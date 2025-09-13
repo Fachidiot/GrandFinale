@@ -172,13 +172,11 @@ public class NetworkManager : MonoBehaviour
                             GameManager.Instance.ClearPlayers();
                         }
                         break;
-                    case "player_moved":
-                        string playerId = json["player_id"].ToString();
-                        JObject pos = json["position"] as JObject;
-                        Vector3 position = new Vector3(pos["x"].Value<float>(), pos["y"].Value<float>(), pos["z"].Value<float>());
-                        if (GameManager.Instance != null)
+                    case "game_state_update":
+                        JArray playersState = json["players"] as JArray;
+                        if (GameManager.Instance != null && playersState != null)
                         {
-                            GameManager.Instance.UpdatePlayerPosition(playerId, position);
+                            GameManager.Instance.UpdatePlayersState(playersState);
                         }
                         continue;
                 }

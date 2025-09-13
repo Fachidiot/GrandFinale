@@ -18,7 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 실행 파일 생성
 # Create the executable
-add_executable(lobby_server main.cpp Server.cpp)
+add_executable(lobby_server main.cpp Server.cpp Session.cpp)
 
 # [mac] 라이브러리 링크
 # target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json)

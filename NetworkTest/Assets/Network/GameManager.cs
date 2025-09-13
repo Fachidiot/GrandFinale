@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,11 +45,10 @@ public class GameManager : MonoBehaviour
         {
             string playerId = playerInfo["player_id"].ToString();
             JObject posJson = playerInfo["position"] as JObject;
-            Vector3 position = new Vector3(posJson["x"].Value<float>(), posJson["y"].Value<float>(), posJson["z"].Value<float>());
 
             if (!players.ContainsKey(playerId))
             {
-                SpawnPlayer(playerId, position);
+                SpawnPlayer(playerId, Vector3.zero);
             }
         }
     }
@@ -69,12 +67,15 @@ public class GameManager : MonoBehaviour
 
         if (playerId == NetworkManager.Instance.PlayerId)
         {
-            playerObject.AddComponent<PlayerController>();
-            SetupThirdPersonCamera(playerObject);
+            // SetupThirdPersonCamera(playerObject);
         }
         else
         {
             playerObject.AddComponent<NetworkedPlayerController>();
+            playerObject.GetComponent<CharacterMove>().enabled = false;
+            playerObject.GetComponentInChildren<InputHandler>().enabled = false;
+            playerObject.GetComponentInChildren<CameraController>().enabled = false;
+            playerObject.GetComponentInChildren<CameraSwitcher>().gameObject.SetActive(false);
         }
     }
 
@@ -104,10 +105,39 @@ public class GameManager : MonoBehaviour
     {
         if (players.TryGetValue(playerId, out GameObject playerObject))
         {
-            NetworkedPlayerController controller = playerObject.GetComponent<NetworkedPlayerController>();
-            if (controller != null)
+            // This is now handled by UpdatePlayersState
+            // NetworkedPlayerController controller = playerObject.GetComponent<NetworkedPlayerController>();
+            // if (controller != null)
+            // {
+            //     controller.SetTargetPosition(position);
+            // }
+        }
+    }
+
+    public void UpdatePlayersState(JArray playersState)
+    {
+        foreach (JObject playerInfo in playersState.Cast<JObject>())
+        {
+            string playerId = playerInfo["player_id"].ToString();
+
+            // Don't update the local player's state from the server yet to avoid jitter.
+            // This is where server reconciliation would be implemented later.
+            if (playerId == NetworkManager.Instance.PlayerId) continue;
+
+            if (players.TryGetValue(playerId, out GameObject playerObject))
             {
-                controller.SetTargetPosition(position);
+                JObject posJson = playerInfo["position"] as JObject;
+                Vector3 position = new Vector3(posJson["x"].Value<float>(), posJson["y"].Value<float>(), posJson["z"].Value<float>());
+
+                JObject animJson = playerInfo["animation"] as JObject;
+                float animForward = animJson["forward"].Value<float>();
+                float animStrafe = animJson["strafe"].Value<float>();
+
+                NetworkedPlayerController controller = playerObject.GetComponent<NetworkedPlayerController>();
+                if (controller != null)
+                {
+                    controller.SetState(position, animForward, animStrafe);
+                }
             }
         }
     }

@@ -15,4 +15,10 @@ struct Player
     int room_id = -1;      // -1 : 방 없음.
     bool is_ready = false; // 준비 상태.
     vec3 position = {0, 0, 0};
+
+    // Animation and input state
+    float anim_forward = 0.0f;
+    float anim_strafe = 0.0f;
+    float input_h = 0.0f;
+    float input_v = 0.0f;
 };

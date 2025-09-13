@@ -151,7 +151,6 @@ public class UIManager : MonoBehaviour
 
     private async void HandleUpdateRoomInfo(string json)
     {
-        Debug.Log("Handle Update RoomInfo");
         var payload = JsonConvert.DeserializeObject<UpdateRoomInfoPayload>(json);
         player_count = payload.players.Count;
 
@@ -160,7 +159,6 @@ public class UIManager : MonoBehaviour
         roomNameText.text = payload.room_name;
 
         bool amIHost = NetworkManager.Instance.PlayerId == payload.host_id;
-        Debug.Log(NetworkManager.Instance.PlayerId + " == " + payload.host_id);
         startGameButton.gameObject.SetActive(amIHost);
         readyButton.gameObject.SetActive(!amIHost);
 

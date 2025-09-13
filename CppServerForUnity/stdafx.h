@@ -13,7 +13,9 @@
 #include <algorithm>
 
 // Third-party Libraries
-#include "asio.hpp"
+#include <asio/strand.hpp>
+#include <asio/ip/tcp.hpp> // Add this for tcp::socket, tcp::acceptor
+#include <asio/ts/buffer.hpp>
 #include "nlohmann/json.hpp"
 
 // Common using declarations

@@ -1,20 +1,18 @@
 using UnityEngine;
 using Newtonsoft.Json.Linq;
 
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
     public float speed = 5.0f;
 
-    private Vector3 lastPosition;
-    private float updateInterval = 0.1f; // Send updates 10 times per second
+    private Animator animator;
+    private float updateInterval = 0.05f; // Send updates 20 times per second (to match server tick)
     private float timeSinceLastUpdate = 0f;
-
-    private float lastHorizontal = 0f;
-    private float lastVertical = 0f;
 
     void Start()
     {
-        lastPosition = transform.position;
+        animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -22,20 +20,14 @@ public class PlayerController : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        // Client-side prediction
+        // This movement is client-side prediction. The server will have the final say.
         Vector3 direction = new Vector3(horizontal, 0, vertical);
         transform.Translate(direction * speed * Time.deltaTime);
 
         timeSinceLastUpdate += Time.deltaTime;
-        if (timeSinceLastUpdate > updateInterval)
+        if (timeSinceLastUpdate >= updateInterval)
         {
-            // Send input to server if it has changed
-            if (Mathf.Abs(horizontal - lastHorizontal) > 0.01f || Mathf.Abs(vertical - lastVertical) > 0.01f)
-            {
-                SendInputUpdate(horizontal, vertical);
-                lastHorizontal = horizontal;
-                lastVertical = vertical;
-            }
+            SendInputUpdate(horizontal, vertical);
             timeSinceLastUpdate = 0f;
         }
     }
@@ -44,9 +36,15 @@ public class PlayerController : MonoBehaviour
     {
         JObject inputUpdate = new JObject();
         inputUpdate["type"] = "player_input";
+        
         JObject input = new JObject();
         input["h"] = horizontal;
         input["v"] = vertical;
+        // Send animator parameters to the server
+        // Ensure your Animator has "Forward" and "Strafe" float parameters.
+        input["anim_forward"] = animator.GetFloat("Forward");
+        input["anim_strafe"] = animator.GetFloat("Strafe");
+
         inputUpdate["input"] = input;
 
         NetworkManager.Instance.SendMessageToServer(inputUpdate.ToString());
