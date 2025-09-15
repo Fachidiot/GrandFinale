@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading.Tasks;
@@ -6,26 +7,36 @@ using System.Collections.Concurrent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json.Linq;
 
 public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance { get; private set; }
 
-    private TcpClient client;
+    // TCP-related fields
+    private TcpClient tcpClient;
     private StreamWriter writer;
     private StreamReader reader;
-    private Task listeningTask;
+    private Task tcpListeningTask;
+    private readonly ConcurrentQueue<string> tcpMessageQueue = new ConcurrentQueue<string>();
 
-    private readonly ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
+    // UDP-related fields
+    private UdpClient udpClient;
+    private IPEndPoint serverUdpEndPoint;
+    private Task udpListeningTask;
+    private readonly ConcurrentQueue<string> udpMessageQueue = new ConcurrentQueue<string>();
 
+    // Events
     public static event Action OnConnected;
     public static event Action<string> OnConnectionFailed;
     public static event Action OnDisconnected;
     public static event Action<string> OnMessageReceived;
 
+    // Player and Room Info
     public string PlayerId { get; private set; }
     public List<string> PlayerIdsInRoom { get; private set; } = new List<string>();
+    public string LastRoomUpdateInfo { get; set; }
 
     private void Awake()
     {
@@ -40,9 +51,9 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    public void Connect(string ip = "127.0.0.1", int port = 8080)
-    {   // ip주소로 서버에 접속을 시도
-        if (client != null && client.Connected)
+    public void Connect(string ip = "127.0.0.1", int tcpPort = 8080, int udpPort = 8081)
+    {
+        if (tcpClient != null && tcpClient.Connected)
         {
             Debug.LogWarning("Already connected.");
             return;
@@ -50,42 +61,41 @@ public class NetworkManager : MonoBehaviour
 
         try
         {
-            client = new TcpClient();
-            client.Connect(ip, port);
-
-            NetworkStream stream = client.GetStream();
+            // TCP Connection
+            tcpClient = new TcpClient();
+            tcpClient.Connect(ip, tcpPort);
+            NetworkStream stream = tcpClient.GetStream();
             writer = new StreamWriter(stream);
             reader = new StreamReader(stream);
+            tcpListeningTask = Task.Run(() => ListenForTcpMessages());
+            Debug.Log("Successfully connected to the server via TCP.");
 
-            listeningTask = Task.Run(() => ListenForServerMessages());
+            // UDP Setup
+            udpClient = new UdpClient(tcpClient.Client.LocalEndPoint as IPEndPoint);
+            serverUdpEndPoint = new IPEndPoint(IPAddress.Parse(ip), udpPort);
+            udpListeningTask = Task.Run(() => ListenForUdpMessages());
+            // Debug.Log("UDP listener started.");
 
-            Debug.Log("Successfully connected to the server.");
             OnConnected?.Invoke();
         }
         catch (SocketException e)
         {
             Debug.LogError("SocketException: " + e.ToString());
             OnConnectionFailed?.Invoke(e.Message);
-            client = null;
-            OnDisconnected?.Invoke();
+            Disconnect();
         }
     }
 
     public void Disconnect()
-    {   // 안전하게 서버와의 연결을 종료
-        if (client == null || !client.Connected)
-        {
-            return;
-        }
+    {
+        if (tcpClient == null) return;
 
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.ClearPlayers();
-        }
+        GameManager.Instance?.ClearPlayers();
 
         try
         {
-            client.Close();
+            tcpClient.Close();
+            udpClient?.Close();
         }
         catch (Exception e)
         {
@@ -93,106 +103,118 @@ public class NetworkManager : MonoBehaviour
         }
         finally
         {
-            client = null;
+            tcpClient = null;
             writer = null;
             reader = null;
+            udpClient = null;
             Debug.Log("Disconnected from server.");
             OnDisconnected?.Invoke();
         }
     }
 
-    private async Task ListenForServerMessages()
-    {   // Task로 서버로부터 메시지를 받는 함수
-        while (client != null && client.Connected)
+    private async Task ListenForTcpMessages()
+    {
+        while (tcpClient != null && tcpClient.Connected)
         {
             try
             {
                 string message = await reader.ReadLineAsync();
                 if (message != null)
                 {
-                    messageQueue.Enqueue(message);
+                    tcpMessageQueue.Enqueue(message);
                 }
-                else
-                {
-                    // Stream is closed
-                    break;
-                }
+                else break;
             }
-            catch (IOException)
-            {
-                // Connection lost
-                break;
-            }
+            catch (IOException) { break; }
             catch (Exception e)
             {
-                Debug.LogError("Error receiving message: " + e.Message);
+                Debug.LogError("Error receiving TCP message: " + e.Message);
                 break;
             }
         }
+        tcpMessageQueue.Enqueue("__DISCONNECTED__");
+    }
 
-        // while loop문을 나왔다는 뜻은, 서버로부터 연결이 끊겼다는걸 의미한다.
-        // 메인 스레드에서 연결 해제 로직이 실행될수 있도록 메시지큐에 추가한다.
-        messageQueue.Enqueue("__DISCONNECTED__");
+    private async Task ListenForUdpMessages()
+    {
+        while (udpClient != null)
+        {
+            try
+            {
+                UdpReceiveResult result = await udpClient.ReceiveAsync();
+                string message = Encoding.UTF8.GetString(result.Buffer);
+                udpMessageQueue.Enqueue(message);
+            }
+            catch (ObjectDisposedException) { break; } // UdpClient was closed.
+            catch (Exception e)
+            {
+                Debug.LogError("Error receiving UDP message: " + e.Message);
+            }
+        }
     }
 
     private void Update()
     {
-        while (messageQueue.TryDequeue(out string message))
+        // Process TCP messages
+        while (tcpMessageQueue.TryDequeue(out string message))
         {
             if (message == "__DISCONNECTED__")
             {
                 Disconnect();
                 continue;
             }
-
-            try
-            {
-                JObject json = JObject.Parse(message);
-                string messageType = json["type"]?.ToString();
-
-                switch (messageType)
-                {
-                    case "assign_id":
-                        PlayerId = json["player_id"]?.ToString();
-                        Debug.Log($"My ID is: {PlayerId}");
-                        continue;
-                    case "update_room_info":
-                        JArray players = json["players"] as JArray;
-                        if (GameManager.Instance != null && players != null)
-                        {
-                            GameManager.Instance.UpdatePlayerList(players);
-                        }
-                        break;
-                    case "game_start":
-                        // Game start logic can go here if needed, but spawning is now handled by room updates
-                        continue;
-                    case "leave_room_success":
-                        if (GameManager.Instance != null)
-                        {
-                            GameManager.Instance.ClearPlayers();
-                        }
-                        break;
-                    case "game_state_update":
-                        JArray playersState = json["players"] as JArray;
-                        if (GameManager.Instance != null && playersState != null)
-                        {
-                            GameManager.Instance.UpdatePlayersState(playersState);
-                        }
-                        continue;
-                }
-            }
-            catch (Exception)
-            {
-                // Not a json message or has no type, just pass it on
-            }
-
+            HandleMessage(message);
             OnMessageReceived?.Invoke(message);
+        }
+
+        // Process UDP messages
+        while (udpMessageQueue.TryDequeue(out string message))
+        {
+            HandleMessage(message);
+        }
+    }
+
+    private void HandleMessage(string message)
+    {
+        try
+        {
+            JObject json = JObject.Parse(message);
+            string messageType = json["type"]?.ToString();
+
+            switch (messageType)
+            {
+                case "assign_id":
+                    PlayerId = json["player_id"]?.ToString();
+                    // Debug.Log($"My ID is: {PlayerId}");
+                    break;
+                case "update_room_info":
+                    JArray players = json["players"] as JArray;
+                    GameManager.Instance?.UpdatePlayerList(players);
+                    break;
+                case "game_start":
+                    // TODO: Game start logic
+                    break;
+                case "leave_room_success":
+                    GameManager.Instance?.ClearPlayers();
+                    break;
+                case "player_event":
+                    GameManager.Instance?.RoutePlayerEvent(json);
+                    break;
+                case "game_state": // Renamed from transform_update
+                    JArray playersState = json["updates"] as JArray;
+                    GameManager.Instance?.UpdatePlayersState(playersState);
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Failed to handle message: {message}. Error: {e.Message}");
         }
     }
 
     public void SendMessageToServer(string jsonMessage)
-    {   // 서버로 메시지 전송
-        if (writer != null && client != null && client.Connected)
+    {
+        if (writer != null && tcpClient != null && tcpClient.Connected)
         {
             try
             {
@@ -201,13 +223,29 @@ public class NetworkManager : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError("Failed to send message: " + e.Message);
+                Debug.LogError("Failed to send TCP message: " + e.Message);
                 Disconnect();
             }
         }
         else
         {
-            Debug.LogError("Not connected to the server.");
+            Debug.LogError("Not connected to the server (TCP).");
+        }
+    }
+
+    public async void SendUdpMessage(string jsonMessage)
+    {
+        if (udpClient != null && serverUdpEndPoint != null)
+        {
+            try
+            {
+                byte[] data = Encoding.UTF8.GetBytes(jsonMessage);
+                await udpClient.SendAsync(data, data.Length, serverUdpEndPoint);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Failed to send UDP message: " + e.Message);
+            }
         }
     }
 

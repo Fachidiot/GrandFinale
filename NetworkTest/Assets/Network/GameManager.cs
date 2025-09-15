@@ -10,7 +10,6 @@ public class GameManager : MonoBehaviour
 
     public GameObject playerPrefab;
     private Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
-    private CinemachineVirtualCamera playerCamera;
 
     private void Awake()
     {
@@ -29,7 +28,6 @@ public class GameManager : MonoBehaviour
     {
         List<string> playerIdsInMessage = playerList.Select(p => p["player_id"].ToString()).ToList();
 
-        // Remove players who are no longer in the room
         List<string> currentPlayers = new List<string>(players.Keys);
         foreach (string playerId in currentPlayers)
         {
@@ -40,12 +38,9 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Add or update players
         foreach (JObject playerInfo in playerList.Cast<JObject>())
         {
             string playerId = playerInfo["player_id"].ToString();
-            JObject posJson = playerInfo["position"] as JObject;
-
             if (!players.ContainsKey(playerId))
             {
                 SpawnPlayer(playerId, Vector3.zero);
@@ -55,89 +50,117 @@ public class GameManager : MonoBehaviour
 
     private void SpawnPlayer(string playerId, Vector3 position)
     {
-        if (playerPrefab == null)
-        {
-            Debug.LogError("Player prefab is not set in GameManager.");
-            return;
-        }
+        if (playerPrefab == null) return;
 
         GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
         playerObject.name = $"Player_{playerId}";
         players.Add(playerId, playerObject);
 
-        if (playerId == NetworkManager.Instance.PlayerId)
+        bool isMine = (playerId == NetworkManager.Instance.PlayerId);
+
+        // Initialize Transform Sync components
+        NetworkTransformSync[] transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
+        foreach (var view in transformSyncs)
         {
-            // SetupThirdPersonCamera(playerObject);
+            view.Initialize(playerId, isMine);
+        }
+
+        // Initialize Animator Sync component
+        NetworkAnimatorSync animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
+        if (animSync != null)
+        {
+            animSync.Initialize(playerId, isMine);
+        }
+
+        if (isMine)
+        {
+            // Local player setup
         }
         else
         {
-            playerObject.AddComponent<NetworkedPlayerController>();
+            // Remote player setup
             playerObject.GetComponent<CharacterMove>().enabled = false;
             playerObject.GetComponentInChildren<InputHandler>().enabled = false;
             playerObject.GetComponentInChildren<CameraController>().enabled = false;
-            playerObject.GetComponentInChildren<CameraSwitcher>().gameObject.SetActive(false);
-        }
-    }
-
-    private void SetupThirdPersonCamera(GameObject target)
-    {
-        if (playerCamera == null)
-        {
-            GameObject camObj = new GameObject("PlayerFollowCamera");
-            playerCamera = camObj.AddComponent<CinemachineVirtualCamera>();
+            playerObject.GetComponentInChildren<CameraSwitcher>()?.gameObject.SetActive(false);
         }
 
-        playerCamera.m_Follow = target.transform;
-        playerCamera.m_LookAt = target.transform;
-
-        // Configure the camera for a 3rd person view
-        var transposer = playerCamera.AddCinemachineComponent<CinemachineTransposer>();
-        transposer.m_FollowOffset = new Vector3(0, 1.5f, -5); // Adjust as needed
-
-        // Ensure the main camera has a CinemachineBrain
-        if (Camera.main != null && Camera.main.GetComponent<CinemachineBrain>() == null)
-        {
-            Camera.main.gameObject.AddComponent<CinemachineBrain>();
-        }
-    }
-
-    public void UpdatePlayerPosition(string playerId, Vector3 position)
-    {
-        if (players.TryGetValue(playerId, out GameObject playerObject))
-        {
-            // This is now handled by UpdatePlayersState
-            // NetworkedPlayerController controller = playerObject.GetComponent<NetworkedPlayerController>();
-            // if (controller != null)
-            // {
-            //     controller.SetTargetPosition(position);
-            // }
-        }
+        DontDestroyOnLoad(playerObject);
     }
 
     public void UpdatePlayersState(JArray playersState)
     {
+        if (playersState == null) return;
+
         foreach (JObject playerInfo in playersState.Cast<JObject>())
         {
-            string playerId = playerInfo["player_id"].ToString();
-
-            // Don't update the local player's state from the server yet to avoid jitter.
-            // This is where server reconciliation would be implemented later.
-            if (playerId == NetworkManager.Instance.PlayerId) continue;
+            string playerId = playerInfo["player_id"]?.ToString();
 
             if (players.TryGetValue(playerId, out GameObject playerObject))
             {
-                JObject posJson = playerInfo["position"] as JObject;
-                Vector3 position = new Vector3(posJson["x"].Value<float>(), posJson["y"].Value<float>(), posJson["z"].Value<float>());
-
-                JObject animJson = playerInfo["animation"] as JObject;
-                float animForward = animJson["forward"].Value<float>();
-                float animStrafe = animJson["strafe"].Value<float>();
-
-                NetworkedPlayerController controller = playerObject.GetComponent<NetworkedPlayerController>();
-                if (controller != null)
+                // --- Handle Transform Sync ---
+                NetworkTransformSync[] transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
+                if (transformSyncs.Length > 0)
                 {
-                    controller.SetState(position, animForward, animStrafe);
+                    JObject bodyPosJson = playerInfo["body_pos"] as JObject;
+                    Vector3 bodyPosition = new Vector3(bodyPosJson["x"].Value<float>(), bodyPosJson["y"].Value<float>(), bodyPosJson["z"].Value<float>());
+
+                    JObject bodyRotJson = playerInfo["body_rot"] as JObject;
+                    Quaternion bodyRotation = new Quaternion(bodyRotJson["x"].Value<float>(), bodyRotJson["y"].Value<float>(), bodyRotJson["z"].Value<float>(), bodyRotJson["w"].Value<float>());
+
+                    JObject camRotJson = playerInfo["cam_rot"] as JObject;
+                    Quaternion camRotation = new Quaternion(camRotJson["x"].Value<float>(), camRotJson["y"].Value<float>(), camRotJson["z"].Value<float>(), camRotJson["w"].Value<float>());
+
+                    foreach (var view in transformSyncs)
+                    {
+                        if (view.viewId == 0) { view.OnTransformReceived(bodyPosition, bodyRotation); }
+                        else if (view.viewId == 1) { view.OnTransformReceived(view.transform.position, camRotation); }
+                    }
                 }
+
+                // --- Handle Animator Sync ---
+                NetworkAnimatorSync animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
+                if (animSync != null)
+                {
+                    float x = playerInfo["x"].Value<float>();
+                    float y = playerInfo["y"].Value<float>();
+
+                    bool walk = playerInfo["walk"].Value<bool>();
+                    bool sprint = playerInfo["sprint"].Value<bool>();
+                    bool roll = playerInfo["roll"].Value<bool>();
+                    bool isGrounded = playerInfo["isGrounded"].Value<bool>();
+                    bool crouch = playerInfo["crouch"].Value<bool>();
+
+                    animSync.OnAnimationDataReceived(x, y, walk, sprint, roll, isGrounded, crouch);
+                }
+
+                // --- Handle Weapon State Sync ---
+                WeaponController weaponController = playerObject.GetComponentInChildren<WeaponController>();
+                if (weaponController != null)
+                {
+                    // int weaponId = playerInfo["weapon_id"].Value<int>();
+                    // Debug.Log(weaponId);
+                    // if (weaponController.activeID != weaponId)
+                    // {
+                    //     weaponController.ToChange(weaponId);
+                    // }
+                }
+            }
+        }
+    }
+
+    public void RoutePlayerEvent(JObject eventData)
+    {
+        string playerId = eventData["player_id"]?.ToString();
+        if (playerId == NetworkManager.Instance.PlayerId)
+            return;
+
+        if (players.TryGetValue(playerId, out GameObject playerObject))
+        {
+            NetworkStateMachine nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
+            if (nsm != null)
+            {
+                nsm.OnNetworkEvent(eventData);
             }
         }
     }
@@ -149,11 +172,5 @@ public class GameManager : MonoBehaviour
             Destroy(player);
         }
         players.Clear();
-
-        if (playerCamera != null)
-        {
-            Destroy(playerCamera.gameObject);
-            playerCamera = null;
-        }
     }
 }

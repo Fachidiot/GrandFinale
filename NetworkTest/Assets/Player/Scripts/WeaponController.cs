@@ -168,9 +168,13 @@ public class WeaponController : MonoBehaviour
     }
 
     public void ToChange(int nextGunSlotID)
-    {
-        if (changed) return;
-        if (activeID == nextGunSlotID) return;
+        {
+        Debug.Log($"ToChange Start {nextGunSlotID}");
+        if (changed)
+            return;
+        if (activeID == nextGunSlotID)
+            return;
+        Debug.Log($"ToChange Check {nextGunSlotID}");
 
         // Use Animator.StringToHash for better performance and to avoid string allocations.
         string animaName = "PutSlot" + activeID;

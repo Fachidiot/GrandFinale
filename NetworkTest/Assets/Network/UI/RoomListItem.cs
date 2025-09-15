@@ -17,7 +17,7 @@ public class RoomListItem : MonoBehaviour
 
         GetComponent<Button>().onClick.AddListener(() =>
         {
-            UIManager.Instance.JoinRoomById(this.roomId);
+            LobbyUIManager.Instance.JoinRoomById(this.roomId);
         });
     }
 }
