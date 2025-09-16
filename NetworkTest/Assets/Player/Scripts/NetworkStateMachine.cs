@@ -30,8 +30,9 @@ public class NetworkStateMachine : MonoBehaviour
     {
         var shootAction = new
         { 
-            type = "player_event", 
-            action = "shoot"
+            type = "player_action", 
+            action = "shoot",
+            player_id = NetworkManager.Instance.PlayerId
         };
         string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(shootAction);
         NetworkManager.Instance.SendMessageToServer(jsonMessage);
@@ -39,14 +40,17 @@ public class NetworkStateMachine : MonoBehaviour
 
     private void WeaponChangeEventSender(bool change)
     {
-        if (!change)
+        if (!change || weaponController.nextID == 0)
+            return;
+        if (weaponController.IsProcessingRemoteWeaponChange) // 새로운 조건 추가
             return;
 
-        var weaponChangeAction = new 
+        var weaponChangeAction = new
         {
-            type = "player_event", 
+            type = "player_action",
             action = "weapon_change",
-            weapon_id = weaponController.nextID
+            weapon_id = weaponController.nextID,
+            player_id = NetworkManager.Instance.PlayerId
         };
         string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(weaponChangeAction);
         NetworkManager.Instance.SendMessageToServer(jsonMessage);
@@ -90,17 +94,17 @@ public class NetworkStateMachine : MonoBehaviour
             case "shoot":
                 if (weaponController != null)
                 {
-                    weaponController.StartShoot();
+                    weaponController.RemoteShoot();
                 }
                 break;
             case "weapon_change":
-                if (weaponController != null) 
-                {
-                    int weaponId = eventData["weapon_id"].Value<int>();
-                    Debug.Log(weaponId);
-                    weaponController.ToChange(weaponId);
-                }
-                break;
+            if (weaponController != null)
+            {
+                int weaponId = eventData["weapon_id"].Value<int>();
+                Debug.Log(weaponId);
+                weaponController.RemoteToChange(weaponId); // RemoteToChange 호출
+            }
+            break;
         }
     }
 }

@@ -50,7 +50,8 @@ public class GameManager : MonoBehaviour
 
     private void SpawnPlayer(string playerId, Vector3 position)
     {
-        if (playerPrefab == null) return;
+        if (playerPrefab == null)
+            return;
 
         GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
         playerObject.name = $"Player_{playerId}";
@@ -90,7 +91,8 @@ public class GameManager : MonoBehaviour
 
     public void UpdatePlayersState(JArray playersState)
     {
-        if (playersState == null) return;
+        if (playersState == null)
+            return;
 
         foreach (JObject playerInfo in playersState.Cast<JObject>())
         {
@@ -103,18 +105,31 @@ public class GameManager : MonoBehaviour
                 if (transformSyncs.Length > 0)
                 {
                     JObject bodyPosJson = playerInfo["body_pos"] as JObject;
-                    Vector3 bodyPosition = new Vector3(bodyPosJson["x"].Value<float>(), bodyPosJson["y"].Value<float>(), bodyPosJson["z"].Value<float>());
+                    Vector3 bodyPosition = new Vector3(
+                        bodyPosJson["x"].Value<float>(),
+                        bodyPosJson["y"].Value<float>(),
+                        bodyPosJson["z"].Value<float>());
 
                     JObject bodyRotJson = playerInfo["body_rot"] as JObject;
-                    Quaternion bodyRotation = new Quaternion(bodyRotJson["x"].Value<float>(), bodyRotJson["y"].Value<float>(), bodyRotJson["z"].Value<float>(), bodyRotJson["w"].Value<float>());
+                    Quaternion bodyRotation = new Quaternion(
+                        bodyRotJson["x"].Value<float>(),
+                        bodyRotJson["y"].Value<float>(),
+                        bodyRotJson["z"].Value<float>(),
+                        bodyRotJson["w"].Value<float>());
 
                     JObject camRotJson = playerInfo["cam_rot"] as JObject;
-                    Quaternion camRotation = new Quaternion(camRotJson["x"].Value<float>(), camRotJson["y"].Value<float>(), camRotJson["z"].Value<float>(), camRotJson["w"].Value<float>());
+                    Quaternion camRotation = new Quaternion(
+                        camRotJson["x"].Value<float>(),
+                        camRotJson["y"].Value<float>(),
+                        camRotJson["z"].Value<float>(),
+                        camRotJson["w"].Value<float>());
 
                     foreach (var view in transformSyncs)
                     {
-                        if (view.viewId == 0) { view.OnTransformReceived(bodyPosition, bodyRotation); }
-                        else if (view.viewId == 1) { view.OnTransformReceived(view.transform.position, camRotation); }
+                        if (view.viewId == 0)
+                            view.OnTransformReceived(bodyPosition, bodyRotation);
+                        else if (view.viewId == 1)
+                            view.OnTransformReceived(view.transform.position, camRotation);
                     }
                 }
 
@@ -138,12 +153,11 @@ public class GameManager : MonoBehaviour
                 WeaponController weaponController = playerObject.GetComponentInChildren<WeaponController>();
                 if (weaponController != null)
                 {
-                    // int weaponId = playerInfo["weapon_id"].Value<int>();
-                    // Debug.Log(weaponId);
-                    // if (weaponController.activeID != weaponId)
-                    // {
-                    //     weaponController.ToChange(weaponId);
-                    // }
+                    int weaponId = playerInfo["weapon_id"].Value<int>();
+                    if (weaponController.activeID != weaponId)
+                    {
+                        weaponController.ToChange(weaponId);
+                    }
                 }
             }
         }
@@ -157,6 +171,7 @@ public class GameManager : MonoBehaviour
 
         if (players.TryGetValue(playerId, out GameObject playerObject))
         {
+            Debug.Log($"{playerObject.name} : event invoke");
             NetworkStateMachine nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
             if (nsm != null)
             {

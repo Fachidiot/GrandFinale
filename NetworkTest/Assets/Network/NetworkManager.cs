@@ -35,6 +35,7 @@ public class NetworkManager : MonoBehaviour
 
     // Player and Room Info
     public string PlayerId { get; private set; }
+    public string PlayerNickname { get; private set; }
     public List<string> PlayerIdsInRoom { get; private set; } = new List<string>();
     public string LastRoomUpdateInfo { get; set; }
 
@@ -72,7 +73,8 @@ public class NetworkManager : MonoBehaviour
 
             // UDP Setup
             udpClient = new UdpClient(tcpClient.Client.LocalEndPoint as IPEndPoint);
-            serverUdpEndPoint = new IPEndPoint(IPAddress.Parse(ip), udpPort);
+            IPAddress serverIp = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address;
+            serverUdpEndPoint = new IPEndPoint(serverIp, udpPort);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
             // Debug.Log("UDP listener started.");
 
@@ -186,6 +188,9 @@ public class NetworkManager : MonoBehaviour
                 case "assign_id":
                     PlayerId = json["player_id"]?.ToString();
                     // Debug.Log($"My ID is: {PlayerId}");
+                    break;
+                case "assign_nickname":
+                    PlayerNickname = json["player_nickname"]?.ToString();
                     break;
                 case "update_room_info":
                     JArray players = json["players"] as JArray;

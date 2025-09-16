@@ -30,6 +30,7 @@ public class NetworkAnimatorSync : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
+        animator.enabled = false;
     }
 
     void Start()
@@ -41,6 +42,7 @@ public class NetworkAnimatorSync : MonoBehaviour
     {
         this.objectId = id;
         this.isMine = isOwner;
+        animator.enabled = true;
     }
 
     void Update()

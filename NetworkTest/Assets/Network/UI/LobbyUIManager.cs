@@ -27,7 +27,7 @@ public class LobbyUIManager : MonoBehaviour
     [SerializeField] private Transform roomListContainer;
 
     private Dictionary<string, Action<string>> messageHandlers;
-    private string ip = "127.0.0.1";
+    private string ip = "grandfinale.o-r.kr";   // localhost: 127.0.0.1
 
     private void Awake()
     {
@@ -160,6 +160,11 @@ public class LobbyUIManager : MonoBehaviour
     #endregion
 
     #region UI Button Clicks
+
+    public void OnCreateRoomPanelActive()
+    {
+        roomNameInput.text = NetworkManager.Instance.PlayerNickname + "'s Room";
+    }
 
     public void OnCreateRoomClicked()
     {

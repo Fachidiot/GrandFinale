@@ -16,8 +16,10 @@ public class WeaponController : MonoBehaviour
     public TwoBoneIK leftHandIK;
     public int activeID; // activeGun
     public int nextID;
-    public Transform offsetForGun; // transform forOffset 
+    public Transform offsetForGun; // transform forOffset
     public GetActualTransform aimPointEffector;
+
+    public bool IsProcessingRemoteWeaponChange { get; private set; } = false;
 
 
     [Header("Gun Detection")]
@@ -84,6 +86,12 @@ public class WeaponController : MonoBehaviour
         var currentWeapon = GETCurrentWeapon;
         if (currentWeapon != null && currentWeapon.Shoot())
             OnShoot?.Invoke();
+    }
+
+    public void RemoteShoot()
+    {
+        var currentWeapon = GETCurrentWeapon;
+        currentWeapon?.Shoot();
     }
 
     IEnumerator setLHandIkWeight(float t, float pause)
@@ -183,5 +191,31 @@ public class WeaponController : MonoBehaviour
         this.nextID = nextGunSlotID;
 
         animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
+    }
+
+    public void RemoteToChange(int nextGunSlotID)
+    {
+        if (changed)
+            return;
+        if (activeID == nextGunSlotID)
+            return;
+
+        IsProcessingRemoteWeaponChange = true; // 플래그 설정
+
+        string animaName = "PutSlot" + activeID;
+        int animationHash = Animator.StringToHash(animaName);
+
+        this.nextID = nextGunSlotID;
+
+        animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
+
+        // 일정 시간 후 플래그를 리셋합니다. (애니메이션 완료 시점에 맞게 조정 필요)
+        StartCoroutine(ResetRemoteWeaponChangeFlag());
+    }
+
+    private IEnumerator ResetRemoteWeaponChangeFlag()
+    {
+        yield return new WaitForSeconds(0.5f); // 필요에 따라 지연 시간 조정
+        IsProcessingRemoteWeaponChange = false;
     }
 }

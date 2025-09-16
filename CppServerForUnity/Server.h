@@ -45,7 +45,7 @@ private:
     void handle_toggle_ready(std::shared_ptr<Session> session, const json& req);
     void handle_start_game(std::shared_ptr<Session> session, const json& req);
     void handle_set_nickname(std::shared_ptr<Session> session, const json& req);
-    void handle_player_action(std::shared_ptr<Session> session, const json& req); // 액션 핸들러 추가
+    void handle_player_action(std::shared_ptr<Session> session, const json& req);
 
     // Utility
     void broadcast_room_update(int room_id);
@@ -55,10 +55,9 @@ private:
     asio::strand<asio::io_context::executor_type> server_strand_;
     std::vector<std::thread> thread_pool_;
 
-    // TCP members
+    // TCP 멤버
     tcp::acceptor acceptor_;
-
-    // UDP members
+    // UDP 멤버
     udp::socket udp_socket_;
     udp::endpoint remote_udp_endpoint_;
     std::array<char, 1024> udp_buffer_;

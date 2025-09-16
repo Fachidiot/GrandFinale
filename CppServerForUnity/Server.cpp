@@ -1,8 +1,6 @@
 #include "Server.h"
 #include "Session.h"
 
-// Constructor and other setup functions remain the same...
-
 Server::Server(asio::io_context &io_context, short tcp_port, short udp_port)
     : io_context_(io_context),
       acceptor_(io_context, tcp::endpoint(tcp::v4(), tcp_port)),
@@ -24,7 +22,10 @@ void Server::run()
     thread_pool_.reserve(thread_count);
     for (int i = 0; i < thread_count; ++i)
     {
-        thread_pool_.emplace_back([this]() { io_context_.run(); });
+        thread_pool_.emplace_back([this]() 
+        { 
+            io_context_.run();
+        });
     }
 
     for (auto &t : thread_pool_)
@@ -36,7 +37,9 @@ void Server::run()
 void Server::start_accept()
 {
     acceptor_.async_accept([this](const asio::error_code &error, tcp::socket socket) {
-        if (!error) { std::make_shared<Session>(std::move(socket), *this)->start(); }
+        if (!error) { 
+            std::make_shared<Session>(std::move(socket), *this)->start(); 
+        }
         start_accept();
     });
 }
@@ -82,8 +85,13 @@ void Server::handle_udp_receive(const asio::error_code &error, std::size_t bytes
                     const auto &pos = request_json["position"];
                     const auto &rot = request_json["rotation"];
 
-                    if (view_id == 0) { player_ptr->body_position = {pos["x"], pos["y"], pos["z"]}; player_ptr->body_rotation = {rot["x"], rot["y"], rot["z"], rot["w"]}; }
-                    else if (view_id == 1) { player_ptr->camera_rotation = {rot["x"], rot["y"], rot["z"], rot["w"]}; }
+                    if (view_id == 0) { 
+                        player_ptr->body_position = {pos["x"], pos["y"], pos["z"]};
+                        player_ptr->body_rotation = {rot["x"], rot["y"], rot["z"], rot["w"]};
+                    }
+                    else if (view_id == 1) { 
+                        player_ptr->camera_rotation = {rot["x"], rot["y"], rot["z"], rot["w"]};
+                    }
                 }
                 else if (type == "anim_sync")
                 {
@@ -118,9 +126,23 @@ void Server::tick()
 
                 json player_state;
                 player_state["player_id"] = player.id;
-                player_state["body_pos"] = {{"x", player.body_position.x}, {"y", player.body_position.y}, {"z", player.body_position.z}};
-                player_state["body_rot"] = {{"x", player.body_rotation.x}, {"y", player.body_rotation.y}, {"z", player.body_rotation.z}, {"w", player.body_rotation.w}};
-                player_state["cam_rot"] = {{"x", player.camera_rotation.x}, {"y", player.camera_rotation.y}, {"z", player.camera_rotation.z}, {"w", player.camera_rotation.w}};
+                player_state["body_pos"] = {
+                    {"x", player.body_position.x}, 
+                    {"y", player.body_position.y}, 
+                    {"z", player.body_position.z}
+                };
+                player_state["body_rot"] = {
+                    {"x", player.body_rotation.x}, 
+                    {"y", player.body_rotation.y}, 
+                    {"z", player.body_rotation.z}, 
+                    {"w", player.body_rotation.w}
+                };
+                player_state["cam_rot"] = {
+                    {"x", player.camera_rotation.x}, 
+                    {"y", player.camera_rotation.y}, 
+                    {"z", player.camera_rotation.z}, 
+                    {"w", player.camera_rotation.w}
+                };
                 player_state["x"] = player.anim_x;
                 player_state["y"] = player.anim_y;
                 player_state["walk"] = player.anim_walk;
@@ -128,8 +150,7 @@ void Server::tick()
                 player_state["roll"] = player.anim_roll;
                 player_state["isGrounded"] = player.anim_isGrounded;
                 player_state["crouch"] = player.anim_crouch;
-                player_state["weapon_id"] = player.current_weapon_id; // Include current weapon ID
-                std::cout<<"__" << player.current_weapon_id<<std::endl;
+                player_state["weapon_id"] = player.current_weapon_id; // Include current weapon IDS
 
                 all_players_state.push_back(player_state);
             }
@@ -172,6 +193,7 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
         {
             broadcast_msg["type"] = "player_event";
             broadcast_msg["event"] = "shoot";
+            std::cout << player.nickname << " Do Shoot" << std::endl;
         }
         else if (action == "weapon_change")
         {
@@ -181,7 +203,7 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
             broadcast_msg["type"] = "player_event";
             broadcast_msg["event"] = "weapon_change";
             broadcast_msg["weapon_id"] = weapon_id;
-            std::cout<<weapon_id<<std::endl;
+            std::cout << player.nickname << " Do Change Weapon to " << weapon_id << std::endl;
         }
 
         if (!broadcast_msg.empty()) {
@@ -196,8 +218,6 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
         }
     }
 }
-
-// ... (The rest of the file: handle_connect, handle_disconnect, etc. remains the same) ...
 
 void Server::handle_connect(std::shared_ptr<Session> session)
 {
@@ -276,7 +296,7 @@ void Server::initialize_request_handlers()
     request_handlers_["toggle_ready"] = [this](auto s, const auto &r) { handle_toggle_ready(s, r); };
     request_handlers_["start_game"] = [this](auto s, const auto &r) { handle_start_game(s, r); };
     request_handlers_["set_nickname"] = [this](auto s, const auto &r) { handle_set_nickname(s, r); };
-    request_handlers_["player_event"] = [this](auto s, const auto &r) { handle_player_action(s, r); };
+    request_handlers_["player_action"] = [this](auto s, const auto &r) { handle_player_action(s, r); };
 }
 
 void Server::broadcast_room_update(int room_id)
@@ -314,6 +334,11 @@ void Server::handle_set_nickname(std::shared_ptr<Session> session, const json &r
     std::string nickname = request["nickname"];
     connected_players_[session].nickname = nickname;
     std::cout << connected_players_[session].id << "'s nickname set " << nickname << std::endl;
+    
+    json nickname_message;
+    nickname_message["type"] = "assign_nickname";
+    nickname_message["player_nickname"] = nickname;
+    session->write(nickname_message.dump());
 }
 
 void Server::handle_create_room(std::shared_ptr<Session> session, const json &request)
