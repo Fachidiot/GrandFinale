@@ -15,7 +15,7 @@ public class BulletNetwork : BulletBehaviour
 
     private Rigidbody rb;
 
-    private void Awake()
+    private new void Awake()
     {
         rb = GetComponent<Rigidbody>();
         if (PoolManager.Instance != null)

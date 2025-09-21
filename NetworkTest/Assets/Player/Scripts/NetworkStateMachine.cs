@@ -13,7 +13,6 @@ public class NetworkStateMachine : MonoBehaviour
     // [SerializeField] private PlayerHealth playerHealth;
     // [SerializeField] private PlayerLifeController playerLifeController;
     [SerializeField] private EventsCenter eventsCenter;
-    bool weapSyncInStart = false;
 
     private void OnEnable()
     {
@@ -76,12 +75,6 @@ public class NetworkStateMachine : MonoBehaviour
     public void RespawnRPC()
     {
         // playerLifeController.Respawn();
-    }
-
-    void SyncActiveWeaponInStart(int activeWeap)
-    {
-        weapSyncInStart = true;
-        weaponController.animator.Play("GunPickUp", 1);
     }
 
     // Called by GameManager to process events received from the server
