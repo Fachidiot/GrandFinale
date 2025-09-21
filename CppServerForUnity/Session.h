@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "Server.h"
 
-class Server; // 전방선언
+class Server;
 
 class Session : public std::enable_shared_from_this<Session> // 비동기 콜백에서 shared_ptr를 안전하게 사용하기 위해 상속받는다.
 {

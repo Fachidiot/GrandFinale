@@ -27,7 +27,8 @@ public class LobbyUIManager : MonoBehaviour
     [SerializeField] private Transform roomListContainer;
 
     private Dictionary<string, Action<string>> messageHandlers;
-    private string ip = "grandfinale.o-r.kr";   // localhost: 127.0.0.1
+    // private string ip = "grandfinale.o-r.kr";   // localhost: 127.0.0.1
+    private string ip = "127.0.0.1";
 
     private void Awake()
     {
@@ -106,7 +107,7 @@ public class LobbyUIManager : MonoBehaviour
             ["type"] = "set_nickname",
             ["nickname"] = nickname
         };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     private void HandleConnectionFailed(string errorMessage)
@@ -161,6 +162,25 @@ public class LobbyUIManager : MonoBehaviour
 
     #region UI Button Clicks
 
+    public void SetNickName(string nickname)
+    {
+        nickNameInput.text = nickname;
+    }
+
+    public void OnSetNicknameClicked()
+    {
+        if (NetworkManager.Instance.PlayerNickname == nickNameInput.text)
+            return;
+
+        string nickname = string.IsNullOrEmpty(nickNameInput.text) ? $"Player{UnityEngine.Random.Range(100, 1000)}" : nickNameInput.text;
+        JObject request = new JObject
+        {
+            ["type"] = "set_nickname",
+            ["nickname"] = nickname
+        };
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
+    }
+
     public void OnCreateRoomPanelActive()
     {
         roomNameInput.text = NetworkManager.Instance.PlayerNickname + "'s Room";
@@ -177,13 +197,13 @@ public class LobbyUIManager : MonoBehaviour
             ["type"] = "create_room",
             ["room_name"] = roomName
         };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     public void OnFindRoomsClicked()
     {
         JObject request = new JObject { ["type"] = "find_rooms" };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     public void JoinRoomById(int roomId)
@@ -193,7 +213,7 @@ public class LobbyUIManager : MonoBehaviour
             ["type"] = "join_room",
             ["room_id"] = roomId
         };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     #endregion

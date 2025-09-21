@@ -14,21 +14,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # [Mac] homebrew로 설치한 패키지
-# find_package(nlohmann_json 3 REQUIRED)
+find_package(nlohmann_json 3 REQUIRED)
 
 # [Windows] vcpkg 패키지
-find_package(nlohmann_json 3 REQUIRED)
-find_package(asio REQUIRED)
+# find_package(nlohmann_json 3 REQUIRED)
+# find_package(asio REQUIRED)
 
 # 실행 파일 생성
 # Create the executable
 add_executable(lobby_server main.cpp Server.cpp Session.cpp)
 
 # [Mac] 라이브러리 링크
-# target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json)
 
 # [Windows] 라이브러리 링크
-target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json asio::asio)
+# target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json asio::asio)
 
 # 프로젝트에 헤더 파일 검색 경로 추가
 # 이렇게 하면 소스 코드에서 #include <nlohmann/json.hpp> 를 그대로 사용할 수 있습니다.

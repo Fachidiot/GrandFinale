@@ -92,7 +92,7 @@ public class NetworkManager : MonoBehaviour
     {
         if (tcpClient == null) return;
 
-        GameManager.Instance?.ClearPlayers();
+        NetworkPlayerManager.Instance?.ClearPlayers();
 
         try
         {
@@ -191,23 +191,24 @@ public class NetworkManager : MonoBehaviour
                     break;
                 case "assign_nickname":
                     PlayerNickname = json["player_nickname"]?.ToString();
+                    LobbyUIManager.Instance.SetNickName(PlayerNickname);
                     break;
                 case "update_room_info":
                     JArray players = json["players"] as JArray;
-                    GameManager.Instance?.UpdatePlayerList(players);
+                    NetworkPlayerManager.Instance?.UpdatePlayerList(players);
                     break;
                 case "game_start":
                     // TODO: Game start logic
                     break;
                 case "leave_room_success":
-                    GameManager.Instance?.ClearPlayers();
+                    NetworkPlayerManager.Instance?.ClearPlayers();
                     break;
                 case "player_event":
-                    GameManager.Instance?.RoutePlayerEvent(json);
+                    NetworkPlayerManager.Instance?.RoutePlayerEvent(json);
                     break;
                 case "game_state": // Renamed from transform_update
                     JArray playersState = json["updates"] as JArray;
-                    GameManager.Instance?.UpdatePlayersState(playersState);
+                    NetworkPlayerManager.Instance?.UpdatePlayersState(playersState);
                     break;
             }
         }
@@ -217,7 +218,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    public void SendMessageToServer(string jsonMessage)
+    public void SendTCPMessage(string jsonMessage)
     {
         if (writer != null && tcpClient != null && tcpClient.Connected)
         {
@@ -238,7 +239,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    public async void SendUdpMessage(string jsonMessage)
+    public async void SendUDPMessage(string jsonMessage)
     {
         if (udpClient != null && serverUdpEndPoint != null)
         {

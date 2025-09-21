@@ -81,7 +81,7 @@ public class NetworkAnimatorSync : MonoBehaviour
         };
 
         string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(animData);
-        networkManager.SendUdpMessage(jsonMessage);
+        networkManager.SendUDPMessage(jsonMessage);
     }
 
     public void OnAnimationDataReceived(float x, float y, bool walk, bool sprint, bool roll, bool isGrounded, bool crouch)
@@ -99,7 +99,8 @@ public class NetworkAnimatorSync : MonoBehaviour
             animator.SetBool(isGroundedHash, isGrounded);
 
             // Handle triggers like roll directly
-            if (roll) {
+            if (roll)
+            {
                 animator.SetTrigger(rollHash);
             }
         }

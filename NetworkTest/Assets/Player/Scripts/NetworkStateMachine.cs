@@ -29,13 +29,13 @@ public class NetworkStateMachine : MonoBehaviour
     private void ShootEventSender()
     {
         var shootAction = new
-        { 
-            type = "player_action", 
+        {
+            type = "player_action",
             action = "shoot",
             player_id = NetworkManager.Instance.PlayerId
         };
         string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(shootAction);
-        NetworkManager.Instance.SendMessageToServer(jsonMessage);
+        NetworkManager.Instance.SendTCPMessage(jsonMessage);
     }
 
     private void WeaponChangeEventSender(bool change)
@@ -53,7 +53,7 @@ public class NetworkStateMachine : MonoBehaviour
             player_id = NetworkManager.Instance.PlayerId
         };
         string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(weaponChangeAction);
-        NetworkManager.Instance.SendMessageToServer(jsonMessage);
+        NetworkManager.Instance.SendTCPMessage(jsonMessage);
     }
 
     // [PunRPC]
@@ -98,13 +98,13 @@ public class NetworkStateMachine : MonoBehaviour
                 }
                 break;
             case "weapon_change":
-            if (weaponController != null)
-            {
-                int weaponId = eventData["weapon_id"].Value<int>();
-                Debug.Log(weaponId);
-                weaponController.RemoteToChange(weaponId); // RemoteToChange 호출
-            }
-            break;
+                if (weaponController != null)
+                {
+                    int weaponId = eventData["weapon_id"].Value<int>();
+                    Debug.Log(weaponId);
+                    weaponController.RemoteToChange(weaponId); // RemoteToChange 호출
+                }
+                break;
         }
     }
 }

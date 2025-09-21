@@ -59,7 +59,7 @@ public class RoomUIManager : MonoBehaviour
 
     private void InitializeMessageHandlers()
     {
-        messageHandlers = new Dictionary<string, Action<string>> 
+        messageHandlers = new Dictionary<string, Action<string>>
         {
             { "update_room_info", HandleUpdateRoomInfo },
             { "player_joined", HandlePlayerJoined },
@@ -158,14 +158,14 @@ public class RoomUIManager : MonoBehaviour
             ["type"] = "chat_message",
             ["message"] = message
         };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
         chatMessageInput.text = "";
     }
 
     public void OnReadyButtonClicked()
     {
         JObject request = new JObject { ["type"] = "toggle_ready" };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     public void OnStartGameButtonClicked()
@@ -177,13 +177,13 @@ public class RoomUIManager : MonoBehaviour
         }
 
         JObject request = new JObject { ["type"] = "start_game" };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     public void OnLeaveRoomClicked()
     {
         JObject request = new JObject { ["type"] = "leave_room" };
-        NetworkManager.Instance.SendMessageToServer(request.ToString());
+        NetworkManager.Instance.SendTCPMessage(request.ToString());
     }
 
     #endregion

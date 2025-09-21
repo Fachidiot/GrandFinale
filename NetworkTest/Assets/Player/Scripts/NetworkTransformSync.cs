@@ -64,7 +64,7 @@ public class NetworkTransformSync : MonoBehaviour
         };
 
         string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-        networkManager.SendUdpMessage(jsonMessage);
+        networkManager.SendUDPMessage(jsonMessage);
     }
 
     public void OnTransformReceived(Vector3 position, Quaternion rotation)

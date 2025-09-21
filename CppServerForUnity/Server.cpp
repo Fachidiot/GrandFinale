@@ -22,26 +22,27 @@ void Server::run()
     thread_pool_.reserve(thread_count);
     for (int i = 0; i < thread_count; ++i)
     {
-        thread_pool_.emplace_back([this]() 
-        { 
-            io_context_.run();
-        });
+        thread_pool_.emplace_back([this]()
+                                  { io_context_.run(); });
     }
 
     for (auto &t : thread_pool_)
     {
-        if (t.joinable()) { t.join(); }
+        if (t.joinable())
+        {
+            t.join();
+        }
     }
 }
 
 void Server::start_accept()
 {
-    acceptor_.async_accept([this](const asio::error_code &error, tcp::socket socket) {
+    acceptor_.async_accept([this](const asio::error_code &error, tcp::socket socket)
+                           {
         if (!error) { 
             std::make_shared<Session>(std::move(socket), *this)->start(); 
         }
-        start_accept();
-    });
+        start_accept(); });
 }
 
 void Server::start_udp_receive()
@@ -49,7 +50,8 @@ void Server::start_udp_receive()
     udp_socket_.async_receive_from(
         asio::buffer(udp_buffer_),
         remote_udp_endpoint_,
-        [this](const asio::error_code &error, std::size_t bytes_transferred) {
+        [this](const asio::error_code &error, std::size_t bytes_transferred)
+        {
             handle_udp_receive(error, bytes_transferred);
         });
 }
@@ -60,7 +62,8 @@ void Server::handle_udp_receive(const asio::error_code &error, std::size_t bytes
     {
         std::string message(udp_buffer_.data(), bytes_transferred);
 
-        asio::post(server_strand_, [this, message, sender_endpoint = this->remote_udp_endpoint_]() {
+        asio::post(server_strand_, [this, message, sender_endpoint = this->remote_udp_endpoint_]()
+                   {
             try
             {
                 auto request_json = json::parse(message);
@@ -104,15 +107,15 @@ void Server::handle_udp_receive(const asio::error_code &error, std::size_t bytes
                     player_ptr->anim_crouch = request_json.value("crouch", false);
                 }
             }
-            catch (json::parse_error &e) { std::cerr << "UDP JSON parse error: " << e.what() << std::endl; }
-        });
+            catch (json::parse_error &e) { std::cerr << "UDP JSON parse error: " << e.what() << std::endl; } });
     }
     start_udp_receive();
 }
 
 void Server::tick()
 {
-    asio::post(server_strand_, [this]() {
+    asio::post(server_strand_, [this]()
+               {
         for (auto const &[room_id, room] : active_rooms_)
         {
             if (room.players.empty()) continue;
@@ -170,17 +173,17 @@ void Server::tick()
                     udp_socket_.async_send_to(asio::buffer(*state_str_ptr), it->second, [state_str_ptr](const asio::error_code &, std::size_t) {});
                 }
             }
-        }
-    });
+        } });
 
     start_game_loop();
 }
 
 void Server::handle_player_action(std::shared_ptr<Session> session, const json &request)
 {
-    if (connected_players_.find(session) == connected_players_.end()) return;
+    if (connected_players_.find(session) == connected_players_.end())
+        return;
 
-    auto& player = connected_players_.at(session);
+    auto &player = connected_players_.at(session);
     int current_room_id = player.room_id;
     std::string action = request.value("action", "");
 
@@ -206,7 +209,8 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
             std::cout << player.nickname << " Do Change Weapon to " << weapon_id << std::endl;
         }
 
-        if (!broadcast_msg.empty()) {
+        if (!broadcast_msg.empty())
+        {
             std::string broadcast_str = broadcast_msg.dump();
             for (auto &player_session : active_rooms_[current_room_id].players)
             {
@@ -220,8 +224,9 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
 }
 
 void Server::handle_connect(std::shared_ptr<Session> session)
-{
-    asio::post(server_strand_, [this, session]() {
+{ //
+    asio::post(server_strand_, [this, session]()
+               {
         std::string player_id = "UID" + std::to_string(next_player_id_num_++);
         connected_players_[session] = {player_id, "", -1, false};
         std::cout << player_id << " connected." << std::endl;
@@ -229,13 +234,13 @@ void Server::handle_connect(std::shared_ptr<Session> session)
         json id_message;
         id_message["type"] = "assign_id";
         id_message["player_id"] = player_id;
-        session->write(id_message.dump());
-    });
+        session->write(id_message.dump()); });
 }
 
 void Server::handle_disconnect(std::shared_ptr<Session> session)
 {
-    asio::post(server_strand_, [this, session]() {
+    asio::post(server_strand_, [this, session]()
+               {
         if (connected_players_.find(session) == connected_players_.end()) return;
 
         std::string leaving_player_id = connected_players_[session].id;
@@ -259,8 +264,7 @@ void Server::handle_disconnect(std::shared_ptr<Session> session)
                 broadcast_room_update(current_room_id);
             }
         }
-        connected_players_.erase(session);
-    });
+        connected_players_.erase(session); });
 }
 
 void Server::handle_request(std::shared_ptr<Session> session, const std::string &message)
@@ -273,7 +277,8 @@ void Server::handle_request(std::shared_ptr<Session> session, const std::string 
         auto it = request_handlers_.find(type);
         if (it != request_handlers_.end())
         {
-            asio::post(server_strand_, [this, session, request_json, handler = it->second]() { handler(session, request_json); });
+            asio::post(server_strand_, [this, session, request_json, handler = it->second]()
+                       { handler(session, request_json); });
         }
         else
         {
@@ -288,20 +293,30 @@ void Server::handle_request(std::shared_ptr<Session> session, const std::string 
 
 void Server::initialize_request_handlers()
 {
-    request_handlers_["create_room"] = [this](auto s, const auto &r) { handle_create_room(s, r); };
-    request_handlers_["find_rooms"] = [this](auto s, const auto &r) { handle_find_rooms(s, r); };
-    request_handlers_["join_room"] = [this](auto s, const auto &r) { handle_join_room(s, r); };
-    request_handlers_["chat_message"] = [this](auto s, const auto &r) { handle_chat_message(s, r); };
-    request_handlers_["leave_room"] = [this](auto s, const auto &r) { handle_leave_room(s, r); };
-    request_handlers_["toggle_ready"] = [this](auto s, const auto &r) { handle_toggle_ready(s, r); };
-    request_handlers_["start_game"] = [this](auto s, const auto &r) { handle_start_game(s, r); };
-    request_handlers_["set_nickname"] = [this](auto s, const auto &r) { handle_set_nickname(s, r); };
-    request_handlers_["player_action"] = [this](auto s, const auto &r) { handle_player_action(s, r); };
+    request_handlers_["create_room"] = [this](auto s, const auto &r)
+    { handle_create_room(s, r); };
+    request_handlers_["find_rooms"] = [this](auto s, const auto &r)
+    { handle_find_rooms(s, r); };
+    request_handlers_["join_room"] = [this](auto s, const auto &r)
+    { handle_join_room(s, r); };
+    request_handlers_["chat_message"] = [this](auto s, const auto &r)
+    { handle_chat_message(s, r); };
+    request_handlers_["leave_room"] = [this](auto s, const auto &r)
+    { handle_leave_room(s, r); };
+    request_handlers_["toggle_ready"] = [this](auto s, const auto &r)
+    { handle_toggle_ready(s, r); };
+    request_handlers_["start_game"] = [this](auto s, const auto &r)
+    { handle_start_game(s, r); };
+    request_handlers_["set_nickname"] = [this](auto s, const auto &r)
+    { handle_set_nickname(s, r); };
+    request_handlers_["player_action"] = [this](auto s, const auto &r)
+    { handle_player_action(s, r); };
 }
 
 void Server::broadcast_room_update(int room_id)
 {
-    if (active_rooms_.count(room_id) == 0) return;
+    if (active_rooms_.count(room_id) == 0)
+        return;
 
     Room &room = active_rooms_[room_id];
     json room_update;
@@ -334,7 +349,7 @@ void Server::handle_set_nickname(std::shared_ptr<Session> session, const json &r
     std::string nickname = request["nickname"];
     connected_players_[session].nickname = nickname;
     std::cout << connected_players_[session].id << "'s nickname set " << nickname << std::endl;
-    
+
     json nickname_message;
     nickname_message["type"] = "assign_nickname";
     nickname_message["player_nickname"] = nickname;
@@ -426,7 +441,10 @@ void Server::handle_leave_room(std::shared_ptr<Session> session, const json &req
         }
         else
         {
-            if (room.host == session) { room.host = room.players.front(); }
+            if (room.host == session)
+            {
+                room.host = room.players.front();
+            }
             broadcast_room_update(current_room_id);
         }
 
@@ -460,7 +478,7 @@ void Server::handle_start_game(std::shared_ptr<Session> session, const json &req
 void Server::start_game_loop()
 {
     game_loop_timer_.expires_after(tick_interval_);
-    game_loop_timer_.async_wait([this](const asio::error_code &ec) {
-        if (!ec) { tick(); }
-    });
+    game_loop_timer_.async_wait([this](const asio::error_code &ec)
+                                {
+        if (!ec) { tick(); } });
 }

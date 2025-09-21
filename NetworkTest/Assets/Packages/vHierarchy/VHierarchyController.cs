@@ -416,7 +416,7 @@ namespace VHierarchy
 
         public void SetScrollPos(float targetScrollPos)
         {
-            window.GetMemberValue("m_SceneHierarchy").GetMemberValue<TreeViewState>("m_TreeViewState").scrollPos = Vector2.up * targetScrollPos;
+            window.GetMemberValue("m_SceneHierarchy").GetMemberValue<UnityEditor.IMGUI.Controls.TreeViewState>("m_TreeViewState").scrollPos = Vector2.up * targetScrollPos;
         }
 
 
