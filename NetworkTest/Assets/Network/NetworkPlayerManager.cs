@@ -41,14 +41,16 @@ public class NetworkPlayerManager : MonoBehaviour
         foreach (JObject playerInfo in playerList.Cast<JObject>())
         {
             string playerId = playerInfo["player_id"].ToString();
+            string nickname = playerInfo["nickname"]?.ToString(); // 닉네임 정보 가져오기
+
             if (!players.ContainsKey(playerId))
             {
-                SpawnPlayer(playerId, Vector3.zero);
+                SpawnPlayer(playerId, Vector3.zero, nickname); // SpawnPlayer에 nickname 전달
             }
         }
     }
 
-    private void SpawnPlayer(string playerId, Vector3 position)
+    private void SpawnPlayer(string playerId, Vector3 position, string nickname) // nickname 파라미터 추가
     {
         if (playerPrefab == null)
             return;
@@ -56,6 +58,14 @@ public class NetworkPlayerManager : MonoBehaviour
         GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
         playerObject.name = $"Player_{playerId}";
         players.Add(playerId, playerObject);
+
+        PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
+        if (nicknameUI != null)
+        {
+            nicknameUI.SetNickname(nickname);
+        }
+        else
+            Debug.LogWarning("No Nickname error");
 
         bool isMine = (playerId == NetworkManager.Instance.PlayerId);
 
@@ -76,6 +86,10 @@ public class NetworkPlayerManager : MonoBehaviour
         if (isMine)
         {
             // Local player setup
+            if (nicknameUI != null)
+            {
+                nicknameUI.gameObject.SetActive(false);
+            }
         }
         else
         {

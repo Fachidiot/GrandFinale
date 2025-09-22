@@ -10,17 +10,22 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private CameraSwitcher cameraSwitcher;
     [SerializeField] private BodyTiltInSprint bodyTiltInSprint;
 
+    private PlayerInputs playerInputs;
+
     private void Start()
     {
         weaponController.activeID = 1;
         weaponController.animator.Play("GunPickUp", 1);
+        GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
     }
 
     void Update()
     {
         TryShoot();
 
-        bodySlope_Handler.setInput(-Input.GetAxisRaw("Slope"));
+        bodySlope_Handler.setInput(-Input.GetAxisRaw("Slope")); // Q E
+        // bodySlope_Handler.setInput(playerInputs.GetSlope());
+        
 
         bodyTiltInSprint.SetMouseXMove(Input.GetAxis("Mouse X"));
 

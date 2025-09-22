@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
+using TMPro;
 
 public class NetworkStateMachine : MonoBehaviour
 {
