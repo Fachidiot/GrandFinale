@@ -36,6 +36,7 @@ public class RoomUIManager : MonoBehaviour
             Destroy(gameObject);
         }
         InitializeMessageHandlers();
+        GameManager.Instance.EnterRoom();
     }
 
     private void Start()
@@ -50,11 +51,13 @@ public class RoomUIManager : MonoBehaviour
     private void OnEnable()
     {
         NetworkManager.OnMessageReceived += HandleServerMessage;
+        NetworkManager.OnDisconnected += HandleDisconnected;
     }
 
     private void OnDisable()
     {
         NetworkManager.OnMessageReceived -= HandleServerMessage;
+        NetworkManager.OnDisconnected -= HandleDisconnected;
     }
 
     private void InitializeMessageHandlers()
@@ -70,10 +73,19 @@ public class RoomUIManager : MonoBehaviour
         };
     }
 
+    private void HandleDisconnected()
+    {
+        // 임시
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        SceneManager.LoadScene("ConnectionScene");
+    }
+
     private void HandleLeaveRoomSuccess(string json)
     {
         Debug.Log("Handle Leave Room");
-        SceneManager.LoadScene("NetworkScene");
+        SceneManager.LoadScene("ConnectionScene");
     }
 
     private void HandleServerMessage(string jsonMsg)

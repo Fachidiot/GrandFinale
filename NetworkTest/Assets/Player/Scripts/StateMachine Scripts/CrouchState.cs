@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class CrouchState : StateMachineBase
@@ -10,14 +11,17 @@ public class CrouchState : StateMachineBase
 
     public override void Tick()
     {
-        var horizontalInput = Input.GetAxis("Horizontal");
-        var verticalInput = Input.GetAxis("Vertical");
+        // var horizontalInput = Input.GetAxis("Horizontal");
+        var horizontalInput = characterMove.Inputs.GetAxisHorizontal();
+        // var verticalInput = Input.GetAxis("Vertical");
+        var verticalInput = characterMove.Inputs.GetAxisVertical();
 
         Quaternion moveForward = Quaternion.Euler(0, characterMove.directionOrienter.rotation.eulerAngles.y, 0);
 
         characterMove.moveVelocity = Vector3.ClampMagnitude(moveForward * Vector3.forward * verticalInput + moveForward * Vector3.right * horizontalInput, 1) * characterMove.crouchSpeed;
 
-        if (Input.GetKeyDown(KeyCode.C))
+        // if (Input.GetKeyDown(KeyCode.C))
+        if (characterMove.Inputs.GetCrouch())
         {
             if (Physics.SphereCast(characterMove.transform.position, characterMove.characterController.radius, Vector3.up, out RaycastHit hit2, characterMove.normalColliderHeight - characterMove.characterController.radius + characterMove.characterController.skinWidth, characterMove.groundCheckMask))
             {
@@ -26,8 +30,13 @@ public class CrouchState : StateMachineBase
             }
             else
             {
-                characterMove.SetState(characterMove.standState);
+                characterMove.SetState(characterMove.moveState);
             }
+        }
+
+        if (characterMove.Inputs.GetJump() || characterMove.Inputs.GetSprint())
+        {
+            characterMove.SetState(characterMove.moveState);
         }
 
         characterController.Move(characterMove.moveVelocity * Time.deltaTime);

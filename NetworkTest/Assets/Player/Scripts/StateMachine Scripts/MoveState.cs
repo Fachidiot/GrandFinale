@@ -46,15 +46,23 @@ public class MoveState : StateMachineBase
         }
     }
 
+    private bool isPause = false;
+
     public MoveState(CharacterMove characterMove) : base(characterMove)
     {
+        GameManager.OnPauseStateChanged += OnPause;
     }
 
     public override void Tick()
     {
-        var inputVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        if (isPause)
+            return;
 
-        isSprint = (Input.GetKey(KeyCode.LeftShift) && inputVector.y > 0 && !walk);
+        // var inputVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        var inputVector = new Vector2(characterMove.Inputs.GetAxisHorizontal(), characterMove.Inputs.GetAxisVertical());
+
+        // isSprint = (Input.GetKey(KeyCode.LeftShift) && inputVector.y > 0 && !walk);
+        isSprint = (characterMove.Inputs.GetSprint() && inputVector.y > 0 && !walk);
 
         Quaternion moveForward = Quaternion.Euler(0, characterMove.directionOrienter.rotation.eulerAngles.y, 0);
 
@@ -68,12 +76,14 @@ public class MoveState : StateMachineBase
         characterMove.moveVelocity = Vector3.ClampMagnitude(moveForward * Vector3.forward * forwardMoveSpeed + moveForward * Vector3.right * rightMoveSpeed, currentSpeed) + characterMove.velocity + characterMove.edgeSlipVelocity;
 
 
-        if (Input.GetKeyDown(KeyCode.C))
+        // if (Input.GetKeyDown(KeyCode.C))
+        if (characterMove.Inputs.GetCrouch())
         {
             characterMove.SetState(isSprint ? characterMove.rollState : characterMove.crouchState);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        // if (Input.GetKeyDown(KeyCode.Space))
+        if (characterMove.Inputs.GetJump())
         {
             characterMove.SetState(characterMove.jumpState);
         }
@@ -113,5 +123,10 @@ public class MoveState : StateMachineBase
     public override void OnStateExit()
     {
         isSprint = false;
+    }
+
+    void OnPause(bool pause)
+    {
+        isPause = pause;
     }
 }

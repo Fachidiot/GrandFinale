@@ -166,7 +166,7 @@ namespace Michsky.MUIP
 
                 if (items[i].itemIcon == null) { setItemImage.gameObject.SetActive(false); }
                 else { imageHelper = items[i].itemIcon; setItemImage.sprite = imageHelper; }
-              
+
                 items[i].itemIndex = i;
                 Item mainItem = items[i];
 
@@ -182,9 +182,12 @@ namespace Michsky.MUIP
             }
 
             if (selectedImage != null && !enableIcon) { selectedImage.gameObject.SetActive(false); }
-            else if (selectedImage != null) { selectedImage.sprite = items[selectedItemIndex].itemIcon; }
+            else if (selectedImage != null)
+            {
+                selectedImage.sprite = items[selectedItemIndex].itemIcon;
+            }
             if (selectedText != null) { selectedText.text = items[selectedItemIndex].itemName; onItemTextChanged?.Invoke(selectedText); }
-          
+
             if (saveSelected)
             {
                 if (invokeAtStart) { items[PlayerPrefs.GetInt("Dropdown_" + saveKey)].OnItemSelection.Invoke(); }
@@ -195,8 +198,8 @@ namespace Michsky.MUIP
 
         // Obsolete
         public void ChangeDropdownInfo(int itemIndex)
-        { 
-            SetDropdownIndex(itemIndex); 
+        {
+            SetDropdownIndex(itemIndex);
         }
 
         public void SetDropdownIndex(int itemIndex)
@@ -240,7 +243,7 @@ namespace Michsky.MUIP
             }
 
             else if (!isOn && animationType == AnimationType.Custom)
-            {   
+            {
                 dropdownAnimator.Play("Stylish In");
                 isOn = true;
             }
@@ -311,7 +314,7 @@ namespace Michsky.MUIP
         {
             if (!isInteractable) { return; }
             if (enableDropdownSounds && useClickSound) { soundSource.PlayOneShot(clickSound); }
-            
+
             Animate();
         }
 

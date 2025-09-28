@@ -75,7 +75,10 @@ namespace Michsky.MUIP
 
         void OnEnable()
         {
-            if (gameObject.activeInHierarchy) { StartCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy)
+            {
+                // StartCoroutine("DisableAnimator");
+            }
         }
 
         public void SetupSelector()
@@ -116,7 +119,7 @@ namespace Michsky.MUIP
             if (items.Count == 0)
                 return;
 
-            StopCoroutine("DisableAnimator");
+            // StopCoroutine("DisableAnimator");
             selectorAnimator.enabled = true;
 
             if (!loopSelection)
@@ -135,7 +138,7 @@ namespace Michsky.MUIP
 
                     items[index].onItemSelect.Invoke();
                     onValueChanged.Invoke(index);
-                   
+
                     selectorAnimator.Play(null);
                     selectorAnimator.StopPlayback();
 
@@ -158,7 +161,7 @@ namespace Michsky.MUIP
 
                 items[index].onItemSelect.Invoke();
                 onValueChanged.Invoke(index);
-                
+
                 selectorAnimator.Play(null);
                 selectorAnimator.StopPlayback();
 
@@ -167,7 +170,10 @@ namespace Michsky.MUIP
             }
 
             if (saveSelected) { PlayerPrefs.SetInt("HorizontalSelector_" + saveKey, index); }
-            if (gameObject.activeInHierarchy) { StartCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy)
+            {
+                // StartCoroutine("DisableAnimator");
+            }
             if (enableIndicators)
             {
                 for (int i = 0; i < items.Count; ++i)
@@ -187,7 +193,7 @@ namespace Michsky.MUIP
             if (items.Count == 0)
                 return;
 
-            StopCoroutine("DisableAnimator");
+            // StopCoroutine("DisableAnimator");
             selectorAnimator.enabled = true;
 
             if (!loopSelection)
@@ -206,7 +212,7 @@ namespace Michsky.MUIP
 
                     items[index].onItemSelect.Invoke();
                     onValueChanged.Invoke(index);
-                   
+
                     selectorAnimator.Play(null);
                     selectorAnimator.StopPlayback();
 
@@ -229,7 +235,7 @@ namespace Michsky.MUIP
 
                 items[index].onItemSelect.Invoke();
                 onValueChanged.Invoke(index);
-               
+
                 selectorAnimator.Play(null);
                 selectorAnimator.StopPlayback();
 
@@ -251,7 +257,10 @@ namespace Michsky.MUIP
                 }
             }
 
-            if (gameObject.activeInHierarchy) { StartCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy)
+            {
+                // StartCoroutine("DisableAnimator");
+            }
         }
 
         // Obsolete
@@ -288,10 +297,13 @@ namespace Michsky.MUIP
 
             label.text = items[index].itemTitle;
             onItemTextChanged?.Invoke(label);
-            
+
             if (labelIcon != null && enableIcon) { labelIcon.sprite = items[index].itemIcon; }
-            if (gameObject.activeInHierarchy) { StartCoroutine("DisableAnimator"); }
-          
+            if (gameObject.activeInHierarchy)
+            {
+                // StartCoroutine("DisableAnimator");
+            }
+
             UpdateContentLayout();
             UpdateIndicators();
         }
@@ -307,7 +319,7 @@ namespace Michsky.MUIP
                 GameObject go = Instantiate(indicatorObject, new Vector3(0, 0, 0), Quaternion.identity);
                 go.transform.SetParent(indicatorParent, false);
                 go.name = items[i].itemTitle;
-                
+
                 Transform onObj = go.transform.Find("On");
                 Transform offObj = go.transform.Find("Off");
 
@@ -330,10 +342,10 @@ namespace Michsky.MUIP
             LayoutRebuilder.ForceRebuildLayoutImmediate(label.transform.parent.GetComponent<RectTransform>());
         }
 
-        IEnumerator DisableAnimator()
-        {
-            yield return new WaitForSecondsRealtime(0.5f);
-            selectorAnimator.enabled = false;
-        }
+        // IEnumerator DisableAnimator()
+        // {
+        //     yield return new WaitForSecondsRealtime(0.5f);
+        //     selectorAnimator.enabled = false;
+        // }
     }
 }

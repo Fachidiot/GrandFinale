@@ -18,7 +18,8 @@ public class InAirState : StateMachineBase
 
         characterController.Move(characterMove.velocity * Time.deltaTime);
 
-        if (characterMove.isGrounded) characterMove.SetState(characterMove.standState);
+        if (characterMove.isGrounded)
+            characterMove.SetState(characterMove.moveState);
     }
 
     public override void OnStateEnter()

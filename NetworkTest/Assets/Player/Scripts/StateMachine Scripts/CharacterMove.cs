@@ -8,6 +8,8 @@ public class CharacterMove : MonoBehaviour
     public BodyTurnHandler bodyTurnHandler;
     public Animator animator;
     public Transform directionOrienter;
+    private PlayerInputs playerInputs;
+    public PlayerInputs Inputs { get { return playerInputs; } }
 
     [Header("Colider values")]
     public float crouchColliderHeight = 1f;
@@ -56,7 +58,7 @@ public class CharacterMove : MonoBehaviour
 
     public StateMachineBase previousState;
     public StateMachineBase currentState;
-    public MoveState standState { get; private set; }
+    public MoveState moveState { get; private set; }
     public CrouchState crouchState { get; private set; }
     public RollState rollState { get; private set; }
     public JumpState jumpState { get; private set; }
@@ -79,9 +81,10 @@ public class CharacterMove : MonoBehaviour
         colliderSizeChangeCor = ColliderSizeChangeSmooth(false);
         characterController = GetComponent<CharacterController>();
         normalColliderHeight = characterController.height;
+        GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
 
 
-        standState = new MoveState(this);
+        moveState = new MoveState(this);
         crouchState = new CrouchState(this);
         rollState = new RollState(this);
         jumpState = new JumpState(this);
@@ -90,7 +93,7 @@ public class CharacterMove : MonoBehaviour
 
     private void Start()
     {
-        currentState = standState;
+        currentState = moveState;
         SetState(inAirState);
     }
 
@@ -114,7 +117,8 @@ public class CharacterMove : MonoBehaviour
 
     private void Update()
     {
-        if (currentState == null) return;
+        if (currentState == null)
+            return;
 
         GroundCheck();
 

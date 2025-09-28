@@ -196,7 +196,7 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
         {
             broadcast_msg["type"] = "player_event";
             broadcast_msg["event"] = "shoot";
-            std::cout << player.nickname << " Do Shoot" << std::endl;
+            // std::cout << player.nickname << " Do Shoot" << std::endl;
         }
         else if (action == "weapon_change")
         {
@@ -206,7 +206,7 @@ void Server::handle_player_action(std::shared_ptr<Session> session, const json &
             broadcast_msg["type"] = "player_event";
             broadcast_msg["event"] = "weapon_change";
             broadcast_msg["weapon_id"] = weapon_id;
-            std::cout << player.nickname << " Do Change Weapon to " << weapon_id << std::endl;
+            // std::cout << player.nickname << " Do Change Weapon to " << weapon_id << std::endl;
         }
 
         if (!broadcast_msg.empty())

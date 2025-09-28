@@ -54,7 +54,7 @@ public class BodyTurnHandler : MonoBehaviour
 
     IEnumerator BodyTurn()
     {
-        if (characterMove.currentState == characterMove.standState)
+        if (characterMove.currentState == characterMove.moveState)
         {
             animator.Play("Turn_" + (_angle > 90 + angleOfRotation ? "Left" : "Right"), 2); // start animation of body rotation
         }

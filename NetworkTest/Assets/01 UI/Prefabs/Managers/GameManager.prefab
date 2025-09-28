@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3528374424469056276
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 537415677376590871}
+  - component: {fileID: 1788740606481346463}
+  - component: {fileID: 1278723525724786473}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &537415677376590871
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3528374424469056276}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 442.04276, y: 270.136, z: -2.3218606}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1788740606481346463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3528374424469056276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 271a6341a15815245a487ca8ab2e2e99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titleScene: 
+  gameScene: 
+  stageInfo: {fileID: 0}
+  playerPrefab: {fileID: 0}
+  gameState: 0
+  initialKey:
+    m_KeyMoveLeft: 97
+    m_KeyMoveRight: 100
+    m_KeyMoveUp: 119
+    m_KeyMoveDown: 115
+    m_KeyJump: 32
+    m_KeySprint: 304
+    m_KeyCrouch: 99
+    m_BendingRight: 101
+    m_BendingLeft: 113
+    m_KeyAttack: 323
+    m_KeyAimed: 324
+    m_KeyUnArmed: 120
+    m_KeySlot1: 49
+    m_KeySlot2: 50
+    m_KeySlot3: 51
+    m_KeySlot4: 52
+    m_KeyInteract: 101
+    m_KeyInventory: 9
+    m_KeyReload: 114
+    m_KeyEscape: 27
+    m_KeyChat: 13
+--- !u!114 &1278723525724786473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3528374424469056276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e522062f65d0d4b689ac4bb8e6980be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyData:
+    m_KeyMoveLeft: 97
+    m_KeyMoveRight: 100
+    m_KeyMoveUp: 119
+    m_KeyMoveDown: 115
+    m_KeyJump: 32
+    m_KeySprint: 304
+    m_KeyCrouch: 99
+    m_BendingRight: 101
+    m_BendingLeft: 113
+    m_KeyAttack: 323
+    m_KeyAimed: 324
+    m_KeyUnArmed: 120
+    m_KeySlot1: 49
+    m_KeySlot2: 50
+    m_KeySlot3: 51
+    m_KeySlot4: 52
+    m_KeyInteract: 101
+    m_KeyInventory: 9
+    m_KeyReload: 114
+    m_KeyEscape: 27
+    m_KeyChat: 13

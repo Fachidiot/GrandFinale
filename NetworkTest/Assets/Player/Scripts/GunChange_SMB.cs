@@ -51,7 +51,14 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
             weaponController.activeID = weaponController.nextID;
 
             //if nextID != 0 then transition to grab animation
-            animator.CrossFadeInFixedTime("GrabSlot" + weaponController.nextID, 0.25f, layerIndex);
+            if (weaponController.nextID <= weaponController.slots.Length)
+                animator.CrossFadeInFixedTime("GrabSlot" + weaponController.nextID, 0.25f, layerIndex);
+            else
+            {
+                // TODO : Melee Animate
+                animator.CrossFadeInFixedTime("Melee_Default", 0.25f, 3);
+                weaponController.changed = false;
+            }
             weaponController.nextID = 0;
             return;
         }
@@ -61,7 +68,7 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
         foreach (var eventModel in UpdateEvents)
         {
             if (eventModel.done) continue;
-            
+
             // invoke updateEvents
             if (stateInfo.normalizedTime > eventModel.time && !eventModel.done)
             {
@@ -73,7 +80,7 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
 
         foreach (var animationCurveEvent in CurveEvents)
         {
-              // invoke curveEvents
+            // invoke curveEvents
             object[] floatValueParameter = { animationCurveEvent.animationCurve.Evaluate(stateInfo.normalizedTime) };
             EventsCenter.EventInvoke(animationCurveEvent.eventName, floatValueParameter);
         }
@@ -83,7 +90,7 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
     {
         if (EventsCenter == null) return;
 
-          // invoke exitEvents
+        // invoke exitEvents
         foreach (var eventModel in ExitEvents)
         {
             EventsCenter.EventInvoke(eventModel.funcName,

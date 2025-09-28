@@ -41,11 +41,16 @@ public class LobbyUIManager : MonoBehaviour
             Destroy(gameObject);
         }
         InitializeMessageHandlers();
+        GameManager.Instance.EnterLobby();
     }
 
     private void Start()
     {
-        if (lobbyPanel != null) lobbyPanel.SetActive(false);
+        if (lobbyPanel != null)
+            lobbyPanel.SetActive(false);
+
+        if (NetworkManager.Instance.isConnected)
+            HandleConnection();
     }
 
     private void OnEnable()
@@ -101,7 +106,11 @@ public class LobbyUIManager : MonoBehaviour
         lobbyPanel.SetActive(true);
         errorText.gameObject.SetActive(false);
 
+        // 플레이어 닉네임의 변경사항이 없다면 return
         string nickname = string.IsNullOrEmpty(nickNameInput.text) ? $"Player{UnityEngine.Random.Range(100, 1000)}" : nickNameInput.text;
+        if (NetworkManager.Instance.PlayerNickname == nickname)
+            return;
+
         JObject request = new JObject
         {
             ["type"] = "set_nickname",

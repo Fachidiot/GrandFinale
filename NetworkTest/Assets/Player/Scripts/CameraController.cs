@@ -5,15 +5,22 @@ public class CameraController : MonoBehaviour
     public float maxViewAngle = 75;
     public float sensitivity = 50;
 
+    private bool isPause = false;
+
     private void Start()
     {
         controlledCamera.localRotation = Quaternion.identity;
+        GameManager.OnPauseStateChanged += OnPause;
     }
 
     void Update()
     {
+        if (isPause)
+            return;
+
         MouseLocker();
-        if (Cursor.lockState != CursorLockMode.Locked) return;
+        if (Cursor.lockState != CursorLockMode.Locked)
+            return;
         SetCameraRotation(Input.GetAxis("Mouse Y") * -sensitivity, Input.GetAxis("Mouse X") * sensitivity);
     }
 
@@ -49,5 +56,15 @@ public class CameraController : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
+    }
+
+    void OnPause(bool pause)
+    {
+        if (pause)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        isPause = pause;
     }
 }

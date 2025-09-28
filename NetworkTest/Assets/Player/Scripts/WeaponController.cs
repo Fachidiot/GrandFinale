@@ -128,7 +128,7 @@ public class WeaponController : MonoBehaviour
         this.changed = changing;
 
         var currentWeapon = GETCurrentWeapon;
-        if (!changing && currentWeapon != null && currentWeapon.AimPoint != null) 
+        if (!changing && currentWeapon != null && currentWeapon.AimPoint != null)
             aimPointEffector.getFromTransform = currentWeapon.AimPoint.transform;
     }
 
@@ -176,18 +176,16 @@ public class WeaponController : MonoBehaviour
     }
 
     public void ToChange(int nextGunSlotID)
-        {
-        Debug.Log($"ToChange Start {nextGunSlotID}");
+    {
         if (changed)
             return;
         if (activeID == nextGunSlotID)
             return;
-        Debug.Log($"ToChange Check {nextGunSlotID}");
 
         // Use Animator.StringToHash for better performance and to avoid string allocations.
         string animaName = "PutSlot" + activeID;
         int animationHash = Animator.StringToHash(animaName);
-        
+
         this.nextID = nextGunSlotID;
 
         animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);

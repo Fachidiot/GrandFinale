@@ -14,6 +14,8 @@ public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance { get; private set; }
 
+    public bool isConnected { get; private set; }
+
     // TCP-related fields
     private TcpClient tcpClient;
     private StreamWriter writer;
@@ -50,6 +52,8 @@ public class NetworkManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        isConnected = false;
     }
 
     public void Connect(string ip = "127.0.0.1", int tcpPort = 8080, int udpPort = 8081)
@@ -77,6 +81,8 @@ public class NetworkManager : MonoBehaviour
             serverUdpEndPoint = new IPEndPoint(serverIp, udpPort);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
             // Debug.Log("UDP listener started.");
+
+            isConnected = true;
 
             OnConnected?.Invoke();
         }
