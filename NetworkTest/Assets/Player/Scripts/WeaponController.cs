@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using Unity.VisualScripting;
 
 public class WeaponController : MonoBehaviour
 {
@@ -183,10 +184,31 @@ public class WeaponController : MonoBehaviour
             return;
 
         // Use Animator.StringToHash for better performance and to avoid string allocations.
+        if (activeID > slots.Length)
+        {
+            ToGetSlot(nextGunSlotID);
+            return;
+        }
         string animaName = "PutSlot" + activeID;
         int animationHash = Animator.StringToHash(animaName);
 
         this.nextID = nextGunSlotID;
+
+        animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
+    }
+
+    public void ToGetSlot(int nextGunSlotID)
+    {
+        if (changed)
+            return;
+        if (activeID == nextGunSlotID)
+            return;
+
+        animator.CrossFadeInFixedTime("Weapon", 0.25f, 3);
+        string animaName = "GrabSlot" + nextGunSlotID;
+        int animationHash = Animator.StringToHash(animaName);
+
+        this.activeID = nextGunSlotID;
 
         animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
     }
