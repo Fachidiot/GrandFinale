@@ -26,6 +26,11 @@ public class CameraSwitcher : MonoBehaviour
         return canAim;
     }
 
+    void Awake()
+    {
+        StopAiming();
+    }
+
     private void OnEnable()
     {
         characterMove.OnGroundedValueChange += ApplyIsGround;
@@ -46,6 +51,11 @@ public class CameraSwitcher : MonoBehaviour
     // [신규] 롱클릭을 위한 TPV 조준 시작 함수
     public void StartTpvAim()
     {
+        if (isFirstpersonView)
+        {
+            ToggleFpvAim();
+            return;
+        }
         if (!CanAimCheck()) return;
         isAiming = true;
         characterMove.moveState.walk = true;

@@ -74,6 +74,7 @@ public class BulletOffline : BulletBehaviour, IBulletInitialize
             if (bloodPrefab && hit.transform.CompareTag("Entity"))
             {
                 SpawnEffect(bloodPrefab, hit, 3f);
+                hit.transform.root.GetComponentInChildren<PlayerHealth>().SetDamage(30);
             }
 
             if (hit.rigidbody)

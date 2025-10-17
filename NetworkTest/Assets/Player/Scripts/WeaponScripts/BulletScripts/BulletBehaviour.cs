@@ -44,7 +44,7 @@ public abstract class BulletBehaviour : MonoBehaviour, IPoolable
                 ps.Play();
             }
         }
-        
+
         // 여기에 추가적인 총알 상태 초기화 로직을 넣을 수 있습니다.
         // 예: 체력, 데미지, 타이머 등
     }

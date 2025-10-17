@@ -4,7 +4,7 @@ public class NetworkTransformSync : MonoBehaviour
 {
     // 0: Body, 1: Camera, etc. Set this in the Unity Inspector.
     public int viewId = 0;
-    public bool isMine = false;
+    public bool IsMine = false;
 
     // Sync options - set in inspector. Camera might only need to sync rotation.
     public bool syncPosition = true;
@@ -32,12 +32,12 @@ public class NetworkTransformSync : MonoBehaviour
     public void Initialize(string id, bool isOwner)
     {
         this.objectId = id;
-        this.isMine = isOwner;
+        this.IsMine = isOwner;
     }
 
     void Update()
     {
-        if (isMine)
+        if (IsMine)
         {
             if (Time.time >= nextSendTime)
             {
@@ -69,7 +69,7 @@ public class NetworkTransformSync : MonoBehaviour
 
     public void OnTransformReceived(Vector3 position, Quaternion rotation)
     {
-        if (!isMine)
+        if (!IsMine)
         {
             if (syncPosition) targetPosition = position;
             if (syncRotation) targetRotation = rotation;

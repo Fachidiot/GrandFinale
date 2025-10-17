@@ -2,16 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeleeController : MonoBehaviour
+public class CombatController : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
-    public void ToChange(int nextWeaponID)
+    // Update is called once per frame
+    void Update()
     {
-
+        
     }
 }

@@ -9,14 +9,6 @@ public class WeaponPickupOffline : WeaponPickup
     [SerializeField] private float raycastLengh = 1.5f;
     [SerializeField] private LayerMask weaponLayers;
 
-
-    void Start()
-    {
-
-    }
-
-
-
     void Update()
     {
         Debug.DrawLine(rayCastStartPoint.position, rayCastStartPoint.position + rayCastStartPoint.TransformDirection(Vector3.forward) * raycastLengh);
@@ -28,7 +20,6 @@ public class WeaponPickupOffline : WeaponPickup
 
         if (Physics.Raycast(rayCastStartPoint.position, rayCastStartPoint.TransformDirection(Vector3.forward), out RaycastHit hit, raycastLengh, weaponLayers))
         {
-
             Weapon detectedGun = null;
 
             if (hit.transform.CompareTag("Weapon")) detectedGun = hit.transform.GetComponent<Weapon>();

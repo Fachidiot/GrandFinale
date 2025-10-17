@@ -39,14 +39,14 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (GameState.Room == gameState || GameState.Game == gameState)
-        {
-            if (playerInputs.GetEscape())
-            {
-                optionOn = !optionOn;
-                OnPauseStateChanged?.Invoke(optionOn);
-            }
-        }
+        // if (GameState.Room == gameState || GameState.Game == gameState)
+        // {
+        //     if (playerInputs.GetEscape())
+        //     {
+        //         optionOn = !optionOn;
+        //         OnPauseStateChanged?.Invoke(optionOn);
+        //     }
+        // }
     }
 
     public void SetPause(bool pause)
