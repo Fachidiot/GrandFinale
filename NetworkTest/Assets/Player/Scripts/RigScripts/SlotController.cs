@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class SlotController : OnRig
 {
+    public bool slotActive = false;
     public Transform constrained;
     [Range(0, 1)] public float weight;
     public Transform inactiveSlot;
@@ -23,6 +24,26 @@ public class SlotController : OnRig
         set => handActive = Mathf.Clamp(value, 0, 1);
     }
 
+    void Awake()
+    {
+        CheckSlot();
+    }
+
+    void Update()
+    {
+        CheckSlot();
+    }
+
+    private void CheckSlot()
+    {
+        if (GetComponentInChildren<Weapon>() == null)
+        {
+            slotActive = false;
+            return;
+        }
+        else
+        slotActive = true;
+    }
     public HandSlot[] hands = new HandSlot[2];
 
     public void ApplyHandOffset(int handID, bool applyOffset)

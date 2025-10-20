@@ -1,7 +1,7 @@
 # CMake에게 프로젝트를 어떻게 빌드해야 하는지 알려주는 설명서 파일
 
 # CMake 최소 요구 버전
-# Minimum required version of CMake
+# Minimum required version of CMakec
 cmake_minimum_required(VERSION 3.10)
 
 # 프로젝트 이름 설정
@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # [Mac] homebrew로 설치한 패키지
-find_package(nlohmann_json 3 REQUIRED)
+# find_package(nlohmann_json 3 REQUIRED)
 
 # [Windows] vcpkg 패키지
 # find_package(nlohmann_json 3 REQUIRED)
@@ -25,7 +25,7 @@ find_package(nlohmann_json 3 REQUIRED)
 add_executable(lobby_server main.cpp Server.cpp Session.cpp)
 
 # [Mac] 라이브러리 링크
-target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json)
 
 # [Windows] 라이브러리 링크
 # target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json asio::asio)

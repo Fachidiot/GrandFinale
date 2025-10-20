@@ -11,10 +11,11 @@ GameObject:
   - component: {fileID: 5642876887343811406}
   - component: {fileID: 5642876887343811405}
   - component: {fileID: 5642876887343811404}
-  - component: {fileID: 9035368876581090791}
+  - component: {fileID: 6189058318192116775}
+  - component: {fileID: 2630708083496521996}
   - component: {fileID: 8093437783953287390}
   m_Layer: 7
-  m_Name: Bullet
+  m_Name: Bullet_Net
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +84,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &9035368876581090791
+--- !u!114 &6189058318192116775
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -92,7 +93,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5642876887343811403}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b796dec7091110547939895829b6d34b, type: 3}
+  m_Script: {fileID: 11500000, guid: 65c48a76733f2d24086208582fd7c337, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lifeTime: 5
@@ -102,7 +103,24 @@ MonoBehaviour:
   bloodPrefab: {fileID: 6499966516186986641, guid: e19973222580d0c47bdad138d68fb9f3, type: 3}
   mask:
     serializedVersion: 2
-    m_Bits: 89
+    m_Bits: 25
+  _isPooled: 0
+--- !u!114 &2630708083496521996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5642876887343811403}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8998e056c216a2a409a80f068288a531, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewId: 0
+  IsMine: 0
+  syncPosition: 1
+  syncRotation: 1
 --- !u!96 &8093437783953287390
 TrailRenderer:
   serializedVersion: 3

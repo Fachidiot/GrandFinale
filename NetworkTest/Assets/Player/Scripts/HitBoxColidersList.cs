@@ -26,6 +26,7 @@ public class HitBoxColidersList : MonoBehaviour
         foreach (var collider in hitBoxColiders)
         {
             collider.GetComponent<Rigidbody>().isKinematic = false;
+            collider.isTrigger = false;
         }
     }
 

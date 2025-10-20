@@ -33,6 +33,8 @@ public class InGameUIManager : MonoBehaviour
     {
         if (weaponController == null)
             return;
+        if (weaponController.GETCurrentWeapon == null)
+            return;
 
         ammoCountText.text = weaponController.GETCurrentWeapon.CurrentAmmo.ToString();
     }

@@ -23,7 +23,7 @@ public class PlayerLifeController : MonoBehaviour
 
         input_Handler.enabled = false;
         characterMove.enabled = false;
-        StartCoroutine(SayRespawn());
+        // StartCoroutine(SayRespawn());
         // if (transform.root.GetComponent<NetworkTransformSync>().IsMine)
         // {
         //     input_Handler.enabled = false;

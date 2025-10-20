@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BulletOffline : BulletBehaviour, IBulletInitialize
+public class BulletOffline : BulletBehaviour
 {
     public float lifeTime;
     private Vector3 _startPoint;
@@ -18,7 +18,8 @@ public class BulletOffline : BulletBehaviour, IBulletInitialize
     {
         base.Awake(); // Call the base class Awake method
         rb = GetComponent<Rigidbody>();
-        if (PoolManager.Instance != null)
+
+        if (_isPooled && PoolManager.Instance != null)
         {
             if (decalPrefab != null) PoolManager.Instance.CreatePool(decalPrefab, 10);
             if (bloodPrefab != null) PoolManager.Instance.CreatePool(bloodPrefab, 10);
@@ -36,10 +37,8 @@ public class BulletOffline : BulletBehaviour, IBulletInitialize
     // public override void BulletStart(Transform bulletCreator) { }
 
     // Explicitly implement the new interface
-    public void BulletStart(Transform bulletCreator, bool isPooled)
+    public override void BulletStart(Transform bulletCreator)
     {
-        _isPooled = isPooled;
-
         var weap = bulletCreator.GetComponent<Weapon>();
         force = weap.BulletForce;
         startSpeed = weap.BulletStartSpeed;
@@ -66,15 +65,16 @@ public class BulletOffline : BulletBehaviour, IBulletInitialize
         if (Physics.Linecast(_startPoint, transform.position, out RaycastHit hit, mask))
         {
             // Decal and blood effects spawning logic remains the same...
-            if (decalPrefab && hit.transform.CompareTag("HitBox"))
+            if (decalPrefab && !hit.transform.CompareTag("HitBox"))
             {
                 SpawnEffect(decalPrefab, hit, 15f);
             }
 
-            if (bloodPrefab && hit.transform.CompareTag("Entity"))
+            if (bloodPrefab && hit.transform.CompareTag("HitBox"))
             {
                 SpawnEffect(bloodPrefab, hit, 3f);
-                hit.transform.root.GetComponentInChildren<PlayerHealth>().SetDamage(30);
+                if (hit.transform.root.GetComponentInChildren<PlayerHealth>())
+                    hit.transform.root.GetComponentInChildren<PlayerHealth>().SetDamage(30);
             }
 
             if (hit.rigidbody)

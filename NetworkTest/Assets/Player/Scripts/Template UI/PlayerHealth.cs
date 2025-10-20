@@ -7,26 +7,45 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private float health = 100f;
     [SerializeField] private PlayerLifeController playerLifeController;
     [SerializeField] private HitBoxColidersList hitBoxColidersList;
+    [SerializeField] private bool Networked = true;
 
+    private bool isMine = false;
     private InGameUIManager uiManager;
 
     private void Start()
     {
+        if (Networked)
+            isMine = transform.root.GetComponentInChildren<NetworkTransformSync>().IsMine;
         hitBoxColidersList.Init();
-        uiManager = FindObjectOfType<InGameUIManager>();
+        Init();
+    }
+
+    void Update()
+    {
+        if (isMine && !uiManager)
+            Init();
     }
 
     public float SetDamage(float damage)
     {
+        if (!isMine)
+            return 0;
+        if (!uiManager)
+            Init();
+
         health -= damage;
 
         float retValue = health;
 
-        uiManager.SetHealthValue(health);
-        // if (transform.root.GetComponent<NetworkTransformSync>().IsMine)
-        // {
-        //     uiManager.SetHealthValue(health);
-        // }
+        if (Networked)
+        {
+            if (!transform.root.GetComponent<NetworkTransformSync>().IsMine)
+            {
+                uiManager.SetHealthValue(health);
+            }
+        }
+        else
+            uiManager.SetHealthValue(health);
 
         if (health <= 0)
         {
@@ -36,5 +55,12 @@ public class PlayerHealth : MonoBehaviour
         }
 
         return retValue;
+    }
+
+    private void Init()
+    {
+        uiManager = FindObjectOfType<InGameUIManager>();
+        if (uiManager)
+            uiManager.SetHealthValue(health);
     }
 }

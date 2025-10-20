@@ -14,14 +14,15 @@ public class BulletNetwork : BulletBehaviour
     public LayerMask mask; // Raycast Ignored Layers;
 
     private Rigidbody rb;
+    [SerializeField] private bool _isPooled = false;
 
     private new void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        if (PoolManager.Instance != null)
+        if (_isPooled && PoolManager.Instance != null)
         {
-            PoolManager.Instance.CreatePool(decalPrefab, 10);
-            PoolManager.Instance.CreatePool(bloodPrefab, 10);
+            if (decalPrefab != null) PoolManager.Instance.CreatePool(decalPrefab, 10);
+            if (bloodPrefab != null) PoolManager.Instance.CreatePool(bloodPrefab, 10);
         }
     }
 
@@ -35,7 +36,7 @@ public class BulletNetwork : BulletBehaviour
         }
 
         // Automatically return to pool after lifetime expires
-        if (PoolManager.Instance != null)
+        if (_isPooled && PoolManager.Instance != null)
         {
             PoolManager.Instance.ReturnToPool(gameObject, lifeTime);
         }
@@ -61,66 +62,91 @@ public class BulletNetwork : BulletBehaviour
             rb.AddForce(transform.forward * startSpeed, ForceMode.Impulse);
         }
         _startPoint = transform.position;
+
+        // Handle lifetime based on whether it's pooled or not
+        if (_isPooled)
+        {
+            PoolManager.Instance.ReturnToPool(gameObject, lifeTime);
+        }
+        else
+        {
+            Destroy(gameObject, lifeTime);
+        }
     }
 
     void Update()
     {
         if (Physics.Linecast(_startPoint, transform.position, out RaycastHit hit, mask))
         {
-            // Spawn decals from pool
-            if (decalPrefab && hit.transform.CompareTag("HitBox"))
+            // Decal and blood effects spawning logic remains the same...
+            if (decalPrefab && !hit.transform.CompareTag("HitBox"))
             {
-                if (PoolManager.Instance != null)
-                {
-                    var decal = PoolManager.Instance.Spawn(decalPrefab, hit.point + (hit.normal * 0.001f), Quaternion.FromToRotation(Vector3.up, hit.normal));
-                    if (decal != null)
-                    {
-                        decal.transform.SetParent(hit.transform);
-                        PoolManager.Instance.ReturnToPool(decal, 15f);
-                    }
-                }
+                SpawnEffect(decalPrefab, hit, 15f);
             }
 
-            // Spawn blood effects from pool
-            if (bloodPrefab && hit.transform.CompareTag("Entity"))
+            if (bloodPrefab && hit.transform.CompareTag("HitBox"))
             {
-                if (PoolManager.Instance != null)
-                {
-                    var blood = PoolManager.Instance.Spawn(bloodPrefab, hit.point + (hit.normal * 0.001f), Quaternion.FromToRotation(Vector3.up, hit.normal));
-                    if (blood != null)
-                    {
-                        blood.transform.SetParent(hit.transform);
-                        PoolManager.Instance.ReturnToPool(blood, 3f);
-                    }
-                }
+                SpawnEffect(bloodPrefab, hit, 3f);
             }
 
-            // if (photonView.IsMine)
-            // {
+            if (GetComponent<NetworkTransformSync>().IsMine)
+            {
+                if (hit.collider.CompareTag("HitBox"))
+                {
+                    if (hit.transform.root.CompareTag("Player"))
+                    {// 팀킬시.
+                        /* RPC Photon 예시 코드 : 
+                        hit.transform.root.GetComponent<PhotonView>().RPC("DamageRPC", RpcTarget.All, PlayerDamage *= hit.collider.name == "Head" ? 2 : 1, photonView.ViewID, hit.collider.name == "Head", weaponName); */
+                        // TODO : 같은 Player가 맞았을때 해당 네트워크 플레이어의 HP 감소.
+                        // hit.transform.root.GetComponent<PlayerHealth>().SetDamage(PlayerDamage *= hit.collider.name == "Head" ? 2 : 1);
+                    }
+                    else if (hit.transform.root.CompareTag("Monster"))
+                    {// 몬스터 공격시.
+                        // hit.transform.root.GetComponent<MonsterHealth>()
+                    }
+                }
 
-            //     // add force for rigid body hit
-            //     if (hit.collider.CompareTag("HitBox") && hit.transform.root.CompareTag("Player"))
-            //     {
-            //         hit.transform.root.GetComponent<PhotonView>().RPC("DamageRPC", RpcTarget.All, PlayerDamage *= hit.collider.name == "Head" ? 3 : 1, photonView.ViewID, hit.collider.name == "Head", weaponName);
-            //     }
-            // }
+            }
 
             if (hit.rigidbody)
-            {
                 hit.rigidbody.AddForceAtPosition(force * transform.forward, hit.point);
-            }
 
-            // Return bullet to the pool on collision
-            if (PoolManager.Instance != null)
-            {
-                PoolManager.Instance.ReturnToPool(gameObject);
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+            // Deactivate or destroy the bullet
+            Deactivate();
         }
 
         _startPoint = transform.position;
+    }
+
+    private void SpawnEffect(GameObject prefab, RaycastHit hit, float effectLifetime)
+    {
+        if (prefab == null) return;
+
+        GameObject effectGO;
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+        Vector3 position = hit.point + (hit.normal * 0.001f);
+
+        if (_isPooled && PoolManager.Instance != null)
+        {
+            effectGO = PoolManager.Instance.Spawn(prefab, position, rotation);
+            if (effectGO != null) PoolManager.Instance.ReturnToPool(effectGO, effectLifetime);
+        }
+        else
+        {
+            effectGO = Instantiate(prefab, position, rotation);
+            Destroy(effectGO, effectLifetime);
+        }
+    }
+
+    private void Deactivate()
+    {
+        if (_isPooled && PoolManager.Instance != null)
+        {
+            PoolManager.Instance.ReturnToPool(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

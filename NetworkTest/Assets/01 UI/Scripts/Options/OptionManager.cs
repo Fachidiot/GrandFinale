@@ -42,9 +42,14 @@ public class OptionManager : MonoBehaviour
 
     private KeyInput inputKey = KeyInput.NONE;
 
-    public void InitMenuLayouts()
+    private void Awake()
     {
         GetComponent<CanvasGroup>().alpha = 1;
+    }
+
+    public void InitMenuLayouts()
+    {
+        // GetComponent<CanvasGroup>().alpha = 1;
         // V-Sync
         m_VSync.isOn = OptionDataManager.Instance.OptionData.m_VSync;
         // FullScreenMode 설정

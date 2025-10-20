@@ -30,7 +30,8 @@ public class RecoilController : MonoBehaviour
 
     private void Start()
     {
-        recoilParametersModel = weaponController.GETCurrentWeapon.RecoilParameters;
+        if (weaponController.GETCurrentWeapon)
+            recoilParametersModel = weaponController.GETCurrentWeapon.RecoilParameters;
     }
 
     private void Update()

@@ -82,10 +82,24 @@ public class WeaponController : MonoBehaviour
         eventsCenter.OnWeaponChange -= GunChangeCheck;
     }
 
+    void Start()
+    {
+        int i = 1;
+        foreach (var slot in slots)
+        {
+            if (slot.slotActive)
+            {
+                ToChange(i);
+                return;
+            }
+            ++i;
+        }
+    }
+
     public void StartShoot()
     {
         var currentWeapon = GETCurrentWeapon;
-        if (currentWeapon != null && currentWeapon.Shoot())
+        if (currentWeapon != null && !changed && currentWeapon.Shoot())
             OnShoot?.Invoke();
     }
 
@@ -189,6 +203,13 @@ public class WeaponController : MonoBehaviour
             ToGetSlot(nextGunSlotID);
             return;
         }
+
+        if (nextGunSlotID <= slots.Length)
+        {
+            if (!slots[nextGunSlotID - 1].slotActive)
+                return;
+        }
+
         string animaName = "PutSlot" + activeID;
         int animationHash = Animator.StringToHash(animaName);
 
