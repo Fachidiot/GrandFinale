@@ -59,10 +59,7 @@ public class NetworkManager : MonoBehaviour
     public void Connect(string ip = "127.0.0.1", int tcpPort = 8080, int udpPort = 8081)
     {
         if (tcpClient != null && tcpClient.Connected)
-        {
-            Debug.LogWarning("Already connected.");
             return;
-        }
 
         try
         {

@@ -256,7 +256,9 @@ void Server::handle_disconnect(std::shared_ptr<Session> session)
 
             if (room.players.empty())
             {
+                std::cout << "Room" << room.id << " is empty, erasing from active_rooms_." << std::endl;
                 active_rooms_.erase(current_room_id);
+                std::cout << "Current active_rooms_ count is " << active_rooms_.size() << std::endl;
             }
             else
             {
@@ -370,7 +372,7 @@ void Server::handle_create_room(std::shared_ptr<Session> session, const json &re
 
     connected_players_[session].room_id = room_id;
     broadcast_room_update(room_id);
-    std::cout << room_name << " Room is create from " << connected_players_[session].id << std::endl;
+    std::cout << "Room" << room_id << " is create from " << connected_players_[session].id << std::endl;
 }
 
 void Server::handle_find_rooms(std::shared_ptr<Session> session, const json &request)
@@ -378,6 +380,7 @@ void Server::handle_find_rooms(std::shared_ptr<Session> session, const json &req
     json response;
     response["type"] = "find_rooms_response";
     json rooms_array = json::array();
+
     for (auto const &[id, room] : active_rooms_)
     {
         json room_info;
@@ -434,10 +437,13 @@ void Server::handle_leave_room(std::shared_ptr<Session> session, const json &req
         auto &room = active_rooms_[current_room_id];
         room.players.erase(std::remove(room.players.begin(), room.players.end(), session), room.players.end());
         connected_players_[session].room_id = -1;
+        std::cout << connected_players_[session].id << " is leave at" << active_rooms_[current_room_id].name << " Room" << std::endl;
 
         if (room.players.empty())
         {
+            std::cout << "Room" << room.id << " is empty, erasing from active_rooms_." << std::endl;
             active_rooms_.erase(current_room_id);
+            std::cout << "Current active_rooms_ count is " << active_rooms_.size() << std::endl;
         }
         else
         {
@@ -452,7 +458,6 @@ void Server::handle_leave_room(std::shared_ptr<Session> session, const json &req
         response["type"] = "leave_room_success";
         session->write(response.dump());
     }
-    std::cout << connected_players_[session].id << " is leave at" << active_rooms_[current_room_id].name << " Room" << std::endl;
 }
 
 void Server::handle_toggle_ready(std::shared_ptr<Session> session, const json &request)

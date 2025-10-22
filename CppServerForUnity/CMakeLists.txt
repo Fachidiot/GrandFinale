@@ -1,7 +1,7 @@
 # CMake에게 프로젝트를 어떻게 빌드해야 하는지 알려주는 설명서 파일
 
 # CMake 최소 요구 버전
-# Minimum required version of CMakec
+# Minimum required version of CMake
 cmake_minimum_required(VERSION 3.10)
 
 # 프로젝트 이름 설정
@@ -28,10 +28,9 @@ add_executable(lobby_server main.cpp Server.cpp Session.cpp)
 # target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json)
 
 # [Windows] 라이브러리 링크
-# target_link_libraries(lobby_server PRIVATE nlohmann_json::nlohmann_json asio::asio)
+target_link_libraries(lobby_server PRIVATE )
 
 # 프로젝트에 헤더 파일 검색 경로 추가
-# 이렇게 하면 소스 코드에서 #include <nlohmann/json.hpp> 를 그대로 사용할 수 있습니다.
 # This allows you to use #include <nlohmann/json.hpp> in your source code as is.
 target_include_directories(lobby_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 

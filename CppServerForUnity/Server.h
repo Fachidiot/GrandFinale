@@ -15,7 +15,7 @@ class Server
 {
 public:
     // Constructor now accepts both TCP and UDP ports
-    Server(asio::io_context& io_context, short tcp_port, short udp_port);
+    Server(asio::io_context &io_context, short tcp_port, short udp_port);
     void run();
 
     // Game Loop
@@ -25,7 +25,7 @@ public:
     // Interface for Session class (TCP)
     void handle_connect(std::shared_ptr<Session> session);
     void handle_disconnect(std::shared_ptr<Session> session);
-    void handle_request(std::shared_ptr<Session> session, const std::string& message);
+    void handle_request(std::shared_ptr<Session> session, const std::string &message);
 
 private:
     // TCP Methods
@@ -33,25 +33,25 @@ private:
 
     // UDP Methods
     void start_udp_receive();
-    void handle_udp_receive(const asio::error_code& error, std::size_t bytes_transferred);
+    void handle_udp_receive(const asio::error_code &error, std::size_t bytes_transferred);
 
     // Request Handlers (TCP)
     void initialize_request_handlers();
-    void handle_create_room(std::shared_ptr<Session> session, const json& req);
-    void handle_find_rooms(std::shared_ptr<Session> session, const json& req);
-    void handle_join_room(std::shared_ptr<Session> session, const json& req);
-    void handle_chat_message(std::shared_ptr<Session> session, const json& req);
-    void handle_leave_room(std::shared_ptr<Session> session, const json& req);
-    void handle_toggle_ready(std::shared_ptr<Session> session, const json& req);
-    void handle_start_game(std::shared_ptr<Session> session, const json& req);
-    void handle_set_nickname(std::shared_ptr<Session> session, const json& req);
-    void handle_player_action(std::shared_ptr<Session> session, const json& req);
+    void handle_create_room(std::shared_ptr<Session> session, const json &req);
+    void handle_find_rooms(std::shared_ptr<Session> session, const json &req);
+    void handle_join_room(std::shared_ptr<Session> session, const json &req);
+    void handle_chat_message(std::shared_ptr<Session> session, const json &req);
+    void handle_leave_room(std::shared_ptr<Session> session, const json &req);
+    void handle_toggle_ready(std::shared_ptr<Session> session, const json &req);
+    void handle_start_game(std::shared_ptr<Session> session, const json &req);
+    void handle_set_nickname(std::shared_ptr<Session> session, const json &req);
+    void handle_player_action(std::shared_ptr<Session> session, const json &req);
 
     // Utility
     void broadcast_room_update(int room_id);
 
     // ASIO and Networking members
-    asio::io_context& io_context_;
+    asio::io_context &io_context_;
     asio::strand<asio::io_context::executor_type> server_strand_;
     std::vector<std::thread> thread_pool_;
 
@@ -73,6 +73,5 @@ private:
     std::atomic<int> next_room_id_{0};
     std::atomic<int> next_player_id_num_{0};
 
-    std::map<std::string, std::function<void(std::shared_ptr<Session>, const json&)>> request_handlers_;
+    std::map<std::string, std::function<void(std::shared_ptr<Session>, const json &)>> request_handlers_;
 };
-

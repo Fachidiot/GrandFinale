@@ -42,15 +42,15 @@ public class LobbyUIManager : MonoBehaviour
         }
         InitializeMessageHandlers();
         GameManager.Instance.EnterLobby();
+
+        if (!string.IsNullOrEmpty(NetworkManager.Instance.PlayerNickname))
+            nickNameInput.text = NetworkManager.Instance.PlayerNickname;
     }
 
     private void Start()
     {
         if (lobbyPanel != null)
             lobbyPanel.SetActive(false);
-
-        if (NetworkManager.Instance.isConnected)
-            HandleConnection();
     }
 
     private void OnEnable()
@@ -102,14 +102,10 @@ public class LobbyUIManager : MonoBehaviour
 
     private void HandleConnection()
     {
-        connectionPanel.SetActive(false);
-        lobbyPanel.SetActive(true);
-        errorText.gameObject.SetActive(false);
+        SetConnectedPanel();
 
-        // 플레이어 닉네임의 변경사항이 없다면 return
-        string nickname = string.IsNullOrEmpty(nickNameInput.text) ? $"Player{UnityEngine.Random.Range(100, 1000)}" : nickNameInput.text;
-        if (NetworkManager.Instance.PlayerNickname == nickname)
-            return;
+        string nickname = string.IsNullOrEmpty(nickNameInput.text) ? $"Player{UnityEngine.Random.Range(100, 1000)}" : nickNameInput.name;
+        nickNameInput.text = nickname;
 
         JObject request = new JObject
         {
@@ -117,6 +113,13 @@ public class LobbyUIManager : MonoBehaviour
             ["nickname"] = nickname
         };
         NetworkManager.Instance.SendTCPMessage(request.ToString());
+    }
+
+    private void SetConnectedPanel()
+    {
+        connectionPanel.SetActive(false);
+        lobbyPanel.SetActive(true);
+        errorText.gameObject.SetActive(false);
     }
 
     private void HandleConnectionFailed(string errorMessage)

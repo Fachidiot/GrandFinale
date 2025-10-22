@@ -2,16 +2,19 @@
 #include "stdafx.h"
 
 // Vector3
-struct vec3 {
+struct vec3
+{
     float x = 0.0f, y = 0.0f, z = 0.0f;
 };
 
 // Quaternion
-struct quat {
+struct quat
+{
     float x = 0.0f, y = 0.0f, z = 0.0f, w = 1.0f;
 };
 
-struct Player {
+struct Player
+{
     std::string id;
     std::string nickname;
     int room_id = -1;
@@ -34,4 +37,3 @@ struct Player {
     // State Data
     int current_weapon_id = 1; // Default weapon
 };
-

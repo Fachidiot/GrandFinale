@@ -67,6 +67,7 @@ public class BulletOffline : BulletBehaviour
             // Decal and blood effects spawning logic remains the same...
             if (decalPrefab && !hit.transform.CompareTag("HitBox"))
             {
+                Debug.Log(hit.transform.name);
                 SpawnEffect(decalPrefab, hit, 15f);
             }
 
