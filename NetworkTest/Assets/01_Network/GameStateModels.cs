@@ -1,0 +1,128 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+// Helper for packing boolean values into a single byte
+public static class AnimationBitmask
+{
+    public const byte Walk = 1 << 0;       // 1
+    public const byte Sprint = 1 << 1;     // 2
+    public const byte Roll = 1 << 2;       // 4
+    public const byte IsGrounded = 1 << 3; // 8
+    public const byte Crouch = 1 << 4;     // 16
+
+    public static bool IsSet(byte mask, byte flag) => (mask & flag) == flag;
+}
+
+// Optimized data structure for a single player's state
+public struct PlayerState
+{
+    public byte playerId; // Assuming player IDs can be mapped to bytes on the host
+    public Vector3 position;
+    public Quaternion rotation;
+    public byte animationMask; // Packed booleans for animations
+    public float moveX;
+    public float moveY;
+    public int weaponId;
+}
+
+// Optimized data structure for a single monster's state
+public struct MonsterState
+{
+    public ushort monsterId;
+    public Vector3 position;
+    public Quaternion rotation;
+    public byte animationMask; // You can define a similar bitmask for monsters
+}
+
+// The main container for all real-time game data
+public class NetworkGameState
+{
+    public List<PlayerState> players = new List<PlayerState>();
+    public List<MonsterState> monsters = new List<MonsterState>();
+
+    // --- Serialization (Host) ---
+    public byte[] ToByteArray()
+    {
+        using (MemoryStream stream = new MemoryStream())
+        using (BinaryWriter writer = new BinaryWriter(stream))
+        {
+            // Write player states
+            writer.Write((byte)players.Count);
+            foreach (var p in players)
+            {
+                writer.Write(p.playerId);
+                writer.Write(p.position.x);
+                writer.Write(p.position.y);
+                writer.Write(p.position.z);
+                // Quantize quaternion to save space
+                writer.Write(p.rotation.x);
+                writer.Write(p.rotation.y);
+                writer.Write(p.rotation.z);
+                writer.Write(p.rotation.w);
+                writer.Write(p.animationMask);
+                writer.Write(p.moveX);
+                writer.Write(p.moveY);
+                writer.Write(p.weaponId);
+            }
+
+            // Write monster states
+            writer.Write((byte)monsters.Count);
+            foreach (var m in monsters)
+            {
+                writer.Write(m.monsterId);
+                writer.Write(m.position.x);
+                writer.Write(m.position.y);
+                writer.Write(m.position.z);
+                writer.Write(m.rotation.x);
+                writer.Write(m.rotation.y);
+                writer.Write(m.rotation.z);
+                writer.Write(m.rotation.w);
+                writer.Write(m.animationMask);
+            }
+
+            return stream.ToArray();
+        }
+    }
+
+    // --- Deserialization (Client) ---
+    public static NetworkGameState FromBytes(byte[] data)
+    {
+        var gameState = new NetworkGameState();
+        using (MemoryStream stream = new MemoryStream(data))
+        using (BinaryReader reader = new BinaryReader(stream))
+        {
+            // Read player states
+            byte playerCount = reader.ReadByte();
+            for (int i = 0; i < playerCount; i++)
+            {
+                var p = new PlayerState
+                {
+                    playerId = reader.ReadByte(),
+                    position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                    animationMask = reader.ReadByte(),
+                    moveX = reader.ReadSingle(),
+                    moveY = reader.ReadSingle(),
+                    weaponId = reader.ReadInt32()
+                };
+                gameState.players.Add(p);
+            }
+
+            // Read monster states
+            byte monsterCount = reader.ReadByte();
+            for (int i = 0; i < monsterCount; i++)
+            {
+                var m = new MonsterState
+                {
+                    monsterId = reader.ReadUInt16(),
+                    position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                    animationMask = reader.ReadByte()
+                };
+                gameState.monsters.Add(m);
+            }
+        }
+        return gameState;
+    }
+}
