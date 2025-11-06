@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -15,12 +16,14 @@ public class RoomUIManager : MonoBehaviour
 
     [Header("In-Room UI")]
     [SerializeField] private GameObject roomPanel;
-    [SerializeField] private TextMeshProUGUI roomNameText;
+    [SerializeField] private TextMeshProUGUI roomIDText;
+    [SerializeField] private Button copyRoomIDButton;
     [SerializeField] private TextMeshProUGUI chatText;
     [SerializeField] private TMP_InputField chatMessageInput;
     [SerializeField] private Button readyButton;
     [SerializeField] private Button startGameButton;
     [SerializeField] private Transform playerListContainer;
+    [SerializeField] private AssetReference playerListItemPrefab;
 
     private Dictionary<string, Action<string>> messageHandlers;
     private int player_count = 0;
@@ -36,15 +39,38 @@ public class RoomUIManager : MonoBehaviour
             Destroy(gameObject);
         }
         InitializeMessageHandlers();
-        GameManager.Instance.EnterRoom();
     }
 
     private void Start()
     {
-        if (LobbyUIManager.Instance != null && !string.IsNullOrEmpty(LobbyUIManager.Instance.LastRoomUpdateInfo))
+        if (GameManager.Instance != null)
         {
-            HandleUpdateRoomInfo(LobbyUIManager.Instance.LastRoomUpdateInfo);
-            LobbyUIManager.Instance.LastRoomUpdateInfo = null; // Consume the data
+            GameManager.Instance.EnterRoom();
+        }
+        else
+        {
+            Debug.LogError("GameManager.Instance is null in RoomUIManager.Start()");
+        }
+
+        if (NetworkManager.Instance != null)
+        {
+            if (NetworkManager.Instance.Mode == NetworkMode.Host)
+            {
+                NetworkPlayerManager.Instance?.SpawnLocalHostPlayer();
+                if (roomIDText != null) roomIDText.text = $"Lobby ID: {NetworkManager.Instance.CurrentLobbyID.ToString()}";
+                if (copyRoomIDButton != null) copyRoomIDButton.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (roomIDText != null) roomIDText.gameObject.SetActive(false);
+                if (copyRoomIDButton != null) copyRoomIDButton.gameObject.SetActive(false);
+
+                if (!string.IsNullOrEmpty(NetworkManager.Instance.LastRoomUpdateInfo))
+                {
+                    HandleUpdateRoomInfo(NetworkManager.Instance.LastRoomUpdateInfo);
+                    NetworkManager.Instance.LastRoomUpdateInfo = null; // Consume the data
+                }
+            }
         }
     }
 
@@ -52,12 +78,23 @@ public class RoomUIManager : MonoBehaviour
     {
         NetworkManager.OnMessageReceived += HandleServerMessage;
         NetworkManager.OnDisconnected += HandleDisconnected;
+        NetworkManager.OnLobbyIDUpdated += HandleLobbyIDUpdated;
     }
 
     private void OnDisable()
     {
         NetworkManager.OnMessageReceived -= HandleServerMessage;
         NetworkManager.OnDisconnected -= HandleDisconnected;
+        NetworkManager.OnLobbyIDUpdated -= HandleLobbyIDUpdated;
+    }
+
+    private void HandleLobbyIDUpdated(CSteamID lobbyID)
+    {
+        if (NetworkManager.Instance.Mode == NetworkMode.Host)
+        {
+            if (roomIDText != null) roomIDText.text = $"Lobby ID: {lobbyID.ToString()}";
+            if (copyRoomIDButton != null) copyRoomIDButton.gameObject.SetActive(true);
+        }
     }
 
     private void InitializeMessageHandlers()
@@ -106,7 +143,7 @@ public class RoomUIManager : MonoBehaviour
         var payload = JsonConvert.DeserializeObject<UpdateRoomInfoPayload>(json);
         player_count = payload.players.Count;
 
-        if (roomNameText != null) roomNameText.text = payload.room_name;
+        if (roomIDText != null) roomIDText.text = payload.room_name;
 
         bool amIHost = NetworkManager.Instance.PlayerId == payload.host_id;
         if (startGameButton != null) startGameButton.gameObject.SetActive(amIHost);
@@ -121,7 +158,7 @@ public class RoomUIManager : MonoBehaviour
 
             foreach (var playerInfo in payload.players)
             {
-                AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync("Assets/Network Scripts/PlayerListItem.prefab", playerListContainer);
+                AsyncOperationHandle<GameObject> handle = playerListItemPrefab.InstantiateAsync(playerListContainer);
                 GameObject playerItemGO = await handle.Task;
                 playerItemGO.GetComponent<PlayerListItem>().Setup(playerInfo, playerInfo.player_id == payload.host_id);
             }
@@ -196,6 +233,15 @@ public class RoomUIManager : MonoBehaviour
     {
         JObject request = new JObject { ["type"] = "leave_room" };
         NetworkManager.Instance.SendTCPMessage(request.ToString());
+    }
+
+    public void OnCopyLobbyIDButtonClicked()
+    {
+        if (NetworkManager.Instance.Mode == NetworkMode.Host && NetworkManager.Instance.CurrentLobbyID.IsValid())
+        {
+            GUIUtility.systemCopyBuffer = NetworkManager.Instance.CurrentLobbyID.ToString();
+            Debug.Log($"Lobby ID {NetworkManager.Instance.CurrentLobbyID} copied to clipboard.");
+        }
     }
 
     #endregion

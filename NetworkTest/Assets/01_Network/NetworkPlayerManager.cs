@@ -58,9 +58,9 @@ public class NetworkPlayerManager : MonoBehaviour
         }
     }
 
-    private void SpawnPlayer(string playerId, Vector3 position, string nickname)
+    private GameObject SpawnPlayer(string playerId, Vector3 position, string nickname)
     {
-        if (playerPrefab == null) return;
+        if (playerPrefab == null) return null;
 
         GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
         playerObject.name = $"Player_{playerId}";
@@ -93,6 +93,24 @@ public class NetworkPlayerManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(playerObject);
+        return playerObject;
+    }
+
+    public void SpawnLocalHostPlayer()
+    {
+        if (NetworkManager.Instance.Mode == NetworkMode.Host)
+        {
+            PlayerInfo hostInfo = NetworkManager.Instance.HostPlayerInfo;
+            if (hostInfo != null)
+            {
+                var player = SpawnPlayer(hostInfo.player_id, Vector3.zero, hostInfo.nickname);
+                FindAnyObjectByType<InGameUIManager>().SetInit(player.GetComponent<WeaponController>());
+            }
+            else
+            {
+                Debug.LogError("HostPlayerInfo is null in NetworkManager.");
+            }
+        }
     }
 
     #endregion
@@ -175,7 +193,7 @@ public class NetworkPlayerManager : MonoBehaviour
         GameObject monsterObject = Instantiate(monsterPrefab, position, Quaternion.identity);
         monsterObject.name = $"Monster_{monsterId}";
         monsters.Add(monsterId, monsterObject);
-        
+
         // TODO: Initialize monster-specific components if any
     }
 

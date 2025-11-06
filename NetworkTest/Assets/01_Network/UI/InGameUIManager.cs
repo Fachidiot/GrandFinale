@@ -10,10 +10,10 @@ public class InGameUIManager : MonoBehaviour
 
     private WeaponController weaponController;
 
-    void Awake()
+    void Start()
     {
         // ONLY AT TEST MODE
-        weaponController = FindAnyObjectByType<WeaponController>().GetComponent<WeaponController>();
+        // weaponController = FindAnyObjectByType<WeaponController>().GetComponent<WeaponController>();
     }
 
     public void SetInit(WeaponController weaponController)
