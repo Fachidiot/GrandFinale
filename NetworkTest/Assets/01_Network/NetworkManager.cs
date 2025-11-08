@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Steamworks;
+using UnityEngine.SceneManagement;
 
 public enum NetworkMode
 {
@@ -60,8 +61,13 @@ public class NetworkManager : MonoBehaviour
     public static event Action<string> OnConnectionFailed;
     public static event Action OnDisconnected;
     public static event Action<string> OnMessageReceived; // For TCP messages primarily
+    public static event Action<ClientConnection, string> OnClientMessageReceived; // Passes the client connection
+
 
     public string PlayerId { get; private set; }
+
+    [Header("Connection Settings")]
+    public string hostIpAddress = "127.0.0.1";
 
     // --- Steam Lobby Fields ---
     private CSteamID m_CurrentLobbyID;
@@ -103,6 +109,16 @@ public class NetworkManager : MonoBehaviour
         {
             Debug.LogWarning("NetworkManager: CustomSteamManager not initialized in Start. Steam Lobby callbacks will not be active.");
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        Disconnect();
+    }
+
+    private void OnDestroy()
+    {
+        Disconnect();
     }
 
     private void Update()
@@ -149,6 +165,9 @@ public class NetworkManager : MonoBehaviour
                 // Pass to the old system if no handler is found
                 OnMessageReceived?.Invoke(jsonMsg);
             }
+
+            // Also invoke the new event for systems that need the client source
+            OnClientMessageReceived?.Invoke(client, jsonMsg);
         }
         catch (Exception e)
         {
@@ -176,10 +195,24 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    private string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                return ip.ToString();
+            }
+        }
+        throw new Exception("No network adapters with an IPv4 address in the system!");
+    }
+
     #region Connection Management
 
     public void StartHost(int port = 8080)
     {
+        Debug.Log("[NetworkManager] StartHost called.");
         if (Mode != NetworkMode.None) return;
         Mode = NetworkMode.Host;
         PlayerId = "0"; // Host is player 0
@@ -198,7 +231,7 @@ public class NetworkManager : MonoBehaviour
             tcpListener.Start();
             hostTcpListenTask = Task.Run(() => ListenForConnections());
 
-            udpClient = new UdpClient(port);
+            udpClient = new UdpClient(port + 1);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
 
             IsConnected = true;
@@ -214,6 +247,13 @@ public class NetworkManager : MonoBehaviour
             {
                 Debug.LogWarning("NetworkManager: CustomSteamManager not initialized. Cannot create Steam Lobby.");
             }
+
+            // Ensure ServerRoomManager exists and register the host
+            if (ServerRoomManager.Instance == null)
+            {
+                gameObject.AddComponent<ServerRoomManager>();
+            }
+            ServerRoomManager.Instance.AddHostPlayer(HostPlayerInfo);
         }
         catch (Exception e)
         {
@@ -222,16 +262,16 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    public void ConnectAsClient(string ip = "127.0.0.1", int port = 8080)
+    public async Task<bool> ConnectAsClient(string ip = "127.0.0.1", int port = 8080)
     {
-        if (Mode != NetworkMode.None) return;
+        if (Mode != NetworkMode.None) return false;
         Mode = NetworkMode.Client;
-        Debug.Log("NetworkManager: Connecting as Client...");
+        Debug.LogWarning($"[NetworkManager] Attempting to connect to host at {ip}:{port}...");
 
         try
         {
             tcpClient = new TcpClient();
-            tcpClient.Connect(ip, port);
+            await tcpClient.ConnectAsync(ip, port);
             var stream = tcpClient.GetStream();
             writer = new StreamWriter(stream);
             reader = new StreamReader(stream);
@@ -239,17 +279,21 @@ public class NetworkManager : MonoBehaviour
 
             var localUdpPort = ((IPEndPoint)tcpClient.Client.LocalEndPoint).Port;
             udpClient = new UdpClient(localUdpPort);
-            serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port);
+            serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port + 1);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
 
             IsConnected = true;
+            Debug.Log("[NetworkManager] Connection successful!");
             OnConnected?.Invoke();
+            return true;
         }
         catch (Exception e)
         {
-            Debug.LogError("NetworkManager: Failed to connect as client: " + e.ToString());
+            Debug.LogError("--- CONNECTION FAILED ---");
+            Debug.LogException(e);
             OnConnectionFailed?.Invoke(e.Message);
             Disconnect();
+            return false;
         }
     }
 
@@ -331,6 +375,23 @@ public class NetworkManager : MonoBehaviour
 
         // Set lobby data (e.g., host's Steam ID, IP/Port if not using Steam P2P)
         SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_steam_id", SteamUser.GetSteamID().ToString());
+        try
+        {
+            string hostIP = GetLocalIPAddress();
+            bool success = SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_ip", hostIP);
+            if (success)
+            {
+                Debug.Log($"NetworkManager: Host IP '{hostIP}' set in lobby data.");
+            }
+            else
+            {
+                Debug.LogError("NetworkManager: Failed to set host_ip in lobby data!");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to get and set host IP address: {e.Message}");
+        }
 
         OnLobbyIDUpdated?.Invoke(m_CurrentLobbyID);
     }
@@ -341,10 +402,12 @@ public class NetworkManager : MonoBehaviour
         JoinSteamLobby(pCallback.m_steamIDLobby);
     }
 
-    private void OnLobbyEnter(LobbyEnter_t pCallback)
+    private async void OnLobbyEnter(LobbyEnter_t pCallback)
     {
+        // This log is critical for debugging client join issues.
+        Debug.Log($"[NetworkManager] OnLobbyEnter callback received. Lobby ID: {pCallback.m_ulSteamIDLobby}, Result: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
+
         CSteamID lobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
-        Debug.Log($"NetworkManager: OnLobbyEnter callback received. Lobby ID: {lobbyID}. Result: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
         if ((EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse != EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
         {
             Debug.LogError($"NetworkManager: Failed to enter lobby: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
@@ -353,24 +416,58 @@ public class NetworkManager : MonoBehaviour
         }
 
         m_CurrentLobbyID = lobbyID;
-        Debug.Log($"NetworkManager: Entered Lobby! ID: {m_CurrentLobbyID}");
 
-        // If client, connect to the host's game server
-        if (Mode == NetworkMode.Client)
+        // If we are not the host, we must be a client joining.
+        if (Mode != NetworkMode.Host)
         {
+            Mode = NetworkMode.Client;
+            Debug.Log("[NetworkManager] Mode set to Client.");
+
             string hostSteamIDStr = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_steam_id");
+            string hostIp = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_ip");
+            Debug.Log($"[NetworkManager] Retrieved host_ip from lobby: '{hostIp}'");
+
             if (!string.IsNullOrEmpty(hostSteamIDStr))
             {
-                // In a real game, you'd use Steam P2P or get the host's IP/Port from lobby data
-                // For now, we'll assume direct connect to localhost for testing
-                ConnectAsClient("127.0.0.1", 8080);
+                if (string.IsNullOrEmpty(hostIp))
+                {
+                    Debug.LogError("Host IP not found in lobby data. Cannot connect.");
+                    OnConnectionFailed?.Invoke("Host IP not found in lobby data.");
+                    return;
+                }
+
+                Debug.Log("[NetworkManager] OnLobbyEnter: About to call ConnectAsClient."); // New log
+                bool connected = false;
+                try
+                {
+                    connected = await ConnectAsClient(hostIp, 8080);
+                }
+                catch (Exception ex)
+                {
+                    // This catch should theoretically not be hit if ConnectAsClient's catch is active
+                    // But it's here to catch any unexpected behavior from the await.
+                    Debug.LogError("--- CRITICAL ERROR in OnLobbyEnter during ConnectAsClient CALL ---");
+                    Debug.LogException(ex);
+                    OnConnectionFailed?.Invoke(ex.Message);
+                    return;
+                }
+
+                if (!connected)
+                {
+                    Debug.LogError("[NetworkManager] Failed to connect to host after entering lobby. Not loading RoomScene. ConnectAsClient explicitly returned FALSE."); // Enhanced log
+                    return;
+                }
+                Debug.Log("[NetworkManager] OnLobbyEnter: ConnectAsClient returned TRUE. Proceeding to load RoomScene."); // New log
             }
             else
             {
-                Debug.LogError("NetworkManager: Host Steam ID not found in lobby data.");
+                Debug.LogError("Host Steam ID not found in lobby data.");
                 OnConnectionFailed?.Invoke("Host Steam ID not found in lobby data.");
+                return;
             }
         }
+
+        SceneManager.LoadScene("RoomScene");
     }
 
     public static event Action<CSteamID> OnLobbyIDUpdated;
@@ -469,6 +566,10 @@ public class NetworkManager : MonoBehaviour
         }
         else if (Mode == NetworkMode.Host)
         {
+            // Enqueue the message for local processing on the host
+            tcpMessageQueue.Enqueue((null, message));
+
+            // Broadcast to all connected clients
             foreach (var client in connectedClients)
             {
                 if (client.Writer != null)

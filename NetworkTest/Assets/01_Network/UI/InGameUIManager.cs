@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InGameUIManager : MonoBehaviour
 {
@@ -37,5 +38,10 @@ public class InGameUIManager : MonoBehaviour
             return;
 
         ammoCountText.text = weaponController.GETCurrentWeapon.CurrentAmmo.ToString();
+    }
+
+    public void OnLeaveRoomClicked()
+    {
+        SceneManager.LoadScene("ConnectionScene");
     }
 }

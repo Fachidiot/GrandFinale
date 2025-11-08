@@ -20,7 +20,7 @@ public class CustomSteamManager : MonoBehaviour
 
         try
         {
-            // Steamworks.NET의 SteamAPI.Init()을 호출합니다.
+            // Steamworks.NET의 SteamAPI.Init()을 호출
             // 이전에 발생했던 DllNotFoundException은 여기서 처리되지 않습니다.
             // 해당 예외는 Steamworks.NET의 SteamManager에서 처리됩니다.
             if (SteamAPI.Init())
@@ -48,7 +48,7 @@ public class CustomSteamManager : MonoBehaviour
     {
         if (IsSteamInitialized)
         {
-            Debug.Log("Running Steam Callbacks");
+            // Debug.Log("Running Steam Callbacks");
             SteamAPI.RunCallbacks();
         }
     }

@@ -83,6 +83,13 @@ public class NetworkPlayerManager : MonoBehaviour
         if (isMine)
         {
             if (nicknameUI != null) nicknameUI.gameObject.SetActive(false);
+
+            // Initialize InGameUIManager for the local player
+            var inGameUI = FindAnyObjectByType<InGameUIManager>();
+            if (inGameUI != null)
+            {
+                inGameUI.SetInit(playerObject.GetComponent<WeaponController>());
+            }
         }
         else
         {
@@ -94,23 +101,6 @@ public class NetworkPlayerManager : MonoBehaviour
 
         DontDestroyOnLoad(playerObject);
         return playerObject;
-    }
-
-    public void SpawnLocalHostPlayer()
-    {
-        if (NetworkManager.Instance.Mode == NetworkMode.Host)
-        {
-            PlayerInfo hostInfo = NetworkManager.Instance.HostPlayerInfo;
-            if (hostInfo != null)
-            {
-                var player = SpawnPlayer(hostInfo.player_id, Vector3.zero, hostInfo.nickname);
-                FindAnyObjectByType<InGameUIManager>().SetInit(player.GetComponent<WeaponController>());
-            }
-            else
-            {
-                Debug.LogError("HostPlayerInfo is null in NetworkManager.");
-            }
-        }
     }
 
     #endregion

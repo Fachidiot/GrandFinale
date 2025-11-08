@@ -4,6 +4,7 @@ using TMPro;
 using Michsky.MUIP;
 using System.Collections.Generic;
 using System;
+using System.Xml.Linq;
 
 public class OptionManager : MonoBehaviour
 {
@@ -304,8 +305,18 @@ public class OptionManager : MonoBehaviour
                         break;
                 }
                 inputKey = KeyInput.NONE;
+                OptionDataManager.Instance.SaveOptionData();
                 m_ShortcutModal.Close();
             }
+        }
+    }
+
+
+    public void OnLeaveRoomClicked()
+    {
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.Instance.Disconnect();
         }
     }
 }

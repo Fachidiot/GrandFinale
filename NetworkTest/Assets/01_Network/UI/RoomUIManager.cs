@@ -56,14 +56,35 @@ public class RoomUIManager : MonoBehaviour
         {
             if (NetworkManager.Instance.Mode == NetworkMode.Host)
             {
-                NetworkPlayerManager.Instance?.SpawnLocalHostPlayer();
                 if (roomIDText != null) roomIDText.text = $"Lobby ID: {NetworkManager.Instance.CurrentLobbyID.ToString()}";
                 if (copyRoomIDButton != null) copyRoomIDButton.gameObject.SetActive(true);
+
+                // Manually trigger player list update for the host
+                if (NetworkPlayerManager.Instance != null && NetworkManager.Instance.HostPlayerInfo != null)
+                {
+                    var hostPlayerInfo = NetworkManager.Instance.HostPlayerInfo;
+                    var playersArray = new JArray();
+                    playersArray.Add(JObject.FromObject(hostPlayerInfo));
+                    NetworkPlayerManager.Instance.UpdatePlayerList(playersArray);
+                }
             }
             else
             {
                 if (roomIDText != null) roomIDText.gameObject.SetActive(false);
                 if (copyRoomIDButton != null) copyRoomIDButton.gameObject.SetActive(false);
+
+                // When connecting as a client, send nickname to the host
+                if (NetworkManager.Instance.Mode == NetworkMode.Client)
+                {
+                    Debug.Log("[RoomUIManager-Client] Scene started. Sending set_nickname message...");
+                    string nickname = CustomSteamManager.Instance.PlayerName;
+                    JObject request = new JObject
+                    {
+                        ["type"] = "set_nickname",
+                        ["nickname"] = nickname
+                    };
+                    NetworkManager.Instance.SendTCPMessage(request.ToString());
+                }
 
                 if (!string.IsNullOrEmpty(NetworkManager.Instance.LastRoomUpdateInfo))
                 {
@@ -105,8 +126,7 @@ public class RoomUIManager : MonoBehaviour
             { "player_joined", HandlePlayerJoined },
             { "player_left", HandlePlayerLeft },
             { "chat_broadcast", HandleChatBroadcast },
-            { "game_start", HandleGameStart },
-            { "leave_room_success", HandleLeaveRoomSuccess }
+            { "game_start", HandleGameStart }
         };
     }
 
@@ -116,12 +136,6 @@ public class RoomUIManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        SceneManager.LoadScene("ConnectionScene");
-    }
-
-    private void HandleLeaveRoomSuccess(string json)
-    {
-        Debug.Log("Handle Leave Room");
         SceneManager.LoadScene("ConnectionScene");
     }
 
@@ -140,6 +154,7 @@ public class RoomUIManager : MonoBehaviour
 
     private async void HandleUpdateRoomInfo(string json)
     {
+        Debug.Log($"[RoomUIManager] Received update_room_info: {json}");
         var payload = JsonConvert.DeserializeObject<UpdateRoomInfoPayload>(json);
         player_count = payload.players.Count;
 
@@ -148,6 +163,12 @@ public class RoomUIManager : MonoBehaviour
         bool amIHost = NetworkManager.Instance.PlayerId == payload.host_id;
         if (startGameButton != null) startGameButton.gameObject.SetActive(amIHost);
         if (readyButton != null) readyButton.gameObject.SetActive(!amIHost);
+
+        // Update the player list in the NetworkPlayerManager to spawn player prefabs
+        if (NetworkPlayerManager.Instance != null)
+        {
+            NetworkPlayerManager.Instance.UpdatePlayerList(JArray.FromObject(payload.players));
+        }
 
         if (playerListContainer != null)
         {
@@ -227,21 +248,6 @@ public class RoomUIManager : MonoBehaviour
 
         JObject request = new JObject { ["type"] = "start_game" };
         NetworkManager.Instance.SendTCPMessage(request.ToString());
-    }
-
-    public void OnLeaveRoomClicked()
-    {
-        JObject request = new JObject { ["type"] = "leave_room" };
-        NetworkManager.Instance.SendTCPMessage(request.ToString());
-    }
-
-    public void OnCopyLobbyIDButtonClicked()
-    {
-        if (NetworkManager.Instance.Mode == NetworkMode.Host && NetworkManager.Instance.CurrentLobbyID.IsValid())
-        {
-            GUIUtility.systemCopyBuffer = NetworkManager.Instance.CurrentLobbyID.ToString();
-            Debug.Log($"Lobby ID {NetworkManager.Instance.CurrentLobbyID} copied to clipboard.");
-        }
     }
 
     #endregion

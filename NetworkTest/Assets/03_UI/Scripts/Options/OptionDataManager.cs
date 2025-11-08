@@ -16,7 +16,7 @@ public class OptionDataManager : MonoBehaviour
 
     private SystemLanguage m_Language;
     private OptionManager m_OptionManager;
-    private List<Resolution> resolutions = new List<Resolution>();
+    private static List<Resolution> resolutions = new List<Resolution>();
     public List<Resolution> Resolutions { get { return resolutions; } }
     // private List<RefreshRate> refreshRates = new List<RefreshRate>();
 
@@ -25,9 +25,9 @@ public class OptionDataManager : MonoBehaviour
         if (Instance == null)
         {
             m_Instance = this;
-            // DontDestroyOnLoad(this);
+            DontDestroyOnLoad(transform.parent);
 
-            m_OptionManager = GetComponent<OptionManager>();
+            m_OptionManager = FindObjectOfType<OptionManager>();
 
             // 옵션 불러오기
             LoadOptionData();
@@ -35,19 +35,24 @@ public class OptionDataManager : MonoBehaviour
             // 유저 모니터 해상도 정보 가져오기 (게임실행시 모니터 변경이 있을경우를 대비)
             Resolution[] userResolutions = Screen.resolutions;
 
-            // build시 중복되는 해상도가 만들어지는 오류 <- 주사율때문.
-            string prevItem = "";
-            for (int i = 0; i < userResolutions.Length; ++i)
+            List<string> stringsresolutions = new List<string>();
+            string newRes;
+            foreach (Resolution res in userResolutions)
             {
-                if (prevItem != userResolutions[i].width + "x" + userResolutions[i].height)
+                newRes = res.width.ToString() + " x " + res.height.ToString();
+                if (!stringsresolutions.Contains(newRes))
                 {
-                    resolutions.Add(userResolutions[i]);
-                    prevItem = userResolutions[i].width + "x" + userResolutions[i].height;
+                    stringsresolutions.Add(newRes);
+                    resolutions.Add(res);
                 }
-                // 해상도 초기 설정
-                if (Screen.currentResolution.width.Equals(resolutions[i].width) && Screen.currentResolution.height.Equals(resolutions[i].height))
-                    OptionData.m_ScreenResolution = i;
             }
+            // for (int i = 0; i < userResolutions.Length; ++i)
+            // {
+            //     resolutions.Add(userResolutions[i]);
+            //     // 해상도 초기 설정
+            //     if (Screen.currentResolution.width.Equals(resolutions[i].width) && Screen.currentResolution.height.Equals(resolutions[i].height))
+            //         OptionData.m_ScreenResolution = i;
+            // }
             SaveOptionData();
 
             // 언어 확인 후 UI언어들 초기화

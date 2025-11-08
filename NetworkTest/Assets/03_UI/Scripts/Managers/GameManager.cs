@@ -76,6 +76,7 @@ public class GameManager : MonoBehaviour
 
     public void ExitGame()
     {
+        Debug.Log("Exit Game");
         Application.Quit();
     }
 
@@ -89,13 +90,13 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Game;
     }
 
-    public void EndGame()
-    {
-        Time.timeScale = 1;
-        gameState = GameState.Title;
-        AudioManager.Instance.PlayLobbyMusic();
-        SceneManager.LoadScene(titleScene);
-    }
+    // public void EndGame()
+    // {
+    //     Time.timeScale = 1;
+    //     gameState = GameState.Title;
+    //     AudioManager.Instance.PlayLobbyMusic();
+    //     SceneManager.LoadScene(titleScene);
+    // }
 
     public void PlayerDeath()
     {

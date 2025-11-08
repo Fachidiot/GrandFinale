@@ -36,6 +36,7 @@ public class FindRoomsResponse
 [Serializable]
 public class UpdateRoomInfoPayload
 {
+    public string type; // Added to match the expected message format
     public string room_name;
     public string host_id;
     public List<PlayerInfo> players;
