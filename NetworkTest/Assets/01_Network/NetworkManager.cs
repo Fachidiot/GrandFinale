@@ -420,9 +420,6 @@ public class NetworkManager : MonoBehaviour
         // If we are not the host, we must be a client joining.
         if (Mode != NetworkMode.Host)
         {
-            Mode = NetworkMode.Client;
-            Debug.Log("[NetworkManager] Mode set to Client.");
-
             string hostSteamIDStr = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_steam_id");
             string hostIp = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_ip");
             Debug.Log($"[NetworkManager] Retrieved host_ip from lobby: '{hostIp}'");

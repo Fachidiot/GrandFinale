@@ -99,4 +99,9 @@ public class MainMenuUIManager : MonoBehaviour
     }
 
     #endregion
+
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }

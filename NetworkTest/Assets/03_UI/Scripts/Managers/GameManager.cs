@@ -74,12 +74,6 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("OfflineScene");
     }
 
-    public void ExitGame()
-    {
-        Debug.Log("Exit Game");
-        Application.Quit();
-    }
-
     public void PauseGame(bool _value)
     {
         Time.timeScale = _value ? 0 : 1;
