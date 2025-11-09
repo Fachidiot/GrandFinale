@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System;
 using System.Collections.Generic;
+using System.Linq; // Added for FirstOrDefault
 using Newtonsoft.Json.Linq;
 using Steamworks;
 using UnityEngine.SceneManagement;
