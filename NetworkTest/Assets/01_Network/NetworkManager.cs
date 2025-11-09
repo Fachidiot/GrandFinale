@@ -154,6 +154,8 @@ public class NetworkManager : MonoBehaviour
             Buffer.BlockCopy(gameStateBytes, 0, message, 1, gameStateBytes.Length);
 
             BroadcastP2PMessage(message, EP2PSend.k_EP2PSendUnreliable);
+
+            if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(authoritativeState);
         }
         // Client Logic
         else
