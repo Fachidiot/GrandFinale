@@ -272,7 +272,7 @@ public class NetworkManager : MonoBehaviour
             tcpListeningTask = Task.Run(() => ListenForTcpMessages());
 
             var localUdpPort = ((IPEndPoint)tcpClient.Client.LocalEndPoint).Port;
-            udpClient = new UdpClient(localUdpPort);
+            udpClient = new UdpClient(0); // Use 0 to let the OS pick an available port
             serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port + 1);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
 

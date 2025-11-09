@@ -3,77 +3,26 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine.SceneManagement;
 
 public class RoomUIManager : MonoBehaviour
 {
-    public static RoomUIManager Instance { get; private set; }
-
     [Header("UI References")]
     [SerializeField] private Transform playerListContent;
     [SerializeField] private GameObject playerListItemPrefab;
     [SerializeField] private TextMeshProUGUI roomNameText;
 
-    private bool nicknameSent = false;
-    private bool isDuplicate = false;
-
-    // --- New fields for delayed UI update ---
-    private JObject pendingUpdateData = null;
-    private bool isSceneReady = false;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Debug.LogWarning($"[RoomUIManager] Another instance ({Instance.gameObject.GetInstanceID()}) already exists. Destroying this one ({gameObject.GetInstanceID()}).");
-            isDuplicate = true;
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-    }
-
     void Start()
     {
-        if (isDuplicate) return;
-
-        if (nicknameSent)
-        {
-            Debug.LogWarning("[RoomUIManager] Start logic has already run on a previous instance. Skipping for this instance.");
-            isSceneReady = true; // Still mark as ready
-            return;
-        }
-
+        Debug.Log($"[RoomUIManager] Start called on instance ID: {gameObject.GetInstanceID()}.");
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
-            Debug.Log("[RoomUIManager] Host has entered the room. Registering host player.");
-            if (ServerRoomManager.Instance != null)
-            {
-                ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.HostPlayerInfo);
-            }
-            else
-            {
-                Debug.LogError("[RoomUIManager] ServerRoomManager.Instance is null! Cannot register host.");
-            }
-            nicknameSent = true;
+            Debug.Log("[RoomUIManager] Host instance is registering itself.");
+            ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.HostPlayerInfo);
         }
         else if (NetworkManager.Instance.Mode == NetworkMode.Client)
         {
-            Debug.Log("[RoomUIManager] Client has entered the room. Sending nickname.");
+            Debug.Log("[RoomUIManager] Client instance is sending nickname.");
             SendNickname();
-            nicknameSent = true;
-        }
-
-        isSceneReady = true; // Signal that the Start method has completed and the scene is ready for UI updates.
-    }
-
-    void Update()
-    {
-        // If the scene is ready and there is pending data to process, process it now.
-        if (isSceneReady && pendingUpdateData != null)
-        {
-            HandleRoomUpdate(pendingUpdateData);
-            pendingUpdateData = null; // Clear the data after processing
         }
     }
 
@@ -89,19 +38,14 @@ public class RoomUIManager : MonoBehaviour
 
     private void SendNickname()
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Client) return;
-
         string nickname = CustomSteamManager.Instance.PlayerName;
-
         JObject msg = new JObject
         {
             { "type", "set_nickname" },
             { "nickname", nickname }
         };
-
         string jsonMessage = msg.ToString(Formatting.None);
         NetworkManager.Instance.SendTCPMessage(jsonMessage);
-        Debug.Log($"Sent nickname message: {jsonMessage}");
     }
 
     private void HandleServerMessage(string jsonMsg)
@@ -113,8 +57,7 @@ public class RoomUIManager : MonoBehaviour
 
             if (type == "update_room_info")
             {
-                // Instead of processing immediately, store the data.
-                pendingUpdateData = response;
+                HandleRoomUpdate(response);
             }
         }
         catch (JsonReaderException e)
@@ -125,6 +68,14 @@ public class RoomUIManager : MonoBehaviour
 
     private void HandleRoomUpdate(JObject data)
     {
+        Debug.Log($"[RoomUIManager] HandleRoomUpdate called on instance ID: {gameObject.GetInstanceID()}.");
+
+        if (playerListContent == null || roomNameText == null || playerListItemPrefab == null)
+        {
+            Debug.LogError("[RoomUIManager] UI references are not set! Cannot update UI.");
+            return;
+        }
+        
         JArray players = data["players"] as JArray;
 
         if (NetworkPlayerManager.Instance != null && players != null)
@@ -132,35 +83,21 @@ public class RoomUIManager : MonoBehaviour
             NetworkPlayerManager.Instance.UpdatePlayerList(players);
         }
 
-        if (playerListContent != null)
+        foreach (Transform child in playerListContent)
         {
-            foreach (Transform child in playerListContent)
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(child.gameObject);
         }
 
         string roomName = data["room_name"]?.ToString();
-
-        if (roomNameText != null)
-            roomNameText.text = roomName;
+        roomNameText.text = roomName;
 
         string hostId = data["host_id"]?.ToString();
-
-        if (players != null && playerListContent != null)
+        if (players != null)
         {
             foreach (JObject playerInfoJson in players)
             {
                 PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-                if (playerListItemPrefab == null)
-                {
-                    continue;
-                }
                 GameObject itemGO = Instantiate(playerListItemPrefab, playerListContent);
-                if (itemGO == null)
-                {
-                    Debug.LogError("[RoomUIManager] Instantiate returned NULL!");
-                }
                 PlayerListItem item = itemGO.GetComponent<PlayerListItem>();
                 if (item != null)
                 {
