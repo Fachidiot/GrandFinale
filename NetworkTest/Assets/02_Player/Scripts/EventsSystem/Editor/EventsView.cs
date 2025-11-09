@@ -82,7 +82,7 @@ public class EventsView : EventsController
 
         if (_selectEvent == null)
         {
-            EditorGUILayout.HelpBox("Select event", MessageType.None);
+            // EditorGUILayout.HelpBox("Select event", MessageType.None); // Commented out to fix compile error
         }
     }
 

@@ -1,177 +1,154 @@
-
 using UnityEngine;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Steamworks;
 
 public class ServerRoomManager : MonoBehaviour
 {
     public static ServerRoomManager Instance { get; private set; }
 
-    private List<PlayerInfo> playersInRoom = new List<PlayerInfo>();
-    private Dictionary<string, System.Action<ClientConnection, JObject>> messageHandlers;
-    private byte nextPlayerByteId = 1; // Start assigning from 1, as Host is 0
+    private Dictionary<CSteamID, PlayerInfo> playersInRoom = new Dictionary<CSteamID, PlayerInfo>();
+    private Dictionary<CSteamID, byte> steamIdToByteId = new Dictionary<CSteamID, byte>();
+    private Dictionary<byte, CSteamID> byteIdToSteamId = new Dictionary<byte, CSteamID>();
+    private byte nextPlayerId = 0;
 
     private void Awake()
     {
-        // Debug.Log("[ServerRoomManager] Awake called.");
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            InitializeMessageHandlers();
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
+
+        NetworkManager.OnJsonMessageReceived += HandleClientJsonMessage;
     }
 
-    private void OnEnable()
+    private void OnDestroy()
     {
-        NetworkManager.OnClientMessageReceived += HandleClientMessage;
-        // We also need to handle client disconnections to remove them from the list
+        NetworkManager.OnJsonMessageReceived -= HandleClientJsonMessage;
     }
 
-    private void OnDisable()
-    {
-        NetworkManager.OnClientMessageReceived -= HandleClientMessage;
-    }
-
-    private void InitializeMessageHandlers()
-    {
-        messageHandlers = new Dictionary<string, System.Action<ClientConnection, JObject>>
-        {
-            { "set_nickname", HandleSetNickname }
-        };
-    }
-
-    private void HandleClientMessage(ClientConnection client, string jsonMsg)
+    private void HandleClientJsonMessage(CSteamID sender, string jsonMsg)
     {
         JObject msg = JObject.Parse(jsonMsg);
         string type = msg["type"]?.ToString();
 
-        if (type != null && messageHandlers.TryGetValue(type, out var handler))
+        if (type == "set_nickname")
         {
-            handler(client, msg);
+            HandleSetNickname(sender, msg);
         }
     }
-    
-    private void HandleSetNickname(ClientConnection client, JObject data)
+
+    private void HandleSetNickname(CSteamID sender, JObject data)
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host || client == null) return;
-
-        Debug.Log("[ServerRoomManager] Received set_nickname message.");
-
         string nickname = data["nickname"]?.ToString();
-        
-        // Check if this client already has an ID. If so, just broadcast.
-        // This can happen if the client's RoomUIManager is recreated.
-        var existingPlayer = playersInRoom.FirstOrDefault(p => p.player_id == client.PlayerId);
-        if (existingPlayer != null)
+        if (string.IsNullOrEmpty(nickname)) return;
+
+        if (!playersInRoom.ContainsKey(sender))
         {
-            Debug.LogWarning($"[ServerRoomManager] Player with ID {client.PlayerId} already exists. Re-broadcasting state.");
-            BroadcastRoomUpdate();
-            return;
+            AddPlayer(sender, nickname);
         }
+    }
 
-        // Assign a new sequential byte ID
-        string newPlayerId = (nextPlayerByteId++).ToString();
+    public void AddHostPlayer(CSteamID hostSteamId, string nickname)
+    {
+        if (playersInRoom.ContainsKey(hostSteamId)) return;
+        AddPlayer(hostSteamId, nickname);
+    }
 
-        Debug.Log($"[ServerRoomManager] New player '{nickname}' joined with ID {newPlayerId}");
+    private void AddPlayer(CSteamID steamId, string nickname)
+    {
+        byte newId = nextPlayerId++;
+        steamIdToByteId[steamId] = newId;
+        byteIdToSteamId[newId] = steamId;
 
-        // Store the ID in the connection object for future reference
-        client.PlayerId = newPlayerId;
-
-        // Send the new client their assigned ID
-        JObject idMessage = new JObject
+        var playerInfo = new PlayerInfo
         {
-            { "type", "assign_id" },
-            { "player_id", newPlayerId }
-        };
-        NetworkManager.Instance.SendTCPMessageToClient(client, idMessage.ToString(Formatting.None));
-
-        PlayerInfo newPlayer = new PlayerInfo
-        {
-            player_id = newPlayerId,
+            steam_id = steamId.ToString(),
+            player_id = newId.ToString(),
             nickname = nickname,
             is_ready = false
         };
-        playersInRoom.Add(newPlayer);
+        playersInRoom[steamId] = playerInfo;
 
-        // After adding the new player, broadcast the updated room info to everyone.
+        Debug.Log($"[ServerRoomManager] Player {nickname} ({steamId}) joined as ID {newId}");
+
         BroadcastRoomUpdate();
     }
 
-            public void AddHostPlayer(PlayerInfo hostInfo)
-            {
-                // If player is not in the list, add them.
-                if (!playersInRoom.Any(p => p.player_id == hostInfo.player_id))
-                {
-                    playersInRoom.Add(hostInfo);
-                    Debug.Log($"Host '{hostInfo.nickname}' added to room.");
-                }
-        
-                // Always broadcast the current state when this is called.
-                // This ensures that if a new UI manager requests the state, it gets it.
-                BroadcastRoomUpdate();
-            }
-    public void RemovePlayer(string playerId)
+    public void RemovePlayer(CSteamID steamId)
     {
-        if (string.IsNullOrEmpty(playerId)) return;
-
-        PlayerInfo playerToRemove = playersInRoom.FirstOrDefault(p => p.player_id == playerId);
-        if (playerToRemove != null)
+        if (playersInRoom.Remove(steamId) && steamIdToByteId.TryGetValue(steamId, out byte id))
         {
-            playersInRoom.Remove(playerToRemove);
-            Debug.Log($"[ServerRoomManager] Player {playerId} removed from room.");
+            steamIdToByteId.Remove(steamId);
+            byteIdToSteamId.Remove(id);
+            Debug.Log($"[ServerRoomManager] Player {steamId} removed.");
             BroadcastRoomUpdate();
         }
+    }
+
+    public void BroadcastRoomUpdate()
+    {
+        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
+
+        JObject roomInfo = new JObject
+        {
+            { "type", "update_room_info" },
+            { "room_name", "Test Room" },
+            { "host_id", steamIdToByteId[NetworkManager.Instance.selfSteamId].ToString() }
+        };
+
+        JArray playersArray = new JArray();
+        foreach (var entry in playersInRoom)
+        {
+            playersArray.Add(JObject.FromObject(entry.Value));
+        }
+        roomInfo["players"] = playersArray;
+
+        NetworkManager.Instance.BroadcastJsonMessage(roomInfo);
+    }
+    
+    public string GetPlayerId(CSteamID steamId)
+    {
+        if (steamIdToByteId.TryGetValue(steamId, out byte id))
+        {
+            return id.ToString();
+        }
+        return "255";
+    }
+
+    public string GetSteamId(byte byteId)
+    {
+        if (byteIdToSteamId.TryGetValue(byteId, out CSteamID steamId))
+        {
+            return steamId.ToString();
+        }
+        return null;
     }
 
     public void ClearRoom()
     {
         playersInRoom.Clear();
-        Debug.Log("[ServerRoomManager] Room player list cleared.");
-    }
-
-    private void BroadcastRoomUpdate()
-    {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
-
-        // Debug.Log("[ServerRoomManager] Broadcasting room update...");
-
-        UpdateRoomInfoPayload payload = new UpdateRoomInfoPayload
-        {
-            type = "update_room_info",
-            room_name = "My Game Room", // Example name
-            host_id = "0", // Host is always 0
-            players = playersInRoom
-        };
-
-        string jsonPayload = JsonConvert.SerializeObject(payload);
-        // Debug.Log($"[ServerRoomManager] Broadcast content: {jsonPayload}");
-        NetworkManager.Instance.SendTCPMessage(jsonPayload);
+        steamIdToByteId.Clear();
+        byteIdToSteamId.Clear();
+        nextPlayerId = 0;
     }
 
     public void OnInviteFriendsButtonClicked()
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host)
+        if (NetworkManager.Instance.CurrentLobbyID.IsValid())
         {
-            Debug.LogWarning("[ServerRoomManager] Only the host can invite friends.");
-            return;
+            SteamFriends.ActivateGameOverlayInviteDialog(NetworkManager.Instance.CurrentLobbyID);
         }
-
-        CSteamID lobbyID = NetworkManager.Instance.CurrentLobbyID;
-        if (!lobbyID.IsValid())
+        else
         {
-            Debug.LogError("[ServerRoomManager] Cannot invite friends: Invalid Lobby ID.");
-            return;
+            Debug.LogWarning("Cannot invite friends, not in a valid lobby.");
         }
-
-        Debug.Log("[ServerRoomManager] Opening Steam invite dialog...");
-        SteamFriends.ActivateGameOverlayInviteDialog(lobbyID);
     }
 }

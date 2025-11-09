@@ -1,7 +1,4 @@
 using UnityEngine;
-using System.Net;
-using System.Net.Sockets;
-using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System;
@@ -10,21 +7,13 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using Steamworks;
 using UnityEngine.SceneManagement;
+using System.Text;
 
 public enum NetworkMode
 {
     None,
     Client,
     Host
-}
-
-public class ClientConnection
-{
-    public TcpClient TcpClient { get; set; }
-    public StreamWriter Writer { get; set; }
-    public StreamReader Reader { get; set; }
-    public IPEndPoint UdpEndPoint { get; set; }
-    public string PlayerId { get; set; }
 }
 
 public class NetworkManager : MonoBehaviour
@@ -34,42 +23,28 @@ public class NetworkManager : MonoBehaviour
     public NetworkMode Mode { get; private set; } = NetworkMode.None;
     public bool IsConnected { get; private set; }
 
-    private readonly ConcurrentQueue<(ClientConnection, string)> tcpMessageQueue = new ConcurrentQueue<(ClientConnection, string)>();
-    private readonly ConcurrentQueue<byte[]> udpDataQueue = new ConcurrentQueue<byte[]>();
+    private readonly ConcurrentQueue<(CSteamID, byte[])> p2pPacketQueue = new ConcurrentQueue<(CSteamID, byte[])>();
     private readonly ConcurrentDictionary<byte, PlayerState> receivedPlayerStates = new ConcurrentDictionary<byte, PlayerState>();
 
-    private TcpClient tcpClient;
-    private StreamWriter writer;
-    private StreamReader reader;
-    private Task tcpListeningTask;
-    private IPEndPoint serverUdpEndPoint;
-
-    private TcpListener tcpListener;
-    private List<ClientConnection> connectedClients = new List<ClientConnection>();
-    private Task hostTcpListenTask;
-
-    private UdpClient udpClient;
-    private Task udpListeningTask;
+    public string PlayerId { get; private set; }
+    public CSteamID selfSteamId { get; private set; }
 
     public static event Action OnConnected;
     public static event Action<string> OnConnectionFailed;
     public static event Action OnDisconnected;
-    public static event Action<string> OnMessageReceived;
-    public static event Action<ClientConnection, string> OnClientMessageReceived;
-
-    public string PlayerId { get; private set; }
-
-    [Header("Connection Settings")]
-    public string hostIpAddress = "127.0.0.1";
+    public static event Action<CSteamID, string> OnJsonMessageReceived;
 
     private CSteamID m_CurrentLobbyID;
+    private List<CSteamID> lobbyMembers = new List<CSteamID>();
+    private CSteamID lobbyHostID;
+
     private Callback<LobbyCreated_t> m_LobbyCreated;
     private Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
     private Callback<LobbyEnter_t> m_LobbyEnter;
+    private Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
+    private Callback<P2PSessionRequest_t> m_P2PSessionRequest;
 
     public CSteamID CurrentLobbyID { get { return m_CurrentLobbyID; } }
-
-    private Dictionary<string, Action<ClientConnection, JObject>> messageHandlers;
 
     private void Awake()
     {
@@ -82,16 +57,20 @@ public class NetworkManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        InitializeMessageHandlers();
     }
 
     private void Start()
     {
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
         {
+            selfSteamId = SteamUser.GetSteamID();
+            PlayerId = selfSteamId.ToString();
+
             m_LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
+            m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+            m_P2PSessionRequest = Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
         }
     }
 
@@ -107,85 +86,65 @@ public class NetworkManager : MonoBehaviour
 
     private void Update()
     {
-        // Process TCP messages on the main thread
-        while (tcpMessageQueue.TryDequeue(out var item))
-        {
-            (ClientConnection client, string jsonMsg) = item;
-            if (jsonMsg == "__DISCONNECTED__")
-            {
-                Disconnect();
-                continue;
-            }
-            HandleServerMessage(client, jsonMsg);
-        }
+        ListenForP2PPackets();
 
-        // Process UDP messages on the main thread for clients
-        if (Mode == NetworkMode.Client)
+        while (p2pPacketQueue.TryDequeue(out var item))
         {
-            while (udpDataQueue.TryDequeue(out byte[] data))
-            {
-                var gameState = NetworkGameState.FromBytes(data);
-                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
-            }
+            (CSteamID sender, byte[] data) = item;
+            HandleP2PPacket(sender, data);
         }
     }
 
     private void FixedUpdate()
     {
-        if (NetworkPlayerManager.Instance == null || NetworkPlayerManager.Instance.Players.Count == 0) return;
+        if (!IsConnected || NetworkPlayerManager.Instance == null || ServerRoomManager.Instance == null) return;
+
+        if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
+        PlayerState myState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
 
         if (Mode == NetworkMode.Host)
         {
-            var authoritativeState = new NetworkGameState();
-            foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
+            string myByteIdStr = ServerRoomManager.Instance.GetPlayerId(selfSteamId);
+            if (byte.TryParse(myByteIdStr, out byte myByteId))
             {
-                string playerIdStr = playerEntry.Key;
-                GameObject playerGo = playerEntry.Value;
-                if (!byte.TryParse(playerIdStr, out byte playerId)) continue;
-
-                PlayerState playerState;
-                if (playerId == 0) // Host reads its own state directly
-                {
-                    playerState = GetPlayerStateFromGameObject(playerGo, 0);
-                }
-                else // For clients, use the last state they sent us
-                {
-                    if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
-                    {
-                        playerState = new PlayerState { playerId = playerId, position = playerGo.transform.position, rotation = playerGo.transform.rotation };
-                    }
-                }
-                authoritativeState.players.Add(playerState);
+                receivedPlayerStates[myByteId] = myState;
             }
 
+            var authoritativeState = new NetworkGameState();
+            foreach (var playerState in receivedPlayerStates.Values)
+            {
+                authoritativeState.players.Add(playerState);
+            }
+            
             byte[] gameStateBytes = authoritativeState.ToByteArray();
-            SendUDPMessage(gameStateBytes);
+            byte[] message = new byte[gameStateBytes.Length + 1];
+            message[0] = (byte)MessageType.GameState;
+            Buffer.BlockCopy(gameStateBytes, 0, message, 1, gameStateBytes.Length);
+
+            BroadcastP2PMessage(message, EP2PSend.k_EP2PSendUnreliable);
         }
         else if (Mode == NetworkMode.Client)
         {
-            if (string.IsNullOrEmpty(PlayerId)) return;
-            if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
+            byte[] stateBytes = myState.ToByteArray();
+            byte[] message = new byte[stateBytes.Length + 1];
+            message[0] = (byte)MessageType.PlayerState;
+            Buffer.BlockCopy(stateBytes, 0, message, 1, stateBytes.Length);
 
-            PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, byte.Parse(PlayerId));
-
-            byte[] stateBytes = playerState.ToByteArray();
-            byte[] messageBytes = new byte[stateBytes.Length + 1];
-            messageBytes[0] = 1; // Message Type 1: Client State Update
-            Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
-            
-            SendUDPMessage(messageBytes);
+            SendP2PMessage(lobbyHostID, message, EP2PSend.k_EP2PSendUnreliable);
         }
     }
 
-    private PlayerState GetPlayerStateFromGameObject(GameObject playerGo, byte playerId)
+    private PlayerState GetPlayerStateFromGameObject(GameObject playerGo, CSteamID steamId)
     {
         var animSync = playerGo.GetComponentInChildren<NetworkAnimatorSync>();
         var weaponCtrl = playerGo.GetComponentInChildren<WeaponController>();
         var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
         
+        string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
+
         return new PlayerState
         {
-            playerId = playerId,
+            playerId = byte.TryParse(byteIdStr, out byte id) ? id : (byte)255,
             position = playerGo.transform.position,
             rotation = playerGo.transform.rotation,
             cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
@@ -196,172 +155,28 @@ public class NetworkManager : MonoBehaviour
         };
     }
 
-    private void InitializeMessageHandlers()
-    {
-        messageHandlers = new Dictionary<string, Action<ClientConnection, JObject>> 
-        {
-            { "player_action", HandlePlayerAction },
-            { "assign_id", HandleAssignId }
-        };
-    }
-
-    private void HandleAssignId(ClientConnection client, JObject data)
-    {
-        if (Mode != NetworkMode.Client) return;
-        string assignedId = data["player_id"]?.ToString();
-        if (!string.IsNullOrEmpty(assignedId))
-        {
-            PlayerId = assignedId;
-        }
-    }
-
-    private void HandleServerMessage(ClientConnection client, string jsonMsg)
-    {
-        try
-        {
-            JObject response = JObject.Parse(jsonMsg);
-            string type = response["type"]?.ToString();
-            if (messageHandlers.TryGetValue(type, out var handler))
-            {
-                handler(client, response);
-            }
-            else
-            {
-                OnMessageReceived?.Invoke(jsonMsg);
-            }
-            OnClientMessageReceived?.Invoke(client, jsonMsg);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error handling server message: {e.Message}\nMessage: {jsonMsg}");
-        }
-    }
-
-    private void HandlePlayerAction(ClientConnection client, JObject data)
-    {
-        NetworkPlayerManager.Instance?.RoutePlayerEvent(data);
-        if (Mode == NetworkMode.Host)
-        {
-            string message = data.ToString(Newtonsoft.Json.Formatting.None);
-            foreach (var otherClient in connectedClients)
-            {
-                if (otherClient != client)
-                {
-                    otherClient.Writer.WriteLine(message);
-                    otherClient.Writer.Flush();
-                }
-            }
-        }
-    }
-
-    private string GetLocalIPAddress()
-    {
-        var host = Dns.GetHostEntry(Dns.GetHostName());
-        foreach (var ip in host.AddressList)
-        {
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
-                return ip.ToString();
-            }
-        }
-        throw new Exception("No network adapters with an IPv4 address in the system!");
-    }
-
-    #region Connection Management
-
-    public PlayerInfo HostPlayerInfo { get; private set; }
-
-    public void StartHost(int port = 8080)
-    {
-        if (Mode != NetworkMode.None) return;
-        Mode = NetworkMode.Host;
-        PlayerId = "0";
-        HostPlayerInfo = new PlayerInfo
-        {
-            player_id = PlayerId,
-            nickname = CustomSteamManager.Instance.PlayerName,
-            is_ready = false
-        };
-        try
-        {
-            tcpListener = new TcpListener(IPAddress.Any, port);
-            tcpListener.Start();
-            hostTcpListenTask = Task.Run(() => ListenForConnections());
-            udpClient = new UdpClient(port + 1);
-            udpListeningTask = Task.Run(() => ListenForUdpMessages());
-            IsConnected = true;
-            OnConnected?.Invoke();
-            if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
-            {
-                SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
-            }
-            if (ServerRoomManager.Instance == null)
-            {
-                gameObject.AddComponent<ServerRoomManager>();
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("[NetworkManager] Failed to start host: " + e.Message);
-            Disconnect();
-        }
-    }
-
-    public async Task<bool> ConnectAsClient(string ip = "127.0.0.1", int port = 8080)
-    {
-        if (Mode != NetworkMode.None) return false;
-        Mode = NetworkMode.Client;
-        try
-        {
-            tcpClient = new TcpClient();
-            await tcpClient.ConnectAsync(ip, port);
-            var stream = tcpClient.GetStream();
-            writer = new StreamWriter(stream);
-            reader = new StreamReader(stream);
-            tcpListeningTask = Task.Run(() => ListenForTcpMessages());
-            udpClient = new UdpClient(0);
-            serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port + 1);
-            udpListeningTask = Task.Run(() => ListenForUdpMessages());
-            byte[] handshake = new byte[1] { 0 }; // Message Type 0: Handshake
-            udpClient.Send(handshake, handshake.Length, serverUdpEndPoint);
-            IsConnected = true;
-            OnConnected?.Invoke();
-            return true;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("--- CONNECTION FAILED ---");
-            Debug.LogException(e);
-            OnConnectionFailed?.Invoke(e.Message);
-            Disconnect();
-            return false;
-        }
-    }
-
     public void Disconnect()
     {
-        if (Mode == NetworkMode.None) return;
+        if (!IsConnected) return;
         Debug.Log("[NetworkManager] Disconnecting...");
+
         IsConnected = false;
-        NetworkPlayerManager.Instance?.ClearPlayers();
-        ServerRoomManager.Instance?.ClearRoom();
-        tcpListener?.Stop();
-        tcpClient?.Close();
-        udpClient?.Close();
+        
         if (m_CurrentLobbyID.IsValid())
         {
             SteamMatchmaking.LeaveLobby(m_CurrentLobbyID);
             m_CurrentLobbyID = CSteamID.Nil;
         }
-        foreach (var client in connectedClients) client.TcpClient.Close();
-        connectedClients.Clear();
+
+        NetworkPlayerManager.Instance?.ClearPlayers();
+        ServerRoomManager.Instance?.ClearRoom();
+        lobbyMembers.Clear();
         receivedPlayerStates.Clear();
+        
         Mode = NetworkMode.None;
         Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
     }
-
-    #endregion
 
     #region Steam Lobby Callbacks and Methods
 
@@ -373,6 +188,30 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    private void OnLobbyCreated(LobbyCreated_t pCallback)
+    {
+        if (pCallback.m_eResult != EResult.k_EResultOK)
+        {
+            OnConnectionFailed?.Invoke($"Lobby creation failed: {pCallback.m_eResult}");
+            return;
+        }
+
+        Mode = NetworkMode.Host;
+        m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
+        Debug.Log($"[NetworkManager] Lobby created! ID: {m_CurrentLobbyID}");
+        
+        lobbyHostID = selfSteamId;
+        IsConnected = true;
+        OnConnected?.Invoke();
+        
+        if (ServerRoomManager.Instance == null)
+        {
+            gameObject.AddComponent<ServerRoomManager>();
+        }
+        
+        SceneManager.LoadScene("RoomScene");
+    }
+
     public void JoinSteamLobby(CSteamID lobbyID)
     {
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
@@ -380,235 +219,180 @@ public class NetworkManager : MonoBehaviour
             SteamMatchmaking.JoinLobby(lobbyID);
         }
     }
-
-    private void OnLobbyCreated(LobbyCreated_t pCallback)
-    {
-        if (pCallback.m_eResult != EResult.k_EResultOK)
-        {
-            Debug.LogError($"[NetworkManager] Lobby creation failed: {pCallback.m_eResult}");
-            return;
-        }
-        m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
-        SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_steam_id", SteamUser.GetSteamID().ToString());
-        try
-        {
-            string hostIP = GetLocalIPAddress();
-            SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_ip", hostIP);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Failed to get and set host IP address: {e.Message}");
-        }
-        OnLobbyIDUpdated?.Invoke(m_CurrentLobbyID);
-    }
-
+    
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t pCallback)
     {
         JoinSteamLobby(pCallback.m_steamIDLobby);
     }
 
-    private async void OnLobbyEnter(LobbyEnter_t pCallback)
+    private void OnLobbyEnter(LobbyEnter_t pCallback)
     {
-        CSteamID lobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         if ((EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse != EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
         {
-            Debug.LogError($"[NetworkManager] Failed to enter lobby: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
+            OnConnectionFailed?.Invoke($"Failed to enter lobby: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
             return;
         }
-        m_CurrentLobbyID = lobbyID;
-        if (Mode != NetworkMode.Host)
+
+        m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
+        lobbyHostID = SteamMatchmaking.GetLobbyOwner(m_CurrentLobbyID);
+
+        if (selfSteamId != lobbyHostID)
         {
-            string hostSteamIDStr = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_steam_id");
-            string hostIp = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_ip");
-            if (!string.IsNullOrEmpty(hostSteamIDStr))
-            {
-                if (string.IsNullOrEmpty(hostIp))
-                {
-                    Debug.LogError("Host IP not found in lobby data. Cannot connect.");
-                    return;
-                }
-                bool connected = await ConnectAsClient(hostIp, 8080);
-                if (!connected)
-                {
-                    Debug.LogError("[NetworkManager] Failed to connect to host after entering lobby.");
-                    return;
-                }
-            }
-            else
-            {
-                Debug.LogError("Host Steam ID not found in lobby data.");
-                return;
-            }
+            Mode = NetworkMode.Client;
         }
+        
+        Debug.Log($"[NetworkManager] Entered lobby {m_CurrentLobbyID}. Host is {lobbyHostID}");
+        
+        UpdateLobbyMembers();
+
+        IsConnected = true;
+        OnConnected?.Invoke();
+
+        if (Mode == NetworkMode.Host && ServerRoomManager.Instance == null)
+        {
+             gameObject.AddComponent<ServerRoomManager>();
+        }
+
         SceneManager.LoadScene("RoomScene");
     }
 
-    public static event Action<CSteamID> OnLobbyIDUpdated;
-
-    #endregion
-
-    #region Message Listening
-
-    private async Task ListenForConnections()
+    private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
-        while (Mode == NetworkMode.Host && tcpListener != null)
+        if ((EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange == EChatMemberStateChange.k_EChatMemberStateChangeEntered)
         {
-            try
-            {
-                TcpClient newTcpClient = await tcpListener.AcceptTcpClientAsync();
-                var stream = newTcpClient.GetStream();
-                var connection = new ClientConnection
-                {
-                    TcpClient = newTcpClient,
-                    Writer = new StreamWriter(stream),
-                    Reader = new StreamReader(stream)
-                };
-                connectedClients.Add(connection);
-                Debug.Log($"New client connected: {newTcpClient.Client.RemoteEndPoint}");
-                Task.Run(() => ListenForClientTcpMessages(connection));
-            }
-            catch (Exception) { break; }
+            Debug.Log($"Player {pCallback.m_ulSteamIDUserChanged} entered the lobby.");
         }
+        else
+        {
+            Debug.Log($"Player {pCallback.m_ulSteamIDUserChanged} left the lobby.");
+            CSteamID user = new CSteamID(pCallback.m_ulSteamIDUserChanged);
+            if (Mode == NetworkMode.Host)
+            {
+                ServerRoomManager.Instance?.RemovePlayer(user);
+            }
+        }
+        UpdateLobbyMembers();
     }
 
-    private async Task ListenForClientTcpMessages(ClientConnection client)
+    private void UpdateLobbyMembers()
     {
-        while (client.TcpClient.Connected)
+        lobbyMembers.Clear();
+        int memberCount = SteamMatchmaking.GetNumLobbyMembers(m_CurrentLobbyID);
+        for (int i = 0; i < memberCount; i++)
         {
-            try
-            {
-                string message = await client.Reader.ReadLineAsync();
-                if (message == null) break;
-                tcpMessageQueue.Enqueue((client, message));
-            }
-            catch (Exception) { break; }
-        }
-        Debug.Log($"Client {client.PlayerId} disconnected.");
-        ServerRoomManager.Instance?.RemovePlayer(client.PlayerId);
-        connectedClients.Remove(client);
-    }
-
-    private async Task ListenForTcpMessages()
-    {
-        while (Mode == NetworkMode.Client && tcpClient.Connected)
-        {
-            try
-            {
-                string message = await reader.ReadLineAsync();
-                if (message == null) break;
-                tcpMessageQueue.Enqueue((null, message));
-            }
-            catch (Exception) { break; }
-        }
-        if (Mode == NetworkMode.Client) tcpMessageQueue.Enqueue((null, "__DISCONNECTED__"));
-    }
-
-    private async Task ListenForUdpMessages()
-    {
-        while (udpClient != null)
-        {
-            try
-            {
-                UdpReceiveResult result = await udpClient.ReceiveAsync();
-                if (Mode == NetworkMode.Host)
-                {
-                    if (result.Buffer.Length == 0) continue;
-                    byte messageType = result.Buffer[0];
-                    if (messageType == 0) // Handshake
-                    {
-                        var client = connectedClients.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint is IPEndPoint tcpEp && tcpEp.Address.Equals(result.RemoteEndPoint.Address));
-                        if (client != null && client.UdpEndPoint == null)
-                        {
-                            client.UdpEndPoint = result.RemoteEndPoint;
-                            Debug.Log($"[NetworkManager] Learned UDP endpoint for client {client.PlayerId}: {result.RemoteEndPoint}");
-                        }
-                    }
-                    else if (messageType == 1) // Client State Update
-                    {
-                        byte[] stateBytes = new byte[result.Buffer.Length - 1];
-                        Buffer.BlockCopy(result.Buffer, 1, stateBytes, 0, stateBytes.Length);
-                        PlayerState state = PlayerState.FromBytes(stateBytes);
-                        receivedPlayerStates[state.playerId] = state;
-                    }
-                }
-                else // Client
-                {
-                    // Enqueue for processing on the main thread
-                    udpDataQueue.Enqueue(result.Buffer);
-                }
-            }
-            catch (ObjectDisposedException)
-            {
-                // This is expected when the client is closed.
-                break;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"UDP Listen Error: {e.Message}");
-                break;
-            }
+            CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(m_CurrentLobbyID, i);
+            lobbyMembers.Add(memberId);
         }
     }
 
     #endregion
 
-    #region Message Sending
+    #region P2P Networking
 
-    public void SendTCPMessage(string message)
+    private void OnP2PSessionRequest(P2PSessionRequest_t pCallback)
     {
-        if (Mode == NetworkMode.Client)
+        SteamNetworking.AcceptP2PSessionWithUser(pCallback.m_steamIDRemote);
+    }
+
+    private void ListenForP2PPackets()
+    {
+        uint packetSize;
+        while (SteamNetworking.IsP2PPacketAvailable(out packetSize))
         {
-            if (writer != null)
+            byte[] buffer = new byte[packetSize];
+            CSteamID remoteId;
+            if (SteamNetworking.ReadP2PPacket(buffer, packetSize, out uint bytesRead, out remoteId))
             {
-                writer.WriteLine(message);
-                writer.Flush();
-            }
-        }
-        else if (Mode == NetworkMode.Host)
-        {
-            tcpMessageQueue.Enqueue((null, message));
-            foreach (var client in connectedClients)
-            {
-                if (client.Writer != null)
-                {
-                    client.Writer.WriteLine(message);
-                    client.Writer.Flush();
-                }
+                p2pPacketQueue.Enqueue((remoteId, buffer));
             }
         }
     }
 
-    public void SendTCPMessageToClient(ClientConnection client, string message)
+    private void HandleP2PPacket(CSteamID sender, byte[] data)
     {
-        if (Mode != NetworkMode.Host || client == null || client.Writer == null) return;
-        try
+        if (data.Length == 0) return;
+        MessageType messageType = (MessageType)data[0];
+        byte[] content = new byte[data.Length - 1];
+        Buffer.BlockCopy(data, 1, content, 0, content.Length);
+
+        if (Mode == NetworkMode.Host)
         {
-            client.Writer.WriteLine(message);
-            client.Writer.Flush();
+            if (messageType == MessageType.PlayerState)
+            {
+                PlayerState state = PlayerState.FromBytes(content);
+                receivedPlayerStates[state.playerId] = state;
+            }
+            else if (messageType == MessageType.JsonMessage)
+            {
+                string jsonMsg = Encoding.UTF8.GetString(content);
+                OnJsonMessageReceived?.Invoke(sender, jsonMsg);
+            }
         }
-        catch (Exception e)
+        else // Client
         {
-            Debug.LogError($"Failed to send message to client {client.PlayerId}: {e.Message}");
+            if (messageType == MessageType.GameState)
+            {
+                var gameState = NetworkGameState.FromBytes(content);
+                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+            }
+            else if (messageType == MessageType.JsonMessage)
+            {
+                string jsonMsg = Encoding.UTF8.GetString(content);
+                OnJsonMessageReceived?.Invoke(sender, jsonMsg);
+            }
         }
     }
 
-    public void SendUDPMessage(byte[] data)
+    public void SendJsonMessage(CSteamID target, JObject json)
     {
-        if (Mode == NetworkMode.Client)
+        string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
+        byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonString);
+        byte[] message = new byte[jsonBytes.Length + 1];
+        message[0] = (byte)MessageType.JsonMessage;
+        Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
+        SendP2PMessage(target, message, EP2PSend.k_EP2PSendReliable);
+    }
+    
+    public void BroadcastJsonMessage(JObject json)
+    {
+        string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
+        byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonString);
+        byte[] message = new byte[jsonBytes.Length + 1];
+        message[0] = (byte)MessageType.JsonMessage;
+        Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
+        
+        // Broadcast to remote peers
+        BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
+
+        // Process locally for the host
+        if (Mode == NetworkMode.Host)
         {
-            udpClient.Send(data, data.Length, serverUdpEndPoint);
+            OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
-        else if (Mode == NetworkMode.Host)
+    }
+
+    private void SendP2PMessage(CSteamID target, byte[] data, EP2PSend sendType)
+    {
+        SteamNetworking.SendP2PPacket(target, data, (uint)data.Length, sendType);
+    }
+
+    private void BroadcastP2PMessage(byte[] data, EP2PSend sendType)
+    {
+        foreach (var member in lobbyMembers)
         {
-            foreach (var client in connectedClients)
+            if (member != selfSteamId)
             {
-                if (client.UdpEndPoint != null)
-                {
-                    udpClient.Send(data, data.Length, client.UdpEndPoint);
-                }
+                SendP2PMessage(member, data, sendType);
             }
         }
     }
 
     #endregion
+}
+
+public enum MessageType : byte
+{
+    GameState = 0,
+    PlayerState = 1,
+    JsonMessage = 2
 }

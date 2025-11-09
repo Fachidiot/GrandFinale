@@ -1,89 +1,77 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
-using TMPro;
 
 public class NetworkStateMachine : MonoBehaviour
 {
-    // [SerializeField] private PhotonView photonView;
     [SerializeField] private WeaponController weaponController;
-    [SerializeField] private BodySlope bodySlope;
-    [SerializeField] private BodySlope_Handler bodySlope_Handler;
-    [SerializeField] private BodyTurnHandler bodyTurnHandler;
-    // [SerializeField] private PlayerHealth playerHealth;
-    // [SerializeField] private PlayerLifeController playerLifeController;
     [SerializeField] private EventsCenter eventsCenter;
 
-    private void OnEnable()
+    private bool isMine;
+
+    public void Initialize(bool isLocalPlayer)
     {
-        weaponController.OnShoot += ShootEventSender;
-        eventsCenter.OnWeaponChange += WeaponChangeEventSender;
+        isMine = isLocalPlayer;
+        
+        // Only local players should send events
+        if (isMine)
+        {
+            weaponController.OnShoot += ShootEventSender;
+            eventsCenter.OnWeaponChange += WeaponChangeEventSender;
+        }
     }
+
     private void OnDisable()
     {
-        weaponController.OnShoot -= ShootEventSender;
-        eventsCenter.OnWeaponChange -= WeaponChangeEventSender;
+        if (isMine)
+        {
+            weaponController.OnShoot -= ShootEventSender;
+            eventsCenter.OnWeaponChange -= WeaponChangeEventSender;
+        }
+    }
+
+    private void SendAction(string actionName, JObject parameters = null)
+    {
+        if (!isMine) return;
+
+        JObject actionData = new JObject(
+            new JProperty("type", "player_action"),
+            new JProperty("action", actionName)
+        );
+
+        if (parameters != null)
+        {
+            actionData.Merge(parameters);
+        }
+
+        NetworkManager.Instance.BroadcastJsonMessage(actionData);
     }
 
     private void ShootEventSender()
     {
-        var shootAction = new
-        {
-            type = "player_action",
-            action = "shoot",
-            player_id = NetworkManager.Instance.PlayerId
-        };
-        string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(shootAction, Newtonsoft.Json.Formatting.None);
-        NetworkManager.Instance.SendTCPMessage(jsonMessage);
+        SendAction("shoot");
     }
 
     private void WeaponChangeEventSender(bool change)
     {
         if (!change || weaponController.nextID == 0)
             return;
-        if (weaponController.IsProcessingRemoteWeaponChange) // 새로운 조건 추가
+        if (weaponController.IsProcessingRemoteWeaponChange)
             return;
 
-        var weaponChangeAction = new
-        {
-            type = "player_action",
-            action = "weapon_change",
-            weapon_id = weaponController.nextID,
-            player_id = NetworkManager.Instance.PlayerId
-        };
-        string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(weaponChangeAction, Newtonsoft.Json.Formatting.None);
-        NetworkManager.Instance.SendTCPMessage(jsonMessage);
+        JObject parameters = new JObject(
+            new JProperty("weapon_id", weaponController.nextID)
+        );
+        SendAction("weapon_change", parameters);
     }
 
-    // [PunRPC]
-    public void DamageRPC(float damage, int photonViewID, bool hitOnTheHead, string weaponName)
+    public void OnNetworkEvent(JObject eventData)
     {
-        Debug.Log("damage ebat");
-        // float health = playerHealth.SetDamage(damage);
+        // Don't process events sent by ourselves
+        if (isMine) return;
 
-        // if (health <= 0)
-        // {
-        //     var killerPV = PhotonView.Find(photonViewID);
+        string action = eventData["action"]?.ToString();
 
-        //     bool isMine = killerPV.IsMine | photonView.IsMine;
-
-        //     UIManger.instance.killPanel.CreateKillItemUI(killerPV.Owner.NickName, photonView.Owner.NickName, weaponName, hitOnTheHead, isMine);
-        // }
-    }
-
-    // [PunRPC]
-    public void RespawnRPC()
-    {
-        // playerLifeController.Respawn();
-    }
-
-    // Called by GameManager to process events received from the server
-    public void OnNetworkEvent(Newtonsoft.Json.Linq.JObject eventData)
-    {
-        string eventName = eventData["action"]?.ToString();
-
-        switch (eventName)
+        switch (action)
         {
             case "shoot":
                 if (weaponController != null)
@@ -95,8 +83,7 @@ public class NetworkStateMachine : MonoBehaviour
                 if (weaponController != null)
                 {
                     int weaponId = eventData["weapon_id"].Value<int>();
-                    Debug.Log(weaponId);
-                    weaponController.RemoteToChange(weaponId); // RemoteToChange 호출
+                    weaponController.RemoteToChange(weaponId);
                 }
                 break;
         }

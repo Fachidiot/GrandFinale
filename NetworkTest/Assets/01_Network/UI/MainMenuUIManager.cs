@@ -1,25 +1,17 @@
 using UnityEngine;
 using TMPro;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class MainMenuUIManager : MonoBehaviour
 {
-    private Dictionary<string, Action<string>> messageHandlers;
-    private string ip = "127.0.0.1";
-
     private OptionController optionController;
-
-    private void Awake()
-    {
-        InitializeMessageHandlers();
-    }
 
     public void OnMultiplayerButtonClicked()
     {
-        NetworkManager.Instance.StartHost(8080);
+        // The new flow is to create a Steam lobby, which then handles connection and scene loading.
+        NetworkManager.Instance.CreateSteamLobby();
     }
 
     public void OnSingleplayerButtonClicked()
@@ -51,33 +43,15 @@ public class MainMenuUIManager : MonoBehaviour
         NetworkManager.OnConnected += HandleConnection;
         NetworkManager.OnConnectionFailed += HandleConnectionFailed;
         NetworkManager.OnDisconnected += HandleDisconnection;
-        NetworkManager.OnMessageReceived += HandleServerMessage;
     }
 
     private void OnDisable()
     {
-        NetworkManager.OnConnected -= HandleConnection;
-        NetworkManager.OnConnectionFailed -= HandleConnectionFailed;
-        NetworkManager.OnDisconnected -= HandleDisconnection;
-        NetworkManager.OnMessageReceived -= HandleServerMessage;
-    }
-
-    private void InitializeMessageHandlers()
-    {
-        messageHandlers = new Dictionary<string, Action<string>>
+        if (NetworkManager.Instance != null)
         {
-
-        };
-    }
-
-    private void HandleServerMessage(string jsonMsg)
-    {
-        JObject response = JObject.Parse(jsonMsg);
-        string type = response["type"]?.ToString();
-
-        if (messageHandlers.TryGetValue(type, out var handler))
-        {
-            handler(jsonMsg);
+            NetworkManager.OnConnected -= HandleConnection;
+            NetworkManager.OnConnectionFailed -= HandleConnectionFailed;
+            NetworkManager.OnDisconnected -= HandleDisconnection;
         }
     }
 
@@ -85,11 +59,9 @@ public class MainMenuUIManager : MonoBehaviour
 
     private void HandleConnection()
     {
-        if (NetworkManager.Instance.Mode == NetworkMode.Host)
-        {
-            // 호스트로 시작했을 때의 로직 (예: 로비 씬으로 바로 이동)
-            SceneManager.LoadScene("RoomScene");
-        }
+        // This logic is now handled by NetworkManager's OnLobbyCreated/OnLobbyEnter callbacks.
+        // This handler can be used for UI changes on the main menu if needed, e.g., showing a "Connected" status.
+        Debug.Log("[MainMenuUIManager] NetworkManager connected.");
     }
 
     private void HandleConnectionFailed(string errorMessage)

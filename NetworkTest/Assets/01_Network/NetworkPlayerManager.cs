@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using Steamworks;
 
 public class NetworkPlayerManager : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class NetworkPlayerManager : MonoBehaviour
 
     [Header("Prefabs")]
     public GameObject playerPrefab;
-    public GameObject monsterPrefab; // To be assigned in the Inspector
+    public GameObject monsterPrefab;
 
     private Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
@@ -26,6 +27,28 @@ public class NetworkPlayerManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
+        }
+        
+        NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
+    }
+
+    private void OnDestroy()
+    {
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
+        }
+    }
+
+    private void HandleServerJsonMessage(CSteamID sender, string jsonMsg)
+    {
+        JObject msg = JObject.Parse(jsonMsg);
+        string type = msg["type"]?.ToString();
+
+        if (type == "player_action")
+        {
+            RoutePlayerEvent(sender, msg);
         }
     }
 
@@ -33,60 +56,54 @@ public class NetworkPlayerManager : MonoBehaviour
 
     public void UpdatePlayerList(JArray playerList)
     {
-        List<string> playerIdsInMessage = playerList.Select(p => p["player_id"].ToString()).ToList();
+        List<string> steamIdsInMessage = playerList.Select(p => p["steam_id"].ToString()).ToList();
 
-        // Remove players that are no longer in the list
         List<string> currentPlayers = new List<string>(players.Keys);
-        foreach (string playerId in currentPlayers)
+        foreach (string steamId in currentPlayers)
         {
-            if (!playerIdsInMessage.Contains(playerId))
+            if (!steamIdsInMessage.Contains(steamId))
             {
-                Destroy(players[playerId]);
-                players.Remove(playerId);
+                Destroy(players[steamId]);
+                players.Remove(steamId);
             }
         }
 
-        // Add new players
-        foreach (JObject playerInfo in playerList.Cast<JObject>())
+        foreach (JObject playerInfoJson in playerList)
         {
-            string playerId = playerInfo["player_id"].ToString();
-            string nickname = playerInfo["nickname"]?.ToString();
-
-            if (!players.ContainsKey(playerId))
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            if (!players.ContainsKey(playerInfo.steam_id))
             {
-                SpawnPlayer(playerId, Vector3.zero, nickname);
+                SpawnPlayer(playerInfo);
             }
         }
     }
 
-    private GameObject SpawnPlayer(string playerId, Vector3 position, string nickname)
+    private GameObject SpawnPlayer(PlayerInfo playerInfo)
     {
         if (playerPrefab == null) return null;
 
-        GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
-        playerObject.name = $"Player_{playerId}";
-        players.Add(playerId, playerObject);
+        GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        playerObject.name = $"Player_{playerInfo.nickname}";
+        players.Add(playerInfo.steam_id, playerObject);
 
-        // Setup Nickname UI
         PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
-        if (nicknameUI != null) nicknameUI.SetNickname(nickname);
+        if (nicknameUI != null) nicknameUI.SetNickname(playerInfo.nickname);
 
-        bool isMine = (playerId == NetworkManager.Instance.PlayerId);
+        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.PlayerId);
 
-        // Initialize Sync components
         var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-        foreach (var view in transformSyncs) view.Initialize(playerId, isMine);
+        foreach (var view in transformSyncs) view.Initialize(playerInfo.steam_id, isMine);
 
         var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
-        if (animSync != null) animSync.Initialize(playerId, isMine);
+        if (animSync != null) animSync.Initialize(playerInfo.steam_id, isMine);
+        
+        var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
+        if (nsm != null) nsm.Initialize(isMine);
 
-        // Disable components for remote players
         if (isMine)
         {
             if (nicknameUI != null) nicknameUI.gameObject.SetActive(false);
-
-            // Initialize InGameUIManager for the local player
-            var inGameUI = FindAnyObjectByType<InGameUIManager>();
+            var inGameUI = FindObjectOfType<InGameUIManager>();
             if (inGameUI != null)
             {
                 inGameUI.SetInit(playerObject.GetComponent<WeaponController>());
@@ -106,28 +123,21 @@ public class NetworkPlayerManager : MonoBehaviour
 
     #endregion
 
-    #region Game State Update (Optimized)
+    #region Game State Update
 
     public void UpdateFromGameState(NetworkGameState state)
     {
-        // --- Update Players ---
         foreach (var playerState in state.players)
         {
-            // TODO: The key for the dictionary should be the byte ID, not the string ID.
-            // This will require a mapping from the initial string ID to a byte ID when a player joins a room.
-            // For now, we will assume a temporary mapping or linear search.
-            string playerId = playerState.playerId.ToString(); // This is a temporary conversion
+            string steamId = ServerRoomManager.Instance.GetSteamId(playerState.playerId);
+            if (string.IsNullOrEmpty(steamId)) continue;
 
-            if (players.TryGetValue(playerId, out GameObject playerObject))
+            if (players.TryGetValue(steamId, out GameObject playerObject))
             {
-                // Don't update the local player's state from the server, as the local player has authority over their own movement.
-                if (playerId == NetworkManager.Instance.PlayerId && NetworkManager.Instance.Mode == NetworkMode.Client)
+                if (steamId == NetworkManager.Instance.PlayerId)
                     continue;
 
-                // --- Handle Transform Sync ---
                 var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-                // In the new model, we only receive one position and rotation for the body.
-                // The camera rotation is handled locally or via a separate mechanism if needed.
                 var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
                 var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);
 
@@ -137,11 +147,9 @@ public class NetworkPlayerManager : MonoBehaviour
                 }
                 if (cameraSync != null)
                 {
-                    // We only care about rotation for the camera sync component
                     cameraSync.OnTransformReceived(cameraSync.transform.position, playerState.cameraRotation);
                 }
 
-                // --- Handle Animator Sync ---
                 var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
                 if (animSync != null)
                 {
@@ -156,62 +164,31 @@ public class NetworkPlayerManager : MonoBehaviour
                     );
                 }
 
-                // --- Handle Weapon State Sync ---
                 var weaponController = playerObject.GetComponentInChildren<WeaponController>();
                 if (weaponController != null && weaponController.activeID != playerState.weaponId)
                 {
                     weaponController.ToChange(playerState.weaponId);
                 }
             }
-            else
-            {
-                // TODO: Player doesn't exist locally, maybe request info or spawn them.
-            }
-        }
-
-        // --- Update Monsters ---
-        foreach (var monsterState in state.monsters)
-        {
-            if (monsters.TryGetValue(monsterState.monsterId, out GameObject monsterObject))
-            {
-                // TODO: Add NetworkTransformSync and NetworkAnimatorSync to monster prefab
-                // monsterObject.transform.position = monsterState.position;
-                // monsterObject.transform.rotation = monsterState.rotation;
-            }
-            else
-            {
-                SpawnMonster(monsterState.monsterId, monsterState.position);
-            }
         }
     }
-
-    private void SpawnMonster(ushort monsterId, Vector3 position)
-    {
-        if (monsterPrefab == null) return;
-
-        GameObject monsterObject = Instantiate(monsterPrefab, position, Quaternion.identity);
-        monsterObject.name = $"Monster_{monsterId}";
-        monsters.Add(monsterId, monsterObject);
-
-        // TODO: Initialize monster-specific components if any
-    }
-
+    
     #endregion
 
-    #region Legacy and Cleanup
+    #region Player Actions
 
-    public void RoutePlayerEvent(JObject eventData)
+    public void RoutePlayerEvent(CSteamID sender, JObject eventData)
     {
-        string playerId = eventData["player_id"]?.ToString();
-        if (playerId == NetworkManager.Instance.PlayerId) return;
-
-        if (players.TryGetValue(playerId, out GameObject playerObject))
+        string senderSteamId = sender.ToString();
+        
+        if (players.TryGetValue(senderSteamId, out GameObject playerObject))
         {
-            Debug.Log($"{playerObject.name} : event invoke");
             var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
             if (nsm != null) nsm.OnNetworkEvent(eventData);
         }
     }
+
+    #endregion
 
     public void ClearPlayers()
     {
@@ -221,6 +198,4 @@ public class NetworkPlayerManager : MonoBehaviour
         foreach (var monster in monsters.Values) Destroy(monster);
         monsters.Clear();
     }
-
-    #endregion
 }

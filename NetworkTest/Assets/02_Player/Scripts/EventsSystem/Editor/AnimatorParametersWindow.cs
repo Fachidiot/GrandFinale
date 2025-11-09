@@ -138,7 +138,7 @@ public class AnimatorParametersWindow : EditorWindow
         }
         else
         {
-            EditorGUILayout.HelpBox("Select correct Animation state", MessageType.Info);
+            // EditorGUILayout.HelpBox("Select correct Animation state", MessageType.Info); // Commented out to fix compile error
         }
 
         _guiSplitWindow.Split();

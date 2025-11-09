@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine.SceneManagement;
+using Steamworks;
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -16,7 +16,7 @@ public class RoomUIManager : MonoBehaviour
     {
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
-            ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.HostPlayerInfo);
+            ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.selfSteamId, CustomSteamManager.Instance.PlayerName);
         }
         else if (NetworkManager.Instance.Mode == NetworkMode.Client)
         {
@@ -26,20 +26,23 @@ public class RoomUIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        NetworkManager.OnMessageReceived += HandleServerMessage;
+        NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
         NetworkManager.OnDisconnected += HandleDisconnection;
     }
 
     private void OnDisable()
     {
-        NetworkManager.OnMessageReceived -= HandleServerMessage;
-        NetworkManager.OnDisconnected -= HandleDisconnection;
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
+            NetworkManager.OnDisconnected -= HandleDisconnection;
+        }
     }
 
     private void HandleDisconnection()
     {
         Debug.Log("[RoomUIManager] Disconnected. Returning to ConnectionScene.");
-        SceneManager.LoadScene("ConnectionScene");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("ConnectionScene");
     }
 
     private void SendNickname()
@@ -47,19 +50,18 @@ public class RoomUIManager : MonoBehaviour
         if (NetworkManager.Instance.Mode != NetworkMode.Client) return;
 
         string nickname = CustomSteamManager.Instance.PlayerName;
-
         JObject msg = new JObject
         {
             { "type", "set_nickname" },
             { "nickname", nickname }
         };
 
-        string jsonMessage = msg.ToString(Formatting.None);
-        NetworkManager.Instance.SendTCPMessage(jsonMessage);
-        Debug.Log($"Sent nickname message: {jsonMessage}");
+        CSteamID hostId = SteamMatchmaking.GetLobbyOwner(NetworkManager.Instance.CurrentLobbyID);
+        NetworkManager.Instance.SendJsonMessage(hostId, msg);
+        Debug.Log($"Sent nickname message to host: {msg.ToString(Formatting.None)}");
     }
 
-    private void HandleServerMessage(string jsonMsg)
+    private void HandleServerJsonMessage(CSteamID sender, string jsonMsg)
     {
         try
         {
@@ -79,11 +81,8 @@ public class RoomUIManager : MonoBehaviour
 
     private void HandleRoomUpdate(JObject data)
     {
-        Debug.Log($"[RoomUIManager] HandleRoomUpdate called on instance ID: {gameObject.GetInstanceID()}.");
-
         if (playerListContent == null || roomNameText == null || playerListItemPrefab == null)
         {
-            Debug.LogError("[RoomUIManager] UI references are not set! Cannot update UI.");
             return;
         }
         
