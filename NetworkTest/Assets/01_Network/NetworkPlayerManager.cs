@@ -14,6 +14,8 @@ public class NetworkPlayerManager : MonoBehaviour
     private Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
 
+    public Dictionary<string, GameObject> Players => players;
+
     private void Awake()
     {
         if (Instance == null)
@@ -196,12 +198,6 @@ public class NetworkPlayerManager : MonoBehaviour
     #endregion
 
     #region Legacy and Cleanup
-
-    // This is the old method. It will be phased out.
-    public void UpdatePlayersStateFromJson(JArray playersState)
-    {
-        // This logic is now replaced by UpdateFromGameState
-    }
 
     public void RoutePlayerEvent(JObject eventData)
     {

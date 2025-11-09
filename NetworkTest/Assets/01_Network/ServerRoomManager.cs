@@ -12,6 +12,7 @@ public class ServerRoomManager : MonoBehaviour
 
     private List<PlayerInfo> playersInRoom = new List<PlayerInfo>();
     private Dictionary<string, System.Action<ClientConnection, JObject>> messageHandlers;
+    private byte nextPlayerByteId = 1; // Start assigning from 1, as Host is 0
 
     private void Awake()
     {
@@ -42,9 +43,9 @@ public class ServerRoomManager : MonoBehaviour
     private void InitializeMessageHandlers()
     {
         messageHandlers = new Dictionary<string, System.Action<ClientConnection, JObject>>
-                {
-                    { "set_nickname", HandleSetNickname }
-                };
+        {
+            { "set_nickname", HandleSetNickname }
+        };
     }
 
     private void HandleClientMessage(ClientConnection client, string jsonMsg)
@@ -57,7 +58,7 @@ public class ServerRoomManager : MonoBehaviour
             handler(client, msg);
         }
     }
-
+    
     private void HandleSetNickname(ClientConnection client, JObject data)
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host || client == null) return;
@@ -65,20 +66,23 @@ public class ServerRoomManager : MonoBehaviour
         Debug.Log("[ServerRoomManager] Received set_nickname message.");
 
         string nickname = data["nickname"]?.ToString();
-
-        // Use the hash code of the client object for a unique and stable ID for the session.
-        string newPlayerId = client.TcpClient.GetHashCode().ToString();
-
-        // Avoid adding the same client twice
-        if (playersInRoom.Any(p => p.player_id == newPlayerId))
+        
+        // Check if this client already has an ID. If so, just broadcast.
+        // This can happen if the client's RoomUIManager is recreated.
+        var existingPlayer = playersInRoom.FirstOrDefault(p => p.player_id == client.PlayerId);
+        if (existingPlayer != null)
         {
-            Debug.LogWarning($"[ServerRoomManager] Player with ID {newPlayerId} already exists.");
+            Debug.LogWarning($"[ServerRoomManager] Player with ID {client.PlayerId} already exists. Re-broadcasting state.");
+            BroadcastRoomUpdate();
             return;
         }
 
+        // Assign a new sequential byte ID
+        string newPlayerId = (nextPlayerByteId++).ToString();
+
         Debug.Log($"[ServerRoomManager] New player '{nickname}' joined with ID {newPlayerId}");
 
-        // Store the ID in the connection object for future reference (e.g., disconnects)
+        // Store the ID in the connection object for future reference
         client.PlayerId = newPlayerId;
 
         // Send the new client their assigned ID

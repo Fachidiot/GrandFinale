@@ -124,10 +124,56 @@ public class NetworkAnimatorSync : MonoBehaviour
 
                 animator.SetTrigger(rollHash);
 
+                        }
+
+                    }
+
+                }
+
+            
+
+                // --- Methods for the host to read local state ---
+
+                public float GetHorizontal()
+
+                {
+
+                    return animator.GetFloat(xHash);
+
+                }
+
+            
+
+                public float GetVertical()
+
+                {
+
+                    return animator.GetFloat(yHash);
+
+                }
+
+            
+
+                public byte GetAnimationMask()
+
+                {
+
+                    byte mask = 0;
+
+                    if (animator.GetBool(walkHash)) mask |= AnimationBitmask.Walk;
+
+                    if (animator.GetBool(sprintHash)) mask |= AnimationBitmask.Sprint;
+
+                    if (animator.GetBool(rollHash)) mask |= AnimationBitmask.Roll; // Note: Roll is a trigger, this might not work as expected.
+
+                    if (animator.GetBool(isGroundedHash)) mask |= AnimationBitmask.IsGrounded;
+
+                    if (animator.GetBool(crouchHash)) mask |= AnimationBitmask.Crouch;
+
+                    return mask;
+
+                }
+
             }
 
-        }
-
-    }
-
-}
+            

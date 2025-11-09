@@ -132,11 +132,49 @@ public class NetworkManager : MonoBehaviour
             HandleServerMessage(client, jsonMsg);
         }
 
-        while (udpDataQueue.TryDequeue(out byte[] data))
+        // Client-side processing of UDP messages
+        if (Mode == NetworkMode.Client)
         {
-            // Process UDP data (e.g., game state updates)
-            // This needs a proper deserialization mechanism based on your data structure
+            while (udpDataQueue.TryDequeue(out byte[] data))
+            {
+                var gameState = NetworkGameState.FromBytes(data);
+                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+            }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        // Host-side game state broadcasting
+        if (Mode != NetworkMode.Host) return;
+        if (NetworkPlayerManager.Instance == null || NetworkPlayerManager.Instance.Players.Count == 0) return;
+
+        var gameState = new NetworkGameState();
+        foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
+        {
+            string playerId = playerEntry.Key;
+            GameObject playerGo = playerEntry.Value;
+
+            // This is a temporary and inefficient way to get animation state.
+            // A better way would be to have NetworkAnimatorSync push its state to a central registry.
+            var animSync = playerGo.GetComponentInChildren<NetworkAnimatorSync>();
+
+            var playerState = new PlayerState
+            {
+                // The ID system needs to be refactored to use bytes, for now, we parse.
+                playerId = byte.TryParse(playerId, out byte id) ? id : (byte)255, // 255 as invalid
+                position = playerGo.transform.position,
+                rotation = playerGo.transform.rotation,
+                moveX = animSync != null ? animSync.GetHorizontal() : 0,
+                moveY = animSync != null ? animSync.GetVertical() : 0,
+                animationMask = animSync != null ? animSync.GetAnimationMask() : (byte)0,
+                weaponId = playerGo.GetComponentInChildren<WeaponController>()?.activeID ?? 0
+            };
+            gameState.players.Add(playerState);
+        }
+
+        byte[] gameStateBytes = gameState.ToByteArray();
+        SendUDPMessage(gameStateBytes);
     }
 
     private void InitializeMessageHandlers()
@@ -192,20 +230,19 @@ public class NetworkManager : MonoBehaviour
         // Route the event for local processing
         NetworkPlayerManager.Instance?.RoutePlayerEvent(data);
 
-        // If this is the host, broadcast to other clients
-        if (Mode == NetworkMode.Host)
-        {
-            string message = data.ToString();
-            foreach (var otherClient in connectedClients)
+            // If this is the host, broadcast to other clients
+            if (Mode == NetworkMode.Host)
             {
-                if (otherClient != client)
+                string message = data.ToString(Newtonsoft.Json.Formatting.None);
+                foreach (var otherClient in connectedClients)
                 {
-                    otherClient.Writer.WriteLine(message);
-                    otherClient.Writer.Flush();
+                    if (otherClient != client)
+                    {
+                        otherClient.Writer.WriteLine(message);
+                        otherClient.Writer.Flush();
+                    }
                 }
-            }
-        }
-    }
+            }    }
 
     private string GetLocalIPAddress()
     {
