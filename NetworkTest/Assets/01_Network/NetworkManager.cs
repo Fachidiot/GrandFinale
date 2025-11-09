@@ -266,7 +266,6 @@ public class NetworkManager : MonoBehaviour
         if (Mode != NetworkMode.None) return;
         Mode = NetworkMode.Host;
         PlayerId = "0"; // Host is player 0
-        Debug.Log($"[NetworkManager] Host Player Name: {CustomSteamManager.Instance.PlayerName}");
         HostPlayerInfo = new PlayerInfo
         {
             player_id = PlayerId,
@@ -313,7 +312,6 @@ public class NetworkManager : MonoBehaviour
     {
         if (Mode != NetworkMode.None) return false;
         Mode = NetworkMode.Client;
-        Debug.LogWarning($"[NetworkManager] Attempting to connect to host at {ip}:{port}...");
 
         try
         {
@@ -330,7 +328,6 @@ public class NetworkManager : MonoBehaviour
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
 
             IsConnected = true;
-            Debug.Log("[NetworkManager] Connection successful!");
             OnConnected?.Invoke();
             return true;
         }
@@ -410,15 +407,7 @@ public class NetworkManager : MonoBehaviour
 
     private void OnLobbyCreated(LobbyCreated_t pCallback)
     {
-        if (pCallback.m_eResult != EResult.k_EResultOK)
-        {
-            Debug.LogError($"[NetworkManager] Lobby creation failed: {pCallback.m_eResult}");
-            OnConnectionFailed?.Invoke($"Lobby creation failed: {pCallback.m_eResult}");
-            return;
-        }
-
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
-        Debug.Log($"[NetworkManager] Lobby created! ID: {m_CurrentLobbyID}");
 
         // Set lobby data (e.g., host's Steam ID, IP/Port if not using Steam P2P)
         SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_steam_id", SteamUser.GetSteamID().ToString());
@@ -426,14 +415,6 @@ public class NetworkManager : MonoBehaviour
         {
             string hostIP = GetLocalIPAddress();
             bool success = SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_ip", hostIP);
-            if (success)
-            {
-                Debug.Log($"[NetworkManager] Host IP '{hostIP}' set in lobby data.");
-            }
-            else
-            {
-                Debug.LogError("[NetworkManager] Failed to set host_ip in lobby data!");
-            }
         }
         catch (Exception e)
         {
@@ -445,15 +426,11 @@ public class NetworkManager : MonoBehaviour
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t pCallback)
     {
-        Debug.Log($"[NetworkManager] Game Lobby Join Requested. Lobby ID: {pCallback.m_steamIDLobby}");
         JoinSteamLobby(pCallback.m_steamIDLobby);
     }
 
     private async void OnLobbyEnter(LobbyEnter_t pCallback)
     {
-        // This log is critical for debugging client join issues.
-        // Debug.Log($"[NetworkManager] OnLobbyEnter callback received. Lobby ID: {pCallback.m_ulSteamIDLobby}, Result: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
-
         CSteamID lobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         if ((EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse != EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
         {
@@ -469,7 +446,6 @@ public class NetworkManager : MonoBehaviour
         {
             string hostSteamIDStr = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_steam_id");
             string hostIp = SteamMatchmaking.GetLobbyData(m_CurrentLobbyID, "host_ip");
-            Debug.Log($"[NetworkManager] Retrieved host_ip from lobby: '{hostIp}'");
 
             if (!string.IsNullOrEmpty(hostSteamIDStr))
             {
@@ -480,7 +456,6 @@ public class NetworkManager : MonoBehaviour
                     return;
                 }
 
-                Debug.Log("[NetworkManager] OnLobbyEnter: About to call ConnectAsClient."); // New log
                 bool connected = false;
                 try
                 {
@@ -488,8 +463,6 @@ public class NetworkManager : MonoBehaviour
                 }
                 catch (Exception ex)
                 {
-                    // This catch should theoretically not be hit if ConnectAsClient's catch is active
-                    // But it's here to catch any unexpected behavior from the await.
                     Debug.LogError("--- CRITICAL ERROR in OnLobbyEnter during ConnectAsClient CALL ---");
                     Debug.LogException(ex);
                     OnConnectionFailed?.Invoke(ex.Message);
@@ -498,10 +471,9 @@ public class NetworkManager : MonoBehaviour
 
                 if (!connected)
                 {
-                    Debug.LogError("[NetworkManager] Failed to connect to host after entering lobby. Not loading RoomScene. ConnectAsClient explicitly returned FALSE."); // Enhanced log
+                    Debug.LogError("[NetworkManager] Failed to connect to host after entering lobby. Not loading RoomScene. ConnectAsClient explicitly returned FALSE.");
                     return;
                 }
-                Debug.Log("[NetworkManager] OnLobbyEnter: ConnectAsClient returned TRUE. Proceeding to load RoomScene."); // New log
             }
             else
             {

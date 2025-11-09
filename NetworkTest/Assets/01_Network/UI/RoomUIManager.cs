@@ -14,15 +14,12 @@ public class RoomUIManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log($"[RoomUIManager] Start called on instance ID: {gameObject.GetInstanceID()}.");
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
-            Debug.Log("[RoomUIManager] Host instance is registering itself.");
             ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.HostPlayerInfo);
         }
         else if (NetworkManager.Instance.Mode == NetworkMode.Client)
         {
-            Debug.Log("[RoomUIManager] Client instance is sending nickname.");
             SendNickname();
         }
     }
