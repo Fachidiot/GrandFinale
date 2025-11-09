@@ -101,18 +101,32 @@ public class NetworkManager : MonoBehaviour
 
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
         
+        var authoritativeState = new NetworkGameState(); // Declared here
+
         if (Mode == NetworkMode.Host)
         {
-            PlayerState myState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
-            string myByteIdStr = ServerRoomManager.Instance.GetPlayerId(selfSteamId);
-            if (byte.TryParse(myByteIdStr, out byte myByteId))
+            foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
             {
-                receivedPlayerStates[myByteId] = myState;
-            }
+                string steamIdStr = playerEntry.Key;
+                GameObject playerGo = playerEntry.Value;
 
-            var authoritativeState = new NetworkGameState();
-            foreach (var playerState in receivedPlayerStates.Values)
-            {
+                CSteamID steamId = new CSteamID(ulong.Parse(steamIdStr));
+                string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
+
+                if (!byte.TryParse(byteIdStr, out byte playerId)) continue;
+
+                PlayerState playerState;
+                if (steamId == selfSteamId)
+                {
+                    playerState = GetPlayerStateFromGameObject(playerGo, selfSteamId);
+                }
+                else
+                {
+                    if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
+                    {
+                        playerState = new PlayerState { playerId = playerId, position = playerGo.transform.position, rotation = playerGo.transform.rotation };
+                    }
+                }
                 authoritativeState.players.Add(playerState);
             }
             
