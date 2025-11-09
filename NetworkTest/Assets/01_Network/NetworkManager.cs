@@ -258,17 +258,29 @@ public class NetworkManager : MonoBehaviour
 
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
+        CSteamID userChanged = new CSteamID(pCallback.m_ulSteamIDUserChanged);
+
         if ((EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange == EChatMemberStateChange.k_EChatMemberStateChangeEntered)
         {
-            Debug.Log($"Player {pCallback.m_ulSteamIDUserChanged} entered the lobby.");
+            Debug.Log($"Player {userChanged} entered the lobby.");
         }
         else
         {
-            Debug.Log($"Player {pCallback.m_ulSteamIDUserChanged} left the lobby.");
-            CSteamID user = new CSteamID(pCallback.m_ulSteamIDUserChanged);
+            Debug.Log($"Player {userChanged} left the lobby.");
+            
             if (Mode == NetworkMode.Host)
             {
-                ServerRoomManager.Instance?.RemovePlayer(user);
+                // Host removes the player who left
+                ServerRoomManager.Instance?.RemovePlayer(userChanged);
+            }
+            else if (Mode == NetworkMode.Client)
+            {
+                // Client checks if the host was the one who left
+                if (userChanged == lobbyHostID)
+                {
+                    Debug.LogError("Host has left the lobby. Disconnecting.");
+                    Disconnect();
+                }
             }
         }
         UpdateLobbyMembers();

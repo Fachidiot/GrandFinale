@@ -13,7 +13,7 @@ public class NetworkPlayerManager : MonoBehaviour
     public GameObject monsterPrefab;
 
     private Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
-    private Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
+    private Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
 
     public Dictionary<string, GameObject> Players => players;
 
@@ -29,7 +29,7 @@ public class NetworkPlayerManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        
+
         NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
     }
 
@@ -56,7 +56,19 @@ public class NetworkPlayerManager : MonoBehaviour
 
     public void UpdatePlayerList(JArray playerList)
     {
-        List<string> steamIdsInMessage = playerList.Select(p => p["steam_id"].ToString()).ToList();
+        byteIdToSteamId.Clear();
+        List<string> steamIdsInMessage = new List<string>();
+
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            steamIdsInMessage.Add(playerInfo.steam_id);
+
+            if (byte.TryParse(playerInfo.player_id, out byte byteId))
+            {
+                byteIdToSteamId[byteId] = playerInfo.steam_id;
+            }
+        }
 
         List<string> currentPlayers = new List<string>(players.Keys);
         foreach (string steamId in currentPlayers)
@@ -96,7 +108,7 @@ public class NetworkPlayerManager : MonoBehaviour
 
         var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
         if (animSync != null) animSync.Initialize(playerInfo.steam_id, isMine);
-        
+
         var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
         if (nsm != null) nsm.Initialize(isMine);
 
@@ -129,8 +141,10 @@ public class NetworkPlayerManager : MonoBehaviour
     {
         foreach (var playerState in state.players)
         {
-            string steamId = ServerRoomManager.Instance.GetSteamId(playerState.playerId);
-            if (string.IsNullOrEmpty(steamId)) continue;
+            if (!byteIdToSteamId.TryGetValue(playerState.playerId, out string steamId))
+            {
+                continue;
+            }
 
             if (players.TryGetValue(steamId, out GameObject playerObject))
             {
@@ -172,7 +186,7 @@ public class NetworkPlayerManager : MonoBehaviour
             }
         }
     }
-    
+
     #endregion
 
     #region Player Actions
@@ -180,7 +194,7 @@ public class NetworkPlayerManager : MonoBehaviour
     public void RoutePlayerEvent(CSteamID sender, JObject eventData)
     {
         string senderSteamId = sender.ToString();
-        
+
         if (players.TryGetValue(senderSteamId, out GameObject playerObject))
         {
             var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
@@ -194,8 +208,6 @@ public class NetworkPlayerManager : MonoBehaviour
     {
         foreach (var player in players.Values) Destroy(player);
         players.Clear();
-
-        foreach (var monster in monsters.Values) Destroy(monster);
-        monsters.Clear();
+        byteIdToSteamId.Clear();
     }
 }
