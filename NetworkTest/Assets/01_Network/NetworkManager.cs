@@ -537,6 +537,11 @@ public class NetworkManager : MonoBehaviour
                     udpDataQueue.Enqueue(result.Buffer);
                 }
             }
+            catch (ObjectDisposedException)
+            {
+                // This is expected when the client is closed.
+                break;
+            }
             catch (Exception e)
             {
                 Debug.LogError($"UDP Listen Error: {e.Message}");
