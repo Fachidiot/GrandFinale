@@ -99,15 +99,13 @@ public class NetworkManager : MonoBehaviour
         // Initialize Steam Lobby Callbacks
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
         {
-            Debug.Log("NetworkManager: Initializing Steam Lobby Callbacks...");
             m_LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
-            Debug.Log("NetworkManager: Steam Lobby Callbacks Initialized.");
         }
         else
         {
-            Debug.LogWarning("NetworkManager: CustomSteamManager not initialized in Start. Steam Lobby callbacks will not be active.");
+            Debug.LogWarning("[NetworkManager] CustomSteamManager not initialized in Start. Steam Lobby callbacks will not be active.");
         }
     }
 
@@ -212,18 +210,16 @@ public class NetworkManager : MonoBehaviour
 
     public void StartHost(int port = 8080)
     {
-        Debug.Log("[NetworkManager] StartHost called.");
         if (Mode != NetworkMode.None) return;
         Mode = NetworkMode.Host;
         PlayerId = "0"; // Host is player 0
-        Debug.Log($"NetworkManager: Host Player Name: {CustomSteamManager.Instance.PlayerName}");
+        Debug.Log($"[NetworkManager] Host Player Name: {CustomSteamManager.Instance.PlayerName}");
         HostPlayerInfo = new PlayerInfo
         {
             player_id = PlayerId,
             nickname = CustomSteamManager.Instance.PlayerName,
             is_ready = false
         };
-        Debug.Log("NetworkManager: Starting as Host...");
 
         try
         {
@@ -240,24 +236,22 @@ public class NetworkManager : MonoBehaviour
             // Host also creates a Steam Lobby
             if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
             {
-                Debug.Log("NetworkManager: Calling SteamMatchmaking.CreateLobby...");
                 SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4); // Max 4 players
             }
             else
             {
-                Debug.LogWarning("NetworkManager: CustomSteamManager not initialized. Cannot create Steam Lobby.");
+                Debug.LogWarning("[NetworkManager] CustomSteamManager not initialized. Cannot create Steam Lobby.");
             }
 
-            // Ensure ServerRoomManager exists and register the host
+            // Ensure ServerRoomManager exists
             if (ServerRoomManager.Instance == null)
             {
                 gameObject.AddComponent<ServerRoomManager>();
             }
-            ServerRoomManager.Instance.AddHostPlayer(HostPlayerInfo);
         }
         catch (Exception e)
         {
-            Debug.LogError("NetworkManager: Failed to start host: " + e.Message);
+            Debug.LogError("[NetworkManager] Failed to start host: " + e.Message);
             Disconnect();
         }
     }
@@ -300,10 +294,11 @@ public class NetworkManager : MonoBehaviour
     public void Disconnect()
     {
         if (Mode == NetworkMode.None) return;
-        Debug.Log("NetworkManager: Disconnecting...");
+        Debug.Log("[NetworkManager] Disconnecting...");
 
         IsConnected = false;
         NetworkPlayerManager.Instance?.ClearPlayers();
+        ServerRoomManager.Instance?.ClearRoom();
 
         tcpListener?.Stop();
         tcpClient?.Close();
@@ -312,7 +307,7 @@ public class NetworkManager : MonoBehaviour
         // Leave Steam Lobby if connected
         if (m_CurrentLobbyID.IsValid())
         {
-            Debug.Log($"NetworkManager: Leaving Steam Lobby: {m_CurrentLobbyID}");
+            Debug.Log($"[NetworkManager] Leaving Steam Lobby: {m_CurrentLobbyID}");
             SteamMatchmaking.LeaveLobby(m_CurrentLobbyID);
             m_CurrentLobbyID = CSteamID.Nil;
         }
@@ -324,7 +319,7 @@ public class NetworkManager : MonoBehaviour
         connectedClients.Clear();
 
         Mode = NetworkMode.None;
-        Debug.Log("NetworkManager: Disconnected.");
+        Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
     }
 
@@ -338,12 +333,12 @@ public class NetworkManager : MonoBehaviour
     {
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
         {
-            Debug.Log("NetworkManager: Calling SteamMatchmaking.CreateLobby from CreateSteamLobby()...");
+            Debug.Log("[NetworkManager] Calling SteamMatchmaking.CreateLobby from CreateSteamLobby()...");
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
         }
         else
         {
-            Debug.LogWarning("NetworkManager: Steam not initialized. Cannot create lobby.");
+            Debug.LogWarning("[NetworkManager] Steam not initialized. Cannot create lobby.");
         }
     }
 
@@ -351,27 +346,26 @@ public class NetworkManager : MonoBehaviour
     {
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
         {
-            Debug.Log($"NetworkManager: Calling SteamMatchmaking.JoinLobby for ID: {lobbyID}");
+            Debug.Log($"[NetworkManager] Calling SteamMatchmaking.JoinLobby for ID: {lobbyID}");
             SteamMatchmaking.JoinLobby(lobbyID);
         }
         else
         {
-            Debug.LogWarning("NetworkManager: Steam not initialized. Cannot join lobby.");
+            Debug.LogWarning("[NetworkManager] Steam not initialized. Cannot join lobby.");
         }
     }
 
     private void OnLobbyCreated(LobbyCreated_t pCallback)
     {
-        Debug.Log($"NetworkManager: OnLobbyCreated callback received. Result: {pCallback.m_eResult}");
         if (pCallback.m_eResult != EResult.k_EResultOK)
         {
-            Debug.LogError($"NetworkManager: Lobby creation failed: {pCallback.m_eResult}");
+            Debug.LogError($"[NetworkManager] Lobby creation failed: {pCallback.m_eResult}");
             OnConnectionFailed?.Invoke($"Lobby creation failed: {pCallback.m_eResult}");
             return;
         }
 
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
-        Debug.Log($"NetworkManager: Lobby created! ID: {m_CurrentLobbyID}");
+        Debug.Log($"[NetworkManager] Lobby created! ID: {m_CurrentLobbyID}");
 
         // Set lobby data (e.g., host's Steam ID, IP/Port if not using Steam P2P)
         SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_steam_id", SteamUser.GetSteamID().ToString());
@@ -381,11 +375,11 @@ public class NetworkManager : MonoBehaviour
             bool success = SteamMatchmaking.SetLobbyData(m_CurrentLobbyID, "host_ip", hostIP);
             if (success)
             {
-                Debug.Log($"NetworkManager: Host IP '{hostIP}' set in lobby data.");
+                Debug.Log($"[NetworkManager] Host IP '{hostIP}' set in lobby data.");
             }
             else
             {
-                Debug.LogError("NetworkManager: Failed to set host_ip in lobby data!");
+                Debug.LogError("[NetworkManager] Failed to set host_ip in lobby data!");
             }
         }
         catch (Exception e)
@@ -398,19 +392,19 @@ public class NetworkManager : MonoBehaviour
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t pCallback)
     {
-        Debug.Log($"NetworkManager: Game Lobby Join Requested. Lobby ID: {pCallback.m_steamIDLobby}");
+        Debug.Log($"[NetworkManager] Game Lobby Join Requested. Lobby ID: {pCallback.m_steamIDLobby}");
         JoinSteamLobby(pCallback.m_steamIDLobby);
     }
 
     private async void OnLobbyEnter(LobbyEnter_t pCallback)
     {
         // This log is critical for debugging client join issues.
-        Debug.Log($"[NetworkManager] OnLobbyEnter callback received. Lobby ID: {pCallback.m_ulSteamIDLobby}, Result: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
+        // Debug.Log($"[NetworkManager] OnLobbyEnter callback received. Lobby ID: {pCallback.m_ulSteamIDLobby}, Result: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
 
         CSteamID lobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         if ((EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse != EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
         {
-            Debug.LogError($"NetworkManager: Failed to enter lobby: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
+            Debug.LogError($"[NetworkManager] Failed to enter lobby: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
             OnConnectionFailed?.Invoke($"Failed to enter lobby: {(EChatRoomEnterResponse)pCallback.m_EChatRoomEnterResponse}");
             return;
         }

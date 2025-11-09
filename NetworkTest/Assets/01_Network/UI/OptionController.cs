@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class OptionController : MonoBehaviour
 {
@@ -14,9 +15,6 @@ public class OptionController : MonoBehaviour
             panel.gameObject.SetActive(false);
         }
         optionPanel.SetActive(false);
-
-        OptionOn = false;
-        Toggle();
     }
 
     void Update()
@@ -43,8 +41,9 @@ public class OptionController : MonoBehaviour
         }
     }
 
-    void Toggle()
+    public void Toggle()
     {
+        OptionOn = !OptionOn;
         optionPanel.SetActive(OptionOn);
     }
 
@@ -56,5 +55,15 @@ public class OptionController : MonoBehaviour
                 return i;
         }
         return -1;
+    }
+
+    public void OnLeaveRoomNetworkClicked()
+    {
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.Instance.Disconnect();
+        }
+
+        SceneManager.LoadScene("ConnectionScene");
     }
 }

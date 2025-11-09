@@ -15,7 +15,7 @@ public class ServerRoomManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[ServerRoomManager] Awake called.");
+        // Debug.Log("[ServerRoomManager] Awake called.");
         if (Instance == null)
         {
             Instance = this;
@@ -57,7 +57,7 @@ public class ServerRoomManager : MonoBehaviour
             handler(client, msg);
         }
     }
-    
+
     private void HandleSetNickname(ClientConnection client, JObject data)
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host || client == null) return;
@@ -65,12 +65,12 @@ public class ServerRoomManager : MonoBehaviour
         Debug.Log("[ServerRoomManager] Received set_nickname message.");
 
         string nickname = data["nickname"]?.ToString();
-        
+
         // Use the hash code of the client object for a unique and stable ID for the session.
         string newPlayerId = client.TcpClient.GetHashCode().ToString();
 
         // Avoid adding the same client twice
-        if (playersInRoom.Any(p => p.player_id == newPlayerId)) 
+        if (playersInRoom.Any(p => p.player_id == newPlayerId))
         {
             Debug.LogWarning($"[ServerRoomManager] Player with ID {newPlayerId} already exists.");
             return;
@@ -95,19 +95,30 @@ public class ServerRoomManager : MonoBehaviour
 
     public void AddHostPlayer(PlayerInfo hostInfo)
     {
-        if (playersInRoom.Any(p => p.player_id == hostInfo.player_id)) return;
-        
-        playersInRoom.Add(hostInfo);
-        Debug.Log($"Host '{hostInfo.nickname}' added to room.");
+        // If player is not in the list, add them.
+        if (!playersInRoom.Any(p => p.player_id == hostInfo.player_id))
+        {
+            playersInRoom.Add(hostInfo);
+            Debug.Log($"Host '{hostInfo.nickname}' added to room.");
+        }
+
+        // Always broadcast the current state when this is called.
+        // This ensures that if a new UI manager requests the state, it gets it.
         BroadcastRoomUpdate();
+    }
+
+    public void ClearRoom()
+    {
+        playersInRoom.Clear();
+        Debug.Log("[ServerRoomManager] Room player list cleared.");
     }
 
     private void BroadcastRoomUpdate()
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
 
-        Debug.Log("[ServerRoomManager] Broadcasting room update...");
-        
+        // Debug.Log("[ServerRoomManager] Broadcasting room update...");
+
         UpdateRoomInfoPayload payload = new UpdateRoomInfoPayload
         {
             type = "update_room_info",
@@ -117,7 +128,7 @@ public class ServerRoomManager : MonoBehaviour
         };
 
         string jsonPayload = JsonConvert.SerializeObject(payload);
-        Debug.Log($"[ServerRoomManager] Broadcast content: {jsonPayload}");
+        // Debug.Log($"[ServerRoomManager] Broadcast content: {jsonPayload}");
         NetworkManager.Instance.SendTCPMessage(jsonPayload);
     }
 

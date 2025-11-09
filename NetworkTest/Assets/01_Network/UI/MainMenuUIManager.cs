@@ -10,6 +10,8 @@ public class MainMenuUIManager : MonoBehaviour
     private Dictionary<string, Action<string>> messageHandlers;
     private string ip = "127.0.0.1";
 
+    private OptionController optionController;
+
     private void Awake()
     {
         InitializeMessageHandlers();
@@ -17,13 +19,11 @@ public class MainMenuUIManager : MonoBehaviour
 
     public void OnMultiplayerButtonClicked()
     {
-        Debug.Log("Multiplayer button clicked. Starting host...");
         NetworkManager.Instance.StartHost(8080);
     }
 
     public void OnSingleplayerButtonClicked()
     {
-        Debug.Log("Singleplayer button clicked. Starting offline mode...");
         if (GameManager.Instance != null)
         {
             GameManager.Instance.StartOffline();
@@ -36,8 +36,14 @@ public class MainMenuUIManager : MonoBehaviour
 
     public void OnSettingsButtonClicked()
     {
-        Debug.Log("Settings button clicked. Opening settings...");
-        // 여기에 설정 UI를 여는 코드를 추가합니다.
+        if (!optionController)
+            optionController = FindObjectOfType<OptionController>();
+        optionController.Toggle();
+    }
+
+    public void OnExitButtonClicked()
+    {
+        Application.Quit();
     }
 
     private void OnEnable()
@@ -99,9 +105,4 @@ public class MainMenuUIManager : MonoBehaviour
     }
 
     #endregion
-
-    public void ExitGame()
-    {
-        Application.Quit();
-    }
 }

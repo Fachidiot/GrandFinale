@@ -27,7 +27,7 @@ public class CustomSteamManager : MonoBehaviour
             {
                 PlayerName = SteamFriends.GetPersonaName();
                 IsSteamInitialized = true;
-                Debug.Log($"Steam Initialized. Player Name: {PlayerName}");
+                Debug.Log($"[CustomSteamManager] Steam Initialized. Player Name: {PlayerName}");
             }
             else
             {

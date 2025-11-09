@@ -11,10 +11,9 @@ public class SteamInviteController : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (playerInputs.GetInteract() && other.CompareTag("Player"))
         {
-            if (playerInputs.GetInteract())
-                OnInviteFriends();
+            OnInviteFriends();
         }
     }
 

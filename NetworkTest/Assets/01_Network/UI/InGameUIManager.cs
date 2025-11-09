@@ -39,9 +39,4 @@ public class InGameUIManager : MonoBehaviour
 
         ammoCountText.text = weaponController.GETCurrentWeapon.CurrentAmmo.ToString();
     }
-
-    public void OnLeaveRoomClicked()
-    {
-        SceneManager.LoadScene("ConnectionScene");
-    }
 }

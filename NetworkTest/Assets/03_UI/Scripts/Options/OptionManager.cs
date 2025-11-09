@@ -310,15 +310,6 @@ public class OptionManager : MonoBehaviour
             }
         }
     }
-
-
-    public void OnLeaveRoomClicked()
-    {
-        if (NetworkManager.Instance != null)
-        {
-            NetworkManager.Instance.Disconnect();
-        }
-    }
 }
 
 [Serializable]
