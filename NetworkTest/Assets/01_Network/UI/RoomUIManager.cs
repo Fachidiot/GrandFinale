@@ -29,23 +29,26 @@ public class RoomUIManager : MonoBehaviour
     private void OnEnable()
     {
         NetworkManager.OnMessageReceived += HandleServerMessage;
+        NetworkManager.OnDisconnected += HandleDisconnection;
     }
 
     private void OnDisable()
     {
         NetworkManager.OnMessageReceived -= HandleServerMessage;
+        NetworkManager.OnDisconnected -= HandleDisconnection;
     }
 
-    private void SendNickname()
+    private void HandleDisconnection()
     {
-        string nickname = CustomSteamManager.Instance.PlayerName;
-        JObject msg = new JObject
-        {
-            { "type", "set_nickname" },
-            { "nickname", nickname }
-        };
-        string jsonMessage = msg.ToString(Formatting.None);
-        NetworkManager.Instance.SendTCPMessage(jsonMessage);
+        // This could be called on the host when they disconnect themselves,
+        // or on the client when the connection to the host is lost.
+        Debug.Log("[RoomUIManager] Disconnected. Returning to ConnectionScene.");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("ConnectionScene");
+    }
+
+    private void RequestRoomInfo()
+    {
+        Debug.Log("[RoomUIManager] Sending room info request to server.");
     }
 
     private void HandleServerMessage(string jsonMsg)

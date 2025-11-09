@@ -111,13 +111,24 @@ public class ServerRoomManager : MonoBehaviour
             if (!playersInRoom.Any(p => p.player_id == hostInfo.player_id))
             {
                 playersInRoom.Add(hostInfo);
-                Debug.Log($"Host '{hostInfo.nickname}' added to room.");
-            }
-    
-            // Always broadcast the current state when this is called.
-            // This ensures that if a new UI manager requests the state, it gets it.
+        Debug.Log($"Host '{hostInfo.nickname}' added to room.");
+        BroadcastRoomUpdate();
+    }
+
+    public void RemovePlayer(string playerId)
+    {
+        if (string.IsNullOrEmpty(playerId)) return;
+
+        PlayerInfo playerToRemove = playersInRoom.FirstOrDefault(p => p.player_id == playerId);
+        if (playerToRemove != null)
+        {
+            playersInRoom.Remove(playerToRemove);
+            Debug.Log($"[ServerRoomManager] Player {playerId} removed from room.");
             BroadcastRoomUpdate();
-        }    public void ClearRoom()
+        }
+    }
+
+    public void ClearRoom()
     {
         playersInRoom.Clear();
         Debug.Log("[ServerRoomManager] Room player list cleared.");

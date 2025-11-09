@@ -137,6 +137,7 @@ public class NetworkManager : MonoBehaviour
         {
             while (udpDataQueue.TryDequeue(out byte[] data))
             {
+                Debug.Log($"[NetworkManager] Client received UDP packet of size: {data.Length}");
                 var gameState = NetworkGameState.FromBytes(data);
                 NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
             }
@@ -174,6 +175,7 @@ public class NetworkManager : MonoBehaviour
         }
 
         byte[] gameStateBytes = gameState.ToByteArray();
+        Debug.Log($"[NetworkManager] Host sending UDP game state. Size: {gameStateBytes.Length}");
         SendUDPMessage(gameStateBytes);
     }
 
@@ -556,8 +558,9 @@ public class NetworkManager : MonoBehaviour
             }
         }
         // Handle client disconnection
-        connectedClients.Remove(client);
         Debug.Log($"Client {client.PlayerId} disconnected.");
+        ServerRoomManager.Instance?.RemovePlayer(client.PlayerId);
+        connectedClients.Remove(client);
     }
 
     private async Task ListenForTcpMessages()
@@ -608,21 +611,22 @@ public class NetworkManager : MonoBehaviour
         }
         else if (Mode == NetworkMode.Host)
         {
-            // Enqueue the message for local processing on the host
-            tcpMessageQueue.Enqueue((null, message));
-
-            // Broadcast to all connected clients
-            foreach (var client in connectedClients)
-            {
-                if (client.Writer != null)
-                {
-                    client.Writer.WriteLine(message);
-                    client.Writer.Flush();
+                    // Enqueue the message for local processing on the host
+                    tcpMessageQueue.Enqueue((null, message));
+            
+                    // Broadcast to all connected clients
+                    Debug.Log($"[NetworkManager] Host broadcasting TCP message to {connectedClients.Count} clients.");
+                    foreach (var client in connectedClients)
+                    {
+                        if (client.Writer != null)
+                        {
+                            Debug.Log($"[NetworkManager] Sending to client {client.PlayerId}: {message}");
+                            client.Writer.WriteLine(message);
+                            client.Writer.Flush();
+                        }
+                    }
                 }
             }
-        }
-    }
-
     public void SendTCPMessageToClient(ClientConnection client, string message)
     {
         if (Mode != NetworkMode.Host || client == null || client.Writer == null) return;

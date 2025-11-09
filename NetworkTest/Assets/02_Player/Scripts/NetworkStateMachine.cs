@@ -81,7 +81,7 @@ public class NetworkStateMachine : MonoBehaviour
     // Called by GameManager to process events received from the server
     public void OnNetworkEvent(Newtonsoft.Json.Linq.JObject eventData)
     {
-        string eventName = eventData["event"]?.ToString();
+        string eventName = eventData["action"]?.ToString();
 
         switch (eventName)
         {
