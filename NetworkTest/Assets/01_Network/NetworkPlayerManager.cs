@@ -151,6 +151,8 @@ public class NetworkPlayerManager : MonoBehaviour
                 if (steamId == NetworkManager.Instance.PlayerId)
                     continue;
 
+                Debug.Log($"Client applying state to ID {playerState.playerId}, Pos={playerState.position}");
+
                 var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
                 var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
                 var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);
