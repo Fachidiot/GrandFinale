@@ -159,7 +159,9 @@ public class NetworkManager : MonoBehaviour
         var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
         
         byte byteId;
-        if (Mode == NetworkMode.Host)
+        // Use the existence of ServerRoomManager as the definitive check for being the host.
+        // This is more robust than the Mode enum which was behaving unpredictably in builds.
+        if (ServerRoomManager.Instance != null)
         {
             byte.TryParse(ServerRoomManager.Instance.GetPlayerId(steamId), out byteId);
         }
