@@ -241,15 +241,16 @@ public class NetworkPlayerManager : MonoBehaviour
                         continue;
                     }
         
-                    if (players.TryGetValue(steamId, out GameObject playerObject))
-                    {
-                        if (steamId == NetworkManager.Instance.PlayerId)
-                            continue;
-        
-                        var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-                        var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
-                        var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);
-        
+                                if (players.TryGetValue(steamId, out GameObject playerObject))
+                                {
+                                    if (steamId == NetworkManager.Instance.PlayerId)
+                                        continue;
+                    
+                                    Debug.Log($"Client applying state to ID {playerState.playerId}, Pos={playerState.position}");
+                    
+                                    var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
+                                    var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
+                                    var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);        
                         if (bodySync != null)
                         {
                             bodySync.OnTransformReceived(playerState.position, playerState.rotation);
@@ -307,12 +308,12 @@ public class NetworkPlayerManager : MonoBehaviour
 
     public byte GetMyByteId()
     {
-        Debug.Log($"GetMyByteId called. Dictionary count: {byteIdToSteamId.Count}");
         foreach(var entry in byteIdToSteamId)
         {
             if (ulong.TryParse(entry.Value, out ulong steamIdUlong))
             {
                 CSteamID steamId = new CSteamID(steamIdUlong);
+                Debug.Log($"GetMyByteId: Comparing map CSteamID {steamId.m_SteamID} with my CSteamID {NetworkManager.Instance.selfSteamId.m_SteamID}");
                 if (steamId == NetworkManager.Instance.selfSteamId)
                 {
                     return entry.Key;
