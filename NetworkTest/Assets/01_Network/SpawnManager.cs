@@ -14,7 +14,6 @@ public class SpawnManager : MonoBehaviour
     public float spawnInterval = 1f;
 
     private int currentWave = 0;
-    private bool waveInProgress = false;
 
     void Start()
     {
@@ -49,13 +48,11 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnWave()
     {
-        waveInProgress = true;
         for (int i = 0; i < monstersPerWave; i++)
         {
             SpawnMonster();
             yield return new WaitForSeconds(spawnInterval);
         }
-        waveInProgress = false;
         Debug.Log($"Wave {currentWave} finished spawning.");
     }
 

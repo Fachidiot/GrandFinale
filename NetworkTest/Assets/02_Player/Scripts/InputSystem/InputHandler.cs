@@ -120,9 +120,13 @@ public class InputHandler : MonoBehaviour
 
     void TryShoot()
     {
-        // Prevent shooting while sprinting
-        if (bodyTiltInSprint.standState.isSprint) return;
+        if (bodyTiltInSprint == null)
+            return;
+        if (bodyTiltInSprint.standState.isSprint)
+            return;
 
+        if (weaponController == null)
+            return;
         if (!weaponController.GETCurrentWeapon)
             return;
 

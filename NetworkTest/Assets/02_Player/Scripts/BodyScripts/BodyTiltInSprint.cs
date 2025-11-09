@@ -14,7 +14,7 @@ public class BodyTiltInSprint : MonoBehaviour
 
     public float mouseXMove;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         standState = characterMove.moveState;
     }

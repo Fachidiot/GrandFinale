@@ -100,10 +100,10 @@ public class NetworkManager : MonoBehaviour
         if (!IsConnected || NetworkPlayerManager.Instance == null || ServerRoomManager.Instance == null) return;
 
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
-        PlayerState myState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
-
+        
         if (Mode == NetworkMode.Host)
         {
+            PlayerState myState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
             string myByteIdStr = ServerRoomManager.Instance.GetPlayerId(selfSteamId);
             if (byte.TryParse(myByteIdStr, out byte myByteId))
             {
@@ -125,12 +125,16 @@ public class NetworkManager : MonoBehaviour
         }
         else if (Mode == NetworkMode.Client)
         {
-            byte[] stateBytes = myState.ToByteArray();
-            byte[] message = new byte[stateBytes.Length + 1];
-            message[0] = (byte)MessageType.PlayerState;
-            Buffer.BlockCopy(stateBytes, 0, message, 1, stateBytes.Length);
+            PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
 
-            SendP2PMessage(lobbyHostID, message, EP2PSend.k_EP2PSendUnreliable);
+            if (playerState.playerId == 255) return;
+
+            byte[] stateBytes = playerState.ToByteArray();
+            byte[] messageBytes = new byte[stateBytes.Length + 1];
+            messageBytes[0] = (byte)MessageType.PlayerState;
+            Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
+            
+            SendP2PMessage(lobbyHostID, messageBytes, EP2PSend.k_EP2PSendUnreliable);
         }
     }
 
@@ -210,7 +214,7 @@ public class NetworkManager : MonoBehaviour
         
         lobbyHostID = selfSteamId;
         IsConnected = true;
-        OnConnected?.Invoke();
+        // OnConnected?.Invoke(); // Removed to prevent duplicate calls
         
         if (ServerRoomManager.Instance == null)
         {
@@ -278,12 +282,10 @@ public class NetworkManager : MonoBehaviour
             
             if (Mode == NetworkMode.Host)
             {
-                // Host removes the player who left
                 ServerRoomManager.Instance?.RemovePlayer(userChanged);
             }
             else if (Mode == NetworkMode.Client)
             {
-                // Client checks if the host was the one who left
                 if (userChanged == lobbyHostID)
                 {
                     Debug.LogError("Host has left the lobby. Disconnecting.");
@@ -381,10 +383,8 @@ public class NetworkManager : MonoBehaviour
         message[0] = (byte)MessageType.JsonMessage;
         Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
         
-        // Broadcast to remote peers
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
 
-        // Process locally for the host
         if (Mode == NetworkMode.Host)
         {
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
