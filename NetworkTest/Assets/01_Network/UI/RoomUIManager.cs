@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -40,15 +41,25 @@ public class RoomUIManager : MonoBehaviour
 
     private void HandleDisconnection()
     {
-        // This could be called on the host when they disconnect themselves,
-        // or on the client when the connection to the host is lost.
         Debug.Log("[RoomUIManager] Disconnected. Returning to ConnectionScene.");
-        UnityEngine.SceneManagement.SceneManager.LoadScene("ConnectionScene");
+        SceneManager.LoadScene("ConnectionScene");
     }
 
-    private void RequestRoomInfo()
+    private void SendNickname()
     {
-        Debug.Log("[RoomUIManager] Sending room info request to server.");
+        if (NetworkManager.Instance.Mode != NetworkMode.Client) return;
+
+        string nickname = CustomSteamManager.Instance.PlayerName;
+
+        JObject msg = new JObject
+        {
+            { "type", "set_nickname" },
+            { "nickname", nickname }
+        };
+
+        string jsonMessage = msg.ToString(Formatting.None);
+        NetworkManager.Instance.SendTCPMessage(jsonMessage);
+        Debug.Log($"Sent nickname message: {jsonMessage}");
     }
 
     private void HandleServerMessage(string jsonMsg)

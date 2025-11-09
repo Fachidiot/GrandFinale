@@ -105,16 +105,19 @@ public class ServerRoomManager : MonoBehaviour
         BroadcastRoomUpdate();
     }
 
-        public void AddHostPlayer(PlayerInfo hostInfo)
-        {
-            // If player is not in the list, add them.
-            if (!playersInRoom.Any(p => p.player_id == hostInfo.player_id))
+            public void AddHostPlayer(PlayerInfo hostInfo)
             {
-                playersInRoom.Add(hostInfo);
-        Debug.Log($"Host '{hostInfo.nickname}' added to room.");
-        BroadcastRoomUpdate();
-    }
-
+                // If player is not in the list, add them.
+                if (!playersInRoom.Any(p => p.player_id == hostInfo.player_id))
+                {
+                    playersInRoom.Add(hostInfo);
+                    Debug.Log($"Host '{hostInfo.nickname}' added to room.");
+                }
+        
+                // Always broadcast the current state when this is called.
+                // This ensures that if a new UI manager requests the state, it gets it.
+                BroadcastRoomUpdate();
+            }
     public void RemovePlayer(string playerId)
     {
         if (string.IsNullOrEmpty(playerId)) return;
