@@ -128,18 +128,7 @@ public class NetworkPlayerManager : MonoBehaviour
                 var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
                 // In the new model, we only receive one position and rotation for the body.
                 // The camera rotation is handled locally or via a separate mechanism if needed.
-                var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
-                var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);
-
-                if (bodySync != null)
-                {
-                    bodySync.OnTransformReceived(playerState.position, playerState.rotation);
-                }
-                if (cameraSync != null)
-                {
-                    // We only care about rotation for the camera sync component
-                    cameraSync.OnTransformReceived(cameraSync.transform.position, playerState.cameraRotation);
-                }
+                transformSyncs[0].OnTransformReceived(playerState.position, playerState.rotation);
 
                 // --- Handle Animator Sync ---
                 var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();

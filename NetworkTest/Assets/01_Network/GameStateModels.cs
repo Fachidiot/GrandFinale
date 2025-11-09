@@ -20,54 +20,10 @@ public struct PlayerState
     public byte playerId; // Assuming player IDs can be mapped to bytes on the host
     public Vector3 position;
     public Quaternion rotation;
-    public Quaternion cameraRotation; // For first-person camera pitch
     public byte animationMask; // Packed booleans for animations
     public float moveX;
     public float moveY;
     public int weaponId;
-
-    public byte[] ToByteArray()
-    {
-        using (MemoryStream stream = new MemoryStream())
-        using (BinaryWriter writer = new BinaryWriter(stream))
-        {
-            writer.Write(playerId);
-            writer.Write(position.x);
-            writer.Write(position.y);
-            writer.Write(position.z);
-            writer.Write(rotation.x);
-            writer.Write(rotation.y);
-            writer.Write(rotation.z);
-            writer.Write(rotation.w);
-            writer.Write(cameraRotation.x);
-            writer.Write(cameraRotation.y);
-            writer.Write(cameraRotation.z);
-            writer.Write(cameraRotation.w);
-            writer.Write(animationMask);
-            writer.Write(moveX);
-            writer.Write(moveY);
-            writer.Write(weaponId);
-            return stream.ToArray();
-        }
-    }
-
-    public static PlayerState FromBytes(byte[] data)
-    {
-        var state = new PlayerState();
-        using (MemoryStream stream = new MemoryStream(data))
-        using (BinaryReader reader = new BinaryReader(stream))
-        {
-            state.playerId = reader.ReadByte();
-            state.position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            state.rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            state.cameraRotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            state.animationMask = reader.ReadByte();
-            state.moveX = reader.ReadSingle();
-            state.moveY = reader.ReadSingle();
-            state.weaponId = reader.ReadInt32();
-        }
-        return state;
-    }
 }
 
 // Optimized data structure for a single monster's state
@@ -103,10 +59,6 @@ public class NetworkGameState
                 writer.Write(p.rotation.y);
                 writer.Write(p.rotation.z);
                 writer.Write(p.rotation.w);
-                writer.Write(p.cameraRotation.x);
-                writer.Write(p.cameraRotation.y);
-                writer.Write(p.cameraRotation.z);
-                writer.Write(p.cameraRotation.w);
                 writer.Write(p.animationMask);
                 writer.Write(p.moveX);
                 writer.Write(p.moveY);
@@ -148,7 +100,6 @@ public class NetworkGameState
                     playerId = reader.ReadByte(),
                     position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
                     rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    cameraRotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
                     animationMask = reader.ReadByte(),
                     moveX = reader.ReadSingle(),
                     moveY = reader.ReadSingle(),

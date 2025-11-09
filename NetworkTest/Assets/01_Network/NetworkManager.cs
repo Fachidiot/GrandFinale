@@ -37,9 +37,7 @@ public class NetworkManager : MonoBehaviour
 
     // --- Queues for thread-safe message handling in Update() ---
     private readonly ConcurrentQueue<(ClientConnection, string)> tcpMessageQueue = new ConcurrentQueue<(ClientConnection, string)>();
-    
-    // --- Host-side state cache ---
-    private readonly ConcurrentDictionary<byte, PlayerState> receivedPlayerStates = new ConcurrentDictionary<byte, PlayerState>();
+    private readonly ConcurrentQueue<byte[]> udpDataQueue = new ConcurrentQueue<byte[]>();
 
     // --- Client-Specific Fields ---
     private TcpClient tcpClient;
@@ -126,85 +124,44 @@ public class NetworkManager : MonoBehaviour
             }
             HandleServerMessage(client, jsonMsg);
         }
+
+        // Client-side processing of UDP messages
+        if (Mode == NetworkMode.Client)
+        {
+            while (udpDataQueue.TryDequeue(out byte[] data))
+            {
+                var gameState = NetworkGameState.FromBytes(data);
+                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+            }
+        }
     }
 
     private void FixedUpdate()
     {
-        if (NetworkPlayerManager.Instance == null || NetworkPlayerManager.Instance.Players.Count == 0) return;
+        // Host-side: broadcast its own state
+        if (Mode != NetworkMode.Host) return;
+        if (NetworkPlayerManager.Instance == null) return;
+        if (!NetworkPlayerManager.Instance.Players.TryGetValue("0", out GameObject hostGo)) return;
 
-        if (Mode == NetworkMode.Host)
+        var gameState = new NetworkGameState();
+        var animSync = hostGo.GetComponentInChildren<NetworkAnimatorSync>();
+
+        var playerState = new PlayerState
         {
-            var authoritativeState = new NetworkGameState();
-            foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
-            {
-                string playerIdStr = playerEntry.Key;
-                GameObject playerGo = playerEntry.Value;
-                if (!byte.TryParse(playerIdStr, out byte playerId)) continue;
+            playerId = 0,
+            position = hostGo.transform.position,
+            rotation = hostGo.transform.rotation,
+            // Other fields can be added later
+        };
+        gameState.players.Add(playerState);
 
-                PlayerState playerState;
-                if (playerId == 0) // Host reads its own state directly
-                {
-                    var animSync = playerGo.GetComponentInChildren<NetworkAnimatorSync>();
-                    var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
-                    playerState = new PlayerState
-                    {
-                        playerId = 0,
-                        position = playerGo.transform.position,
-                        rotation = playerGo.transform.rotation,
-                        cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
-                        moveX = animSync != null ? animSync.GetHorizontal() : 0,
-                        moveY = animSync != null ? animSync.GetVertical() : 0,
-                        animationMask = animSync != null ? animSync.GetAnimationMask() : (byte)0,
-                        weaponId = playerGo.GetComponentInChildren<WeaponController>()?.activeID ?? 0
-                    };
-                }
-                else // For clients, use the last state they sent us
-                {
-                    if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
-                    {
-                        // If we haven't received any state from this client yet, send a default state
-                        playerState = new PlayerState { playerId = playerId, position = playerGo.transform.position, rotation = playerGo.transform.rotation, cameraRotation = Quaternion.identity };
-                    }
-                }
-                authoritativeState.players.Add(playerState);
-            }
-
-            byte[] gameStateBytes = authoritativeState.ToByteArray();
-            SendUDPMessage(gameStateBytes);
-        }
-        else if (Mode == NetworkMode.Client)
-        {
-            // Client-side: send its own state to the host
-            if (string.IsNullOrEmpty(PlayerId)) return;
-            if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
-
-            var animSync = myPlayerGo.GetComponentInChildren<NetworkAnimatorSync>();
-            var camTransformSync = myPlayerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
-            var playerState = new PlayerState
-            {
-                playerId = byte.Parse(PlayerId),
-                position = myPlayerGo.transform.position,
-                rotation = myPlayerGo.transform.rotation,
-                cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
-                moveX = animSync != null ? animSync.GetHorizontal() : 0,
-                moveY = animSync != null ? animSync.GetVertical() : 0,
-                animationMask = animSync != null ? animSync.GetAnimationMask() : (byte)0,
-                weaponId = myPlayerGo.GetComponentInChildren<WeaponController>()?.activeID ?? 0
-            };
-
-            // Prefix the data with a message type byte (1 for client state update)
-            byte[] stateBytes = playerState.ToByteArray();
-            byte[] messageBytes = new byte[stateBytes.Length + 1];
-            messageBytes[0] = 1; // Message Type 1: Client State Update
-            Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
-            
-            SendUDPMessage(messageBytes);
-        }
+        byte[] gameStateBytes = gameState.ToByteArray();
+        SendUDPMessage(gameStateBytes);
     }
 
     private void InitializeMessageHandlers()
     {
-        messageHandlers = new Dictionary<string, Action<ClientConnection, JObject>> 
+        messageHandlers = new Dictionary<string, Action<ClientConnection, JObject>>
         {
             { "player_action", HandlePlayerAction },
             { "assign_id", HandleAssignId }
@@ -328,7 +285,7 @@ public class NetworkManager : MonoBehaviour
             udpClient = new UdpClient(0);
             serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port + 1);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
-            byte[] handshake = new byte[1] { 0 }; // Message Type 0: Handshake
+            byte[] handshake = new byte[1];
             udpClient.Send(handshake, handshake.Length, serverUdpEndPoint);
             IsConnected = true;
             OnConnected?.Invoke();
@@ -517,29 +474,15 @@ public class NetworkManager : MonoBehaviour
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
                 if (Mode == NetworkMode.Host)
                 {
-                    byte messageType = result.Buffer[0];
-                    if (messageType == 0) // Handshake
+                    var client = connectedClients.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint is IPEndPoint tcpEp && tcpEp.Address.Equals(result.RemoteEndPoint.Address));
+                    if (client != null && client.UdpEndPoint == null)
                     {
-                        var client = connectedClients.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint is IPEndPoint tcpEp && tcpEp.Address.Equals(result.RemoteEndPoint.Address));
-                        if (client != null && client.UdpEndPoint == null)
-                        {
-                            client.UdpEndPoint = result.RemoteEndPoint;
-                            Debug.Log($"[NetworkManager] Learned UDP endpoint for client {client.PlayerId}: {result.RemoteEndPoint}");
-                        }
-                    }
-                    else if (messageType == 1) // Client State Update
-                    {
-                        byte[] stateBytes = new byte[result.Buffer.Length - 1];
-                        Buffer.BlockCopy(result.Buffer, 1, stateBytes, 0, stateBytes.Length);
-                        PlayerState state = PlayerState.FromBytes(stateBytes);
-                        receivedPlayerStates[state.playerId] = state;
+                        client.UdpEndPoint = result.RemoteEndPoint;
+                        Debug.Log($"[NetworkManager] Learned UDP endpoint for client {client.PlayerId}: {result.RemoteEndPoint}");
+                        continue;
                     }
                 }
-                else // Client
-                {
-                    var gameState = NetworkGameState.FromBytes(result.Buffer);
-                    NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
-                }
+                udpDataQueue.Enqueue(result.Buffer);
             }
             catch (Exception e)
             {
