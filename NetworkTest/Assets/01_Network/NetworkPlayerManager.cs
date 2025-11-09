@@ -216,6 +216,7 @@ public class NetworkPlayerManager : MonoBehaviour
             if (ulong.TryParse(entry.Value, out ulong steamIdUlong))
             {
                 CSteamID steamId = new CSteamID(steamIdUlong);
+                Debug.Log($"RAW COMPARE: Map ulong = {steamId.m_SteamID} vs My ulong = {NetworkManager.Instance.selfSteamId.m_SteamID}");
                 if (steamId == NetworkManager.Instance.selfSteamId)
                 {
                     return entry.Key;
