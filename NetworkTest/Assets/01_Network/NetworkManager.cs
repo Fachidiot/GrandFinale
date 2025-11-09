@@ -18,14 +18,13 @@ public enum NetworkMode
     Host
 }
 
-// A simple class to hold information about connected clients for the host
 public class ClientConnection
 {
     public TcpClient TcpClient { get; set; }
     public StreamWriter Writer { get; set; }
     public StreamReader Reader { get; set; }
-    public IPEndPoint UdpEndPoint { get; set; } // We need to learn this endpoint
-    public string PlayerId { get; set; } // Can be a string or a byte
+    public IPEndPoint UdpEndPoint { get; set; }
+    public string PlayerId { get; set; }
 }
 
 public class NetworkManager : MonoBehaviour
@@ -35,39 +34,33 @@ public class NetworkManager : MonoBehaviour
     public NetworkMode Mode { get; private set; } = NetworkMode.None;
     public bool IsConnected { get; private set; }
 
-    // --- Queues for thread-safe message handling in Update() ---
     private readonly ConcurrentQueue<(ClientConnection, string)> tcpMessageQueue = new ConcurrentQueue<(ClientConnection, string)>();
-    private readonly ConcurrentQueue<byte[]> udpDataQueue = new ConcurrentQueue<byte[]>();
+    private readonly ConcurrentDictionary<byte, PlayerState> receivedPlayerStates = new ConcurrentDictionary<byte, PlayerState>();
 
-    // --- Client-Specific Fields ---
     private TcpClient tcpClient;
     private StreamWriter writer;
     private StreamReader reader;
     private Task tcpListeningTask;
     private IPEndPoint serverUdpEndPoint;
 
-    // --- Host-Specific Fields ---
     private TcpListener tcpListener;
     private List<ClientConnection> connectedClients = new List<ClientConnection>();
     private Task hostTcpListenTask;
 
-    // --- Common Fields ---
     private UdpClient udpClient;
     private Task udpListeningTask;
 
-    // --- Events ---
     public static event Action OnConnected;
     public static event Action<string> OnConnectionFailed;
     public static event Action OnDisconnected;
-    public static event Action<string> OnMessageReceived; // For TCP messages primarily
-    public static event Action<ClientConnection, string> OnClientMessageReceived; // Passes the client connection
+    public static event Action<string> OnMessageReceived;
+    public static event Action<ClientConnection, string> OnClientMessageReceived;
 
     public string PlayerId { get; private set; }
 
     [Header("Connection Settings")]
     public string hostIpAddress = "127.0.0.1";
 
-    // --- Steam Lobby Fields ---
     private CSteamID m_CurrentLobbyID;
     private Callback<LobbyCreated_t> m_LobbyCreated;
     private Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
@@ -88,7 +81,6 @@ public class NetworkManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
         InitializeMessageHandlers();
     }
 
@@ -124,46 +116,77 @@ public class NetworkManager : MonoBehaviour
             }
             HandleServerMessage(client, jsonMsg);
         }
-
-        // Client-side processing of UDP messages
-        if (Mode == NetworkMode.Client)
-        {
-            while (udpDataQueue.TryDequeue(out byte[] data))
-            {
-                Debug.Log($"[NetworkManager] Client received UDP packet of size: {data.Length}");
-                var gameState = NetworkGameState.FromBytes(data);
-                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
-            }
-        }
     }
 
     private void FixedUpdate()
     {
-        // Host-side: broadcast its own state
-        if (Mode != NetworkMode.Host) return;
-        if (NetworkPlayerManager.Instance == null) return;
-        if (!NetworkPlayerManager.Instance.Players.TryGetValue("0", out GameObject hostGo)) return;
+        if (NetworkPlayerManager.Instance == null || NetworkPlayerManager.Instance.Players.Count == 0) return;
 
-        var gameState = new NetworkGameState();
-        var animSync = hostGo.GetComponentInChildren<NetworkAnimatorSync>();
-
-        var playerState = new PlayerState
+        if (Mode == NetworkMode.Host)
         {
-            playerId = 0,
-            position = hostGo.transform.position,
-            rotation = hostGo.transform.rotation,
-            // Other fields can be added later
-        };
-        gameState.players.Add(playerState);
+            var authoritativeState = new NetworkGameState();
+            foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
+            {
+                string playerIdStr = playerEntry.Key;
+                GameObject playerGo = playerEntry.Value;
+                if (!byte.TryParse(playerIdStr, out byte playerId)) continue;
 
-        byte[] gameStateBytes = gameState.ToByteArray();
-        Debug.Log($"[NetworkManager] Host sending UDP game state. Size: {gameStateBytes.Length}");
-        SendUDPMessage(gameStateBytes);
+                PlayerState playerState;
+                if (playerId == 0) // Host reads its own state directly
+                {
+                    playerState = GetPlayerStateFromGameObject(playerGo, 0);
+                }
+                else // For clients, use the last state they sent us
+                {
+                    if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
+                    {
+                        playerState = new PlayerState { playerId = playerId, position = playerGo.transform.position, rotation = playerGo.transform.rotation };
+                    }
+                }
+                authoritativeState.players.Add(playerState);
+            }
+
+            byte[] gameStateBytes = authoritativeState.ToByteArray();
+            SendUDPMessage(gameStateBytes);
+        }
+        else if (Mode == NetworkMode.Client)
+        {
+            if (string.IsNullOrEmpty(PlayerId)) return;
+            if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
+
+            PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, byte.Parse(PlayerId));
+
+            byte[] stateBytes = playerState.ToByteArray();
+            byte[] messageBytes = new byte[stateBytes.Length + 1];
+            messageBytes[0] = 1; // Message Type 1: Client State Update
+            Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
+            
+            SendUDPMessage(messageBytes);
+        }
+    }
+
+    private PlayerState GetPlayerStateFromGameObject(GameObject playerGo, byte playerId)
+    {
+        var animSync = playerGo.GetComponentInChildren<NetworkAnimatorSync>();
+        var weaponCtrl = playerGo.GetComponentInChildren<WeaponController>();
+        var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
+        
+        return new PlayerState
+        {
+            playerId = playerId,
+            position = playerGo.transform.position,
+            rotation = playerGo.transform.rotation,
+            cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
+            animationMask = animSync != null ? animSync.GetAnimationMask() : (byte)0,
+            moveX = animSync != null ? animSync.GetHorizontal() : 0,
+            moveY = animSync != null ? animSync.GetVertical() : 0,
+            weaponId = weaponCtrl != null ? weaponCtrl.activeID : 0
+        };
     }
 
     private void InitializeMessageHandlers()
     {
-        messageHandlers = new Dictionary<string, Action<ClientConnection, JObject>>
+        messageHandlers = new Dictionary<string, Action<ClientConnection, JObject>> 
         {
             { "player_action", HandlePlayerAction },
             { "assign_id", HandleAssignId }
@@ -267,7 +290,7 @@ public class NetworkManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[NetworkManager] Failed to start host: {e.Message}");
+            Debug.LogError("[NetworkManager] Failed to start host: " + e.Message);
             Disconnect();
         }
     }
@@ -287,7 +310,7 @@ public class NetworkManager : MonoBehaviour
             udpClient = new UdpClient(0);
             serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port + 1);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
-            byte[] handshake = new byte[1];
+            byte[] handshake = new byte[1] { 0 }; // Message Type 0: Handshake
             udpClient.Send(handshake, handshake.Length, serverUdpEndPoint);
             IsConnected = true;
             OnConnected?.Invoke();
@@ -320,6 +343,7 @@ public class NetworkManager : MonoBehaviour
         }
         foreach (var client in connectedClients) client.TcpClient.Close();
         connectedClients.Clear();
+        receivedPlayerStates.Clear();
         Mode = NetworkMode.None;
         Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
@@ -476,15 +500,30 @@ public class NetworkManager : MonoBehaviour
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
                 if (Mode == NetworkMode.Host)
                 {
-                    var client = connectedClients.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint is IPEndPoint tcpEp && tcpEp.Address.Equals(result.RemoteEndPoint.Address));
-                    if (client != null && client.UdpEndPoint == null)
+                    if (result.Buffer.Length == 0) continue;
+                    byte messageType = result.Buffer[0];
+                    if (messageType == 0) // Handshake
                     {
-                        client.UdpEndPoint = result.RemoteEndPoint;
-                        Debug.Log($"[NetworkManager] Learned UDP endpoint for client {client.PlayerId}: {result.RemoteEndPoint}");
-                        continue;
+                        var client = connectedClients.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint is IPEndPoint tcpEp && tcpEp.Address.Equals(result.RemoteEndPoint.Address));
+                        if (client != null && client.UdpEndPoint == null)
+                        {
+                            client.UdpEndPoint = result.RemoteEndPoint;
+                            Debug.Log($"[NetworkManager] Learned UDP endpoint for client {client.PlayerId}: {result.RemoteEndPoint}");
+                        }
+                    }
+                    else if (messageType == 1) // Client State Update
+                    {
+                        byte[] stateBytes = new byte[result.Buffer.Length - 1];
+                        Buffer.BlockCopy(result.Buffer, 1, stateBytes, 0, stateBytes.Length);
+                        PlayerState state = PlayerState.FromBytes(stateBytes);
+                        receivedPlayerStates[state.playerId] = state;
                     }
                 }
-                udpDataQueue.Enqueue(result.Buffer);
+                else // Client
+                {
+                    var gameState = NetworkGameState.FromBytes(result.Buffer);
+                    NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+                }
             }
             catch (Exception e)
             {
