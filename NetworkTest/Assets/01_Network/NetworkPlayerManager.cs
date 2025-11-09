@@ -32,6 +32,7 @@ public class NetworkPlayerManager : MonoBehaviour
     // This function is now only for Lobby setup
     public void UpdatePlayerList(JArray playerList)
     {
+        Debug.Log($"[NetworkPlayerManager] Updating player list. Current player count in dictionary: {players.Count}");
         List<string> playerIdsInMessage = playerList.Select(p => p["player_id"].ToString()).ToList();
 
         // Remove players that are no longer in the list
@@ -51,6 +52,7 @@ public class NetworkPlayerManager : MonoBehaviour
             string playerId = playerInfo["player_id"].ToString();
             string nickname = playerInfo["nickname"]?.ToString();
 
+            Debug.Log($"[NetworkPlayerManager] Processing player ID: {playerId}. In dictionary? {players.ContainsKey(playerId)}");
             if (!players.ContainsKey(playerId))
             {
                 SpawnPlayer(playerId, Vector3.zero, nickname);

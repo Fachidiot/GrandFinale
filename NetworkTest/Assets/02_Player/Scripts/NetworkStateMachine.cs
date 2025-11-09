@@ -34,7 +34,7 @@ public class NetworkStateMachine : MonoBehaviour
             action = "shoot",
             player_id = NetworkManager.Instance.PlayerId
         };
-        string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(shootAction);
+        string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(shootAction, Newtonsoft.Json.Formatting.None);
         NetworkManager.Instance.SendTCPMessage(jsonMessage);
     }
 
@@ -52,7 +52,7 @@ public class NetworkStateMachine : MonoBehaviour
             weapon_id = weaponController.nextID,
             player_id = NetworkManager.Instance.PlayerId
         };
-        string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(weaponChangeAction);
+        string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(weaponChangeAction, Newtonsoft.Json.Formatting.None);
         NetworkManager.Instance.SendTCPMessage(jsonMessage);
     }
 
