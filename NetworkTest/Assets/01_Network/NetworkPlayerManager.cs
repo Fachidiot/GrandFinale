@@ -70,6 +70,14 @@ public class NetworkPlayerManager : MonoBehaviour
             }
         }
 
+        // --- DEBUG LOG ---
+        Debug.Log("[NetworkPlayerManager] Client ID Map Populated:");
+        foreach(var entry in byteIdToSteamId)
+        {
+            Debug.Log($" - ID: {entry.Key} -> SteamID: {entry.Value}");
+        }
+        // --- END DEBUG LOG ---
+
         List<string> currentPlayers = new List<string>(players.Keys);
         foreach (string steamId in currentPlayers)
         {
