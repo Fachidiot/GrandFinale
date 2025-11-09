@@ -211,12 +211,12 @@ public class NetworkPlayerManager : MonoBehaviour
 
     public byte GetMyByteId()
     {
+        Debug.Log($"GetMyByteId called. Dictionary count: {byteIdToSteamId.Count}");
         foreach(var entry in byteIdToSteamId)
         {
             if (ulong.TryParse(entry.Value, out ulong steamIdUlong))
             {
                 CSteamID steamId = new CSteamID(steamIdUlong);
-                Debug.Log($"RAW COMPARE: Map ulong = {steamId.m_SteamID} vs My ulong = {NetworkManager.Instance.selfSteamId.m_SteamID}");
                 if (steamId == NetworkManager.Instance.selfSteamId)
                 {
                     return entry.Key;
