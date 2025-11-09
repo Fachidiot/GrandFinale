@@ -137,11 +137,11 @@ public class NetworkManager : MonoBehaviour
                 {
                     if (receivedPlayerStates.TryGetValue(playerId, out playerState))
                     {
-                        Debug.Log($"Host FOUND state for ID {playerId}");
+    
                     }
                     else
                     {
-                        Debug.Log($"Host did NOT find state for ID {playerId}, using default.");
+    
                         continue;
                     }
                 }
@@ -164,7 +164,7 @@ public class NetworkManager : MonoBehaviour
 
             if (playerState.playerId == 255) return;
 
-            Debug.Log($"Client sending state: ID={playerState.playerId}, Pos={playerState.position}");
+
 
             byte[] stateBytes = playerState.ToByteArray();
             byte[] messageBytes = new byte[stateBytes.Length + 1];
@@ -361,7 +361,7 @@ public class NetworkManager : MonoBehaviour
             if (messageType == MessageType.PlayerState)
             {
                 PlayerState state = PlayerState.FromBytes(content);
-                Debug.Log($"Host received state: ID={state.playerId}, Pos={state.position}");
+
                 receivedPlayerStates[state.playerId] = state;
             }
             else if (messageType == MessageType.JsonMessage)
