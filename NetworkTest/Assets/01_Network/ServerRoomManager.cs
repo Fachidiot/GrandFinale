@@ -81,6 +81,14 @@ public class ServerRoomManager : MonoBehaviour
         // Store the ID in the connection object for future reference (e.g., disconnects)
         client.PlayerId = newPlayerId;
 
+        // Send the new client their assigned ID
+        JObject idMessage = new JObject
+        {
+            { "type", "assign_id" },
+            { "player_id", newPlayerId }
+        };
+        NetworkManager.Instance.SendTCPMessageToClient(client, idMessage.ToString(Formatting.None));
+
         PlayerInfo newPlayer = new PlayerInfo
         {
             player_id = newPlayerId,

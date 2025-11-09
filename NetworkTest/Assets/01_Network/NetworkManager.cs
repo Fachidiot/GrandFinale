@@ -143,8 +143,22 @@ public class NetworkManager : MonoBehaviour
     {
         messageHandlers = new Dictionary<string, Action<ClientConnection, JObject>>
         {
-            { "player_action", HandlePlayerAction }
+            { "player_action", HandlePlayerAction },
+            { "assign_id", HandleAssignId }
         };
+    }
+
+    private void HandleAssignId(ClientConnection client, JObject data)
+    {
+        // This is a client-only handler
+        if (Mode != NetworkMode.Client) return;
+
+        string assignedId = data["player_id"]?.ToString();
+        if (!string.IsNullOrEmpty(assignedId))
+        {
+            PlayerId = assignedId;
+            Debug.Log($"[NetworkManager] Client ID assigned: {PlayerId}");
+        }
     }
 
     private void HandleServerMessage(ClientConnection client, string jsonMsg)
@@ -569,6 +583,22 @@ public class NetworkManager : MonoBehaviour
                     client.Writer.Flush();
                 }
             }
+        }
+    }
+
+    public void SendTCPMessageToClient(ClientConnection client, string message)
+    {
+        if (Mode != NetworkMode.Host || client == null || client.Writer == null) return;
+
+        try
+        {
+            client.Writer.WriteLine(message);
+            client.Writer.Flush();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to send message to client {client.PlayerId}: {e.Message}");
+            // Consider handling client disconnection here
         }
     }
 

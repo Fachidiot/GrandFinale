@@ -52,10 +52,14 @@ public class NetworkPlayerManager : MonoBehaviour
             string playerId = playerInfo["player_id"].ToString();
             string nickname = playerInfo["nickname"]?.ToString();
 
-            Debug.Log($"[NetworkPlayerManager] Processing player ID: {playerId}. In dictionary? {players.ContainsKey(playerId)}");
             if (!players.ContainsKey(playerId))
             {
+                Debug.Log($"[NetworkPlayerManager] Player ID {playerId} is new. Spawning now.");
                 SpawnPlayer(playerId, Vector3.zero, nickname);
+            }
+            else
+            {
+                Debug.Log($"[NetworkPlayerManager] Player ID {playerId} already exists in dictionary. Skipping spawn.");
             }
         }
     }
