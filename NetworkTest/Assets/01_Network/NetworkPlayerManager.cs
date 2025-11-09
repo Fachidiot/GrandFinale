@@ -225,6 +225,7 @@ public class NetworkPlayerManager : MonoBehaviour
     {
         foreach(var entry in byteIdToSteamId)
         {
+            Debug.Log($"Comparing map value '{entry.Value}' with my ID '{NetworkManager.Instance.PlayerId}'");
             if (entry.Value == NetworkManager.Instance.PlayerId)
             {
                 return entry.Key;
