@@ -56,6 +56,13 @@ public class NetworkManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
+        }
+
+        if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
+        {
+            selfSteamId = SteamUser.GetSteamID();
+            PlayerId = selfSteamId.ToString();
         }
     }
 
@@ -63,9 +70,6 @@ public class NetworkManager : MonoBehaviour
     {
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
         {
-            selfSteamId = SteamUser.GetSteamID();
-            PlayerId = selfSteamId.ToString();
-
             m_LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
@@ -101,15 +105,12 @@ public class NetworkManager : MonoBehaviour
 
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
         
-        var authoritativeState = new NetworkGameState(); // Declared here
-
         if (Mode == NetworkMode.Host)
         {
+            var authoritativeState = new NetworkGameState();
             foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
             {
                 string steamIdStr = playerEntry.Key;
-                GameObject playerGo = playerEntry.Value;
-
                 CSteamID steamId = new CSteamID(ulong.Parse(steamIdStr));
                 string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
 
@@ -118,18 +119,13 @@ public class NetworkManager : MonoBehaviour
                 PlayerState playerState;
                 if (steamId == selfSteamId)
                 {
-                    playerState = GetPlayerStateFromGameObject(playerGo, selfSteamId);
+                    playerState = GetPlayerStateFromGameObject(playerEntry.Value, selfSteamId);
                 }
                 else
                 {
-                    if (receivedPlayerStates.TryGetValue(playerId, out playerState))
+                    if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
                     {
-                        Debug.Log($"Host FOUND state for ID {playerId}");
-                    }
-                    else
-                    {
-                        Debug.Log($"Host did NOT find state for ID {playerId}, using default.");
-                        playerState = new PlayerState { playerId = playerId, position = playerGo.transform.position, rotation = playerGo.transform.rotation };
+                        playerState = new PlayerState { playerId = playerId, position = playerEntry.Value.transform.position, rotation = playerEntry.Value.transform.rotation };
                     }
                 }
                 authoritativeState.players.Add(playerState);
@@ -147,8 +143,6 @@ public class NetworkManager : MonoBehaviour
             PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
 
             if (playerState.playerId == 255) return;
-
-            Debug.Log($"Client sending state: ID={playerState.playerId}, Pos={playerState.position}");
 
             byte[] stateBytes = playerState.ToByteArray();
             byte[] messageBytes = new byte[stateBytes.Length + 1];
@@ -235,7 +229,6 @@ public class NetworkManager : MonoBehaviour
         
         lobbyHostID = selfSteamId;
         IsConnected = true;
-        // OnConnected?.Invoke(); // Removed to prevent duplicate calls
         
         if (ServerRoomManager.Instance == null)
         {
@@ -363,7 +356,6 @@ public class NetworkManager : MonoBehaviour
             if (messageType == MessageType.PlayerState)
             {
                 PlayerState state = PlayerState.FromBytes(content);
-                Debug.Log($"Host received state: ID={state.playerId}, Pos={state.position}");
                 receivedPlayerStates[state.playerId] = state;
             }
             else if (messageType == MessageType.JsonMessage)
