@@ -35,6 +35,7 @@ public class NetworkManager : MonoBehaviour
     public bool IsConnected { get; private set; }
 
     private readonly ConcurrentQueue<(ClientConnection, string)> tcpMessageQueue = new ConcurrentQueue<(ClientConnection, string)>();
+    private readonly ConcurrentQueue<byte[]> udpDataQueue = new ConcurrentQueue<byte[]>();
     private readonly ConcurrentDictionary<byte, PlayerState> receivedPlayerStates = new ConcurrentDictionary<byte, PlayerState>();
 
     private TcpClient tcpClient;
@@ -106,6 +107,7 @@ public class NetworkManager : MonoBehaviour
 
     private void Update()
     {
+        // Process TCP messages on the main thread
         while (tcpMessageQueue.TryDequeue(out var item))
         {
             (ClientConnection client, string jsonMsg) = item;
@@ -115,6 +117,16 @@ public class NetworkManager : MonoBehaviour
                 continue;
             }
             HandleServerMessage(client, jsonMsg);
+        }
+
+        // Process UDP messages on the main thread for clients
+        if (Mode == NetworkMode.Client)
+        {
+            while (udpDataQueue.TryDequeue(out byte[] data))
+            {
+                var gameState = NetworkGameState.FromBytes(data);
+                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+            }
         }
     }
 
@@ -521,8 +533,8 @@ public class NetworkManager : MonoBehaviour
                 }
                 else // Client
                 {
-                    var gameState = NetworkGameState.FromBytes(result.Buffer);
-                    NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+                    // Enqueue for processing on the main thread
+                    udpDataQueue.Enqueue(result.Buffer);
                 }
             }
             catch (Exception e)
