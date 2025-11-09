@@ -32,7 +32,15 @@ public class ServerRoomManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        NetworkManager.OnJsonMessageReceived -= HandleClientJsonMessage;
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+        
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.OnJsonMessageReceived -= HandleClientJsonMessage;
+        }
     }
 
     private void HandleClientJsonMessage(CSteamID sender, string jsonMsg)

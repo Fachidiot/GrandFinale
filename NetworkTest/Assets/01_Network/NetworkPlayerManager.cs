@@ -70,26 +70,32 @@ public class NetworkPlayerManager : MonoBehaviour
                     }
                 }
         
-                List<string> currentPlayers = new List<string>(players.Keys);
-                foreach (string steamId in currentPlayers)
-                {
-                    if (!steamIdsInMessage.Contains(steamId))
-                    {
-                        Destroy(players[steamId]);
-                        players.Remove(steamId);
-                    }
-                }
-        
-                foreach (JObject playerInfoJson in playerList)
-                {
-                    PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-                    if (!players.ContainsKey(playerInfo.steam_id))
-                    {
-                        SpawnPlayer(playerInfo);
-                    }
-                }
-            }
-        
+                        List<string> currentPlayers = new List<string>(players.Keys);
+                        foreach (string steamId in currentPlayers)
+                        {
+                            if (!steamIdsInMessage.Contains(steamId))
+                            {
+                                Destroy(players[steamId]);
+                                players.Remove(steamId);
+                            }
+                        }
+                
+                        // After populating the map, find our own ID and set it in the NetworkManager
+                        byte myId = GetMyByteId();
+                        if (myId != 255)
+                        {
+                            NetworkManager.Instance.SetMyPlayerId(myId);
+                        }
+                
+                        foreach (JObject playerInfoJson in playerList)
+                        {
+                            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+                            if (!players.ContainsKey(playerInfo.steam_id))
+                            {
+                                SpawnPlayer(playerInfo);
+                            }
+                        }
+                    }        
             private GameObject SpawnPlayer(PlayerInfo playerInfo)
             {
                 if (playerPrefab == null) return null;

@@ -21,6 +21,7 @@ public class NetworkManager : MonoBehaviour
     public static NetworkManager Instance { get; private set; }
 
     public NetworkMode Mode { get; private set; } = NetworkMode.None;
+    public byte MyPlayerId { get; private set; } = 255; // 0=Host, >0=Client, 255=NotSet
     public bool IsConnected { get; private set; }
 
     private readonly ConcurrentQueue<(CSteamID, byte[])> p2pPacketQueue = new ConcurrentQueue<(CSteamID, byte[])>();
@@ -45,6 +46,12 @@ public class NetworkManager : MonoBehaviour
     private Callback<P2PSessionRequest_t> m_P2PSessionRequest;
 
     public CSteamID CurrentLobbyID { get { return m_CurrentLobbyID; } }
+
+    public void SetMyPlayerId(byte id)
+    {
+        MyPlayerId = id;
+        Debug.Log($"[NetworkManager] My Player ID is set to: {MyPlayerId}");
+    }
 
     private void Awake()
     {
@@ -82,6 +89,10 @@ public class NetworkManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
         Disconnect();
     }
 
@@ -98,13 +109,16 @@ public class NetworkManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (string.IsNullOrEmpty(PlayerId)) return; // Guard against running before SteamID is initialized
-        if (!IsConnected || NetworkPlayerManager.Instance == null || ServerRoomManager.Instance == null) return;
+        if (string.IsNullOrEmpty(PlayerId)) return;
+        if (!IsConnected || MyPlayerId == 255 || NetworkPlayerManager.Instance == null) return;
 
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
         
-        if (Mode == NetworkMode.Host)
+        // Host Logic
+        if (MyPlayerId == 0)
         {
+            if (ServerRoomManager.Instance == null) return;
+
             var authoritativeState = new NetworkGameState();
             foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
             {
@@ -115,13 +129,12 @@ public class NetworkManager : MonoBehaviour
                 if (!byte.TryParse(byteIdStr, out byte playerId)) continue;
 
                 PlayerState playerState;
-                if (steamId == selfSteamId)
+                if (playerId == 0) // Host's own state
                 {
                     playerState = GetPlayerStateFromGameObject(playerEntry.Value, selfSteamId);
                 }
-                else
+                else // Client's state
                 {
-                    // If we haven't received a state update from this client yet, just skip them for this frame.
                     if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
                     {
                         continue;
@@ -137,11 +150,10 @@ public class NetworkManager : MonoBehaviour
 
             BroadcastP2PMessage(message, EP2PSend.k_EP2PSendUnreliable);
         }
-        else if (Mode == NetworkMode.Client)
+        // Client Logic
+        else
         {
             PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
-
-            if (playerState.playerId == 255) return;
 
             byte[] stateBytes = playerState.ToByteArray();
             byte[] messageBytes = new byte[stateBytes.Length + 1];
@@ -158,21 +170,9 @@ public class NetworkManager : MonoBehaviour
         var weaponCtrl = playerGo.GetComponentInChildren<WeaponController>();
         var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
         
-        byte byteId;
-        // Use the existence of ServerRoomManager as the definitive check for being the host.
-        // This is more robust than the Mode enum which was behaving unpredictably in builds.
-        if (ServerRoomManager.Instance != null)
-        {
-            byte.TryParse(ServerRoomManager.Instance.GetPlayerId(steamId), out byteId);
-        }
-        else
-        {
-            byteId = NetworkPlayerManager.Instance.GetMyByteId();
-        }
-
         return new PlayerState
         {
-            playerId = byteId,
+            playerId = MyPlayerId,
             position = playerGo.transform.position,
             rotation = playerGo.transform.rotation,
             cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
@@ -189,6 +189,8 @@ public class NetworkManager : MonoBehaviour
         Debug.Log("[NetworkManager] Disconnecting...");
 
         IsConnected = false;
+        MyPlayerId = 255;
+        Mode = NetworkMode.None;
         
         if (m_CurrentLobbyID.IsValid())
         {
@@ -196,12 +198,12 @@ public class NetworkManager : MonoBehaviour
             m_CurrentLobbyID = CSteamID.Nil;
         }
 
-        NetworkPlayerManager.Instance?.ClearPlayers();
-        ServerRoomManager.Instance?.ClearRoom();
+        if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.ClearPlayers();
+        if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.ClearRoom();
+        
         lobbyMembers.Clear();
         receivedPlayerStates.Clear();
         
-        Mode = NetworkMode.None;
         Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
     }
@@ -226,8 +228,6 @@ public class NetworkManager : MonoBehaviour
 
         Mode = NetworkMode.Host;
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
-        Debug.Log($"[NetworkManager] Lobby created! ID: {m_CurrentLobbyID}");
-        
         lobbyHostID = selfSteamId;
         IsConnected = true;
         
@@ -262,21 +262,22 @@ public class NetworkManager : MonoBehaviour
 
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = SteamMatchmaking.GetLobbyOwner(m_CurrentLobbyID);
-
+        
         if (selfSteamId != lobbyHostID)
         {
             Mode = NetworkMode.Client;
+        }
+        else
+        {
+            // If we are the lobby owner, ensure mode is Host.
+            // This can happen if OnLobbyCreated hasn't set it yet in some race conditions.
+            Mode = NetworkMode.Host;
         }
         
         UpdateLobbyMembers();
 
         IsConnected = true;
         OnConnected?.Invoke();
-
-        if (Mode == NetworkMode.Host && ServerRoomManager.Instance == null)
-        {
-             gameObject.AddComponent<ServerRoomManager>();
-        }
 
         SceneManager.LoadScene("RoomScene");
     }
@@ -285,25 +286,18 @@ public class NetworkManager : MonoBehaviour
     {
         CSteamID userChanged = new CSteamID(pCallback.m_ulSteamIDUserChanged);
 
-        if ((EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange == EChatMemberStateChange.k_EChatMemberStateChangeEntered)
-        {
-            Debug.Log($"Player {userChanged} entered the lobby.");
-        }
-        else
+        if ((EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange != EChatMemberStateChange.k_EChatMemberStateChangeEntered)
         {
             Debug.Log($"Player {userChanged} left the lobby.");
             
-            if (Mode == NetworkMode.Host)
+            if (MyPlayerId == 0 && ServerRoomManager.Instance != null)
             {
-                ServerRoomManager.Instance?.RemovePlayer(userChanged);
+                ServerRoomManager.Instance.RemovePlayer(userChanged);
             }
-            else if (Mode == NetworkMode.Client)
+            else if (MyPlayerId > 0 && userChanged == lobbyHostID)
             {
-                if (userChanged == lobbyHostID)
-                {
-                    Debug.LogError("Host has left the lobby. Disconnecting.");
-                    Disconnect();
-                }
+                Debug.LogError("Host has left the lobby. Disconnecting.");
+                Disconnect();
             }
         }
         UpdateLobbyMembers();
@@ -350,7 +344,8 @@ public class NetworkManager : MonoBehaviour
         byte[] content = new byte[data.Length - 1];
         Buffer.BlockCopy(data, 1, content, 0, content.Length);
 
-        if (Mode == NetworkMode.Host)
+        // Host receives state from clients
+        if (MyPlayerId == 0)
         {
             if (messageType == MessageType.PlayerState)
             {
@@ -363,12 +358,13 @@ public class NetworkManager : MonoBehaviour
                 OnJsonMessageReceived?.Invoke(sender, jsonMsg);
             }
         }
-        else // Client
+        // Client receives game state from host
+        else
         {
             if (messageType == MessageType.GameState)
             {
                 var gameState = NetworkGameState.FromBytes(content);
-                NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
+                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
             }
             else if (messageType == MessageType.JsonMessage)
             {
@@ -398,7 +394,8 @@ public class NetworkManager : MonoBehaviour
         
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
 
-        if (Mode == NetworkMode.Host)
+        // Host also processes its own JSON messages
+        if (MyPlayerId == 0)
         {
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
