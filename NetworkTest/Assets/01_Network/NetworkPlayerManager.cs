@@ -210,4 +210,16 @@ public class NetworkPlayerManager : MonoBehaviour
         players.Clear();
         byteIdToSteamId.Clear();
     }
+
+    public byte GetMyByteId()
+    {
+        foreach(var entry in byteIdToSteamId)
+        {
+            if (entry.Value == NetworkManager.Instance.PlayerId)
+            {
+                return entry.Key;
+            }
+        }
+        return 255; // Invalid ID
+    }
 }

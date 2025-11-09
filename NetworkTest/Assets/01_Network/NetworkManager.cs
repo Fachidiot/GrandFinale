@@ -140,11 +140,19 @@ public class NetworkManager : MonoBehaviour
         var weaponCtrl = playerGo.GetComponentInChildren<WeaponController>();
         var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
         
-        string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
+        byte byteId;
+        if (Mode == NetworkMode.Host)
+        {
+            byte.TryParse(ServerRoomManager.Instance.GetPlayerId(steamId), out byteId);
+        }
+        else
+        {
+            byteId = NetworkPlayerManager.Instance.GetMyByteId();
+        }
 
         return new PlayerState
         {
-            playerId = byte.TryParse(byteIdStr, out byte id) ? id : (byte)255,
+            playerId = byteId,
             position = playerGo.transform.position,
             rotation = playerGo.transform.rotation,
             cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
