@@ -59,7 +59,6 @@ public class ServerRoomManager : MonoBehaviour
 
     public void AddHostPlayer(CSteamID hostSteamId, string nickname)
     {
-        Debug.Log("ServerRoomManager: AddHostPlayer() called.");
         if (playersInRoom.ContainsKey(hostSteamId)) return;
         AddPlayer(hostSteamId, nickname, true);
     }
@@ -82,16 +81,13 @@ public class ServerRoomManager : MonoBehaviour
         Debug.Log($"[ServerRoomManager] Player {nickname} ({steamId}) joined as ID {newId}");
 
         // Broadcast at the end of the frame to ensure all listeners are ready
-        Debug.Log("ServerRoomManager: AddPlayer() called. Starting DelayedBroadcast.");
         StartCoroutine(DelayedBroadcast());
     }
 
     IEnumerator DelayedBroadcast()
     {
-        Debug.Log("ServerRoomManager: DelayedBroadcast() coroutine started.");
         // Wait until the end of the frame to ensure all Start/OnEnable methods have run
         yield return new WaitForEndOfFrame();
-        Debug.Log("ServerRoomManager: EndOfFrame reached. Calling BroadcastRoomUpdate.");
         BroadcastRoomUpdate();
     }
 
@@ -108,8 +104,6 @@ public class ServerRoomManager : MonoBehaviour
 
     public void BroadcastRoomUpdate()
     {
-        Debug.Log("ServerRoomManager: BroadcastRoomUpdate() called.");
-        Debug.Log($"BroadcastRoomUpdate: Checking mode. Current mode is: {NetworkManager.Instance.Mode}");
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
 
         JObject roomInfo = new JObject

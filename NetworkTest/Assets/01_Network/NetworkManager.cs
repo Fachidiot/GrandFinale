@@ -261,13 +261,10 @@ public class NetworkManager : MonoBehaviour
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = SteamMatchmaking.GetLobbyOwner(m_CurrentLobbyID);
 
-        Debug.Log($"[NetworkManager] OnLobbyEnter: Comparing self ID '{selfSteamId}' with lobby owner ID '{lobbyHostID}'.");
         if (selfSteamId != lobbyHostID)
         {
             Mode = NetworkMode.Client;
         }
-        
-        Debug.Log($"[NetworkManager] Entered lobby {m_CurrentLobbyID}. Host is {lobbyHostID}. Current Mode is {Mode}");
         
         UpdateLobbyMembers();
 
@@ -401,7 +398,6 @@ public class NetworkManager : MonoBehaviour
 
         if (Mode == NetworkMode.Host)
         {
-            Debug.Log("NetworkManager: BroadcastJsonMessage() called. Invoking locally for host.");
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
     }
