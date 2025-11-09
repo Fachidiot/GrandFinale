@@ -130,6 +130,7 @@ public class NetworkManager : MonoBehaviour
         {
             while (udpDataQueue.TryDequeue(out byte[] data))
             {
+                Debug.Log($"[NetworkManager] Client received UDP packet of size: {data.Length}");
                 var gameState = NetworkGameState.FromBytes(data);
                 NetworkPlayerManager.Instance?.UpdateFromGameState(gameState);
             }
@@ -156,6 +157,7 @@ public class NetworkManager : MonoBehaviour
         gameState.players.Add(playerState);
 
         byte[] gameStateBytes = gameState.ToByteArray();
+        Debug.Log($"[NetworkManager] Host sending UDP game state. Size: {gameStateBytes.Length}");
         SendUDPMessage(gameStateBytes);
     }
 
