@@ -327,6 +327,10 @@ public class NetworkManager : MonoBehaviour
             serverUdpEndPoint = new IPEndPoint(((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address, port + 1);
             udpListeningTask = Task.Run(() => ListenForUdpMessages());
 
+            // Send a handshake UDP packet to the server so it learns our endpoint
+            byte[] handshake = new byte[1];
+            udpClient.Send(handshake, handshake.Length, serverUdpEndPoint);
+
             IsConnected = true;
             OnConnected?.Invoke();
             return true;
@@ -557,10 +561,25 @@ public class NetworkManager : MonoBehaviour
             try
             {
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
-                // In Host mode, we need to identify which client sent the data.
-                // The result.RemoteEndPoint tells us who sent it.
-                // We can then process their input.
-                // For now, we assume all UDP data is game state for the client.
+
+                if (Mode == NetworkMode.Host)
+                {
+                    // Find the client connection that matches this endpoint
+                    var client = connectedClients.FirstOrDefault(c => c.TcpClient.Client.RemoteEndPoint is IPEndPoint tcpEp && tcpEp.Address.Equals(result.RemoteEndPoint.Address));
+
+                    if (client != null)
+                    {
+                        // If this is the first UDP packet from this client, store their endpoint
+                        if (client.UdpEndPoint == null)
+                        {
+                            client.UdpEndPoint = result.RemoteEndPoint;
+                            Debug.Log($"[NetworkManager] Learned UDP endpoint for client {client.PlayerId}: {result.RemoteEndPoint}");
+                            continue; // Skip processing the handshake packet
+                        }
+                    }
+                }
+                
+                // If it's not a handshake packet, or if we are a client, queue the data for processing.
                 udpDataQueue.Enqueue(result.Buffer);
             }
             catch (Exception) { break; }
