@@ -16,6 +16,7 @@ public class RoomUIManager : MonoBehaviour
     {
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
+            Debug.Log("RoomUIManager: Start() called. Mode: Host");
             ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.selfSteamId, CustomSteamManager.Instance.PlayerName);
         }
         else if (NetworkManager.Instance.Mode == NetworkMode.Client)
@@ -69,6 +70,7 @@ public class RoomUIManager : MonoBehaviour
 
             if (type == "update_room_info")
             {
+                Debug.Log("RoomUIManager: HandleServerJsonMessage() received update_room_info.");
                 HandleRoomUpdate(response);
             }
         }

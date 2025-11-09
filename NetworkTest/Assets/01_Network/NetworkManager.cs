@@ -395,8 +395,9 @@ public class NetworkManager : MonoBehaviour
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
 
         // Host also processes its own JSON messages
-        if (MyPlayerId == 0)
+        if (Mode == NetworkMode.Host)
         {
+            Debug.Log("NetworkManager: BroadcastJsonMessage() called. Invoking locally for host.");
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
     }
