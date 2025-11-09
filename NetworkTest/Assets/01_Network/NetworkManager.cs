@@ -58,18 +58,15 @@ public class NetworkManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
-        if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
-        {
-            selfSteamId = SteamUser.GetSteamID();
-            PlayerId = selfSteamId.ToString();
-        }
     }
 
     private void Start()
     {
         if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
         {
+            selfSteamId = SteamUser.GetSteamID();
+            PlayerId = selfSteamId.ToString();
+
             m_LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
@@ -101,6 +98,7 @@ public class NetworkManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (string.IsNullOrEmpty(PlayerId)) return; // Guard against running before SteamID is initialized
         if (!IsConnected || NetworkPlayerManager.Instance == null || ServerRoomManager.Instance == null) return;
 
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
@@ -123,9 +121,10 @@ public class NetworkManager : MonoBehaviour
                 }
                 else
                 {
+                    // If we haven't received a state update from this client yet, just skip them for this frame.
                     if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
                     {
-                        playerState = new PlayerState { playerId = playerId, position = playerEntry.Value.transform.position, rotation = playerEntry.Value.transform.rotation };
+                        continue;
                     }
                 }
                 authoritativeState.players.Add(playerState);
@@ -262,12 +261,13 @@ public class NetworkManager : MonoBehaviour
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = SteamMatchmaking.GetLobbyOwner(m_CurrentLobbyID);
 
+        Debug.Log($"[NetworkManager] OnLobbyEnter: Comparing self ID '{selfSteamId}' with lobby owner ID '{lobbyHostID}'.");
         if (selfSteamId != lobbyHostID)
         {
             Mode = NetworkMode.Client;
         }
         
-        Debug.Log($"[NetworkManager] Entered lobby {m_CurrentLobbyID}. Host is {lobbyHostID}");
+        Debug.Log($"[NetworkManager] Entered lobby {m_CurrentLobbyID}. Host is {lobbyHostID}. Current Mode is {Mode}");
         
         UpdateLobbyMembers();
 
@@ -401,6 +401,7 @@ public class NetworkManager : MonoBehaviour
 
         if (Mode == NetworkMode.Host)
         {
+            Debug.Log("NetworkManager: BroadcastJsonMessage() called. Invoking locally for host.");
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
     }

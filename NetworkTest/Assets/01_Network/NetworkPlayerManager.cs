@@ -52,60 +52,61 @@ public class NetworkPlayerManager : MonoBehaviour
         }
     }
 
-    #region Player Management
-
-    public void UpdatePlayerList(JArray playerList)
-    {
-        byteIdToSteamId.Clear();
-        List<string> steamIdsInMessage = new List<string>();
-
-        foreach (JObject playerInfoJson in playerList)
+        #region Player Management
+    
+        public void UpdatePlayerList(JArray playerList)
         {
-            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            steamIdsInMessage.Add(playerInfo.steam_id);
-
-            if (byte.TryParse(playerInfo.player_id, out byte byteId))
+            Debug.Log("NetworkPlayerManager: UpdatePlayerList() called.");
+            byteIdToSteamId.Clear();
+            List<string> steamIdsInMessage = new List<string>();
+    
+            foreach (JObject playerInfoJson in playerList)
             {
-                byteIdToSteamId[byteId] = playerInfo.steam_id;
+                PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+                steamIdsInMessage.Add(playerInfo.steam_id);
+                
+                if (byte.TryParse(playerInfo.player_id, out byte byteId))
+                {
+                    byteIdToSteamId[byteId] = playerInfo.steam_id;
+                }
+            }
+    
+            // --- DEBUG LOG ---
+            Debug.Log("[NetworkPlayerManager] Client ID Map Populated:");
+            foreach(var entry in byteIdToSteamId)
+            {
+                Debug.Log($" - ID: {entry.Key} -> SteamID: {entry.Value}");
+            }
+            // --- END DEBUG LOG ---
+    
+            List<string> currentPlayers = new List<string>(players.Keys);
+            foreach (string steamId in currentPlayers)
+            {
+                if (!steamIdsInMessage.Contains(steamId))
+                {
+                    Destroy(players[steamId]);
+                    players.Remove(steamId);
+                }
+            }
+    
+            foreach (JObject playerInfoJson in playerList)
+            {
+                PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+                if (!players.ContainsKey(playerInfo.steam_id))
+                {
+                    SpawnPlayer(playerInfo);
+                }
             }
         }
-
-        // --- DEBUG LOG ---
-        Debug.Log("[NetworkPlayerManager] Client ID Map Populated:");
-        foreach(var entry in byteIdToSteamId)
+    
+        private GameObject SpawnPlayer(PlayerInfo playerInfo)
         {
-            Debug.Log($" - ID: {entry.Key} -> SteamID: {entry.Value}");
-        }
-        // --- END DEBUG LOG ---
-
-        List<string> currentPlayers = new List<string>(players.Keys);
-        foreach (string steamId in currentPlayers)
-        {
-            if (!steamIdsInMessage.Contains(steamId))
-            {
-                Destroy(players[steamId]);
-                players.Remove(steamId);
-            }
-        }
-
-        foreach (JObject playerInfoJson in playerList)
-        {
-            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            if (!players.ContainsKey(playerInfo.steam_id))
-            {
-                SpawnPlayer(playerInfo);
-            }
-        }
-    }
-
-    private GameObject SpawnPlayer(PlayerInfo playerInfo)
-    {
-        if (playerPrefab == null) return null;
-
-        GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-        playerObject.name = $"Player_{playerInfo.nickname}";
-        players.Add(playerInfo.steam_id, playerObject);
-
+            Debug.Log($"NetworkPlayerManager: SpawnPlayer() called for steam_id: {playerInfo.steam_id}");
+            if (playerPrefab == null) return null;
+    
+            GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            playerObject.name = $"Player_{playerInfo.nickname}";
+            players.Add(playerInfo.steam_id, playerObject);
         PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
         if (nicknameUI != null) nicknameUI.SetNickname(playerInfo.nickname);
 

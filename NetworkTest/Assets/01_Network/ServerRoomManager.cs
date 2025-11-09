@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using Steamworks;
+using System.Collections;
 
 public class ServerRoomManager : MonoBehaviour
 {
@@ -58,11 +59,12 @@ public class ServerRoomManager : MonoBehaviour
 
     public void AddHostPlayer(CSteamID hostSteamId, string nickname)
     {
+        Debug.Log("ServerRoomManager: AddHostPlayer() called.");
         if (playersInRoom.ContainsKey(hostSteamId)) return;
-        AddPlayer(hostSteamId, nickname);
+        AddPlayer(hostSteamId, nickname, true);
     }
 
-    private void AddPlayer(CSteamID steamId, string nickname)
+    private void AddPlayer(CSteamID steamId, string nickname, bool isHost = false)
     {
         byte newId = nextPlayerId++;
         steamIdToByteId[steamId] = newId;
@@ -79,6 +81,17 @@ public class ServerRoomManager : MonoBehaviour
 
         Debug.Log($"[ServerRoomManager] Player {nickname} ({steamId}) joined as ID {newId}");
 
+        // Broadcast at the end of the frame to ensure all listeners are ready
+        Debug.Log("ServerRoomManager: AddPlayer() called. Starting DelayedBroadcast.");
+        StartCoroutine(DelayedBroadcast());
+    }
+
+    IEnumerator DelayedBroadcast()
+    {
+        Debug.Log("ServerRoomManager: DelayedBroadcast() coroutine started.");
+        // Wait until the end of the frame to ensure all Start/OnEnable methods have run
+        yield return new WaitForEndOfFrame();
+        Debug.Log("ServerRoomManager: EndOfFrame reached. Calling BroadcastRoomUpdate.");
         BroadcastRoomUpdate();
     }
 
@@ -95,6 +108,8 @@ public class ServerRoomManager : MonoBehaviour
 
     public void BroadcastRoomUpdate()
     {
+        Debug.Log("ServerRoomManager: BroadcastRoomUpdate() called.");
+        Debug.Log($"BroadcastRoomUpdate: Checking mode. Current mode is: {NetworkManager.Instance.Mode}");
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
 
         JObject roomInfo = new JObject
