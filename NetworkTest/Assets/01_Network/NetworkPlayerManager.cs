@@ -52,236 +52,161 @@ public class NetworkPlayerManager : MonoBehaviour
         }
     }
 
-                #region Player Management
+    #region Player Management
 
-                
+    public void UpdatePlayerList(JArray playerList)
+    {
+        // Debug.Log("NetworkPlayerManager: UpdatePlayerList() called.");
+        byteIdToSteamId.Clear();
+        List<string> steamIdsInMessage = new List<string>();
 
-                public void UpdatePlayerList(JArray playerList)
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
 
-                {
+            steamIdsInMessage.Add(playerInfo.steam_id);
 
-                    Debug.Log("NetworkPlayerManager: UpdatePlayerList() called.");
-
-                    byteIdToSteamId.Clear();
-
-                    List<string> steamIdsInMessage = new List<string>();
-
-                
-
-                    foreach (JObject playerInfoJson in playerList)
-
-                    {
-
-                        PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-
-                        steamIdsInMessage.Add(playerInfo.steam_id);
-
-                        
-
-                        if (byte.TryParse(playerInfo.player_id, out byte byteId))
-
-                        {
-
-                            byteIdToSteamId[byteId] = playerInfo.steam_id;
-
-                        }
-
-                    }
-
-                
-
-                    List<string> currentPlayers = new List<string>(players.Keys);
-
-                    foreach (string steamId in currentPlayers)
-
-                    {
-
-                        if (!steamIdsInMessage.Contains(steamId))
-
-                        {
-
-                            Destroy(players[steamId]);
-
-                            players.Remove(steamId);
-
-                        }
-
-                    }
-
-            
-
-                    // After populating the map, find our own ID and set it in the NetworkManager
-
-                    byte myId = GetMyByteId();
-
-                    if (myId != 255)
-
-                    {
-
-                        NetworkManager.Instance.SetMyPlayerId(myId);
-
-                    }
-
-                
-
-                    foreach (JObject playerInfoJson in playerList)
-
-                    {
-
-                        PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-
-                        if (!players.ContainsKey(playerInfo.steam_id))
-
-                        {
-
-                            SpawnPlayer(playerInfo);
-
-                        }
-
-                    }
-
-                }
-
-                
-
-                private GameObject SpawnPlayer(PlayerInfo playerInfo)
-
-                {
-
-                    Debug.Log($"NetworkPlayerManager: SpawnPlayer() called for steam_id: {playerInfo.steam_id}");
-
-                    if (playerPrefab == null) return null;
-
-                
-
-                    GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-
-                    playerObject.name = $"Player_{playerInfo.nickname}";
-
-                    players.Add(playerInfo.steam_id, playerObject);
-
-                    PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
-
-                    if (nicknameUI != null) nicknameUI.SetNickname(playerInfo.nickname);
-
-            
-
-                    bool isMine = (playerInfo.steam_id == NetworkManager.Instance.PlayerId);
-
-            
-
-                    var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-
-                    foreach (var view in transformSyncs) view.Initialize(playerInfo.steam_id, isMine);
-
-            
-
-                    var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
-
-                    if (animSync != null) animSync.Initialize(playerInfo.steam_id, isMine);
-
-            
-
-                    var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
-
-                    if (nsm != null) nsm.Initialize(isMine);
-
-            
-
-                    if (isMine)
-
-                    {
-
-                        if (nicknameUI != null) nicknameUI.gameObject.SetActive(false);
-
-                        var inGameUI = FindObjectOfType<InGameUIManager>();
-
-                        if (inGameUI != null)
-
-                        {
-
-                            inGameUI.SetInit(playerObject.GetComponent<WeaponController>());
-
-                        }
-
-                    }
-
-                    else
-
-                    {
-
-                        playerObject.GetComponent<CharacterMove>().enabled = false;
-
-                        playerObject.GetComponentInChildren<InputHandler>().enabled = false;
-
-                        playerObject.GetComponentInChildren<CameraController>().enabled = false;
-
-                        playerObject.GetComponentInChildren<CameraSwitcher>()?.gameObject.SetActive(false);
-
-                    }
-
-            
-
-                    DontDestroyOnLoad(playerObject);
-
-                    return playerObject;
-
-                }
-        
-            #endregion
-        
-            #region Game State Update
-        
-            public void UpdateFromGameState(NetworkGameState state)
+            if (byte.TryParse(playerInfo.player_id, out byte byteId))
             {
-                foreach (var playerState in state.players)
-                {
-                    if (!byteIdToSteamId.TryGetValue(playerState.playerId, out string steamId))
-                    {
-                        continue;
-                    }
-        
-                                if (players.TryGetValue(steamId, out GameObject playerObject))
-                                {
-                                    if (steamId == NetworkManager.Instance.PlayerId)
-                                        continue;
-                    
+                byteIdToSteamId[byteId] = playerInfo.steam_id;
+            }
+        }
 
-                    
-                                    var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-                                    var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
-                                    var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);        
-                        if (bodySync != null)
-                        {
-                            bodySync.OnTransformReceived(playerState.position, playerState.rotation);
-                        }
-                        if (cameraSync != null)
-                        {
-                            cameraSync.OnTransformReceived(cameraSync.transform.position, playerState.cameraRotation);
-                        }
-        
-                        var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
-                        if (animSync != null)
-                        {
-                            animSync.OnAnimationDataReceived(
-                                playerState.moveX,
-                                playerState.moveY,
-                                AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk),
-                                AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sprint),
-                                AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Roll),
-                                AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded),
-                                AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Crouch)
-                            );
-                        }
-        
-                        var weaponController = playerObject.GetComponentInChildren<WeaponController>();
-                        if (weaponController != null && weaponController.activeID != playerState.weaponId)
-                        {
-                            weaponController.ToChange(playerState.weaponId);
-                        }
-                    }
+        List<string> currentPlayers = new List<string>(players.Keys);
+
+        foreach (string steamId in currentPlayers)
+        {
+            if (!steamIdsInMessage.Contains(steamId))
+            {
+                Destroy(players[steamId]);
+                players.Remove(steamId);
+            }
+        }
+        // After populating the map, find our own ID and set it in the NetworkManager
+
+        byte myId = GetMyByteId();
+
+        if (myId != 255)
+        {
+            NetworkManager.Instance.SetMyPlayerId(myId);
+        }
+
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            if (!players.ContainsKey(playerInfo.steam_id))
+            {
+                SpawnPlayer(playerInfo);
+            }
+        }
+    }
+
+    private GameObject SpawnPlayer(PlayerInfo playerInfo)
+    {
+        Debug.Log($"NetworkPlayerManager: SpawnPlayer() called for steam_id: {playerInfo.steam_id}");
+        if (playerPrefab == null) return null;
+
+        GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        playerObject.name = $"Player_{playerInfo.nickname}";
+        players.Add(playerInfo.steam_id, playerObject);
+        PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
+
+        if (nicknameUI != null)
+            nicknameUI.SetNickname(playerInfo.nickname);
+
+        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.PlayerId);
+        var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
+
+        foreach (var view in transformSyncs)
+            view.Initialize(playerInfo.steam_id, isMine);
+
+        var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
+
+        if (animSync != null)
+            animSync.Initialize(playerInfo.steam_id, isMine);
+
+        var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
+
+        if (nsm != null)
+            nsm.Initialize(isMine);
+
+        if (isMine)
+        {
+            if (nicknameUI != null)
+                nicknameUI.gameObject.SetActive(false);
+            var inGameUI = FindObjectOfType<InGameUIManager>();
+            if (inGameUI != null)
+            {
+                inGameUI.SetInit(playerObject.GetComponent<WeaponController>());
+            }
+        }
+        else
+        {
+            playerObject.GetComponent<CharacterMove>().enabled = false;
+            playerObject.GetComponentInChildren<InputHandler>().enabled = false;
+            playerObject.GetComponentInChildren<CameraController>().enabled = false;
+            playerObject.GetComponentInChildren<CameraSwitcher>()?.gameObject.SetActive(false);
+        }
+
+        DontDestroyOnLoad(playerObject);
+
+        return playerObject;
+    }
+
+    #endregion
+
+    #region Game State Update
+
+    public void UpdateFromGameState(NetworkGameState state)
+    {
+        foreach (var playerState in state.players)
+        {
+            if (!byteIdToSteamId.TryGetValue(playerState.playerId, out string steamId))
+            {
+                continue;
+            }
+
+            if (players.TryGetValue(steamId, out GameObject playerObject))
+            {
+                if (steamId == NetworkManager.Instance.PlayerId)
+                    continue;
+
+
+
+                var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
+                var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
+                var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);
+                if (bodySync != null)
+                {
+                    bodySync.OnTransformReceived(playerState.position, playerState.rotation);
+                }
+                if (cameraSync != null)
+                {
+                    cameraSync.OnTransformReceived(cameraSync.transform.position, playerState.cameraRotation);
+                }
+
+                var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
+                if (animSync != null)
+                {
+                    animSync.OnAnimationDataReceived(
+                        playerState.moveX,
+                        playerState.moveY,
+                        AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk),
+                        AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sprint),
+                        AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Roll),
+                        AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded),
+                        AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Crouch)
+                    );
+                }
+
+                var weaponController = playerObject.GetComponentInChildren<WeaponController>();
+                if (weaponController != null && weaponController.activeID != playerState.weaponId)
+                {
+                    weaponController.ToChange(playerState.weaponId);
                 }
             }
+        }
+    }
     #endregion
 
     #region Player Actions
@@ -308,12 +233,12 @@ public class NetworkPlayerManager : MonoBehaviour
 
     public byte GetMyByteId()
     {
-        foreach(var entry in byteIdToSteamId)
+        foreach (var entry in byteIdToSteamId)
         {
             if (ulong.TryParse(entry.Value, out ulong steamIdUlong))
             {
                 CSteamID steamId = new CSteamID(steamIdUlong);
-                Debug.Log($"GetMyByteId: Comparing map CSteamID {steamId.m_SteamID} with my CSteamID {NetworkManager.Instance.selfSteamId.m_SteamID}");
+                // Debug.Log($"GetMyByteId: Comparing map CSteamID {steamId.m_SteamID} with my CSteamID {NetworkManager.Instance.selfSteamId.m_SteamID}");
                 if (steamId == NetworkManager.Instance.selfSteamId)
                 {
                     return entry.Key;

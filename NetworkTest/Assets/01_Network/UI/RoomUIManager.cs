@@ -16,7 +16,6 @@ public class RoomUIManager : MonoBehaviour
     {
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
-            Debug.Log("RoomUIManager: Start() called. Mode: Host");
             ServerRoomManager.Instance.AddHostPlayer(NetworkManager.Instance.selfSteamId, CustomSteamManager.Instance.PlayerName);
         }
         else if (NetworkManager.Instance.Mode == NetworkMode.Client)
@@ -70,7 +69,7 @@ public class RoomUIManager : MonoBehaviour
 
             if (type == "update_room_info")
             {
-                Debug.Log("RoomUIManager: HandleServerJsonMessage() received update_room_info.");
+                // Debug.Log("RoomUIManager: HandleServerJsonMessage() received update_room_info.");
                 HandleRoomUpdate(response);
             }
         }
@@ -86,7 +85,7 @@ public class RoomUIManager : MonoBehaviour
         {
             return;
         }
-        
+
         JArray players = data["players"] as JArray;
 
         if (NetworkPlayerManager.Instance != null && players != null)
@@ -114,6 +113,57 @@ public class RoomUIManager : MonoBehaviour
                 {
                     item.Setup(playerInfo, playerInfo.player_id == hostId);
                 }
+            }
+        }
+    }
+
+    // This method would be called by a UI button's OnClick event in the RoomScene.
+    public void OnPlanetSelect(int planetId)
+    {
+        Debug.Log($"[RoomUIManager] UI button clicked. Proposing planet {planetId}.");
+        ProposePlanet(planetId);
+    }
+
+    private void ProposePlanet(int planetId)
+    {
+        if (NetworkManager.Instance == null)
+        {
+            Debug.LogError("[RoomUIManager] NetworkManager not found!");
+            return;
+        }
+
+        // If we are the host, we can directly call the ServerRoomManager's logic.
+        // This is more direct and avoids sending a network message to ourselves.
+        if (NetworkManager.Instance.Mode == NetworkMode.Host)
+        {
+            if (ServerRoomManager.Instance != null)
+            {
+                // The host directly sets the planet and broadcasts the update.
+                ServerRoomManager.Instance.SelectPlanet(planetId);
+            }
+            else
+            {
+                Debug.LogError("[RoomUIManager] ServerRoomManager not found for host!");
+            }
+        }
+        // If we are a client, we send a message to the host to make the request.
+        else
+        {
+            JObject message = new JObject
+            {
+                { "type", "propose_planet" },
+                { "planet_id", planetId }
+            };
+            
+            CSteamID hostId = NetworkManager.Instance.LobbyHostID;
+            if (hostId.IsValid())
+            {
+                NetworkManager.Instance.SendJsonMessage(hostId, message);
+                Debug.Log($"[RoomUIManager] Sent 'propose_planet' (ID: {planetId}) message to host ({hostId}).");
+            }
+            else
+            {
+                Debug.LogError("[RoomUIManager] Could not send proposal, invalid host ID.");
             }
         }
     }

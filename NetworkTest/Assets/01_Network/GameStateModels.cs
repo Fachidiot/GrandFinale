@@ -84,6 +84,7 @@ public class NetworkGameState
 {
     public List<PlayerState> players = new List<PlayerState>();
     public List<MonsterState> monsters = new List<MonsterState>();
+    public int selectedPlanetId = -1; // Default to -1, indicating no planet is selected
 
     // --- Serialization (Host) ---
     public byte[] ToByteArray()
@@ -127,6 +128,9 @@ public class NetworkGameState
                 writer.Write(m.rotation.w);
                 writer.Write(m.animationMask);
             }
+            
+            // Write game-level state
+            writer.Write(selectedPlanetId);
 
             return stream.ToArray();
         }
@@ -169,6 +173,12 @@ public class NetworkGameState
                     animationMask = reader.ReadByte()
                 };
                 gameState.monsters.Add(m);
+            }
+            
+            // Read game-level state
+            if (reader.BaseStream.Position < reader.BaseStream.Length)
+            {
+                gameState.selectedPlanetId = reader.ReadInt32();
             }
         }
         return gameState;

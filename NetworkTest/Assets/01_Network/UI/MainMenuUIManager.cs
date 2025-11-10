@@ -59,8 +59,6 @@ public class MainMenuUIManager : MonoBehaviour
 
     private void HandleConnection()
     {
-        // This logic is now handled by NetworkManager's OnLobbyCreated/OnLobbyEnter callbacks.
-        // This handler can be used for UI changes on the main menu if needed, e.g., showing a "Connected" status.
         Debug.Log("[MainMenuUIManager] NetworkManager connected.");
     }
 

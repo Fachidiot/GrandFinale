@@ -39,6 +39,8 @@ public class NetworkManager : MonoBehaviour
     private List<CSteamID> lobbyMembers = new List<CSteamID>();
     private CSteamID lobbyHostID;
 
+    public CSteamID LobbyHostID { get { return lobbyHostID; } }
+
     private Callback<LobbyCreated_t> m_LobbyCreated;
     private Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
     private Callback<LobbyEnter_t> m_LobbyEnter;
@@ -50,7 +52,7 @@ public class NetworkManager : MonoBehaviour
     public void SetMyPlayerId(byte id)
     {
         MyPlayerId = id;
-        Debug.Log($"[NetworkManager] My Player ID is set to: {MyPlayerId}");
+        // Debug.Log($"[NetworkManager] My Player ID is set to: {MyPlayerId}");
     }
 
     private void Awake()
@@ -113,7 +115,7 @@ public class NetworkManager : MonoBehaviour
         if (!IsConnected || MyPlayerId == 255 || NetworkPlayerManager.Instance == null) return;
 
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
-        
+
         // Host Logic
         if (MyPlayerId == 0)
         {
@@ -137,17 +139,17 @@ public class NetworkManager : MonoBehaviour
                 {
                     if (receivedPlayerStates.TryGetValue(playerId, out playerState))
                     {
-    
+
                     }
                     else
                     {
-    
+
                         continue;
                     }
                 }
                 authoritativeState.players.Add(playerState);
             }
-            
+
             byte[] gameStateBytes = authoritativeState.ToByteArray();
             byte[] message = new byte[gameStateBytes.Length + 1];
             message[0] = (byte)MessageType.GameState;
@@ -170,7 +172,7 @@ public class NetworkManager : MonoBehaviour
             byte[] messageBytes = new byte[stateBytes.Length + 1];
             messageBytes[0] = (byte)MessageType.PlayerState;
             Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
-            
+
             SendP2PMessage(lobbyHostID, messageBytes, EP2PSend.k_EP2PSendUnreliable);
         }
     }
@@ -180,7 +182,7 @@ public class NetworkManager : MonoBehaviour
         var animSync = playerGo.GetComponentInChildren<NetworkAnimatorSync>();
         var weaponCtrl = playerGo.GetComponentInChildren<WeaponController>();
         var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
-        
+
         return new PlayerState
         {
             playerId = MyPlayerId,
@@ -197,12 +199,11 @@ public class NetworkManager : MonoBehaviour
     public void Disconnect()
     {
         if (!IsConnected) return;
-        Debug.Log("[NetworkManager] Disconnecting...");
 
         IsConnected = false;
         MyPlayerId = 255;
         Mode = NetworkMode.None;
-        
+
         if (m_CurrentLobbyID.IsValid())
         {
             SteamMatchmaking.LeaveLobby(m_CurrentLobbyID);
@@ -211,10 +212,10 @@ public class NetworkManager : MonoBehaviour
 
         if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.ClearPlayers();
         if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.ClearRoom();
-        
+
         lobbyMembers.Clear();
         receivedPlayerStates.Clear();
-        
+
         Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
     }
@@ -241,12 +242,12 @@ public class NetworkManager : MonoBehaviour
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = selfSteamId;
         IsConnected = true;
-        
+
         if (ServerRoomManager.Instance == null)
         {
             gameObject.AddComponent<ServerRoomManager>();
         }
-        
+
         SceneManager.LoadScene("RoomScene");
     }
 
@@ -257,7 +258,7 @@ public class NetworkManager : MonoBehaviour
             SteamMatchmaking.JoinLobby(lobbyID);
         }
     }
-    
+
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t pCallback)
     {
         JoinSteamLobby(pCallback.m_steamIDLobby);
@@ -273,7 +274,7 @@ public class NetworkManager : MonoBehaviour
 
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = SteamMatchmaking.GetLobbyOwner(m_CurrentLobbyID);
-        
+
         if (selfSteamId != lobbyHostID)
         {
             Mode = NetworkMode.Client;
@@ -284,7 +285,7 @@ public class NetworkManager : MonoBehaviour
             // This can happen if OnLobbyCreated hasn't set it yet in some race conditions.
             Mode = NetworkMode.Host;
         }
-        
+
         UpdateLobbyMembers();
 
         IsConnected = true;
@@ -300,7 +301,7 @@ public class NetworkManager : MonoBehaviour
         if ((EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange != EChatMemberStateChange.k_EChatMemberStateChangeEntered)
         {
             Debug.Log($"Player {userChanged} left the lobby.");
-            
+
             if (MyPlayerId == 0 && ServerRoomManager.Instance != null)
             {
                 ServerRoomManager.Instance.RemovePlayer(userChanged);
@@ -395,7 +396,7 @@ public class NetworkManager : MonoBehaviour
         Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
         SendP2PMessage(target, message, EP2PSend.k_EP2PSendReliable);
     }
-    
+
     public void BroadcastJsonMessage(JObject json)
     {
         string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
@@ -403,13 +404,13 @@ public class NetworkManager : MonoBehaviour
         byte[] message = new byte[jsonBytes.Length + 1];
         message[0] = (byte)MessageType.JsonMessage;
         Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
-        
+
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
 
         // Host also processes its own JSON messages
         if (Mode == NetworkMode.Host)
         {
-            Debug.Log("NetworkManager: BroadcastJsonMessage() called. Invoking locally for host.");
+            // Debug.Log("NetworkManager: BroadcastJsonMessage() called. Invoking locally for host.");
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
     }
