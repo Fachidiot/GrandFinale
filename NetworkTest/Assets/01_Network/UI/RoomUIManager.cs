@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using TMPro;
 using Steamworks;
+using UnityEngine.SceneManagement; // Add this for scene management
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -11,6 +12,10 @@ public class RoomUIManager : MonoBehaviour
     [SerializeField] private Transform playerListContent;
     [SerializeField] private GameObject playerListItemPrefab;
     [SerializeField] private TextMeshProUGUI roomNameText;
+    // TODO: Assign this button in the Unity Editor. It should only be visible/interactable for the host.
+    [SerializeField] private GameObject launchButton;
+
+    private int currentSelectedPlanetId = -1;
 
     void Start()
     {
@@ -22,6 +27,7 @@ public class RoomUIManager : MonoBehaviour
         {
             SendNickname();
         }
+        UpdateLaunchButtonVisibility();
     }
 
     private void OnEnable()
@@ -42,7 +48,7 @@ public class RoomUIManager : MonoBehaviour
     private void HandleDisconnection()
     {
         Debug.Log("[RoomUIManager] Disconnected. Returning to ConnectionScene.");
-        UnityEngine.SceneManagement.SceneManager.LoadScene("ConnectionScene");
+        SceneManager.LoadScene("ConnectionScene");
     }
 
     private void SendNickname()
@@ -69,8 +75,16 @@ public class RoomUIManager : MonoBehaviour
 
             if (type == "update_room_info")
             {
-                // Debug.Log("RoomUIManager: HandleServerJsonMessage() received update_room_info.");
                 HandleRoomUpdate(response);
+            }
+            else if (type == "load_scene") // Handle scene loading command
+            {
+                string sceneToLoad = response["scene_name"]?.ToString();
+                if (!string.IsNullOrEmpty(sceneToLoad))
+                {
+                    Debug.Log($"[RoomUIManager] Received command to load scene: {sceneToLoad}");
+                    SceneManager.LoadScene(sceneToLoad);
+                }
             }
         }
         catch (JsonReaderException e)
@@ -85,6 +99,10 @@ public class RoomUIManager : MonoBehaviour
         {
             return;
         }
+
+        // Update selected planet
+        currentSelectedPlanetId = data["selected_planet_id"]?.ToObject<int>() ?? -1;
+        Debug.Log($"[RoomUIManager] Room updated. Selected planet ID is now: {currentSelectedPlanetId}");
 
         JArray players = data["players"] as JArray;
 
@@ -115,6 +133,30 @@ public class RoomUIManager : MonoBehaviour
                 }
             }
         }
+        UpdateLaunchButtonVisibility();
+    }
+
+    private void UpdateLaunchButtonVisibility()
+    {
+        if (launchButton != null)
+        {
+            bool shouldBeActive = NetworkManager.Instance.Mode == NetworkMode.Host && currentSelectedPlanetId != -1;
+            launchButton.SetActive(shouldBeActive);
+        }
+    }
+
+    // This method is called by the new "Launch" button
+    public void OnLaunchGameClicked()
+    {
+        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
+        if (currentSelectedPlanetId == -1)
+        {
+            Debug.LogWarning("[RoomUIManager] Cannot launch, no planet selected.");
+            return;
+        }
+
+        Debug.Log($"[RoomUIManager] Host clicked launch for planet {currentSelectedPlanetId}.");
+        ServerRoomManager.Instance.LaunchToPlanet(currentSelectedPlanetId);
     }
 
     // This method would be called by a UI button's OnClick event in the RoomScene.
@@ -132,13 +174,10 @@ public class RoomUIManager : MonoBehaviour
             return;
         }
 
-        // If we are the host, we can directly call the ServerRoomManager's logic.
-        // This is more direct and avoids sending a network message to ourselves.
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
             if (ServerRoomManager.Instance != null)
             {
-                // The host directly sets the planet and broadcasts the update.
                 ServerRoomManager.Instance.SelectPlanet(planetId);
             }
             else
@@ -146,7 +185,6 @@ public class RoomUIManager : MonoBehaviour
                 Debug.LogError("[RoomUIManager] ServerRoomManager not found for host!");
             }
         }
-        // If we are a client, we send a message to the host to make the request.
         else
         {
             JObject message = new JObject
@@ -154,7 +192,7 @@ public class RoomUIManager : MonoBehaviour
                 { "type", "propose_planet" },
                 { "planet_id", planetId }
             };
-            
+
             CSteamID hostId = NetworkManager.Instance.LobbyHostID;
             if (hostId.IsValid())
             {
@@ -165,6 +203,20 @@ public class RoomUIManager : MonoBehaviour
             {
                 Debug.LogError("[RoomUIManager] Could not send proposal, invalid host ID.");
             }
+        }
+    }
+
+    public void OnInviteFriends()
+    {
+        // Use the static Instance to call the method
+        if (ServerRoomManager.Instance != null)
+        {
+            ServerRoomManager.Instance.OnInviteFriendsButtonClicked();
+            Debug.Log("Steam Invite Friends Overlay Opened.");
+        }
+        else
+        {
+            Debug.LogError("ServerRoomManager.Instance is not found!");
         }
     }
 }

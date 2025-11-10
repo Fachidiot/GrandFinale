@@ -156,6 +156,29 @@ public class ServerRoomManager : MonoBehaviour
         BroadcastRoomUpdate();
     }
 
+    public void LaunchToPlanet(int planetId)
+    {
+        if (NetworkManager.Instance.Mode != NetworkMode.Host)
+        {
+            Debug.LogWarning("Only the host can launch the game.");
+            return;
+        }
+
+        // TODO: Replace this with a real mapping from planetId to scene name
+        // This could come from a ScriptableObject or some other config file.
+        string sceneToLoad = $"Planet_{planetId}_Scene"; 
+
+        Debug.Log($"[ServerRoomManager] Host is launching game to planet {planetId} (Scene: {sceneToLoad})");
+
+        JObject message = new JObject
+        {
+            { "type", "load_scene" },
+            { "scene_name", sceneToLoad }
+        };
+
+        NetworkManager.Instance.BroadcastJsonMessage(message);
+    }
+
     public void BroadcastRoomUpdate()
     {
         // Debug.Log("ServerRoomManager: BroadcastRoomUpdate() called.");
