@@ -122,6 +122,8 @@ public class NetworkManager : MonoBehaviour
             if (ServerRoomManager.Instance == null) return;
 
             var authoritativeState = new NetworkGameState();
+            
+            // 1. Gather Player States
             foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
             {
                 string steamIdStr = playerEntry.Key;
@@ -139,17 +141,40 @@ public class NetworkManager : MonoBehaviour
                 {
                     if (receivedPlayerStates.TryGetValue(playerId, out playerState))
                     {
-
+                        // We have the client's state, use it
                     }
                     else
                     {
-
+                        // Client state not received yet, maybe skip or use last known
                         continue;
                     }
                 }
                 authoritativeState.players.Add(playerState);
             }
 
+            // 2. Gather Monster States
+            if (SpawnManager.Instance != null)
+            {
+                foreach (var monsterGo in SpawnManager.Instance.SpawnedMonsters)
+                {
+                    if (monsterGo == null) continue; // Monster might have been destroyed
+
+                    var networkMonster = monsterGo.GetComponent<NetworkMonster>();
+                    if (networkMonster == null) continue;
+
+                    // TODO: Get animation state from a monster-specific animator sync component
+                    var monsterState = new MonsterState
+                    {
+                        monsterId = networkMonster.MonsterId,
+                        position = monsterGo.transform.position,
+                        rotation = monsterGo.transform.rotation,
+                        animationMask = 0 // Placeholder
+                    };
+                    authoritativeState.monsters.Add(monsterState);
+                }
+            }
+
+            // 3. Broadcast the combined state
             byte[] gameStateBytes = authoritativeState.ToByteArray();
             byte[] message = new byte[gameStateBytes.Length + 1];
             message[0] = (byte)MessageType.GameState;
@@ -157,6 +182,7 @@ public class NetworkManager : MonoBehaviour
 
             BroadcastP2PMessage(message, EP2PSend.k_EP2PSendUnreliable);
 
+            // 4. Update host's local game state directly
             if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(authoritativeState);
         }
         // Client Logic
@@ -165,8 +191,6 @@ public class NetworkManager : MonoBehaviour
             PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
 
             if (playerState.playerId == 255) return;
-
-
 
             byte[] stateBytes = playerState.ToByteArray();
             byte[] messageBytes = new byte[stateBytes.Length + 1];
@@ -210,7 +234,7 @@ public class NetworkManager : MonoBehaviour
             m_CurrentLobbyID = CSteamID.Nil;
         }
 
-        if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.ClearPlayers();
+        if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.ClearAllNetworkEntities();
         if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.ClearRoom();
 
         lobbyMembers.Clear();
@@ -248,7 +272,7 @@ public class NetworkManager : MonoBehaviour
             gameObject.AddComponent<ServerRoomManager>();
         }
 
-        SceneManager.LoadScene("RoomScene");
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.roomScene);
     }
 
     public void JoinSteamLobby(CSteamID lobbyID)
@@ -291,7 +315,7 @@ public class NetworkManager : MonoBehaviour
         IsConnected = true;
         OnConnected?.Invoke();
 
-        SceneManager.LoadScene("RoomScene");
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.roomScene);
     }
 
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)

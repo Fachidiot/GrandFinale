@@ -12,10 +12,12 @@ public class NetworkPlayerManager : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject monsterPrefab;
 
-    private Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
-    private Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
+    private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
+    private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
+    private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
 
-    public Dictionary<string, GameObject> Players => players;
+    public IReadOnlyDictionary<string, GameObject> Players => players;
+    public IReadOnlyDictionary<ushort, GameObject> Monsters => monsters;
 
     private void Awake()
     {
@@ -159,6 +161,7 @@ public class NetworkPlayerManager : MonoBehaviour
 
     public void UpdateFromGameState(NetworkGameState state)
     {
+        // --- Player States ---
         foreach (var playerState in state.players)
         {
             if (!byteIdToSteamId.TryGetValue(playerState.playerId, out string steamId))
@@ -170,8 +173,6 @@ public class NetworkPlayerManager : MonoBehaviour
             {
                 if (steamId == NetworkManager.Instance.PlayerId)
                     continue;
-
-
 
                 var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
                 var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
@@ -206,7 +207,86 @@ public class NetworkPlayerManager : MonoBehaviour
                 }
             }
         }
+
+        // --- Monster States ---
+        if (NetworkManager.Instance.Mode == NetworkMode.Host) return; // Host manages its own monsters
+
+        HashSet<ushort> receivedMonsterIds = new HashSet<ushort>();
+
+        foreach (var monsterState in state.monsters)
+        {
+            receivedMonsterIds.Add(monsterState.monsterId);
+
+            if (monsters.TryGetValue(monsterState.monsterId, out GameObject monsterGO))
+            {
+                // Monster exists, update its state
+                monsterGO.transform.position = monsterState.position;
+                monsterGO.transform.rotation = monsterState.rotation;
+                // TODO: Update monster animation state via a NetworkAnimatorSync for monsters
+            }
+            else
+            {
+                // Monster is new, spawn it
+                SpawnMonster(monsterState);
+            }
+        }
+
+        // Despawn any monsters that are no longer in the game state
+        List<ushort> monstersToDestroy = new List<ushort>();
+        foreach (var monsterId in monsters.Keys)
+        {
+            if (!receivedMonsterIds.Contains(monsterId))
+            {
+                monstersToDestroy.Add(monsterId);
+            }
+        }
+
+        foreach (var monsterId in monstersToDestroy)
+        {
+            if (monsters.TryGetValue(monsterId, out GameObject monsterToDestroy))
+            {
+                Destroy(monsterToDestroy);
+            }
+            monsters.Remove(monsterId);
+        }
     }
+    #endregion
+
+    #region Spawning
+    
+    private void SpawnMonster(MonsterState state)
+    {
+        if (monsterPrefab == null)
+        {
+            Debug.LogError("[NetworkPlayerManager] Monster Prefab is not assigned!");
+            return;
+        }
+
+        GameObject monsterGO = Instantiate(monsterPrefab, state.position, state.rotation);
+        
+        NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
+        if (networkMonster == null)
+        {
+            Debug.LogError("Monster prefab is missing the NetworkMonster component!");
+            Destroy(monsterGO);
+            return;
+        }
+        
+        networkMonster.Initialize(state.monsterId);
+        monsterGO.name = $"{monsterPrefab.name}_{state.monsterId}";
+        
+        monsters.Add(state.monsterId, monsterGO);
+        Debug.Log($"[NetworkPlayerManager] Spawned monster {monsterGO.name} from network state.");
+
+        // Disable components that are host-authoritative
+        var monsterMovement = monsterGO.GetComponent<MonsterMovement>();
+        if (monsterMovement != null)
+        {
+            monsterMovement.enabled = false;
+        }
+        // Disable any other AI/logic components here
+    }
+
     #endregion
 
     #region Player Actions
@@ -224,11 +304,14 @@ public class NetworkPlayerManager : MonoBehaviour
 
     #endregion
 
-    public void ClearPlayers()
+    public void ClearAllNetworkEntities()
     {
         foreach (var player in players.Values) Destroy(player);
         players.Clear();
         byteIdToSteamId.Clear();
+
+        foreach (var monster in monsters.Values) Destroy(monster);
+        monsters.Clear();
     }
 
     public byte GetMyByteId()

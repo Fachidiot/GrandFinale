@@ -47,8 +47,8 @@ public class RoomUIManager : MonoBehaviour
 
     private void HandleDisconnection()
     {
-        Debug.Log("[RoomUIManager] Disconnected. Returning to ConnectionScene.");
-        SceneManager.LoadScene("ConnectionScene");
+        Debug.Log($"[RoomUIManager] Disconnected. Returning to {GameManager.Instance.GameSettings.connectionScene}.");
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.connectionScene);
     }
 
     private void SendNickname()
@@ -73,18 +73,25 @@ public class RoomUIManager : MonoBehaviour
             JObject response = JObject.Parse(jsonMsg);
             string type = response["type"]?.ToString();
 
-            if (type == "update_room_info")
+            switch (type)
             {
-                HandleRoomUpdate(response);
-            }
-            else if (type == "load_scene") // Handle scene loading command
-            {
-                string sceneToLoad = response["scene_name"]?.ToString();
-                if (!string.IsNullOrEmpty(sceneToLoad))
-                {
-                    Debug.Log($"[RoomUIManager] Received command to load scene: {sceneToLoad}");
-                    SceneManager.LoadScene(sceneToLoad);
-                }
+                case "update_room_info":
+                    HandleRoomUpdate(response);
+                    break;
+
+                case "load_scene":
+                    string sceneToLoad = response["scene_name"]?.ToString();
+                    if (!string.IsNullOrEmpty(sceneToLoad))
+                    {
+                        Debug.Log($"[RoomUIManager] Received command to load scene: {sceneToLoad}");
+                        SceneManager.LoadScene(sceneToLoad);
+                    }
+                    break;
+
+                default:
+                    // Optional: Log unknown message types
+                    // Debug.LogWarning($"[RoomUIManager] Received unknown message type: {type}");
+                    break;
             }
         }
         catch (JsonReaderException e)

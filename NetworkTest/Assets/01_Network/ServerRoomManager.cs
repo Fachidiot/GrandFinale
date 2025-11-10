@@ -164,11 +164,16 @@ public class ServerRoomManager : MonoBehaviour
             return;
         }
 
-        // TODO: Replace this with a real mapping from planetId to scene name
-        // This could come from a ScriptableObject or some other config file.
-        string sceneToLoad = $"Planet_{planetId}_Scene"; 
+        PlanetData planet = GameManager.Instance.PlanetDatabase.GetPlanetById(planetId);
+        if (planet == null)
+        {
+            Debug.LogError($"[ServerRoomManager] Cannot launch. No planet found in database with ID: {planetId}");
+            return;
+        }
 
-        Debug.Log($"[ServerRoomManager] Host is launching game to planet {planetId} (Scene: {sceneToLoad})");
+        string sceneToLoad = planet.sceneName; 
+
+        Debug.Log($"[ServerRoomManager] Host is launching game to planet {planet.planetName} (Scene: {sceneToLoad})");
 
         JObject message = new JObject
         {
@@ -188,7 +193,7 @@ public class ServerRoomManager : MonoBehaviour
         JObject roomInfo = new JObject
         {
             { "type", "update_room_info" },
-            { "room_name", "Test Room" },
+            { "room_name", GameManager.Instance.GameSettings.defaultRoomName },
             { "host_id", steamIdToByteId[NetworkManager.Instance.selfSteamId].ToString() },
             { "selected_planet_id", selectedPlanetId } // Add selected planet info
         };

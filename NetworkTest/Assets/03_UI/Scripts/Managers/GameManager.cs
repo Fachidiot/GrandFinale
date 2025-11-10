@@ -13,6 +13,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private StageInfo stageInfo;
     [SerializeField] private GameObject playerPrefab;
 
+    [Header("Data References")]
+    [SerializeField] private GameSettings gameSettings;
+    public GameSettings GameSettings { get { return gameSettings; } }
+    [SerializeField] private PlanetDatabase planetDatabase;
+    public PlanetDatabase PlanetDatabase { get { return planetDatabase; } }
+
     public static event Action<bool> OnPauseStateChanged;
 
     [SerializeField] private GameState gameState;
