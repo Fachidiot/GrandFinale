@@ -155,6 +155,16 @@ public class NetworkPlayerManager : MonoBehaviour
         return playerObject;
     }
 
+    public void RemovePlayer(string steamId)
+    {
+        if (players.TryGetValue(steamId, out GameObject playerToDestroy))
+        {
+            Debug.Log($"[NetworkPlayerManager] Removing player {steamId}.");
+            Destroy(playerToDestroy);
+            players.Remove(steamId);
+        }
+    }
+
     #endregion
 
     #region Game State Update
@@ -222,7 +232,13 @@ public class NetworkPlayerManager : MonoBehaviour
                 // Monster exists, update its state
                 monsterGO.transform.position = monsterState.position;
                 monsterGO.transform.rotation = monsterState.rotation;
-                // TODO: Update monster animation state via a NetworkAnimatorSync for monsters
+                
+                // Update monster animation state
+                var monsterAnimSync = monsterGO.GetComponent<NetworkMonsterAnimatorSync>();
+                if (monsterAnimSync != null)
+                {
+                    monsterAnimSync.OnAnimationDataReceived(monsterState.animationMask);
+                }
             }
             else
             {

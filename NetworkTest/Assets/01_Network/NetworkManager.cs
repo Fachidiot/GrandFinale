@@ -321,21 +321,33 @@ public class NetworkManager : MonoBehaviour
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)
     {
         CSteamID userChanged = new CSteamID(pCallback.m_ulSteamIDUserChanged);
+        EChatMemberStateChange stateChange = (EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange;
 
-        if ((EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange != EChatMemberStateChange.k_EChatMemberStateChangeEntered)
+        // If a player has left, disconnected, or been kicked
+        if ((stateChange & (EChatMemberStateChange.k_EChatMemberStateChangeLeft | EChatMemberStateChange.k_EChatMemberStateChangeDisconnected | EChatMemberStateChange.k_EChatMemberStateChangeKicked | EChatMemberStateChange.k_EChatMemberStateChangeBanned)) != 0)
         {
-            Debug.Log($"Player {userChanged} left the lobby.");
+            Debug.Log($"Player {userChanged} left the lobby (Reason: {stateChange}).");
 
-            if (MyPlayerId == 0 && ServerRoomManager.Instance != null)
+            // If we are the host, we need to clean up the disconnected player
+            if (Mode == NetworkMode.Host)
             {
-                ServerRoomManager.Instance.RemovePlayer(userChanged);
+                if (ServerRoomManager.Instance != null)
+                {
+                    ServerRoomManager.Instance.RemovePlayer(userChanged);
+                }
+                if (NetworkPlayerManager.Instance != null)
+                {
+                    NetworkPlayerManager.Instance.RemovePlayer(userChanged.ToString());
+                }
             }
-            else if (MyPlayerId > 0 && userChanged == lobbyHostID)
+            // If we are a client and the user who left was the host, we must disconnect
+            else if (Mode == NetworkMode.Client && userChanged == lobbyHostID)
             {
                 Debug.LogError("Host has left the lobby. Disconnecting.");
                 Disconnect();
             }
         }
+        
         UpdateLobbyMembers();
     }
 
