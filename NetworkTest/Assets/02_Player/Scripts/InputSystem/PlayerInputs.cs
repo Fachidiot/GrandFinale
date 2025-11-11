@@ -9,6 +9,7 @@ public class PlayerInputs : MonoBehaviour
     private float horizontalInput = 0f;
     private float verticalInput = 0f;
     private float bending = 0f;
+    private bool isPaused = false;
 
     // Movement
     public float GetAxisHorizontal()
@@ -121,10 +122,24 @@ public class PlayerInputs : MonoBehaviour
     {
         if (OptionDataManager.Instance)
             keyData = OptionDataManager.Instance.OptionData.m_keyData;
+        GameManager.OnPauseStateChanged += OnPause; // Subscribe to pause event
+    }
+
+    void OnPause(bool pause)
+    {
+        isPaused = pause;
     }
 
     void Update()
     {
+        if (isPaused)
+        {
+            horizontalInput = 0f;
+            verticalInput = 0f;
+            bending = 0f;
+            return;
+        }
+
         // Axis Raw
         float horizontalRaw = Input.GetKey(keyData.m_KeyMoveLeft) ? -1 : Input.GetKey(keyData.m_KeyMoveRight) ? 1 : 0;
         float verticalRaw = Input.GetKey(keyData.m_KeyMoveDown) ? -1 : Input.GetKey(keyData.m_KeyMoveUp) ? 1 : 0;

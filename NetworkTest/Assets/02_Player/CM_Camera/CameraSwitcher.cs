@@ -18,6 +18,7 @@ public class CameraSwitcher : MonoBehaviour
     private bool isGrounded;
     private bool isWeaponChange;
     private bool isFirstpersonView = false;
+    public bool IsFirstPersonView { get { return isFirstpersonView; } }
     private bool isAiming = false;
 
     bool CanAimCheck()

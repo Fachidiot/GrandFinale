@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,6 +8,7 @@ public class OptionController : MonoBehaviour
     public bool OptionOn { get; private set; }
 
     [SerializeField] private GameObject[] uiPanels;
+    private TerminalManager terminalManager;
 
     void Start()
     {
@@ -21,6 +23,7 @@ public class OptionController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            TerminalCheck();
             // if (shortcutModal.isOn)
             //     shortcutModal.Close();
             if (-1 != IsOptionEnable())
@@ -33,12 +36,22 @@ public class OptionController : MonoBehaviour
                 optionPanel.SetActive(false);
             // else if (inventoryUI.activeSelf)
             //     inventoryUI.SetActive(false);
+            else if (terminalManager && terminalManager.IsTerminalActive)
+            {
+                terminalManager.ToggleTerminal(null);
+            }
             else
                 optionPanel.SetActive(true);
             OptionOn = optionPanel.activeSelf;
 
             GameManager.Instance.SetPause(OptionOn);
         }
+    }
+
+    private void TerminalCheck()
+    {
+        if (!terminalManager)
+            terminalManager = FindObjectOfType<TerminalManager>();
     }
 
     public void Toggle()
