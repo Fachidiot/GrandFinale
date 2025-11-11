@@ -29,7 +29,8 @@ public class Weapon : MonoBehaviour
     [SerializeField] private int maxAmmo = 30;
     public int MaxAmmo => maxAmmo;
     private int currentAmmo;
-    public int CurrentAmmo => currentAmmo;
+    public int CurrentAmmo { get { return currentAmmo; } }
+    public void InfiniteAmmo() { currentAmmo = maxAmmo; }
 
     [Header("Shotgun Parameters")]
     [SerializeField] private bool shotgun;

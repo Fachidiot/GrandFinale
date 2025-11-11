@@ -122,7 +122,7 @@ public class NetworkManager : MonoBehaviour
             if (ServerRoomManager.Instance == null) return;
 
             var authoritativeState = new NetworkGameState();
-            
+
             // 1. Gather Player States
             foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
             {
@@ -177,7 +177,7 @@ public class NetworkManager : MonoBehaviour
             // 3. Broadcast the combined state
             byte[] gameStateBytes = authoritativeState.ToByteArray();
             byte[] message = new byte[gameStateBytes.Length + 1];
-            message[0] = (byte)MessageType.GameState;
+            message[0] = (byte)NetworkMessageType.GameState;
             Buffer.BlockCopy(gameStateBytes, 0, message, 1, gameStateBytes.Length);
 
             BroadcastP2PMessage(message, EP2PSend.k_EP2PSendUnreliable);
@@ -194,7 +194,7 @@ public class NetworkManager : MonoBehaviour
 
             byte[] stateBytes = playerState.ToByteArray();
             byte[] messageBytes = new byte[stateBytes.Length + 1];
-            messageBytes[0] = (byte)MessageType.PlayerState;
+            messageBytes[0] = (byte)NetworkMessageType.PlayerState;
             Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
 
             SendP2PMessage(lobbyHostID, messageBytes, EP2PSend.k_EP2PSendUnreliable);
@@ -347,7 +347,7 @@ public class NetworkManager : MonoBehaviour
                 Disconnect();
             }
         }
-        
+
         UpdateLobbyMembers();
     }
 
@@ -388,20 +388,20 @@ public class NetworkManager : MonoBehaviour
     private void HandleP2PPacket(CSteamID sender, byte[] data)
     {
         if (data.Length == 0) return;
-        MessageType messageType = (MessageType)data[0];
+        NetworkMessageType messageType = (NetworkMessageType)data[0];
         byte[] content = new byte[data.Length - 1];
         Buffer.BlockCopy(data, 1, content, 0, content.Length);
 
         // Host receives state from clients
         if (MyPlayerId == 0)
         {
-            if (messageType == MessageType.PlayerState)
+            if (messageType == NetworkMessageType.PlayerState)
             {
                 PlayerState state = PlayerState.FromBytes(content);
 
                 receivedPlayerStates[state.playerId] = state;
             }
-            else if (messageType == MessageType.JsonMessage)
+            else if (messageType == NetworkMessageType.JsonMessage)
             {
                 string jsonMsg = Encoding.UTF8.GetString(content);
                 OnJsonMessageReceived?.Invoke(sender, jsonMsg);
@@ -410,12 +410,12 @@ public class NetworkManager : MonoBehaviour
         // Client receives game state from host
         else
         {
-            if (messageType == MessageType.GameState)
+            if (messageType == NetworkMessageType.GameState)
             {
                 var gameState = NetworkGameState.FromBytes(content);
                 if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
             }
-            else if (messageType == MessageType.JsonMessage)
+            else if (messageType == NetworkMessageType.JsonMessage)
             {
                 string jsonMsg = Encoding.UTF8.GetString(content);
                 OnJsonMessageReceived?.Invoke(sender, jsonMsg);
@@ -428,7 +428,7 @@ public class NetworkManager : MonoBehaviour
         string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
         byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonString);
         byte[] message = new byte[jsonBytes.Length + 1];
-        message[0] = (byte)MessageType.JsonMessage;
+        message[0] = (byte)NetworkMessageType.JsonMessage;
         Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
         SendP2PMessage(target, message, EP2PSend.k_EP2PSendReliable);
     }
@@ -438,7 +438,7 @@ public class NetworkManager : MonoBehaviour
         string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
         byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonString);
         byte[] message = new byte[jsonBytes.Length + 1];
-        message[0] = (byte)MessageType.JsonMessage;
+        message[0] = (byte)NetworkMessageType.JsonMessage;
         Buffer.BlockCopy(jsonBytes, 0, message, 1, jsonBytes.Length);
 
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
@@ -470,7 +470,7 @@ public class NetworkManager : MonoBehaviour
     #endregion
 }
 
-public enum MessageType : byte
+public enum NetworkMessageType : byte
 {
     GameState = 0,
     PlayerState = 1,

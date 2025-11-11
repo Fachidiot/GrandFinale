@@ -107,6 +107,10 @@ public class PlayerInputs : MonoBehaviour
     {
         return Input.GetKeyDown(keyData.m_KeyInventory);
     }
+    public bool GetFullInventory()
+    {
+        return Input.GetKeyDown(keyData.m_KeyInventory);
+    }
 
     // UI
     public bool GetEscape()

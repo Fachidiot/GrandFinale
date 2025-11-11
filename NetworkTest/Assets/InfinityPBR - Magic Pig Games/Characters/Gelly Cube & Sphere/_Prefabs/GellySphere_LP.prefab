@@ -1,0 +1,791 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &764396769178818902
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3436860320873032866}
+  m_Layer: 0
+  m_Name: sphere4_jnt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3436860320873032866
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764396769178818902}
+  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.62499994, y: 1.3877786e-16, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7627012911397940890}
+  m_Father: {fileID: 7752882946361110112}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1877188484633888319
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1244907024165035141}
+  - component: {fileID: 1642816790671375200}
+  - component: {fileID: 1642816790671375203}
+  - component: {fileID: 1625389956956586965}
+  - component: {fileID: 7563265369544687638}
+  - component: {fileID: 919132148714475767}
+  m_Layer: 0
+  m_Name: GellySphere_LP
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1244907024165035141
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877188484633888319}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7581235892656255397}
+  - {fileID: 8909457647598352310}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1642816790671375200
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877188484633888319}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 85b968ad442cb438c902ac9b85f48902, type: 3}
+  m_Controller: {fileID: 9100000, guid: bcde8d27ea7834086b77d42aa184fc3c, type: 2}
+  m_CullingMode: 1
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1642816790671375203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877188484633888319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4d50f83d86304f0d83741ff1bc6c773, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 145382, guid: 8e814fc7b9a284e0392791b4cf27b9b3, type: 3}
+  spawnPos: {fileID: 0}
+--- !u!114 &1625389956956586965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877188484633888319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf52f11bf2ee4abba5fc0133d75f3f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blendShapeGameObjects:
+  - gameObjectName: GellySphere
+    gameObject: {fileID: 6019971913895971856}
+    smr: {fileID: 3103689271988740210}
+    displayableValues: 1
+    blendShapeValues:
+    - objectIndex: 0
+      index: 0
+      display: 0
+      fullName: 
+      triggerName: 
+      isMinus: 0
+      value: 0
+      min: 0
+      max: 100
+      limitMin: 0
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 0
+      display: 0
+      fullName: 
+      triggerName: 
+      isMinus: 0
+      value: 0
+      min: 0
+      max: 100
+      limitMin: 0
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 0
+      display: 0
+      fullName: 
+      triggerName: 
+      isMinus: 0
+      value: 0
+      min: 0
+      max: 100
+      limitMin: 0
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 0
+      display: 0
+      fullName: 
+      triggerName: 
+      isMinus: 0
+      value: 0
+      min: 0
+      max: 100
+      limitMin: 0
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 0
+      display: 0
+      fullName: 
+      triggerName: 
+      isMinus: 0
+      value: 0
+      min: 0
+      max: 100
+      limitMin: 0
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 0
+      display: 0
+      fullName: 
+      triggerName: 
+      isMinus: 0
+      value: 0
+      min: 0
+      max: 100
+      limitMin: 0
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 6
+      display: 0
+      fullName: Morpher.SFB_BS_CircumferenceMinus
+      triggerName: Circumference
+      isMinus: 1
+      value: -0
+      min: -100
+      max: 100
+      limitMin: -100
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    - objectIndex: 0
+      index: 7
+      display: 1
+      fullName: Morpher.SFB_BS_CircumferencePlus
+      triggerName: Circumference
+      isMinus: 0
+      value: 0
+      min: -100
+      max: 100
+      limitMin: -100
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+    showValues: 1
+  userMatchRespectsLimits: 1
+  globalModifier: 1
+  rangeFiles: []
+  presetFiles: []
+  blendShapePrimaryPrefix: SFB_BS_
+  blendShapeMatchPrefix: SFB_BSM_
+  matchList: []
+  matchListNames: []
+  matchListIndex: 0
+  exportPath: 
+  showHelpBoxes: 1
+  showSetup: 1
+  showPresets: 1
+  showFullInspector: 0
+  showBlendShapeObjects: 1
+  showRangeFiles: 1
+  showPresetFiles: 1
+--- !u!114 &7563265369544687638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877188484633888319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c023f4138a334623acb9140fdbbe0dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  presets:
+  - name: Reset
+    presetValues:
+    - objectName: GellySphere
+      valueTriggerName: Circumference
+      onTriggerMode: Explicit
+      onTriggerModeIndex: 0
+      shapeValue: 0
+      limitMin: -100
+      limitMax: 100
+      min: -100
+      max: 100
+    showValues: 1
+  - name: Random
+    presetValues:
+    - objectName: GellySphere
+      valueTriggerName: Circumference
+      onTriggerMode: Random
+      onTriggerModeIndex: 1
+      shapeValue: 0
+      limitMin: -100
+      limitMax: 100
+      min: -100
+      max: 100
+    showValues: 1
+  onTriggerMode:
+  - Explicit
+  - Random
+  shapeList:
+  - obj:
+      gameObjectName: GellySphere
+      gameObject: {fileID: 6019971913895971856}
+      smr: {fileID: 3103689271988740210}
+      displayableValues: 1
+      blendShapeValues:
+      - objectIndex: 0
+        index: 0
+        display: 0
+        fullName: 
+        triggerName: 
+        isMinus: 0
+        value: 0
+        min: 0
+        max: 100
+        limitMin: 0
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 0
+        display: 0
+        fullName: 
+        triggerName: 
+        isMinus: 0
+        value: 0
+        min: 0
+        max: 100
+        limitMin: 0
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 0
+        display: 0
+        fullName: 
+        triggerName: 
+        isMinus: 0
+        value: 0
+        min: 0
+        max: 100
+        limitMin: 0
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 0
+        display: 0
+        fullName: 
+        triggerName: 
+        isMinus: 0
+        value: 0
+        min: 0
+        max: 100
+        limitMin: 0
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 0
+        display: 0
+        fullName: 
+        triggerName: 
+        isMinus: 0
+        value: 0
+        min: 0
+        max: 100
+        limitMin: 0
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 0
+        display: 0
+        fullName: 
+        triggerName: 
+        isMinus: 0
+        value: 0
+        min: 0
+        max: 100
+        limitMin: 0
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 6
+        display: 0
+        fullName: Morpher.SFB_BS_CircumferenceMinus
+        triggerName: Circumference
+        isMinus: 1
+        value: -0
+        min: -100
+        max: 100
+        limitMin: -100
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      - objectIndex: 0
+        index: 7
+        display: 1
+        fullName: Morpher.SFB_BS_CircumferencePlus
+        triggerName: Circumference
+        isMinus: 0
+        value: 0
+        min: -100
+        max: 100
+        limitMin: -100
+        limitMax: 100
+        lastValue: 0
+        showValueOptions: 0
+        isOpen: 0
+        matchThisObjectIndex: 0
+        matchThisValueIndex: 0
+        matchAnotherValue: 0
+        otherValuesMatchThis: []
+      showValues: 1
+    value:
+      objectIndex: 0
+      index: 7
+      display: 1
+      fullName: Morpher.SFB_BS_CircumferencePlus
+      triggerName: Circumference
+      isMinus: 0
+      value: 0
+      min: -100
+      max: 100
+      limitMin: -100
+      limitMax: 100
+      lastValue: 0
+      showValueOptions: 0
+      isOpen: 0
+      matchThisObjectIndex: 0
+      matchThisValueIndex: 0
+      matchAnotherValue: 0
+      otherValuesMatchThis: []
+  shapeListNames:
+  - GellySphere Circumference
+  shapeListIndex: 0
+  showHelpBoxes: 1
+  showFullInspector: 0
+  showSetup: 1
+  lerp: 1
+  lerpSeconds: 0.5
+--- !u!114 &919132148714475767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877188484633888319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87069b19991ec46e69717faed3de1941, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colors:
+  - {r: 0.6981132, g: 0.16135636, b: 0.16135636, a: 0.78431374}
+  - {r: 0.69803923, g: 0.16078432, b: 0.44234467, a: 0.78431374}
+  - {r: 0.6602384, g: 0.16078432, b: 0.69803923, a: 0.78431374}
+  - {r: 0.36318538, g: 0.16078432, b: 0.69803923, a: 0.78431374}
+  - {r: 0.16078432, g: 0.23794462, b: 0.69803923, a: 0.78431374}
+  - {r: 0.16078432, g: 0.44972402, b: 0.69803923, a: 0.78431374}
+  - {r: 0.16078432, g: 0.6526666, b: 0.69803923, a: 0.78431374}
+  - {r: 0.16078432, g: 0.69803923, b: 0.3935779, a: 0.78431374}
+  - {r: 0.32763138, g: 0.69803923, b: 0.16078432, a: 0.78431374}
+  - {r: 0.6806334, g: 0.69803923, b: 0.16078432, a: 0.78431374}
+  - {r: 0.69803923, g: 0.5263318, b: 0.16078432, a: 0.78431374}
+  - {r: 0.69803923, g: 0.3120368, b: 0.16078432, a: 0.78431374}
+  _renderer: {fileID: 3103689271988740210}
+  _transitionTime: 4
+  constantColorChange: 1
+--- !u!1 &2029651598018639803
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8909457647598352310}
+  m_Layer: 0
+  m_Name: Sphere_ROOT_jnt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8909457647598352310
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029651598018639803}
+  m_LocalRotation: {x: -7.216381e-17, y: 8.4845444e-17, z: -0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2140640246090839506}
+  m_Father: {fileID: 1244907024165035141}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3187653235837778652
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2140640246090839506}
+  m_Layer: 0
+  m_Name: sphere1_jnt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2140640246090839506
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3187653235837778652}
+  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.24999999, y: 5.5511148e-17, z: 0}
+  m_LocalScale: {x: 1, y: 0.9999999, z: 0.9999999}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7153343302966848393}
+  m_Father: {fileID: 8909457647598352310}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6019971913895971856
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7581235892656255397}
+  - component: {fileID: 3103689271988740210}
+  m_Layer: 0
+  m_Name: GellySphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7581235892656255397
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019971913895971856}
+  m_LocalRotation: {x: 0.000000021855694, y: 0, z: -0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1244907024165035141}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &3103689271988740210
+SkinnedMeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019971913895971856}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 03a41ce1738424b8a82ba97f0440f777, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  serializedVersion: 2
+  m_Quality: 0
+  m_UpdateWhenOffscreen: 0
+  m_SkinnedMotionVectors: 1
+  m_Mesh: {fileID: 2107818935161925049, guid: 85b968ad442cb438c902ac9b85f48902, type: 3}
+  m_Bones:
+  - {fileID: 2140640246090839506}
+  - {fileID: 7153343302966848393}
+  - {fileID: 7752882946361110112}
+  - {fileID: 3436860320873032866}
+  - {fileID: 8909457647598352310}
+  m_BlendShapeWeights:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - -0
+  - 0
+  m_RootBone: {fileID: 8909457647598352310}
+  m_AABB:
+    m_Center: {x: -1.851089, y: -0.12214708, z: -0.2831602}
+    m_Extent: {x: 1.9053249, y: 2.617814, z: 2.640237}
+  m_DirtyAABB: 0
+--- !u!1 &6730108832650859664
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7752882946361110112}
+  m_Layer: 0
+  m_Name: sphere3_jnt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7752882946361110112
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6730108832650859664}
+  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.74999994, y: 1.6653344e-16, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3436860320873032866}
+  m_Father: {fileID: 7153343302966848393}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7802893803836510555
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7153343302966848393}
+  m_Layer: 0
+  m_Name: sphere2_jnt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7153343302966848393
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7802893803836510555}
+  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.62499994, y: 1.3877786e-16, z: 0}
+  m_LocalScale: {x: 1, y: 0.99999994, z: 0.99999994}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7752882946361110112}
+  m_Father: {fileID: 2140640246090839506}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8830050807240293551
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7627012911397940890}
+  m_Layer: 0
+  m_Name: sphere5_jnt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7627012911397940890
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8830050807240293551}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: -0.24999999, y: -5.6843415e-15, z: -5.6843415e-15}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3436860320873032866}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

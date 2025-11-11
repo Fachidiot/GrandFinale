@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11ce14b82e61e7444bc6ca775a836287, type: 3}
+  m_Name: PlantConfig
+  m_EditorClassIdentifier: 
+  maxHP: 500
+  attackDamage: 10
+  defense: 0
+  fovRange: 10
+  fovAngle: 120
+  soundRange: 15
+  attackRange: 2
+  stoppingDistance: 1.5
+  persistenceTime: 5
+  patrolRadiusMin: 5
+  patrolRadiusMax: 10
+  idleTimeMin: 2
+  idleTimeMax: 4
+  lookAroundTime: 3
+  lookAroundTurnInterval: 1.5
+  walkSpeed: 1.5
+  runSpeed: 3
+  turnSpeed: 5
+  attackDelay: 0.5
+  attackCooldown: 2
+  idleSound: {fileID: 0}
+  chaseSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hitSound: {fileID: 0}
+  dieSound: {fileID: 0}
+  hitEffect: {fileID: 0}
+  dieEffect: {fileID: 0}
+  lootTable: {fileID: 11400000, guid: 76fc19c5d3d505b4191c5140888ad440, type: 2}
+  corpseDestroyDelay: 5
+  activationRange: 15
+  jumpRange: 10
+  rangedAttackRange: 8
+  castTime: 1.2
+  timeBetweenShots: 1.2
+  projectilePrefab: {fileID: 1983626663567947396, guid: 9157120e83e0ea043beedbaae61826e4, type: 3}
+  impactDamage: 20
+  poisonAreaPrefab: {fileID: 1644561725666258, guid: 0443ed12a25c9b742b1287696d82d646, type: 3}
+  tickDamage: 5
+  poisonDuration: 15
+  poisonTickRate: 1
+  projectileArcHeight: 5
+  projectileSpeed: 5
