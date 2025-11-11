@@ -32,12 +32,45 @@ public class OptionManager : MonoBehaviour
     [Header("Shortcut Setting")]
     [SerializeField] private Button m_KeyMoveLeft;
     [SerializeField] private Button m_KeyMoveRight;
-    [SerializeField] private Button m_KeyMoveBack;
-    [SerializeField] private Button m_KeyMoveForward;
+    [SerializeField] private Button m_KeyMoveUp;
+    [SerializeField] private Button m_KeyMoveDown;
     [SerializeField] private Button m_KeyJump;
+    [SerializeField] private Button m_KeySprint;
+    [SerializeField] private Button m_KeyCrouch;
+    [SerializeField] private Button m_BendingRight;
+    [SerializeField] private Button m_BendingLeft;
+    [SerializeField] private Button m_KeyUnArmed;
+    [SerializeField] private Button m_KeySlot1;
+    [SerializeField] private Button m_KeySlot2;
+    [SerializeField] private Button m_KeySlot3;
+    [SerializeField] private Button m_KeySlot4;
     [SerializeField] private Button m_KeyInteract;
     [SerializeField] private Button m_KeyInventory;
-    [SerializeField] private Button m_KeyEscape;
+    [SerializeField] private Button m_KeyReload;
+
+
+    [Serializable]
+    public enum KeyInput
+    {
+        NONE,
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN,
+        JUMP,
+        SPRINT,
+        CROUCH,
+        BENDING_RIGHT,
+        BENDING_LEFT,
+        UNARMED,
+        SLOT1,
+        SLOT2,
+        SLOT3,
+        SLOT4,
+        INTERACT,
+        INVENTORY,
+        RELOAD
+    }
 
     [SerializeField] private ModalWindowManager m_ShortcutModal;
 
@@ -105,13 +138,21 @@ public class OptionManager : MonoBehaviour
 
         m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveLeft.ToString();
         m_KeyMoveRight.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveRight.ToString();
-        m_KeyMoveBack.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveUp.ToString();
-        m_KeyMoveForward.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveDown.ToString();
+        m_KeyMoveUp.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveUp.ToString();
+        m_KeyMoveDown.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveDown.ToString();
         m_KeyJump.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyJump.ToString();
-        // m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySprint.ToString();
-        // m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyCrouch.ToString();
+        m_KeySprint.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySprint.ToString();
+        m_KeyCrouch.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyCrouch.ToString();
+        m_BendingRight.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_BendingRight.ToString();
+        m_BendingLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_BendingLeft.ToString();
+        m_KeyUnArmed.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyUnArmed.ToString();
+        m_KeySlot1.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot1.ToString();
+        m_KeySlot2.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot2.ToString();
+        m_KeySlot3.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot3.ToString();
+        m_KeySlot4.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot4.ToString();
         m_KeyInteract.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyInteract.ToString();
         m_KeyInventory.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyInventory.ToString();
+        m_KeyReload.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyReload.ToString();
     }
 
     public void SetVSync(bool vsync)
@@ -197,7 +238,7 @@ public class OptionManager : MonoBehaviour
     {
         switch (language)
         {
-            //한국어
+            //한국어
             case 0:
                 OptionDataManager.Instance.OptionData.m_Language = SystemLanguage.Korean;
                 break;
@@ -242,25 +283,49 @@ public class OptionManager : MonoBehaviour
                             m_KeyMoveRight.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveRight.ToString();
                             break;
                         case KeyInput.UP:
-                            m_KeyMoveBack.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveUp.ToString();
+                            m_KeyMoveUp.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveUp.ToString();
                             break;
                         case KeyInput.DOWN:
-                            m_KeyMoveForward.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveDown.ToString();
+                            m_KeyMoveDown.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveDown.ToString();
                             break;
                         case KeyInput.JUMP:
                             m_KeyJump.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyJump.ToString();
                             break;
                         case KeyInput.SPRINT:
-                            m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySprint.ToString();
+                            m_KeySprint.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySprint.ToString();
                             break;
                         case KeyInput.CROUCH:
-                            m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyCrouch.ToString();
+                            m_KeyCrouch.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyCrouch.ToString();
+                            break;
+                        case KeyInput.BENDING_RIGHT:
+                            m_BendingRight.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_BendingRight.ToString();
+                            break;
+                        case KeyInput.BENDING_LEFT:
+                            m_BendingLeft.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_BendingLeft.ToString();
+                            break;
+                        case KeyInput.UNARMED:
+                            m_KeyUnArmed.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyUnArmed.ToString();
+                            break;
+                        case KeyInput.SLOT1:
+                            m_KeySlot1.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot1.ToString();
+                            break;
+                        case KeyInput.SLOT2:
+                            m_KeySlot2.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot2.ToString();
+                            break;
+                        case KeyInput.SLOT3:
+                            m_KeySlot3.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot3.ToString();
+                            break;
+                        case KeyInput.SLOT4:
+                            m_KeySlot4.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot4.ToString();
                             break;
                         case KeyInput.INTERACT:
                             m_KeyInteract.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyInteract.ToString();
                             break;
                         case KeyInput.INVENTORY:
                             m_KeyInventory.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyInventory.ToString();
+                            break;
+                        case KeyInput.RELOAD:
+                            m_KeyReload.GetComponentInChildren<TMP_Text>().text = OptionDataManager.Instance.OptionData.m_keyData.m_KeyReload.ToString();
                             break;
                     }
                     return;
@@ -277,11 +342,11 @@ public class OptionManager : MonoBehaviour
                         break;
                     case KeyInput.UP:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveUp = keyEvent.keyCode;
-                        m_KeyMoveBack.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        m_KeyMoveUp.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
                         break;
                     case KeyInput.DOWN:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeyMoveDown = keyEvent.keyCode;
-                        m_KeyMoveForward.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        m_KeyMoveDown.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
                         break;
                     case KeyInput.JUMP:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeyJump = keyEvent.keyCode;
@@ -289,11 +354,39 @@ public class OptionManager : MonoBehaviour
                         break;
                     case KeyInput.SPRINT:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeySprint = keyEvent.keyCode;
-                        m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        m_KeySprint.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
                         break;
                     case KeyInput.CROUCH:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeyCrouch = keyEvent.keyCode;
-                        m_KeyMoveLeft.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        m_KeyCrouch.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.BENDING_RIGHT:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_BendingRight = keyEvent.keyCode;
+                        m_BendingRight.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.BENDING_LEFT:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_BendingLeft = keyEvent.keyCode;
+                        m_BendingLeft.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.UNARMED:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_KeyUnArmed = keyEvent.keyCode;
+                        m_KeyUnArmed.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.SLOT1:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot1 = keyEvent.keyCode;
+                        m_KeySlot1.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.SLOT2:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot2 = keyEvent.keyCode;
+                        m_KeySlot2.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.SLOT3:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot3 = keyEvent.keyCode;
+                        m_KeySlot3.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.SLOT4:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_KeySlot4 = keyEvent.keyCode;
+                        m_KeySlot4.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
                         break;
                     case KeyInput.INTERACT:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeyInteract = keyEvent.keyCode;
@@ -302,6 +395,10 @@ public class OptionManager : MonoBehaviour
                     case KeyInput.INVENTORY:
                         OptionDataManager.Instance.OptionData.m_keyData.m_KeyInventory = keyEvent.keyCode;
                         m_KeyInventory.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
+                        break;
+                    case KeyInput.RELOAD:
+                        OptionDataManager.Instance.OptionData.m_keyData.m_KeyReload = keyEvent.keyCode;
+                        m_KeyReload.GetComponentInChildren<TMP_Text>().text = keyEvent.keyCode.ToString();
                         break;
                 }
                 inputKey = KeyInput.NONE;
@@ -312,17 +409,3 @@ public class OptionManager : MonoBehaviour
     }
 }
 
-[Serializable]
-public enum KeyInput
-{
-    NONE,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-    JUMP,
-    SPRINT,
-    CROUCH,
-    INTERACT,
-    INVENTORY
-}

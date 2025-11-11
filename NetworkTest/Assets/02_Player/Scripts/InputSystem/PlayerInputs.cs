@@ -64,11 +64,11 @@ public class PlayerInputs : MonoBehaviour
     // Attack
     public bool GetAttack()
     {
-        return Input.GetKey(keyData.m_KeyAttack);
+        return Input.GetKey(KeyCode.Mouse0);
     }
     public bool GetAimed()
     {
-        return Input.GetKey(keyData.m_KeyAimed);
+        return Input.GetKey(KeyCode.Mouse1);
     }
     public bool GetReload()
     {
@@ -110,11 +110,11 @@ public class PlayerInputs : MonoBehaviour
     // UI
     public bool GetEscape()
     {
-        return Input.GetKeyDown(keyData.m_KeyEscape);
+        return Input.GetKeyDown(KeyCode.Escape);
     }
     public bool GetChatOpen()
     {
-        return Input.GetKeyDown(keyData.m_KeyChat);
+        return Input.GetKeyDown(KeyCode.Slash);
     }
 
     void Start()
@@ -159,10 +159,6 @@ public class OptionKeyData
     public KeyCode m_BendingRight;
     public KeyCode m_BendingLeft;
 
-    [Header("Attack")]
-    public KeyCode m_KeyAttack;
-    public KeyCode m_KeyAimed;
-
     [Header("Accessable")]
     public KeyCode m_KeyUnArmed;
     public KeyCode m_KeySlot1;
@@ -174,8 +170,4 @@ public class OptionKeyData
     public KeyCode m_KeyInteract;
     public KeyCode m_KeyInventory;
     public KeyCode m_KeyReload;
-
-    [Header("UI")]
-    public KeyCode m_KeyEscape;
-    public KeyCode m_KeyChat;
 }
