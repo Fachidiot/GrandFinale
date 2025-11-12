@@ -2423,6 +2423,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6399210144836021977}
   - component: {fileID: 7587095511856033674}
+  - component: {fileID: 4255030727210528380}
   m_Layer: 2
   m_Name: TPV_AimCam
   m_TagString: Untagged
@@ -2464,7 +2465,7 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 0
   m_StandbyUpdate: 2
-  m_LookAt: {fileID: 0}
+  m_LookAt: {fileID: 4864377631380418331}
   m_Follow: {fileID: 4864377631380418331}
   m_Lens:
     FieldOfView: 40
@@ -2485,6 +2486,36 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 4598734486026214185}
+--- !u!114 &4255030727210528380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2411069316464744592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e501d18bb52cf8c40b1853ca4904654f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CollideAgainst:
+    serializedVersion: 2
+    m_Bits: 9
+  m_IgnoreTag: 
+  m_TransparentLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_MinimumDistanceFromTarget: 0.1
+  m_AvoidObstacles: 1
+  m_DistanceLimit: 0
+  m_MinimumOcclusionTime: 0
+  m_CameraRadius: 0.1
+  m_Strategy: 1
+  m_MaximumEffort: 1
+  m_SmoothingTime: 0.2
+  m_Damping: 0.4
+  m_DampingWhenOccluded: 0.3
+  m_OptimalTargetDistance: 0
 --- !u!1 &2426566277790712350
 GameObject:
   m_ObjectHideFlags: 0
@@ -3277,7 +3308,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 1.7
   m_Radius: 0.3
-  m_SlopeLimit: 45
+  m_SlopeLimit: 60
   m_StepOffset: 0.05
   m_SkinWidth: 0.015
   m_MinMoveDistance: 0
@@ -5350,11 +5381,11 @@ MonoBehaviour:
   CameraDistance: 2
   CameraCollisionFilter:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 9
   IgnoreTag: 
   CameraRadius: 0.001
-  DampingIntoCollision: 0
-  DampingFromCollision: 2
+  DampingIntoCollision: 10
+  DampingFromCollision: 10
 --- !u!1 &5098396406416838018
 GameObject:
   m_ObjectHideFlags: 0
@@ -6246,11 +6277,11 @@ MonoBehaviour:
   CameraDistance: 2
   CameraCollisionFilter:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 9
   IgnoreTag: 
   CameraRadius: 0.001
-  DampingIntoCollision: 0
-  DampingFromCollision: 2
+  DampingIntoCollision: 10
+  DampingFromCollision: 10
 --- !u!1 &5871337823050610581
 GameObject:
   m_ObjectHideFlags: 0
@@ -8419,6 +8450,7 @@ GameObject:
   m_Component:
   - component: {fileID: 86955650169052260}
   - component: {fileID: 5773169237022774680}
+  - component: {fileID: 2345951385249882097}
   m_Layer: 2
   m_Name: TPVCam
   m_TagString: Untagged
@@ -8460,7 +8492,7 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 1
   m_StandbyUpdate: 2
-  m_LookAt: {fileID: 0}
+  m_LookAt: {fileID: 693380022373970151}
   m_Follow: {fileID: 693380022373970151}
   m_Lens:
     FieldOfView: 40
@@ -8481,6 +8513,36 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 5343098707002420094}
+--- !u!114 &2345951385249882097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8154824933820671841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e501d18bb52cf8c40b1853ca4904654f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CollideAgainst:
+    serializedVersion: 2
+    m_Bits: 9
+  m_IgnoreTag: 
+  m_TransparentLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_MinimumDistanceFromTarget: 0.1
+  m_AvoidObstacles: 1
+  m_DistanceLimit: 0
+  m_MinimumOcclusionTime: 0
+  m_CameraRadius: 0.1
+  m_Strategy: 1
+  m_MaximumEffort: 1
+  m_SmoothingTime: 0.2
+  m_Damping: 0.4
+  m_DampingWhenOccluded: 0.3
+  m_OptimalTargetDistance: 0
 --- !u!1 &8200410594584912407
 GameObject:
   m_ObjectHideFlags: 0
