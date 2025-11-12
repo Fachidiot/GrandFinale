@@ -164,9 +164,9 @@ public class TerminalManager : MonoBehaviour
             case "goto":
                 ExecuteGoto(parts);
                 break;
-            case "launch":
-                ExecuteLaunch();
-                break;
+            // case "launch":
+            //     ExecuteLaunch();
+            //     break;
             case "clear":
                 ExecuteClear();
                 break;
@@ -185,7 +185,7 @@ public class TerminalManager : MonoBehaviour
         AppendToLog("  help - Shows this message.");
         AppendToLog("  planets - Lists available planets.");
         AppendToLog("  goto [planet-name] - Selects a planet for travel.");
-        AppendToLog("  launch - Launches the game to the selected planet (host only).");
+        // AppendToLog("  launch - Launches the game to the selected planet (host only).");
         AppendToLog("  clear - Clears the terminal screen.");
         AppendToLog("  exit - Closes the terminal.");
     }
@@ -208,18 +208,19 @@ public class TerminalManager : MonoBehaviour
         string planetName = parts[1];
         int planetId = -1;
 
-        if (planetName == "planet_1")
+        switch (planetName)
         {
-            planetId = 0;
-        }
-        else if (planetName == "planet_2")
-        {
-            planetId = 1;
-        }
-        else
-        {
-            AppendToLog($"Unknown planet: '{planetName}'");
-            return;
+            case "planet_1":
+            case "Planet_1":
+                planetId = 1;
+                break;
+            case "planet_2":
+            case "Planet_2":
+                planetId = 2;
+                break;
+            default:
+                AppendToLog($"Unknown planet: '{planetName}'");
+                break;
         }
 
         AppendToLog($"Selecting planet '{planetName}'...");

@@ -108,7 +108,7 @@ public class NetworkPlayerManager : MonoBehaviour
         Debug.Log($"NetworkPlayerManager: SpawnPlayer() called for steam_id: {playerInfo.steam_id}");
         if (playerPrefab == null) return null;
 
-        GameObject playerObject = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        GameObject playerObject = Instantiate(playerPrefab, new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = $"Player_{playerInfo.nickname}";
         players.Add(playerInfo.steam_id, playerObject);
         PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
@@ -232,7 +232,7 @@ public class NetworkPlayerManager : MonoBehaviour
                 // Monster exists, update its state
                 monsterGO.transform.position = monsterState.position;
                 monsterGO.transform.rotation = monsterState.rotation;
-                
+
                 // Update monster animation state
                 var monsterAnimSync = monsterGO.GetComponent<NetworkMonsterAnimatorSync>();
                 if (monsterAnimSync != null)
@@ -269,7 +269,7 @@ public class NetworkPlayerManager : MonoBehaviour
     #endregion
 
     #region Spawning
-    
+
     private void SpawnMonster(MonsterState state)
     {
         if (monsterPrefab == null)
@@ -279,7 +279,7 @@ public class NetworkPlayerManager : MonoBehaviour
         }
 
         GameObject monsterGO = Instantiate(monsterPrefab, state.position, state.rotation);
-        
+
         NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
         if (networkMonster == null)
         {
@@ -287,10 +287,10 @@ public class NetworkPlayerManager : MonoBehaviour
             Destroy(monsterGO);
             return;
         }
-        
+
         networkMonster.Initialize(state.monsterId);
         monsterGO.name = $"{monsterPrefab.name}_{state.monsterId}";
-        
+
         monsters.Add(state.monsterId, monsterGO);
         Debug.Log($"[NetworkPlayerManager] Spawned monster {monsterGO.name} from network state.");
 
