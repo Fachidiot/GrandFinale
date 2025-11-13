@@ -7,13 +7,13 @@ public class NavMeshMovement : MonoBehaviour, IMonsterMovement
     private NavMeshAgent agent;
     private Animator animator;
 
-    // AI°¡ ¿äÃ»ÇÑ '¸ñÇ¥ ¼Óµµ'¸¦ ÀúÀåÇÒ º¯¼ö
+    // AIê°€ ìš”ì²­í•œ 'ëª©í‘œ ì†ë„'ë¥¼ ì €ì¥í•˜ëŠ” ë³€ìˆ˜
     private float targetSpeed;
 
-    [Header("--- °¡¼Ó/°¨¼Ó ¼³Á¤ ---")]
-    [Tooltip("¼Óµµ°¡ 0¿¡¼­ ÃÖ´ë·Î ¿À¸£´Â µ¥ °É¸®´Â ½Ã°£ (¿¹: 5 = ÃÊ´ç 5ÀÇ ¼Óµµ¸¸Å­ Áõ°¡)")]
+    [Header("--- ê°€ì†/ê°ì† ì„¤ì • ---")]
+    [Tooltip("ì†ë„ê°€ 0ì—ì„œ ìµœëŒ€ë¡œ ì˜¤ë¥´ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„ (ì˜ˆ: 5 = ì´ˆë‹¹ 5ì˜ ì†ë„ë§Œí¼ ê°€ì†)")]
     [SerializeField] private float accelerationRate = 5f;
-    [Tooltip("¼Óµµ°¡ ÃÖ´ë¿¡¼­ 0À¸·Î ¶³¾îÁö´Â µ¥ °É¸®´Â ½Ã°£ (º¸Åë °¡¼Óº¸´Ù ºü¸§)")]
+    [Tooltip("ì†ë„ê°€ ìµœëŒ€ì—ì„œ 0ìœ¼ë¡œ ë–¨ì–´ì§€ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„ (ê°€ì† ë¹„ìœ¨ë³´ë‹¤ ë†’ìŒ)")]
     [SerializeField] private float decelerationRate = 10f;
 
 
@@ -26,27 +26,27 @@ public class NavMeshMovement : MonoBehaviour, IMonsterMovement
 
     private void Update()
     {
-        // 1. ÇöÀç ¼Óµµ¿Í ¸ñÇ¥ ¼Óµµ¸¦ °¡Á®¿É´Ï´Ù.
+        // 1. í˜„ì¬ ì†ë„ë¥¼ ëª©í‘œ ì†ë„ë¡œ ì¡°ì ˆí•©ë‹ˆë‹¤.
         float currentSpeed = agent.speed;
 
-        // 2. ¸ñÇ¥ ¼Óµµ¿¡ µµ´ŞÇÏ±â À§ÇØ ÀÌ¹ø ÇÁ·¹ÀÓ¿¡ »ç¿ëÇÒ °¡/°¨¼Óµµ¸¦ Á¤ÇÕ´Ï´Ù.
-        // (¸ñÇ¥°¡ ´õ Å©¸é °¡¼Ó, ÀÛÀ¸¸é °¨¼Ó)
+        // 2. ëª©í‘œ ì†ë„ì— ë„ë‹¬í•˜ê¸° ìœ„í•´ í˜„ì¬ ê°€ì†ë„ì— ê¸°ë°˜í•œ ê°€/ê°ì†ë„ë¥¼ êµ¬í•©ë‹ˆë‹¤.
+        // (ëª©í‘œê°€ ë” í¬ë©´ ê°€ì†, ì‘ìœ¼ë©´ ê°ì†)
         float rate = (currentSpeed < targetSpeed) ? accelerationRate : decelerationRate;
 
-        // 3. ÇöÀç ¼Óµµ¸¦ ¸ñÇ¥ ¼Óµµ¸¦ ÇâÇØ ºÎµå·´°Ô ÀÌµ¿½ÃÅµ´Ï´Ù.
-        // MoveTowards´Â Lerpº¸´Ù ÀÏÁ¤ÇÑ ¼Óµµ¸¦ º¸ÀåÇØÁİ´Ï´Ù.
+        // 3. í˜„ì¬ ì†ë„ë¥¼ ëª©í‘œ ì†ë„ë¡œ í–¥í•´ ë¶€ë“œëŸ½ê²Œ ì´ë™ì‹œí‚µë‹ˆë‹¤.
+        // MoveTowardsëŠ” Lerpê³¼ ë‹¬ë¦¬ ì¼ì •í•œ ì†ë„ë¡œ ë³€í™”í•©ë‹ˆë‹¤.
         agent.speed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.deltaTime * rate);
 
 
-        // ¿¡ÀÌÀüÆ®ÀÇ '½ÇÁ¦' ¼Óµµ¸¦ ¾Ö´Ï¸ŞÀÌÅÍ¿¡ Àü´ŞÇÕ´Ï´Ù.
-        // (0 -> 1.5 -> 3.2 -> 5.0 Ã³·³ ºÎµå·´°Ô º¯ÇÏ´Â °ªÀÌ µé¾î°¨)
-        //animator.SetFloat("Speed", agent.velocity.magnitude);
+        // ì—ì´ì „íŠ¸ì˜ 'ì‹¤ì œ' ì†ë„ë¥¼ ì• ë‹ˆë©”ì´í„°ì— ì „ë‹¬í•©ë‹ˆë‹¤.
+        // (0 -> 1.5 -> 3.2 -> 5.0 ì²˜ëŸ¼ ë¶€ë“œëŸ½ê²Œ ë³€í•˜ëŠ” ê°’ì´ ë“¤ì–´ê°)
+        animator.SetFloat("Speed", agent.velocity.magnitude);
     }
 
-    // AI¿¡°Ô ¹ŞÀº ÃÖÁ¾ ¸ñÀûÁö¸¦ NavMeshAgent¿¡ ¼³Á¤
+    // AIë¡œë¶€í„° ì´ë™ ëª…ë ¹ì„ ë°›ìœ¼ë©´ NavMeshAgentì— ì „ë‹¬
     public void Move(Vector3 destination, float speed)
     {
-        // agent.speed¸¦ Á÷Á¢ ¼³Á¤ÇÏ´Â ´ë½Å, 'targetSpeed' º¯¼ö¿¡ ÀúÀåÇÕ´Ï´Ù.
+        // agent.speedë¥¼ ì§ì ‘ ë°”ê¾¸ëŠ” ëŒ€ì‹ , 'targetSpeed' ë³€ìˆ˜ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
         this.targetSpeed = speed;
 
         agent.SetDestination(destination);
@@ -54,7 +54,7 @@ public class NavMeshMovement : MonoBehaviour, IMonsterMovement
 
     public void TurnTowards(Vector3 worldTargetPosition, float turnSpeed)
     {
-        // (Á¦ÀÚ¸® È¸Àü¿ëÀÌ¹Ç·Î ¼öÁ¤ X)
+        // (ì œìë¦¬ íšŒì „ì´ë¯€ë¡œ ì´ë™ X)
         agent.SetDestination(transform.position);
         transform.LookAt(new Vector3(worldTargetPosition.x, transform.position.y, worldTargetPosition.z));
     }
@@ -66,8 +66,8 @@ public class NavMeshMovement : MonoBehaviour, IMonsterMovement
             agent.ResetPath();
         }
 
-        // ¸ØÃß¶ó´Â ¸í·ÉÀº 'targetSpeed'¸¦ 0À¸·Î ¼³Á¤ÇÕ´Ï´Ù.
-        // Update() ÇÔ¼ö°¡ ¾Ë¾Æ¼­ ¼Óµµ¸¦ 0±îÁö ºÎµå·´°Ô ÁÙ¿©ÁÙ °Ì´Ï´Ù.
+        // ë©ˆì¶”ë¼ëŠ” ëª…ë ¹ì€ 'targetSpeed'ë¥¼ 0ìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
+        // Update() í•¨ìˆ˜ê°€ ì•Œì•„ì„œ ì†ë„ë¥¼ 0ìœ¼ë¡œ ë¶€ë“œëŸ½ê²Œ ë‚®ì¶°ì¤„ ê²ë‹ˆë‹¤.
         this.targetSpeed = 0f;
     }
 }

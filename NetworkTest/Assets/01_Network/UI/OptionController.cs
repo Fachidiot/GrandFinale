@@ -77,6 +77,6 @@ public class OptionController : MonoBehaviour
             NetworkManager.Instance.Disconnect();
         }
 
-        SceneManager.LoadScene("ConnectionScene");
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
     }
 }

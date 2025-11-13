@@ -10,7 +10,6 @@ public class NetworkPlayerManager : MonoBehaviour
 
     [Header("Prefabs")]
     public GameObject playerPrefab;
-    public GameObject monsterPrefab;
 
     private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
@@ -237,7 +236,8 @@ public class NetworkPlayerManager : MonoBehaviour
                 var monsterAnimSync = monsterGO.GetComponent<NetworkMonsterAnimatorSync>();
                 if (monsterAnimSync != null)
                 {
-                    monsterAnimSync.OnAnimationDataReceived(monsterState.animationMask);
+                    var animData = NetworkMonsterAnimatorSync.Deserialize(monsterState.animationData);
+                    monsterAnimSync.OnAnimationDataReceived(animData);
                 }
             }
             else
@@ -272,35 +272,43 @@ public class NetworkPlayerManager : MonoBehaviour
 
     private void SpawnMonster(MonsterState state)
     {
-        if (monsterPrefab == null)
+        // Get the correct prefab from the SpawnManager using the monsterType from the state
+        GameObject prefabToSpawn = SpawnManager.Instance.GetPrefab(state.monsterType);
+        if (prefabToSpawn == null)
         {
-            Debug.LogError("[NetworkPlayerManager] Monster Prefab is not assigned!");
+            Debug.LogError($"[NetworkPlayerManager] No prefab found for monster type: {state.monsterType}");
             return;
         }
 
-        GameObject monsterGO = Instantiate(monsterPrefab, state.position, state.rotation);
+        GameObject monsterGO = Instantiate(prefabToSpawn, state.position, state.rotation);
 
         NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
         if (networkMonster == null)
         {
-            Debug.LogError("Monster prefab is missing the NetworkMonster component!");
+            Debug.LogError($"Monster prefab '{prefabToSpawn.name}' is missing the NetworkMonster component!");
             Destroy(monsterGO);
             return;
         }
 
-        networkMonster.Initialize(state.monsterId);
-        monsterGO.name = $"{monsterPrefab.name}_{state.monsterId}";
+        // Initialize with both ID and Type
+        networkMonster.Initialize(state.monsterId, state.monsterType);
+        monsterGO.name = $"{prefabToSpawn.name}_{state.monsterId}";
 
         monsters.Add(state.monsterId, monsterGO);
         Debug.Log($"[NetworkPlayerManager] Spawned monster {monsterGO.name} from network state.");
 
         // Disable components that are host-authoritative
-        var monsterMovement = monsterGO.GetComponent<MonsterMovement>();
-        if (monsterMovement != null)
+        var monsterMovement = monsterGO.GetComponent<IMonsterMovement>();
+        if (monsterMovement != null && monsterMovement is MonoBehaviour)
         {
-            monsterMovement.enabled = false;
+            (monsterMovement as MonoBehaviour).enabled = false;
         }
-        // Disable any other AI/logic components here
+
+        var monsterAI = monsterGO.GetComponent<MonsterAIController>();
+        if (monsterAI != null)
+        {
+            monsterAI.enabled = false;
+        }
     }
 
     #endregion

@@ -2,12 +2,12 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-// ÀÌÁ¦ ¸ğµç ÇÊ¼ö ÄÄÆ÷³ÍÆ®¸¦ ¸í½ÃÇÕ´Ï´Ù.
+//   Ê¼ Æ® Õ´Ï´.
 [RequireComponent(typeof(IMonsterMovement), typeof(MonsterHealth), typeof(MonsterSensor))]
 public class MonsterAIController : MonoBehaviour
 {
-    #region ÇÊµå
-    // --- ÁÖ¿ä ÄÄÆ÷³ÍÆ® ÂüÁ¶ ---
+    #region Êµ
+    // --- Ö¿ Æ®  ---
     private IMonsterMovement movement;
     private MonsterHealth health;
     public MonsterSensor sensor { get; private set; }
@@ -15,37 +15,37 @@ public class MonsterAIController : MonoBehaviour
     private NavMeshAgent agent;
 
     private Animator animator;
-    [Header("¸ó½ºÅÍ ¼³Á¤")]
+    [Header(" ")]
     public MonsterConfig config;
 
-    [Tooltip("Åõ»çÃ¼°¡ ¹ß»çµÉ À§Ä¡ (¿¹: ¸ó½ºÅÍÀÇ ÀÔ, ¼Õ) ÇöÀç´Â ½Ä¹° ÇüÅÂ ¸ó½ºÅÍ¸¸ »ç¿ë")]
+    [Tooltip("Ã¼ ß» Ä¡ (:  , )  Ä¹  Í¸ ")]
     public Transform firePoint;
 
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤")]
+    [Header("Ö´Ï¸Ì¼ ")]
     public MonsterAnimationConfig animConfig;
 
     public MonsterFSM fsm { get; private set; }
 
     public GameObject player { get; private set; }
 
-    [Header("µğ¹ö±× ¼³Á¤")]
+    [Header(" ")]
     public bool alwaysShowGizmos = false;
-    // --- »óÅÂ ¸Ó½Å (FSM) ---
+    // ---  Ó½ (FSM) ---
     public ZombieBaseState<MonsterAIController> CurrentState { get; private set; }
 
 
-    // <<<< 2. µµÂø ¿©ºÎ ÆÇÁ¤ ·ÎÁ÷ ¼öÁ¤ >>>>
-    // NavMeshAgent°¡ ÀÖÀ¸¸é ±× »óÅÂ¸¦ »ç¿ëÇÏ°í, ¾øÀ¸¸é(°Å¹Ì) ±âÁ¸Ã³·³ °Å¸® ±â¹İÀ¸·Î ÆÇ´Ü
+    // <<<< 2.      >>>>
+    // NavMeshAgent   Â¸ Ï°, (Å¹) Ã³ Å¸  Ç´
     public bool arrivedAtDestination
     {
         get
         {
-            if (agent != null) // Á»ºñÀÇ °æ¿ì
+            if (agent != null) //  
             {
-                // °æ·Î °è»êÀÌ ³¡³ª°í, ³²Àº °Å¸®°¡ Á¤Áö °Å¸®º¸´Ù ÀÛÀ¸¸é µµÂøÇÑ °ÍÀ¸·Î °£ÁÖ
+                //   ,  Å¸  Å¸    
                 return !agent.pathPending && agent.remainingDistance <= config.stoppingDistance;
             }
-            else // °Å¹ÌÀÇ °æ¿ì
+            else // Å¹ 
             {
                 return Vector3.Distance(transform.position, currentDestination) < config.stoppingDistance;
             }
@@ -54,10 +54,10 @@ public class MonsterAIController : MonoBehaviour
 
     public Vector3 currentDestination { get; private set; }
 
-    // --- ÄÚ·çÆ¾ ÂüÁ¶ ---
+    // --- Ú·Æ¾  ---
     public Coroutine attackRoutineCor { get; set; }
 
-    // --- ¾Ö´Ï¸ŞÀÌ¼Ç ÇØ½Ã ---
+    // --- Ö´Ï¸Ì¼ Ø½ ---
     public int hashMoveSpeed { get; private set; }
     public int hashIsWalking { get; private set; }
     public int hashIsRunning { get; private set; }
@@ -76,7 +76,7 @@ public class MonsterAIController : MonoBehaviour
     public int hashIdleType { get; private set; }
     #endregion
 
-    #region ÃÊ±âÈ­ ¹× ·çÇÁ
+    #region Ê±È­  
     void Awake()
     {
         movement = GetComponent<IMonsterMovement>();
@@ -89,7 +89,7 @@ public class MonsterAIController : MonoBehaviour
 
         if (animConfig == null)
         {
-            Debug.LogError(gameObject.name + "¿¡ MonsterAnimationConfig ÆÄÀÏÀÌ ÇÒ´ç ¾ÈµÊ");
+            Debug.LogError(gameObject.name + " MonsterAnimationConfig  Ò´ Èµ");
             return;
         }
 
@@ -97,17 +97,17 @@ public class MonsterAIController : MonoBehaviour
 
         if (config == null)
         {
-            Debug.LogError(gameObject.name + "¿¡ MonsterConfig ÆÄÀÏÀÌ ÇÒ´ç ¾ÈµÊ");
+            Debug.LogError(gameObject.name + " MonsterConfig  Ò´ Èµ");
             return;
         }
 
         if (fsm == null)
         {
-            Debug.LogError(gameObject.name + "¿¡ MonsterFSM ('°ÔÀÓÆÑ') ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù! GolemFSM, GazerFSM µîÀ» Ãß°¡ÇØÁÖ¼¼¿ä.", this);
-            return; // Start() ÇÔ¼ö°¡ ½ÇÇàµÇÁö ¾Êµµ·Ï Áß´Ü
+            Debug.LogError(gameObject.name + " MonsterFSM ('') Æ® Ï´! GolemFSM, GazerFSM  ß°Ö¼.", this);
+            return; // Start() Ô¼  Êµ ß´
         }
 
-        // 3. Health ÄÄÆ÷³ÍÆ®¿¡ Config °ªÀ» ³Ñ°Ü ÃÊ±âÈ­½ÃÅµ´Ï´Ù.
+        // 3. Health Æ® Config  Ñ° Ê±È­ÅµÏ´.
         InitializeAnimationHashes();
         health.Initialize(config);
     }
@@ -158,7 +158,7 @@ public class MonsterAIController : MonoBehaviour
     }
     #endregion
 
-    #region »óÅÂ °ü¸®
+    #region  
     public void ChangeState(ZombieBaseState<MonsterAIController> newState)
     {
         CurrentState?.ExitState(this);
@@ -170,15 +170,15 @@ public class MonsterAIController : MonoBehaviour
     #endregion
 
 
-    #region ÀÌµ¿ Á¦¾î
+    #region Ìµ 
     public void MoveTo(Vector3 destination)
     {
         currentDestination = destination;
         float speed = (CurrentState == fsm.TraceState) ? config.runSpeed : config.walkSpeed;
-        // ÃÖÁ¾ ¸ñÀûÁö¸¦ ÀÌµ¿ ½Ã½ºÅÛ¿¡ Àü´ŞÇÕ´Ï´Ù.
+        //   Ìµ Ã½Û¿ Õ´Ï´.
         movement.Move(destination, speed);
 
-        // NavMeshAgent°¡ ¾ø´Â ¸ó½ºÅÍ(°Å¹Ì)´Â ¼öµ¿À¸·Î È¸Àü½ÃÄÑ Áİ´Ï´Ù.
+        // NavMeshAgent  (Å¹)  È¸ İ´Ï´.
         if (agent == null)
         {
             movement.TurnTowards(destination, config.turnSpeed);
@@ -202,7 +202,7 @@ public class MonsterAIController : MonoBehaviour
     }
     #endregion
 
-    #region °¨Áö, °ø°İ, ÀÌº¥Æ® ÇÚµé·¯
+    #region , , ÌºÆ® Úµé·¯
 
     public bool CanSeePlayer => sensor.CanSeePlayer;
     public Vector3 targetLastPos => sensor.TargetLastPosition;
@@ -215,9 +215,9 @@ public class MonsterAIController : MonoBehaviour
         Vector3 playerPos = new Vector3(player.transform.position.x, 0, player.transform.position.z);
         return Vector3.Distance(monsterPos, playerPos);
     }
-    public IEnumerator AttackRoutine() { WaitForSeconds attackCooldown = new WaitForSeconds(config.attackCooldown); while (GetDistanceToPlayer() <= config.attackRange) { Debug.Log("¸ó½ºÅÍ °ø°İ!"); yield return attackCooldown; } }
+    public IEnumerator AttackRoutine() { WaitForSeconds attackCooldown = new WaitForSeconds(config.attackCooldown); while (GetDistanceToPlayer() <= config.attackRange) { Debug.Log(" !"); yield return attackCooldown; } }
     public void StopAttackRoutine() { if (attackRoutineCor != null) { StopCoroutine(attackRoutineCor); attackRoutineCor = null; } }
-    // MonsterAIController.cs -> HandleHit (¸¸¾à 1´ë¸¸ ¸Â¾Æµµ Block ÇÏ±æ ¿øÇÑ´Ù¸é)
+    // MonsterAIController.cs -> HandleHit ( 1ë¸¸ Â¾Æµ Block Ï± Ñ´Ù¸)
 
     private void HandleHit()
     {
@@ -225,25 +225,25 @@ public class MonsterAIController : MonoBehaviour
 
         if (fsm is GazerFSM gazerFSM)
         {
-            // ¡Ú (½Å±Ô) 1-1. ÇÃ·¹ÀÌ¾î¸¦ °¨Áö ¸øÇßÀ» ¶§(Idle/Patrol) ¸Â¾Ò´Â°¡?
-            // (¿äÃ»»çÇ× 1: °¨Áö ¾ÈµÆ´Âµ¥ ¸ÂÀ¸¸é)
+            //  (Å±) 1-1. Ã·Ì¾î¸¦   (Idle/Patrol) Â¾Ò´Â°?
+            // (Ã» 1:  ÈµÆ´Âµ )
             if (CurrentState == fsm.IdleState || CurrentState == fsm.PatrolState)
             {
-                Debug.Log("GAZER HIT: (Idle/Patrol) Áß ÇÇ°İ! °­Á¦ °¨Áö ¹× ÃßÀû ½ÃÀÛ.");
+                Debug.Log("GAZER HIT: (Idle/Patrol)  Ç°!     .");
                 if (player != null)
                 {
-                    sensor.ForceDetection(player.transform.position); // (¿äÃ»: ¦i¾Æ¿À±â)
+                    sensor.ForceDetection(player.transform.position); // (Ã»: iÆ¿)
                 }
-                SetAnimTrigger(hashHit);     // (¿äÃ»: hit¾Ö´Ï¸ŞÀÌ¼Ç)
-                ChangeState(fsm.HitState); // Hit »óÅÂ·Î ÀüÈ¯ (ÀÌÈÄ Trace·Î °¨)
-                return; // (Áß¿ä) ±âÁ¸ HP ÀÓ°èÁ¡ ·ÎÁ÷À» ½ºÅµ
+                SetAnimTrigger(hashHit);     // (Ã»: hitÖ´Ï¸Ì¼)
+                ChangeState(fsm.HitState); // Hit Â· È¯ ( Trace )
+                return; // (ß¿)  HP Ó°  Åµ
             }
 
-            // ¡Ú (±âÁ¸) 1-2. (Trace/Attack µî) ÀüÅõ Áß¿¡ ¸Â¾Ò´Â°¡?
-            // (±âÁ¸ HP ÀÓ°èÁ¡ ·ÎÁ÷)
+            //  () 1-2. (Trace/Attack )  ß¿ Â¾Ò´Â°?
+            // ( HP Ó° )
             if (gazerFSM.IsHitOnCooldown)
             {
-                Debug.Log("Gazer Hit: Äğ´Ù¿î Áß... °æÁ÷ ¹«½Ã.");
+                Debug.Log("Gazer Hit: Ù¿ ...  .");
                 return;
             }
             float hpPercent = health.CurrentHP / health._maxHP;
@@ -263,77 +263,77 @@ public class MonsterAIController : MonoBehaviour
             }
             else
             {
-                Debug.Log("Gazer Hit: HP ÀÓ°èÁ¡ÀÌ ¾Æ´Ï¹Ç·Î °æÁ÷ ¹«½Ã.");
+                Debug.Log("Gazer Hit: HP Ó° Æ´Ï¹Ç·  .");
             }
         }
-        // ¡Ú 2. (¼öÁ¤) GOLEM ÇÇ°İ ·ÎÁ÷ ¡Ú
+        //  2. () GOLEM Ç°  
         else if (fsm is GolemFSM golemFSM)
         {
-            // --- (¿ì¼±¼øÀ§ 1: Block Áß) ---
-            // (¿ä±¸»çÇ× 4: Block ÁßÀÎ°¡?)
+            // --- (ì¼± 1: Block ) ---
+            // (ä±¸ 4: Block Î°?)
             if (CurrentState == fsm.BlockState)
             {
                 var blockState = CurrentState as GolemStates.Block;
 
-                // (¿ä±¸»çÇ× 3: BlockÀÌ Ç®¸®´Â 1ÃÊÀÇ Ãë¾àÇÑ Å¸ÀÌ¹ÖÀÎ°¡?)
+                // (ä±¸ 3: Block Ç® 1  Å¸Ì¹Î°?)
                 if (blockState != null && blockState.CurrentPhase == GolemStates.Block.Phase.VulnerableCheck)
                 {
-                    Debug.Log("GOLEM HIT: Ãë¾à(Vulnerable) »óÅÂ¿¡¼­ ÇÇ°İ! HitState ÀüÈ¯.");
-                    SetAnimTrigger(hashHit); // Hit ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı
-                    ChangeState(fsm.HitState); // Hit »óÅÂ(¼ÓµµÀúÇÏ)·Î ÀüÈ¯
+                    Debug.Log("GOLEM HIT: (Vulnerable) Â¿ Ç°! HitState È¯.");
+                    SetAnimTrigger(hashHit); // Hit Ö´Ï¸Ì¼ 
+                    ChangeState(fsm.HitState); // Hit (Óµ) È¯
                 }
                 else
                 {
-                    // 'Blocking' ´Ü°èÀÌ¹Ç·Î ¸ğµç µ¥¹ÌÁö ¹«½Ã (Hit ¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀ½)
-                    Debug.Log("GOLEM HIT: ¹æ¾î(Blocking) Áß! ÇÇ°İ ¹«½Ã.");
+                    // 'Blocking' Ü°Ì¹Ç·    (Hit Ö´Ï¸Ì¼ )
+                    Debug.Log("GOLEM HIT: (Blocking) ! Ç° .");
                 }
-                return; // ¹æ¾î ÁßÀÌ¹Ç·Î ¾Æ·¡ ·ÎÁ÷ ½ÇÇà ¾È ÇÔ
+                return; //  Ì¹Ç· Æ·    
             }
 
-            // --- (¿ì¼±¼øÀ§ 2: Block ¹ßµ¿ Á÷Àü) ---
-            // (¿ä±¸»çÇ× 4: Block ÇØ¾ß ÇØ!)
-            // OnBlock ÀÌº¥Æ®°¡ OnHitº¸´Ù ´Ê°Ô ¿À¹Ç·Î, HealthÀÇ Ä«¿îÅÍ¸¦ Á÷Á¢ Ã¼Å©
+            // --- (ì¼± 2: Block ßµ ) ---
+            // (ä±¸ 4: Block Ø¾ !)
+            // OnBlock ÌºÆ® OnHit Ê° Ç·, Health Ä«Í¸  Ã¼Å©
             if (health.hitCounter >= health.blockTriggerHits)
             {
-                Debug.Log("GOLEM HIT: Block ¹ßµ¿ Á¶°Ç ÃæÁ·! Hit ¾Ö´Ï¸ŞÀÌ¼Ç ¹«½Ã.");
-                // °ğ HandleBlockÀÌ È£ÃâµÇ¾î BlockState·Î ¹Ù²Ü °ÍÀÌ¹Ç·Î HitState·Î °¡Áö ¾ÊÀ½
-                // (¼Óµµ ÀúÇÏµµ ¾øÀ½)
+                Debug.Log("GOLEM HIT: Block ßµ  ! Hit Ö´Ï¸Ì¼ .");
+                //  HandleBlock È£Ç¾ BlockState Ù² Ì¹Ç· HitState  
+                // (Óµ Ïµ )
                 return;
             }
 
-            // --- (¿ì¼±¼øÀ§ 3: ¿ø°Å¸® ÇÇ°İ) ---
-            // (¿ä±¸»çÇ× 2, 5: ¸Ö¸®¼­ ½î¸é ÇÑ¹ø¸¸)
+            // --- (ì¼± 3: Å¸ Ç°) ---
+            // (ä±¸ 2, 5: Ö¸  Ñ¹)
             float distance = GetDistanceToPlayer();
-            // (¿¹: °ø°İ »ç°Å¸®ÀÇ 2¹èº¸´Ù ¸Ö°í, ¾ÆÁ÷ ¿ø°Å¸® Hit ¾Ö´Ï¸¦ ¾ÈÇßÀ» ¶§)
+            // (:  Å¸ 2èº¸ Ö°,  Å¸ Hit Ö´Ï¸  )
             if (distance > (config.attackRange * 2) && !golemFSM.HasPlayedRangedHitAnim)
             {
-                Debug.Log("GOLEM HIT: ¿ø°Å¸® ÇÇ°İ! HitState ÀüÈ¯ (¾Ö´Ï¸ŞÀÌ¼Ç Æ÷ÇÔ).");
-                golemFSM.SetRangedHitAnimPlayed(); // ÇÃ·¡±× ¼³Á¤ (´Ù½Ã ¾ÈÇÏ°Ô)
-                SetAnimTrigger(hashHit); // Hit ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı
-                ChangeState(fsm.HitState); // Hit »óÅÂ(¼ÓµµÀúÇÏ)·Î ÀüÈ¯
+                Debug.Log("GOLEM HIT: Å¸ Ç°! HitState È¯ (Ö´Ï¸Ì¼ ).");
+                golemFSM.SetRangedHitAnimPlayed(); // Ã·  (Ù½ Ï°)
+                SetAnimTrigger(hashHit); // Hit Ö´Ï¸Ì¼ 
+                ChangeState(fsm.HitState); // Hit (Óµ) È¯
                 return;
             }
 
-            // --- (¿ì¼±¼øÀ§ 4: ±× ¿Ü ¸ğµç ÇÇ°İ) ---
-            // (¿ä±¸»çÇ× 1: ±×³É ¼Óµµ¸¸ ´À¸®°Ô)
-            // (¿¹: °¡±îÀÌ¼­ ¸Â¾ÒÀ» ¶§, ¶Ç´Â ¿ø°Å¸®¿¡¼­ µÎ ¹øÂ° ÀÌ»ó ¸Â¾ÒÀ» ¶§)
-            Debug.Log("GOLEM HIT: ÀÏ¹İ ÇÇ°İ. HitState ÀüÈ¯ (¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀ½).");
-            // SetAnimTrigger(hashHit) È£Ãâ ¾È ÇÔ
-            ChangeState(fsm.HitState); // Hit »óÅÂ(¼ÓµµÀúÇÏ)·Î¸¸ ÀüÈ¯
+            // --- (ì¼± 4:    Ç°) ---
+            // (ä±¸ 1: ×³ Óµ )
+            // (: Ì¼ Â¾ , Ç´ Å¸  Â° Ì» Â¾ )
+            Debug.Log("GOLEM HIT: Ï¹ Ç°. HitState È¯ (Ö´Ï¸Ì¼ ).");
+            // SetAnimTrigger(hashHit) È£  
+            ChangeState(fsm.HitState); // Hit (Óµ)Î¸ È¯
         }
 
         else if (fsm is MinotaurFSM)
         {
-            // Minotaur´Â ¾Ö´Ï¸ŞÀÌ¼Ç(SetAnimTrigger)À» Àç»ıÇÏÁö ¾Ê°í
-            // HitState(¼Óµµ ÀúÇÏ)·Î¸¸ Áï½Ã ÀüÈ¯ÇÕ´Ï´Ù.
-            Debug.Log("MINOTAUR HIT: HitState ÀüÈ¯ (¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀ½).");
+            // Minotaur Ö´Ï¸Ì¼(SetAnimTrigger)  Ê°
+            // HitState(Óµ )Î¸  È¯Õ´Ï´.
+            Debug.Log("MINOTAUR HIT: HitState È¯ (Ö´Ï¸Ì¼ ).");
             ChangeState(fsm.HitState); //
         }
-        // 4. ±× ¿Ü ¸ó½ºÅÍ (Á»ºñ, ½½¶óÀÓ µî)
+        // 4.    (,  )
         else
         {
-            // ±âÁ¸ ·ÎÁ÷ (¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı + HitState)
-            Debug.Log("DEFAULT HIT: HitState ÀüÈ¯ (¾Ö´Ï¸ŞÀÌ¼Ç Æ÷ÇÔ).");
+            //   (Ö´Ï¸Ì¼  + HitState)
+            Debug.Log("DEFAULT HIT: HitState È¯ (Ö´Ï¸Ì¼ ).");
             SetAnimTrigger(hashHit);
             ChangeState(fsm.HitState);
         }
@@ -342,10 +342,10 @@ public class MonsterAIController : MonoBehaviour
     {
         if (health.IsDead) return;
 
-        // 1. GolemFSMÀÎÁö È®ÀÎ
+        // 1. GolemFSM È®
         var golemFSM = fsm as GolemFSM;
 
-        // 2. GolemFSMÀÌ ¾Æ´Ï¸é (¿¹: Á»ºñ, ½½¶óÀÓ) ¹æ¾î/¹İ°İ ¾È ÇÔ
+        // 2. GolemFSM Æ´Ï¸ (: , ) /İ°  
         if (golemFSM == null)
         {
             return;
@@ -356,14 +356,14 @@ public class MonsterAIController : MonoBehaviour
             return;
         }
 
-        // 4. 10ÃÊ Äğ´Ù¿îÀÌ µ¹°í ÀÖÀ¸¸é ¹«½Ã
+        // 4. 10 Ù¿   
         if (golemFSM.IsBlockOnCooldown)
         {
-            Debug.Log("¹æ¾î Äğ´Ù¿î Áß... ¹«½Ã!");
+            Debug.Log(" Ù¿ ... !");
             return;
         }
 
-        // 5. GolemÀÌ ¸Â°í Äğ´Ù¿îµµ ¾Æ´Ï¹Ç·Î Block »óÅÂ·Î ÀüÈ¯
+        // 5. Golem Â° Ù¿îµµ Æ´Ï¹Ç· Block Â· È¯
         ChangeState(fsm.BlockState);
     }
     private void HandleDeath()
@@ -371,14 +371,14 @@ public class MonsterAIController : MonoBehaviour
         StopAllCoroutines();
         if (string.IsNullOrEmpty(animConfig.dieTrigger2))
         {
-            // 1. DieTrigger2°¡ ºñ¾îÀÖ´Â °æ¿ì (Gazer µî Death ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ 1°³ÀÎ ¸ó½ºÅÍ)
-            //    config¿¡ ¼³Á¤µÈ Ã¹ ¹øÂ° dieTrigger (hashDie)¸¸ ½ÇÇàÇÕ´Ï´Ù.
+            // 1. DieTrigger2 Ö´  (Gazer  Death Ö´Ï¸Ì¼ 1 )
+            //    config  Ã¹ Â° dieTrigger (hashDie) Õ´Ï´.
             SetAnimTrigger(hashDie);
         }
         else
         {
-            // 2. DieTrigger2°¡ ¼³Á¤µÇ¾î ÀÖ´Â °æ¿ì (Death ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ 2°³ ÀÌ»óÀÎ ¸ó½ºÅÍ)
-            //    ±âÁ¸Ã³·³ 50% È®·ü·Î ·£´ı ½ÇÇàÇÕ´Ï´Ù.
+            // 2. DieTrigger2 Ç¾ Ö´  (Death Ö´Ï¸Ì¼ 2 Ì» )
+            //    Ã³ 50% È®  Õ´Ï´.
             if (Random.value > 0.5f)
                 SetAnimTrigger(hashDie); // "Death1"
             else
@@ -390,10 +390,12 @@ public class MonsterAIController : MonoBehaviour
     #endregion
 
 
-    #region ¾Ö´Ï¸ŞÀÌ¼Ç
+    #region ì• ë‹ˆë©”ì´ì…˜
+
+    public event System.Action<int> OnAnimatorTriggered;
 
     /// <summary>
-    /// ¾Ö´Ï¸ŞÀÌÅÍÀÇ 'Bool' ÆÄ¶ó¹ÌÅÍ¸¦ ¼³Á¤ÇÕ´Ï´Ù.
+    /// ì• ë‹ˆë©”ì´í„°ì˜ 'Bool' íŒŒë¼ë¯¸í„°ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
     /// </summary>
     public void SetAnimBool(int animHash, bool value)
     {
@@ -402,7 +404,7 @@ public class MonsterAIController : MonoBehaviour
     }
 
     /// <summary>
-    /// ¾Ö´Ï¸ŞÀÌÅÍÀÇ 'Float' ÆÄ¶ó¹ÌÅÍ¸¦ ¼³Á¤ÇÕ´Ï´Ù.
+    /// ì• ë‹ˆë©”ì´í„°ì˜ 'Float' íŒŒë¼ë¯¸í„°ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
     /// </summary>
     public void SetAnimFloat(int animHash, float value)
     {
@@ -411,14 +413,15 @@ public class MonsterAIController : MonoBehaviour
     }
 
     /// <summary>
-    /// ¾Ö´Ï¸ŞÀÌÅÍÀÇ 'Trigger' ÆÄ¶ó¹ÌÅÍ¸¦ ¹ßµ¿½ÃÅµ´Ï´Ù.
-    /// (±âÁ¸ SetTrigger ÇÔ¼ö¿Í µ¿ÀÏ, ÀÌ¸§¸¸ º¯°æ)
+    /// ì• ë‹ˆë©”ì´í„°ì˜ 'Trigger' íŒŒë¼ë¯¸í„°ë¥¼ ë°œë™ì‹œí‚µë‹ˆë‹¤.
+    /// (ê¸°ì¡´ SetTrigger í•¨ìˆ˜ì™€ ë™ì¼, ì´ë¦„ë§Œ ë³€ê²½)
     /// </summary>
     public void SetAnimTrigger(int animHash)
     {
         if (animator != null)
         {
             animator.SetTrigger(animHash);
+            OnAnimatorTriggered?.Invoke(animHash); // Notify subscribers
         }
     }
 
@@ -431,16 +434,16 @@ public class MonsterAIController : MonoBehaviour
     #endregion
 
     /// <summary>
-    /// ¸ó½ºÅÍÀÇ ÀıÂ÷Àû ¿òÁ÷ÀÓ(IK)À» ÄÑ°Å³ª ²ü´Ï´Ù. °Å¹Ì¿¡°Ô¸¸ ÇØ´çµË´Ï´Ù.
+    ///   (IK) Ñ°Å³ Ï´. Å¹Ì¿Ô¸ Ø´Ë´Ï´.
     /// </summary>
     public void SetProceduralMovement(bool isActive)
     {
-        // Spider ÄÄÆ÷³ÍÆ®°¡ ÀÖ´ÂÁö È®ÀÎ
+        // Spider Æ® Ö´ È®
         if (TryGetComponent<Spider>(out var spiderBody))
         {
             spiderBody.enabled = isActive;
         }
-        // IKStepManager ÄÄÆ÷³ÍÆ®°¡ ÀÖ´ÂÁö È®ÀÎ
+        // IKStepManager Æ® Ö´ È®
         if (TryGetComponent<IKStepManager>(out var spiderStepManager))
         {
             spiderStepManager.enabled = isActive;
@@ -448,29 +451,29 @@ public class MonsterAIController : MonoBehaviour
     }
 
     /// <summary>
-    /// (½Å±Ô) Attack »óÅÂ¿¡¼­ È£ÃâµÇ¾î ÇÃ·¹ÀÌ¾î¿¡°Ô µ¥¹ÌÁö¸¦ Àû¿ëÇÕ´Ï´Ù.
+    /// (Å±) Attack Â¿ È£Ç¾ Ã·Ì¾î¿¡  Õ´Ï´.
     /// </summary>
     public void ApplyDamageToPlayer()
     {
         if (player == null || health.IsDead) return;
 
-        // 1. °ø°İ µô·¹ÀÌ(attackDelay) ÈÄ¿¡µµ ÇÃ·¹ÀÌ¾î°¡ »ç°Å¸® ¾È¿¡ ÀÖ´ÂÁö ´Ù½Ã Ã¼Å©
+        // 1.  (attackDelay) Ä¿ Ã·Ì¾î°¡ Å¸ È¿ Ö´ Ù½ Ã¼Å©
         if (GetDistanceToPlayer() <= config.attackRange)
         {
-            // 2. ¡Ú (¼öÁ¤) 'PlayerHealth' -> 'PlayerStats'·Î º¯°æ ¡Ú
+            // 2.  () 'PlayerHealth' -> 'PlayerStats'  
             if (player.TryGetComponent<PlayerStats>(out PlayerStats playerStats))
             {
-                Debug.Log($"[Golem] ÇÃ·¹ÀÌ¾î °ø°İ! µ¥¹ÌÁö: {config.attackDamage}");
+                Debug.Log($"[Golem] Ã·Ì¾ ! : {config.attackDamage}");
                 playerStats.TakeDamage(config.attackDamage);
             }
             else
             {
-                Debug.LogWarning($"[Golem] ÇÃ·¹ÀÌ¾î({player.name})¿¡°Ô 'PlayerStats' ½ºÅ©¸³Æ®°¡ ¾ø½À´Ï´Ù!");
+                Debug.LogWarning($"[Golem] Ã·Ì¾({player.name}) 'PlayerStats' Å©Æ® Ï´!");
             }
         }
         else
         {
-            Debug.Log("[Golem] ÇÃ·¹ÀÌ¾î°¡ »ç°Å¸®¸¦ ¹ş¾î³ª¼­ °ø°İÀÌ ºø³ª°¬½À´Ï´Ù.");
+            Debug.Log("[Golem] Ã·Ì¾î°¡ Å¸ î³ª  Ï´.");
         }
     }
 
@@ -478,22 +481,22 @@ public class MonsterAIController : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        // config ÆÄÀÏÀÌ ¾øÀ¸¸é ¾Æ¹«°Íµµ ±×¸®Áö ¾Ê½À´Ï´Ù.
+        // config   Æ¹Íµ ×¸ Ê½Ï´.
         if (config == null) return;
 
-        // 1. °ø°İ ¹üÀ§ (Attack Range)
+        // 1.   (Attack Range)
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, config.attackRange);
 
-        // 2. ¸ØÃß´Â °Å¸® (Stopping Distance)
+        // 2. ß´ Å¸ (Stopping Distance)
         Gizmos.color = Color.gray;
         Gizmos.DrawWireSphere(transform.position, config.stoppingDistance);
 
-        // 3. ¼Ò¸® °¨Áö ¹üÀ§ (Sound Range)
+        // 3. Ò¸   (Sound Range)
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, config.soundRange);
 
-        // 4. ÇöÀç ¸ñÀûÁö (½ÇÇà Áß¿¡¸¸ Ç¥½Ã)
+        // 4.   ( ß¿ Ç¥)
         if (Application.isPlaying && fsm != null && (CurrentState == fsm.PatrolState || CurrentState == fsm.TraceState))
         {
             Gizmos.color = Color.magenta;
@@ -504,6 +507,3 @@ public class MonsterAIController : MonoBehaviour
 #endif
 
 }
-
-
-

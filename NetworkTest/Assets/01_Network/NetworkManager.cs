@@ -162,13 +162,21 @@ public class NetworkManager : MonoBehaviour
                     var networkMonster = monsterGo.GetComponent<NetworkMonster>();
                     if (networkMonster == null) continue;
 
-                    // TODO: Get animation state from a monster-specific animator sync component
+                    var monsterAnimSync = monsterGo.GetComponent<NetworkMonsterAnimatorSync>();
+                    byte[] animDataBytes = null;
+                    if (monsterAnimSync != null)
+                    {
+                        var animData = monsterAnimSync.GetAnimationData();
+                        animDataBytes = NetworkMonsterAnimatorSync.Serialize(animData);
+                    }
+
                     var monsterState = new MonsterState
                     {
                         monsterId = networkMonster.MonsterId,
+                        monsterType = networkMonster.MonsterType, // Get monster type from NetworkMonster
                         position = monsterGo.transform.position,
                         rotation = monsterGo.transform.rotation,
-                        animationMask = 0 // Placeholder
+                        animationData = animDataBytes
                     };
                     authoritativeState.monsters.Add(monsterState);
                 }
@@ -272,7 +280,7 @@ public class NetworkManager : MonoBehaviour
             gameObject.AddComponent<ServerRoomManager>();
         }
 
-        SceneManager.LoadScene(GameManager.Instance.GameSettings.roomScene);
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
     }
 
     public void JoinSteamLobby(CSteamID lobbyID)
@@ -315,7 +323,7 @@ public class NetworkManager : MonoBehaviour
         IsConnected = true;
         OnConnected?.Invoke();
 
-        SceneManager.LoadScene(GameManager.Instance.GameSettings.roomScene);
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
     }
 
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)

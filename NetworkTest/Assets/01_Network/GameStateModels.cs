@@ -14,6 +14,16 @@ public static class AnimationBitmask
     public static bool IsSet(byte mask, byte flag) => (mask & flag) == flag;
 }
 
+// Enum to identify the type of monster
+public enum MonsterType : byte // Use byte for network efficiency
+{
+    GellyCube,
+    GellySphere,
+    Golem,
+    Minotaur,
+    PlantMonster
+}
+
 // Optimized data structure for a single player's state
 public struct PlayerState
 {
@@ -74,9 +84,10 @@ public struct PlayerState
 public struct MonsterState
 {
     public ushort monsterId;
+    public MonsterType monsterType; // Added monster type
     public Vector3 position;
     public Quaternion rotation;
-    public byte animationMask; // You can define a similar bitmask for monsters
+    public byte[] animationData;
 }
 
 // The main container for all real-time game data
@@ -119,6 +130,7 @@ public class NetworkGameState
             foreach (var m in monsters)
             {
                 writer.Write(m.monsterId);
+                writer.Write((byte)m.monsterType); // Write monster type
                 writer.Write(m.position.x);
                 writer.Write(m.position.y);
                 writer.Write(m.position.z);
@@ -126,7 +138,14 @@ public class NetworkGameState
                 writer.Write(m.rotation.y);
                 writer.Write(m.rotation.z);
                 writer.Write(m.rotation.w);
-                writer.Write(m.animationMask);
+                
+                // Write animation data
+                byte dataLength = (byte)(m.animationData?.Length ?? 0);
+                writer.Write(dataLength);
+                if (dataLength > 0)
+                {
+                    writer.Write(m.animationData);
+                }
             }
             
             // Write game-level state
@@ -168,10 +187,18 @@ public class NetworkGameState
                 var m = new MonsterState
                 {
                     monsterId = reader.ReadUInt16(),
+                    monsterType = (MonsterType)reader.ReadByte(), // Read monster type
                     position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
                     rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    animationMask = reader.ReadByte()
                 };
+                
+                // Read animation data
+                byte dataLength = reader.ReadByte();
+                if (dataLength > 0)
+                {
+                    m.animationData = reader.ReadBytes(dataLength);
+                }
+
                 gameState.monsters.Add(m);
             }
             

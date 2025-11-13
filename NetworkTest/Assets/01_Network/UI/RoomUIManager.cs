@@ -12,7 +12,6 @@ public class RoomUIManager : MonoBehaviour
     [SerializeField] private Transform playerListContent;
     [SerializeField] private GameObject playerListItemPrefab;
     [SerializeField] private TextMeshProUGUI roomNameText;
-    // TODO: Assign this button in the Unity Editor. It should only be visible/interactable for the host.
     [SerializeField] private GameObject launchButton;
 
     private int currentSelectedPlanetId = -1;
@@ -47,8 +46,8 @@ public class RoomUIManager : MonoBehaviour
 
     private void HandleDisconnection()
     {
-        Debug.Log($"[RoomUIManager] Disconnected. Returning to {GameManager.Instance.GameSettings.connectionScene}.");
-        SceneManager.LoadScene(GameManager.Instance.GameSettings.connectionScene);
+        Debug.Log($"[RoomUIManager] Disconnected. Returning to {GameManager.Instance.GameSettings.mainmenuScene}.");
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
     }
 
     private void SendNickname()

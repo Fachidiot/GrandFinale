@@ -16,7 +16,7 @@ public class TerminalManager : MonoBehaviour
     [Header("Interaction Settings")]
     [SerializeField] private Transform playerStandPosition;
 
-    [SerializeField] private CinemachineVirtualCamera cinemachineVirtualCamera;
+    [SerializeField] private CinemachineVirtualCamera terminalVirtualCamera;
 
     private readonly StringBuilder outputLog = new StringBuilder();
     private bool isTerminalActive = false;
@@ -28,7 +28,7 @@ public class TerminalManager : MonoBehaviour
 
     private void Start()
     {
-        if (terminalPanel == null || inputField == null || terminalOutput == null || roomUIManager == null || playerStandPosition == null)
+        if (terminalPanel == null || inputField == null || terminalOutput == null || roomUIManager == null || playerStandPosition == null || terminalVirtualCamera == null)
         {
             Debug.LogError("TerminalManager is not configured correctly. Please assign all fields in the inspector.");
             gameObject.SetActive(false);
@@ -82,11 +82,11 @@ public class TerminalManager : MonoBehaviour
             // Weapon Unarmed.
             activePlayer.GetComponentInChildren<WeaponController>().ToChange(5);
 
-            // Find CameraSwitcher and toggle to FPV
+            // Find CameraSwitcher disable it
             activeCameraSwitcher = activePlayer.GetComponentInChildren<CameraSwitcher>();
-            if (activeCameraSwitcher != null && !activeCameraSwitcher.IsFirstPersonView)
+            if (activeCameraSwitcher != null)
             {
-                activeCameraSwitcher.ViewChange(); // Assuming this toggles into FPV
+                activeCameraSwitcher.enabled = false;
             }
 
             // Move player to stand position
@@ -104,7 +104,7 @@ public class TerminalManager : MonoBehaviour
                 playerAnimator.SetBool(playerCharacterMove.rollID, false);   // Assuming rollID exists
             }
 
-            cinemachineVirtualCamera.Priority = 10;
+            terminalVirtualCamera.Priority = 10;
 
             // Setup UI
             ExecuteClear();
@@ -113,11 +113,11 @@ public class TerminalManager : MonoBehaviour
         }
         else
         {
-            cinemachineVirtualCamera.Priority = 0;
+            terminalVirtualCamera.Priority = 0;
 
             if (activeCameraSwitcher != null)
             {
-                activeCameraSwitcher.ViewChange(); // Toggle back to previous view
+                activeCameraSwitcher.enabled = true;
             }
 
             // Clear references
