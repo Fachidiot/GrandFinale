@@ -1,14 +1,22 @@
 using UnityEngine;
-using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+
+// A helper class to map a MonsterType enum to a GameObject prefab in the Inspector
+[System.Serializable]
+public class MonsterPrefabMapping
+{
+    public MonsterType type;
+    public GameObject prefab;
+}
 
 public class SpawnManager : MonoBehaviour
 {
     public static SpawnManager Instance { get; private set; }
 
     [Header("Spawning Configuration")]
-    public GameObject monsterPrefab; // Assign your monster prefab in the Inspector
+    public List<MonsterPrefabMapping> monsterPrefabs; // List of all available monster prefabs
     public Transform spawnPoint; // Assign a spawn point in the Inspector
 
     public float timeBetweenWaves = 5f;
@@ -42,9 +50,9 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        if (monsterPrefab == null)
+        if (monsterPrefabs == null || monsterPrefabs.Count == 0)
         {
-            Debug.LogError("Monster Prefab is not assigned in SpawnManager.");
+            Debug.LogError("Monster Prefabs are not assigned in SpawnManager.");
             return;
         }
         if (spawnPoint == null)
@@ -71,14 +79,27 @@ public class SpawnManager : MonoBehaviour
     {
         for (int i = 0; i < monstersPerWave; i++)
         {
-            SpawnMonster();
+            // Randomly select a monster type to spawn from the available prefabs
+            if (monsterPrefabs.Count > 0)
+            {
+                int randomIndex = Random.Range(0, monsterPrefabs.Count);
+                MonsterType randomType = monsterPrefabs[randomIndex].type;
+                SpawnMonster(randomType);
+            }
             yield return new WaitForSeconds(spawnInterval);
         }
         Debug.Log($"[SpawnManager] Wave {currentWave} finished spawning.");
     }
 
-    void SpawnMonster()
+    void SpawnMonster(MonsterType monsterType)
     {
+        GameObject monsterPrefab = GetPrefab(monsterType);
+        if (monsterPrefab == null)
+        {
+            Debug.LogError($"No prefab found for monster type: {monsterType}");
+            return;
+        }
+
         GameObject monsterGO = Instantiate(monsterPrefab, spawnPoint.position, spawnPoint.rotation);
         
         // Initialize network identity
@@ -91,12 +112,21 @@ public class SpawnManager : MonoBehaviour
         }
         
         ushort newId = nextMonsterId++;
-        networkMonster.Initialize(newId);
+        networkMonster.Initialize(newId, monsterType); // Pass monster type during initialization
         monsterGO.name = $"{monsterPrefab.name}_{newId}";
         
         spawnedMonsters.Add(monsterGO);
-        Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name}");
+        Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
 
         // AI logic is now handled by MonsterMovement.cs on the host
+    }
+
+    /// <summary>
+    /// Gets the prefab associated with a given MonsterType.
+    /// </summary>
+    public GameObject GetPrefab(MonsterType type)
+    {
+        var mapping = monsterPrefabs.FirstOrDefault(m => m.type == type);
+        return mapping?.prefab;
     }
 }
