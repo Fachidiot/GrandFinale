@@ -28,15 +28,18 @@ public class TerminalManager : MonoBehaviour
     private GameObject activePlayer;
     private CameraSwitcher activeCameraSwitcher;
 
-    private void Start()
+    private IEnumerator Start()
     {
         // serverRoomManager is now assigned at runtime
         if (terminalPanel == null || inputField == null || terminalOutput == null || playerStandPosition == null || terminalVirtualCamera == null)
         {
             Debug.LogError("TerminalManager is not configured correctly. Please assign all UI and camera fields in the inspector.");
             gameObject.SetActive(false);
-            return;
+            yield break;
         }
+
+        // Wait a frame to ensure all singletons are initialized
+        yield return null;
 
         // Get PlayerInputs from GameManager
         playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
@@ -47,7 +50,7 @@ public class TerminalManager : MonoBehaviour
         {
             Debug.LogError("[TerminalManager] ServerRoomManager.Instance not found! The terminal will not function correctly.");
             gameObject.SetActive(false);
-            return;
+            yield break;
         }
 
         inputField.onSubmit.AddListener(OnSubmitCommand);
