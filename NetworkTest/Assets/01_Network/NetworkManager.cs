@@ -318,6 +318,12 @@ public class NetworkManager : MonoBehaviour
             Mode = NetworkMode.Host;
         }
 
+        // Ensure ServerRoomManager exists for both Host and Client
+        if (ServerRoomManager.Instance == null)
+        {
+            gameObject.AddComponent<ServerRoomManager>();
+        }
+
         UpdateLobbyMembers();
 
         IsConnected = true;
