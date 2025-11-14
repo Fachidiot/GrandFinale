@@ -4,6 +4,7 @@ using System.Text;
 using Cinemachine;
 using Newtonsoft.Json.Linq;
 using Steamworks;
+using System.Collections;
 
 public class TerminalManager : MonoBehaviour
 {
