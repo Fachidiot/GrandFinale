@@ -115,7 +115,7 @@ public class NetworkPlayerManager : MonoBehaviour
         if (nicknameUI != null)
             nicknameUI.SetNickname(playerInfo.nickname);
 
-        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.PlayerId);
+        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
         var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
 
         foreach (var view in transformSyncs)
