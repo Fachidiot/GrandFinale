@@ -13,12 +13,11 @@ public class TerminalManager : MonoBehaviour
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private TMP_Text terminalOutput;
 
-    [Header("Dependencies")]
-    [SerializeField] private ServerRoomManager serverRoomManager;
+    // [Header("Dependencies")] - No longer serialized
+    // [SerializeField] private ServerRoomManager serverRoomManager;
 
     [Header("Interaction Settings")]
     [SerializeField] private Transform playerStandPosition;
-
     [SerializeField] private CinemachineVirtualCamera terminalVirtualCamera;
 
     private readonly StringBuilder outputLog = new StringBuilder();
@@ -29,42 +28,41 @@ public class TerminalManager : MonoBehaviour
     private GameObject activePlayer;
     private CameraSwitcher activeCameraSwitcher;
 
-    private IEnumerator Start()
+    // --- Lazy-Loading Implementation ---
+    private ServerRoomManager _serverRoomManager;
+    private ServerRoomManager ServerRoomManager
     {
-        // serverRoomManager is now assigned at runtime
+        get
+        {
+            if (_serverRoomManager == null)
+            {
+                _serverRoomManager = ServerRoomManager.Instance;
+            }
+            return _serverRoomManager;
+        }
+    }
+    // ------------------------------------
+
+    private void Start()
+    {
         if (terminalPanel == null || inputField == null || terminalOutput == null || playerStandPosition == null || terminalVirtualCamera == null)
         {
             Debug.LogError("TerminalManager is not configured correctly. Please assign all UI and camera fields in the inspector.");
             gameObject.SetActive(false);
-            yield break;
+            return;
         }
 
-        // Wait a frame to ensure all singletons are initialized
-        yield return null;
-
-        // Get PlayerInputs from GameManager
         playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
-
-        // Find the persistent ServerRoomManager instance
-        serverRoomManager = ServerRoomManager.Instance;
-        if (serverRoomManager == null)
-        {
-            Debug.LogError("[TerminalManager] ServerRoomManager.Instance not found! The terminal will not function correctly.");
-            gameObject.SetActive(false);
-            yield break;
-        }
-
         inputField.onSubmit.AddListener(OnSubmitCommand);
         terminalPanel.SetActive(false); // Start with the terminal closed
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (isTerminalActive) return; // Don't do anything if terminal is already open
+        if (isTerminalActive) return;
 
         if (other.CompareTag("Player"))
         {
-            // Check if it's the local player by checking if the InputHandler is enabled
             InputHandler handler = other.GetComponentInChildren<InputHandler>();
             if (handler != null && handler.enabled)
             {
@@ -85,30 +83,22 @@ public class TerminalManager : MonoBehaviour
 
         if (isTerminalActive)
         {
-            // --- Activating Terminal ---
             activePlayer = playerObject;
             if (activePlayer == null)
             {
-                Debug.LogError("Terminal activated without a valid player object!");
-                // Deactivate again as a fallback
                 ToggleTerminal(null);
                 return;
             }
 
-            // Weapon Unarmed.
             activePlayer.GetComponentInChildren<WeaponController>().ToChange(5);
-
-            // Find CameraSwitcher disable it
             activeCameraSwitcher = activePlayer.GetComponentInChildren<CameraSwitcher>();
             if (activeCameraSwitcher != null)
             {
                 activeCameraSwitcher.enabled = false;
             }
 
-            // Move player to stand position
             activePlayer.transform.position = playerStandPosition.position;
 
-            // Stop player animations
             Animator playerAnimator = activePlayer.GetComponentInChildren<Animator>();
             CharacterMove playerCharacterMove = activePlayer.GetComponent<CharacterMove>();
             if (playerAnimator != null && playerCharacterMove != null)
@@ -116,13 +106,12 @@ public class TerminalManager : MonoBehaviour
                 playerAnimator.SetFloat(playerCharacterMove.horizontalInputID, 0);
                 playerAnimator.SetFloat(playerCharacterMove.verticalInputID, 0);
                 playerAnimator.SetBool(playerCharacterMove.sprintID, false);
-                playerAnimator.SetBool(playerCharacterMove.crouchID, false); // Assuming crouchID exists
-                playerAnimator.SetBool(playerCharacterMove.rollID, false);   // Assuming rollID exists
+                playerAnimator.SetBool(playerCharacterMove.crouchID, false);
+                playerAnimator.SetBool(playerCharacterMove.rollID, false);
             }
 
             terminalVirtualCamera.Priority = 10;
 
-            // Setup UI
             ExecuteClear();
             PrintWelcomeMessage();
             inputField.ActivateInputField();
@@ -130,13 +119,10 @@ public class TerminalManager : MonoBehaviour
         else
         {
             terminalVirtualCamera.Priority = 0;
-
             if (activeCameraSwitcher != null)
             {
                 activeCameraSwitcher.enabled = true;
             }
-
-            // Clear references
             activePlayer = null;
             activeCameraSwitcher = null;
         }
@@ -151,14 +137,9 @@ public class TerminalManager : MonoBehaviour
 
     private void OnSubmitCommand(string command)
     {
-        if (string.IsNullOrWhiteSpace(command))
-        {
-            return;
-        }
-
+        if (string.IsNullOrWhiteSpace(command)) return;
         AppendToLog($"> {command}");
         ParseCommand(command.Trim().ToLower());
-
         inputField.text = "";
         inputField.ActivateInputField();
         UpdateOutput();
@@ -171,27 +152,12 @@ public class TerminalManager : MonoBehaviour
 
         switch (commandWord)
         {
-            case "help":
-                ExecuteHelp();
-                break;
-            case "planets":
-                ExecutePlanets();
-                break;
-            case "goto":
-                ExecuteGoto(parts);
-                break;
-            // case "launch":
-            //     ExecuteLaunch();
-            //     break;
-            case "clear":
-                ExecuteClear();
-                break;
-            case "exit":
-                ToggleTerminal(null);
-                break;
-            default:
-                AppendToLog($"Unknown command: '{commandWord}'");
-                break;
+            case "help": ExecuteHelp(); break;
+            case "planets": ExecutePlanets(); break;
+            case "goto": ExecuteGoto(parts); break;
+            case "clear": ExecuteClear(); break;
+            case "exit": ToggleTerminal(null); break;
+            default: AppendToLog($"Unknown command: '{commandWord}'"); break;
         }
     }
 
@@ -201,7 +167,6 @@ public class TerminalManager : MonoBehaviour
         AppendToLog("  help - Shows this message.");
         AppendToLog("  planets - Lists available planets.");
         AppendToLog("  goto [planet-name] - Selects a planet for travel.");
-        // AppendToLog("  launch - Launches the game to the selected planet (host only).");
         AppendToLog("  clear - Clears the terminal screen.");
         AppendToLog("  exit - Closes the terminal.");
     }
@@ -226,17 +191,9 @@ public class TerminalManager : MonoBehaviour
 
         switch (planetName)
         {
-            case "planet_1":
-            case "Planet_1":
-                planetId = 1;
-                break;
-            case "planet_2":
-            case "Planet_2":
-                planetId = 2;
-                break;
-            default:
-                AppendToLog($"Unknown planet: '{planetName}'");
-                return; // Return early if planet is unknown
+            case "planet_1": case "Planet_1": planetId = 1; break;
+            case "planet_2": case "Planet_2": planetId = 2; break;
+            default: AppendToLog($"Unknown planet: '{planetName}'"); return;
         }
 
         AppendToLog($"Proposing planet '{planetName}'...");
@@ -245,7 +202,7 @@ public class TerminalManager : MonoBehaviour
 
     private void ProposePlanet(int planetId)
     {
-        if (NetworkManager.Instance == null || serverRoomManager == null)
+        if (NetworkManager.Instance == null || ServerRoomManager == null)
         {
             AppendToLog("Error: Network systems not available.");
             return;
@@ -253,17 +210,12 @@ public class TerminalManager : MonoBehaviour
 
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
-            serverRoomManager.SelectPlanet(planetId);
+            ServerRoomManager.SelectPlanet(planetId);
             AppendToLog("Planet selected as host.");
         }
         else // Client
         {
-            JObject message = new JObject
-            {
-                { "type", "propose_planet" },
-                { "planet_id", planetId }
-            };
-
+            JObject message = new JObject { { "type", "propose_planet" }, { "planet_id", planetId } };
             CSteamID hostId = NetworkManager.Instance.LobbyHostID;
             if (hostId.IsValid())
             {
@@ -280,7 +232,6 @@ public class TerminalManager : MonoBehaviour
     private void ExecuteLaunch()
     {
         AppendToLog("Attempting to launch...");
-        // serverRoomManager.OnLaunchGameClicked();
     }
 
     private void ExecuteClear()
