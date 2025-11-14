@@ -8,27 +8,27 @@ public class Projectile_Arc : MonoBehaviour
     private float travelTime;
     private float timer = 0f;
 
-    // Config¿¡¼­ ¹Ş¾Æ¿Ã º¯¼öµé
+    // Configì—ì„œ ë°›ì•„ì˜¬ ë°ì´í„°
     private float impactDamage;
     private float poisonDuration;
     private float poisonTickDamage;
     private float poisonTickRate;
     private GameObject poisonAreaPrefab;
 
-    [Header("ÀÌÆåÆ® ¼³Á¤ (ÀÎ½ºÆåÅÍ)")]
-    [Tooltip("¹ß»çÃ¼ º»Ã¼¿¡ ºÙ´Â µ¶ ¿¬±â ÀÌÆåÆ®")]
+    [Header("ì´í™íŠ¸ ê´€ë ¨ (ì¸ìŠ¤í™í„°)")]
+    [Tooltip("ë°œì‚¬ì²´ ë³¸ì²´ì— ë¶™ì¼ ì´í™íŠ¸")]
     public GameObject poisonPrefab;
-    [Tooltip("¶¥(Ground)À¸·Î ÀÎ½ÄÇÒ LayerMask")]
+    [Tooltip("ë•…(Ground)ìœ¼ë¡œ ì¸ì‹í•  LayerMask")]
     public LayerMask groundLayer;
 
-    // [¼öÁ¤] ¿¬±â ÀÌÆåÆ® ÀÎ½ºÅÏ½º¸¦ ÀúÀåÇÒ º¯¼ö
+    // [ì¶”ê°€] ë… ì´í™íŠ¸ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì €ì¥í•  ë³€ìˆ˜
     private GameObject poisonInstance;
 
     void Awake()
     {
         if (poisonPrefab != null)
         {
-            // [¼öÁ¤] »ı¼ºÇÑ ÀÌÆåÆ®¸¦ º¯¼ö¿¡ ÀúÀåÇÕ´Ï´Ù.
+            // [ì¶”ê°€] ì‹œì‘ì‹œ ì´í™íŠ¸ë¥¼ ìƒì„±í•˜ì—¬ ì €ì¥í•©ë‹ˆë‹¤.
             poisonInstance = Instantiate(poisonPrefab, transform.position, transform.rotation);
             poisonInstance.transform.SetParent(transform, false);
         }
@@ -42,7 +42,7 @@ public class Projectile_Arc : MonoBehaviour
         float distance = Vector3.Distance(startPos, targetPos);
         if (speed <= 0) speed = 15f;
         travelTime = distance / speed;
-        Destroy(gameObject, 5.0f); // 5ÃÊ ÈÄ ÀÚµ¿ ÆÄ±« (¾ÈÀüÀåÄ¡)
+        Destroy(gameObject, 5.0f); // 5ì´ˆ í›„ ìë™ íŒŒê´´ (ì•ˆì „ì¥ì¹˜)
     }
 
     void Update()
@@ -68,32 +68,32 @@ public class Projectile_Arc : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"[Projectile] Æ®¸®°Å °¨Áö! ´ë»ó: {other.gameObject.name}, ·¹ÀÌ¾î: {LayerMask.LayerToName(other.gameObject.layer)}");
+        Debug.Log($"[Projectile] íŠ¸ë¦¬ê±° ê°ì§€! ëŒ€ìƒ: {other.gameObject.name}, ë ˆì´ì–´: {LayerMask.LayerToName(other.gameObject.layer)}");
 
         bool isGround = ((1 << other.gameObject.layer) & groundLayer) != 0;
         bool isPlayer = other.CompareTag("Player");
 
         if (isGround)
         {
-            Debug.Log($"[Projectile] 'Ground' ·¹ÀÌ¾î¿¡ ¸íÁß.");
+            Debug.Log($"[Projectile] 'Ground' ë ˆì´ì–´ì— ì¶©ëŒ.");
             HandleGroundHit(transform.position);
         }
         else if (isPlayer)
         {
-            Debug.Log($"[Projectile] 'Player'¿¡ ¸íÁß.");
+            Debug.Log($"[Projectile] 'Player'ì— ì¶©ëŒ.");
             HandlePlayerHit(other.gameObject);
         }
         else
         {
-            Debug.Log($"[Projectile] ±âÅ¸ ´ë»ó({other.gameObject.name})°ú Ãæµ¹. ¼Ò¸êÇÕ´Ï´Ù.");
+            Debug.Log($"[Projectile] ê¸°íƒ€ ëŒ€ìƒ({other.gameObject.name})ê³¼ ì¶©ëŒ. ì†Œë©¸í•©ë‹ˆë‹¤.");
         }
 
-        // ¶¥, ÇÃ·¹ÀÌ¾î, º® µî '¹«¾ùÀÌµç' ´êÀ¸¸é ¹ß»çÃ¼´Â ÆÄ±«µÇ¾î¾ß ÇÕ´Ï´Ù.
-        if (isGround || isPlayer || !other.isTrigger) // (Trigger°¡ ¾Æ´Ñ Collider = º®)
+        // ë•…, í”Œë ˆì´ì–´, ë˜ëŠ” 'ì¼ë°˜' ì½œë¼ì´ë”ì— ë‹¿ìœ¼ë©´ ë°œì‚¬ì²´ëŠ” íŒŒê´´ë˜ì–´ì•¼ í•©ë‹ˆë‹¤.
+        if (isGround || isPlayer || !other.isTrigger) // (Triggerê°€ ì•„ë‹Œ Collider = ë²½)
         {
-            // [¼öÁ¤] DetachChildren() ´ë½Å, ¿¬±â ÀÌÆåÆ®¸¦ °ü¸®ÇÏ´Â »õ ÇÔ¼ö È£Ãâ
+            // [ì¶”ê°€] DetachChildren() ëŒ€ì‹ , ë… ì´í™íŠ¸ë¥¼ ë¶„ë¦¬í•˜ëŠ” ìƒˆ í•¨ìˆ˜ í˜¸ì¶œ
             HandleParticleStop();
-            Destroy(gameObject); // ¹ß»çÃ¼ ÆÄ±«
+            Destroy(gameObject); // ë°œì‚¬ì²´ íŒŒê´´
         }
     }
 
@@ -102,7 +102,7 @@ public class Projectile_Arc : MonoBehaviour
         if (target.TryGetComponent<PlayerStats>(out var playerStats))
         {
             playerStats.TakeDamage(impactDamage);
-            Debug.Log($"[Projectile] {target.name}¿¡°Ô ´Ü¹ß ÇÇÇØ {impactDamage} Àû¿ë!");
+            Debug.Log($"[Projectile] {target.name}ì—ê²Œ ì§ê²© ë°ë¯¸ì§€ {impactDamage} ì ìš©!");
         }
     }
 
@@ -110,7 +110,7 @@ public class Projectile_Arc : MonoBehaviour
     {
         if (poisonAreaPrefab != null)
         {
-            Debug.Log($"[HandleGroundHit] 'poisonAreaPrefab'({poisonAreaPrefab.name})À» »ı¼ºÇÕ´Ï´Ù.");
+            Debug.Log($"[HandleGroundHit] 'poisonAreaPrefab'({poisonAreaPrefab.name})ì„ ìƒì„±í•©ë‹ˆë‹¤.");
             GameObject poisonArea = Instantiate(
                 poisonAreaPrefab,
                 impactPosition + Vector3.up * 0.1f,
@@ -123,33 +123,33 @@ public class Projectile_Arc : MonoBehaviour
             }
             else
             {
-                Debug.LogError($"[Projectile_Arc] {poisonAreaPrefab.name}¿¡ PoisonArea.cs ½ºÅ©¸³Æ®°¡ ¾ø½À´Ï´Ù!");
+                Debug.LogError($"[Projectile_Arc] {poisonAreaPrefab.name}ì— PoisonArea.cs ìŠ¤í¬ë¦½íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
             }
         }
         else
         {
-            Debug.LogError("[HandleGroundHit] ÀÌÆåÆ® »ı¼º ½ÇÆĞ: poisonAreaPrefabÀÌ nullÀÔ´Ï´Ù. (Config ¿¡¼ÂÀ» È®ÀÎÇÏ¼¼¿ä)");
+            Debug.LogError("[HandleGroundHit] ì´í™íŠ¸ ìƒì„± ì‹¤íŒ¨: poisonAreaPrefabì´ nullì…ë‹ˆë‹¤. (Config ì„¤ì •ì„ í™•ì¸í•˜ì„¸ìš”)");
         }
     }
 
     /// <summary>
-    /// [½Å±Ô] ¹ß»çÃ¼¿¡ ºÙ¾îÀÖ´ø ÆÄÆ¼Å¬(¿¬±â)À» Á¤Áö½ÃÅ°°í ÆÄ±«ÇÕ´Ï´Ù.
+    /// [ì‹ ê·œ] ë°œì‚¬ì²´ì— ë¶™ì–´ìˆëŠ” íŒŒí‹°í´(ë…)ì„ ë¶„ë¦¬í•˜ê³  ì†Œë©¸ì‹œí‚µë‹ˆë‹¤.
     /// </summary>
     private void HandleParticleStop()
     {
         if (poisonInstance != null)
         {
-            // 1. ºÎ¸ğ-ÀÚ½Ä °ü°è ÇØÁ¦ (¹ß»çÃ¼°¡ »ç¶óÁ®µµ ¿¬±â´Â ³²¾Æ¼­ »ç¶óÁ®¾ß ÇÔ)
+            // 1. ë¶€ëª¨-ìì‹ ê´€ê³„ í•´ì œ (ë°œì‚¬ì²´ê°€ ì‚¬ë¼ì ¸ë„ ì´í™íŠ¸ëŠ” ë‚¨ë„ë¡)
             poisonInstance.transform.SetParent(null);
 
-            // 2. ÆÄÆ¼Å¬ ½Ã½ºÅÛ Ã£±â
+            // 2. íŒŒí‹°í´ ì‹œìŠ¤í…œ ì°¾ê¸°
             if (poisonInstance.TryGetComponent<ParticleSystem>(out var ps))
             {
-                // 3. »õ ÆÄÆ¼Å¬ ¹æÃâ ÁßÁö
+                // 3. ë” ì´ìƒ íŒŒí‹°í´ ìƒì„± ì¤‘ì§€
                 ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
 
-            // 4. ÆÄÆ¼Å¬ÀÌ »ç¶óÁú ½Ã°£(5ÃÊ)À» ÁØ µÚ, ¿¬±â ¿ÀºêÁ§Æ® ÀÚÃ¼¸¦ ÆÄ±«
+            // 4. íŒŒí‹°í´ì´ ì‚¬ë¼ì§ˆ ì‹œê°„(5ì´ˆ)ì´ ì§€ë‚œ í›„, ì´í™íŠ¸ ì˜¤ë¸Œì íŠ¸ ìì²´ë¥¼ íŒŒê´´
             Destroy(poisonInstance, 5.0f);
         }
     }

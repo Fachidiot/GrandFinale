@@ -38,10 +38,9 @@ namespace InfinityPBR.Demo
         private static readonly int WalkSpeed = Animator.StringToHash("WalkSpeed");
         private static readonly int IdleStyle = Animator.StringToHash("IdleStyle");
         private static readonly int AngryIdleBreakStyle = Animator.StringToHash("AngryIdleBreakStyle");
-        private float _spellTimer = 0f;
         private GameObject _spellOnDeck;
 
-        void Start()
+        new void Start()
         {
             base.Start();
             if (isLowPoly)

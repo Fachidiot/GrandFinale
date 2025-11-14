@@ -3258,6 +3258,7 @@ GameObject:
   - component: {fileID: 1238787710222060017}
   - component: {fileID: 2994192107694521990}
   - component: {fileID: 2584884767898990148}
+  - component: {fileID: 7141207012547369512}
   m_Layer: 6
   m_Name: Player_Network
   m_TagString: Player
@@ -3395,6 +3396,32 @@ MonoBehaviour:
   IsMine: 0
   syncPosition: 1
   syncRotation: 1
+--- !u!114 &7141207012547369512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3125512638087466591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05d3956e29193184cad0acb56f5e0a5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseWalkSpeed: 2
+  baseRunSpeed: 3
+  baseSprintSpeed: 5
+  baseCooldownReduction: 0
+  baseMaxHealth: 100
+  baseDamageModifier: 1
+  currentHealth: 0
+  currentMaxHealth: 0
+  currentShield: 0
+  currentWalkSpeed: 0
+  currentRunSpeed: 0
+  currentSprintSpeed: 0
+  currentDamageModifier: 0
+  currentCooldownReduction: 0
 --- !u!1 &3154526535571121985
 GameObject:
   m_ObjectHideFlags: 0

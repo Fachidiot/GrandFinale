@@ -3,19 +3,19 @@ using UnityEngine;
 using System.Collections;
 
 /// <summary>
-/// ¸ó½ºÅÍÀÇ ½Ã¾ß °¨Áö(FOV)¸¦ Àü¹®ÀûÀ¸·Î Ã³¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®ÀÔ´Ï´Ù.
+/// ëª¬ìŠ¤í„°ì˜ ì‹œì•¼ ê°ì§€(FOV)ì™€ ê´€ë ¨ëœ ë¡œì§ì„ ì²˜ë¦¬í•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸ì…ë‹ˆë‹¤.
 /// </summary>
 public class MonsterSensor : MonoBehaviour
 {
-    [Header("°¨Áö ¼³Á¤")]
+    [Header("ê°ì§€ ì„¤ì •")]
     public MonsterConfig config;
     public LayerMask targetMask;
     public LayerMask obstructionMask;
 
-    [Tooltip("·¹ÀÌÄ³½ºÆ®¸¦ ½ÃÀÛÇÒ '´«' ³ôÀÌÀÔ´Ï´Ù. (¸ó½ºÅÍ ¹ß À§Ä¡ ±âÁØ)")]
+    [Tooltip("ë ˆì´ìºìŠ¤íŠ¸ë¥¼ ì‹œì‘í•  'ëˆˆ' ë†’ì´ì…ë‹ˆë‹¤. (ì§€í˜• ë†’ë‚®ì´ ë³´ì •)")]
     public float eyeHeight = 1.5f;
 
-    // °¨Áö °á°ú¸¦ ÀúÀåÇÏ´Â ÇÁ·ÎÆÛÆ¼
+    // ê°ì§€ ê²°ê³¼ë¥¼ ì €ì¥í•˜ëŠ” í”„ë¡œí¼í‹°
     public bool CanSeePlayer { get; private set; }
     public Vector3 TargetLastPosition { get; private set; }
 
@@ -29,7 +29,7 @@ public class MonsterSensor : MonoBehaviour
 
     private void Start()
     {
-        // ÄÄÆ÷³ÍÆ®°¡ ½º½º·Î °¨Áö ·çÆ¾À» ½ÃÀÛÇÕ´Ï´Ù.
+        // ìŠ¤í¬ë¦½íŠ¸ê°€ í™œì„±í™”ë˜ë©´ ê°ì§€ ë£¨í‹´ì„ ì‹œì‘í•©ë‹ˆë‹¤.
         StartCoroutine(CheckFovRoutine());
     }
 
@@ -41,7 +41,7 @@ public class MonsterSensor : MonoBehaviour
             yield return checkDelay;
         }
     }
-    // MonsterSensor.cs ÆÄÀÏÀÇ CheckFov ÇÔ¼ö¸¦ ¾Æ·¡ ÄÚµå·Î ±³Ã¼ÇÏ¼¼¿ä.
+    // MonsterSensor.cs ìŠ¤í¬ë¦½íŠ¸ì˜ CheckFov í•¨ìˆ˜ë¥¼ ì•„ë˜ ì½”ë“œë¡œ êµì²´í•˜ì„¸ìš”.
 
     private void CheckFov()
     {
@@ -49,44 +49,44 @@ public class MonsterSensor : MonoBehaviour
 
         bool playerDetected = false;
 
-        // 1. °Å¸® °¨Áö (¼öÁ¤ ¾øÀ½)
+        // 1. ê±°ë¦¬ ì²´í¬ (ê¸°ì¡´ê³¼ ë™ì¼)
         Collider[] rangeChecks = Physics.OverlapSphere(transform.position, config.fovRange, targetMask);
 
         if (rangeChecks.Length > 0)
         {
             Transform target = rangeChecks[0].transform;
 
-            // 2. '´«' À§Ä¡ °è»ê (¼öÁ¤ ¾øÀ½)
+            // 2. 'ëˆˆ' ìœ„ì¹˜ ê³„ì‚° (ê¸°ì¡´ê³¼ ë™ì¼)
             Vector3 eyePosition = transform.position + transform.up * eyeHeight;
             Vector3 directionToTarget = (target.position - eyePosition).normalized;
 
-            // (¾î¶»°Ô) ¸ó½ºÅÍÀÇ Á¤¸é ¹æÇâ°ú Å¸°Ù ¹æÇâ¿¡¼­ Y(³ôÀÌ) °ªÀ» 0À¸·Î ¸¸µì´Ï´Ù.
+            // (ì–´ë–»ê²Œ) ëª¬ìŠ¤í„°ì˜ ì •ë©´ ë²¡í„°ì—ì„œ Y(ë†’ì´) ê°’ì„ 0ìœ¼ë¡œ ë§Œë“­ë‹ˆë‹¤.
             Vector3 monsterForward_2D = transform.forward;
             monsterForward_2D.y = 0;
 
             Vector3 directionToTarget_2D = directionToTarget;
             directionToTarget_2D.y = 0;
 
-            // (¿Ö) 3D °¢µµ(Vector3.Angle) ´ë½Å, YÃàÀÌ ¹«½ÃµÈ 2D °¢µµ¸¦ °è»êÇÕ´Ï´Ù.
-            //     ÀÌ·¡¾ß ¸ó½ºÅÍ°¡ 3¹ÌÅÍ À§¿¡ ¶°¼­ ¾Æ·¡¸¦ ºÁµµ ¼öÆò °¢µµ¸¸ Ã¼Å©ÇÕ´Ï´Ù.
+            // (ì™œ) 3D ê°ë„(Vector3.Angle) ëŒ€ì‹ , Yê°’ì´ ì œê±°ëœ 2D ë²¡í„°ë¡œ ê³„ì‚°í•©ë‹ˆë‹¤.
+            //     ì´ë ‡ê²Œ í•´ì•¼ ëª¬ìŠ¤í„°ê°€ 3ì°¨ì› ì§€í˜•ì˜ ìœ„ë‚˜ ì•„ë˜ë¥¼ ë³¼ ë•Œ ê°ë„ë¥¼ ì •í™•íˆ ì²´í¬í•©ë‹ˆë‹¤.
             float angle = Vector3.Angle(monsterForward_2D, directionToTarget_2D);
 
             if (angle < config.fovAngle / 2)
             {
-                // 4. Àå¾Ö¹° °¨Áö (¼öÁ¤ ¾øÀ½)
-                // (¿Ö) Àå¾Ö¹°(º®, ±âµÕ)Àº 3D·Î Ã¼Å©ÇØ¾ß ÇÏ¹Ç·Î,
-                //     ¿ø·¡ÀÇ 3D ¹æÇâ(directionToTarget)À» ±×´ë·Î »ç¿ëÇÕ´Ï´Ù.
+                // 4. ì¥ì• ë¬¼ ì²´í¬ (ê¸°ì¡´ê³¼ ë™ì¼)
+                // (ì™œ) ì¥ì• ë¬¼(ë²½, ê¸°ë‘¥)ì€ 3Dë¡œ ì²´í¬í•´ì•¼ í•˜ë¯€ë¡œ,
+                //     ì›ë˜ì˜ 3D ë°©í–¥(directionToTarget)ì„ ê·¸ëŒ€ë¡œ ì‚¬ìš©í•©ë‹ˆë‹¤.
                 float distanceToTarget = Vector3.Distance(eyePosition, target.position);
 
                 if (Physics.Raycast(eyePosition, directionToTarget, out RaycastHit hit, distanceToTarget, obstructionMask))
                 {
-                    Debug.LogWarning($"<color=red>3. Àå¾Ö¹° °¨Áö:</color> ½Ã¾ß°¡ '{hit.collider.name}'¿¡ ¸·Çû½À´Ï´Ù!");
+                    Debug.LogWarning($"<color=red>3. ì¥ì• ë¬¼ ê°ì§€:</color> ì‹œì•¼ê°€ '{hit.collider.name}'ì— ê°€ë ¤ì¡ŒìŠµë‹ˆë‹¤!");
                 }
                 else
                 {
                     playerDetected = true;
                     TargetLastPosition = target.position;
-                    Debug.Log("<color=cyan>¡Ú¡Ú¡Ú ÃÖÁ¾ °¨Áö ¼º°ø! ¡Ú¡Ú¡Ú</color>");
+                    // Debug.Log("<color=cyan>ìº¬ìº¬ìº¬ í”Œë ˆì´ì–´ ë°œê²¬! ìº¬ìº¬ìº¬</color>");
                 }
             }
         }
@@ -95,16 +95,16 @@ public class MonsterSensor : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î¸¦ °­Á¦·Î °¨Áö »óÅÂ·Î ¸¸µé°í ¸¶Áö¸· À§Ä¡¸¦ °»½ÅÇÕ´Ï´Ù.
-    /// (¿¹: ÇÇ°İ ½Ã)
+    /// í”Œë ˆì´ì–´ë¥¼ ê°•ì œë¡œ ê°ì§€ ìƒíƒœë¡œ ë§Œë“¤ê³  ìœ„ì¹˜ë¥¼ ì €ì¥í•©ë‹ˆë‹¤.
+    /// (ì˜ˆ: í”¼ê²© ì‹œ)
     /// </summary>
     public void ForceDetection(Vector3 targetPosition)
     {
         CanSeePlayer = true;
         TargetLastPosition = targetPosition;
-        Debug.LogWarning("°­Á¦ °¨Áö ¹ßµ¿!");
+        Debug.LogWarning("ê°•ì œ ê°ì§€ ë°œë™!");
     }
-    // µğ¹ö±×¿ë ±âÁî¸ğ (AI ÄÁÆ®·Ñ·¯¿¡¼­ ¿Å°Ü¿È)
+    // ê¸°ì¦ˆëª¨ ë¡œì§ (AI ì»¨íŠ¸ë¡¤ëŸ¬ì™€ ë™ì¼)
     private void OnDrawGizmosSelected()
     {
         if (config == null) return;

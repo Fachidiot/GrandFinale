@@ -101,7 +101,7 @@ public class BulletNetwork : BulletBehaviour
                         // TODO : 같은 Player가 맞았을때 해당 네트워크 플레이어의 HP 감소.
                         // hit.transform.root.GetComponent<PlayerHealth>().SetDamage(PlayerDamage *= hit.collider.name == "Head" ? 2 : 1);
                     }
-                    else if (hit.transform.root.CompareTag("Monster"))
+                    else
                     {// 몬스터 공격시.
                         // hit.transform.root.GetComponent<MonsterHealth>()
                     }

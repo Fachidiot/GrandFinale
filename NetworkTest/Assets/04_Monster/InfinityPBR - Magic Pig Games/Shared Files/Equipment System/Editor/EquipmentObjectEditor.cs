@@ -12,7 +12,6 @@ namespace InfinityPBR
     [Serializable]
     public class EquipmentObjectEditor : InfinityEditor
     {
-        private int _wardrobePrefabManagerIndex = 0;
         private List<GameObject> _wardrobePrefabManagers = new List<GameObject>();
         private List<string> _wardrobePrefabManagerNames = new List<string>();
         

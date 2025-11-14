@@ -279,17 +279,6 @@ namespace InfinityPBR
             }
             
             return newBoneMap;
-            
-            // March 19, 2022 -- Bug was that the code below was only finding the bones that are actually targetted
-            // by the object I guess. Not ALL the bones. So the code above gets them all.
-            
-            // Add each bone from the SkinnedMeshRenderer to the dictionary.
-            foreach (Transform bone in skinnedMeshRenderer.bones)
-            {
-                newBoneMap.Add(bone.name, bone);
-            }
-
-            return newBoneMap;
         }
 
         /// <summary>

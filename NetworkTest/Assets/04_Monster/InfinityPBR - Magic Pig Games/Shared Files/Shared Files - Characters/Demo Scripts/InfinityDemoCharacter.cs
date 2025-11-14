@@ -47,8 +47,6 @@ namespace InfinityPBR.Demo
         private float _randomSeed;
         private float _randomLerp;
         private bool _randomWait;
-        private float _randomSeedChangeSpeed = 1f;
-        private float _randomSeedChangePeriod = 1f;
         protected Vector3 _startPosition;
         protected Quaternion _startRotation;
         protected Transform _transform;

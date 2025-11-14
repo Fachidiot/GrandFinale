@@ -29,8 +29,6 @@ namespace InfinityPBR
         private PrefabAndObjectManager PrefabAndObjectManager => Manager.PrefabAndObjectManager;
         private WardrobePrefabManager Manager => GetManager();
         private WardrobePrefabManager _wardrobePrefabManager;
-
-        private bool _initialCheck = false;
         
         private WardrobePrefabManager GetManager()
         {

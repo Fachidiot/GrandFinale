@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using System.Text;
 using Cinemachine;
+using Newtonsoft.Json.Linq;
+using Steamworks;
 
 public class TerminalManager : MonoBehaviour
 {
@@ -11,7 +13,7 @@ public class TerminalManager : MonoBehaviour
     [SerializeField] private TMP_Text terminalOutput;
 
     [Header("Dependencies")]
-    [SerializeField] private RoomUIManager roomUIManager;
+    [SerializeField] private ServerRoomManager serverRoomManager;
 
     [Header("Interaction Settings")]
     [SerializeField] private Transform playerStandPosition;
@@ -28,15 +30,25 @@ public class TerminalManager : MonoBehaviour
 
     private void Start()
     {
-        if (terminalPanel == null || inputField == null || terminalOutput == null || roomUIManager == null || playerStandPosition == null || terminalVirtualCamera == null)
+        // serverRoomManager is now assigned at runtime
+        if (terminalPanel == null || inputField == null || terminalOutput == null || playerStandPosition == null || terminalVirtualCamera == null)
         {
-            Debug.LogError("TerminalManager is not configured correctly. Please assign all fields in the inspector.");
+            Debug.LogError("TerminalManager is not configured correctly. Please assign all UI and camera fields in the inspector.");
             gameObject.SetActive(false);
             return;
         }
 
         // Get PlayerInputs from GameManager
         playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
+
+        // Find the persistent ServerRoomManager instance
+        serverRoomManager = ServerRoomManager.Instance;
+        if (serverRoomManager == null)
+        {
+            Debug.LogError("[TerminalManager] ServerRoomManager.Instance not found! The terminal will not function correctly.");
+            gameObject.SetActive(false);
+            return;
+        }
 
         inputField.onSubmit.AddListener(OnSubmitCommand);
         terminalPanel.SetActive(false); // Start with the terminal closed
@@ -220,17 +232,51 @@ public class TerminalManager : MonoBehaviour
                 break;
             default:
                 AppendToLog($"Unknown planet: '{planetName}'");
-                break;
+                return; // Return early if planet is unknown
         }
 
-        AppendToLog($"Selecting planet '{planetName}'...");
-        roomUIManager.OnPlanetSelect(planetId);
+        AppendToLog($"Proposing planet '{planetName}'...");
+        ProposePlanet(planetId);
+    }
+
+    private void ProposePlanet(int planetId)
+    {
+        if (NetworkManager.Instance == null || serverRoomManager == null)
+        {
+            AppendToLog("Error: Network systems not available.");
+            return;
+        }
+
+        if (NetworkManager.Instance.Mode == NetworkMode.Host)
+        {
+            serverRoomManager.SelectPlanet(planetId);
+            AppendToLog("Planet selected as host.");
+        }
+        else // Client
+        {
+            JObject message = new JObject
+            {
+                { "type", "propose_planet" },
+                { "planet_id", planetId }
+            };
+
+            CSteamID hostId = NetworkManager.Instance.LobbyHostID;
+            if (hostId.IsValid())
+            {
+                NetworkManager.Instance.SendJsonMessage(hostId, message);
+                AppendToLog($"Sent proposal for planet ID {planetId} to host.");
+            }
+            else
+            {
+                AppendToLog("Error: Could not send proposal, invalid host ID.");
+            }
+        }
     }
 
     private void ExecuteLaunch()
     {
         AppendToLog("Attempting to launch...");
-        roomUIManager.OnLaunchGameClicked();
+        // serverRoomManager.OnLaunchGameClicked();
     }
 
     private void ExecuteClear()

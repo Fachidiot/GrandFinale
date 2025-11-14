@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 public class LootOrbVisuals : MonoBehaviour
 {
-    [Header("µî±Þº° VFX ÇÁ¸®ÆÕ (ÀÚ½Ä ¿ÀºêÁ§Æ®)")]
+    [Header("ï¿½ï¿½Þºï¿½ VFX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®)")]
     public GameObject vfxCommon;
     public GameObject vfxRare;
     public GameObject vfxEpic;
 
 
-    // [¡ÚÃß°¡¡Ú] VFXµéÀ» °¨½Î´Â ºÎ¸ð ¿ÀºêÁ§Æ® (Áß½ÉÁ¡ ¿ªÇÒ)
-    // ÀÌ ÇÊµå¸¦ GenericLootDrop ÇÁ¸®ÆÕÀÇ Inspector¿¡¼­ VFX_Center ¿ÀºêÁ§Æ®¿Í ¿¬°áÇØ¾ß ÇÕ´Ï´Ù.
-    [Header("Áß½ÉÁ¡ ¿ÀºêÁ§Æ®")]
+    // [ï¿½ï¿½ï¿½ß°ï¿½ï¿½ï¿½] VFXï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î´ï¿½ ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® (ï¿½ß½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+    // ï¿½ï¿½ ï¿½Êµå¸¦ GenericLootDrop ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Inspectorï¿½ï¿½ï¿½ï¿½ VFX_Center ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½Õ´Ï´ï¿½.
+    [Header("ï¿½ß½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®")]
     public GameObject vfxCenter;
 
-    // ¼º´ÉÀ» À§ÇØ ÆÄÆ¼Å¬ ½Ã½ºÅÛ ÄÄÆ÷³ÍÆ®¸¦ ¹Ì¸® Ä³½ÃÇÕ´Ï´Ù.
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ¼Å¬ ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ì¸ï¿½ Ä³ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
     private ParticleSystem commonPS;
     private ParticleSystem rarePS;
     private ParticleSystem epicPS;
@@ -22,7 +22,7 @@ public class LootOrbVisuals : MonoBehaviour
 
     private void Awake()
     {
-        // 1. Awake¿¡¼­ ParticleSystem ÄÄÆ÷³ÍÆ®¸¦ ¹Ì¸® Ã£¾Æ¼­ Ä³½ÃÇÕ´Ï´Ù.
+        // 1. Awakeï¿½ï¿½ï¿½ï¿½ ParticleSystem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ì¸ï¿½ Ã£ï¿½Æ¼ï¿½ Ä³ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
         if (vfxCommon) commonPS = vfxCommon.GetComponent<ParticleSystem>();
         if (vfxRare) rarePS = vfxRare.GetComponent<ParticleSystem>();
         if (vfxEpic) epicPS = vfxEpic.GetComponent<ParticleSystem>();
@@ -30,8 +30,8 @@ public class LootOrbVisuals : MonoBehaviour
 
     public void Initialize(string grade)
     {
-        Debug.Log($"<color=yellow>[VFX_INIT] Initialize ½ÃÀÛ. ¿äÃ» µî±Þ: {grade}</color>");
-        // 1. ¾ÈÀüÀ» À§ÇØ ¸ðµç VFX ¿ÀºêÁ§Æ®¸¦ ºñÈ°¼ºÈ­ÇÕ´Ï´Ù. 
+        Debug.Log($"<color=yellow>[VFX_INIT] Initialize ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½Ã» ï¿½ï¿½ï¿½: {grade}</color>");
+        // 1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ VFX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­ï¿½Õ´Ï´ï¿½. 
         if (vfxCommon) vfxCommon.SetActive(false);
         if (vfxRare) vfxRare.SetActive(false);
         if (vfxEpic) vfxEpic.SetActive(false);
@@ -39,7 +39,7 @@ public class LootOrbVisuals : MonoBehaviour
         ParticleSystem targetPS = null;
         GameObject targetVFXObject = null;
 
-        // 2. µî±Þ¿¡ ¸Â´Â VFX ¼±ÅÃ
+        // 2. ï¿½ï¿½Þ¿ï¿½ ï¿½Â´ï¿½ VFX ï¿½ï¿½ï¿½ï¿½
         switch (grade)
         {
             case "Common":
@@ -47,7 +47,6 @@ public class LootOrbVisuals : MonoBehaviour
                 break;
             case "Rare":
                 if (vfxRare) { targetVFXObject = vfxRare; targetPS = rarePS; }
-                break;
                 break;
             case "Epic":
                 if (vfxEpic) { targetVFXObject = vfxEpic; targetPS = epicPS; }
@@ -59,33 +58,33 @@ public class LootOrbVisuals : MonoBehaviour
 
         if (targetVFXObject != null)
         {
-            Debug.Log($"<color=yellow>[VFX_INIT] ¼±ÅÃµÈ VFX ¿ÀºêÁ§Æ®: {targetVFXObject.name}</color>");
-            Debug.Log($"<color=yellow>[VFX_INIT] ParticleSystem Ä³½Ã »óÅÂ: {(targetPS != null ? "OK" : "NULL")}</color>");
+            Debug.Log($"<color=yellow>[VFX_INIT] ï¿½ï¿½ï¿½Ãµï¿½ VFX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®: {targetVFXObject.name}</color>");
+            Debug.Log($"<color=yellow>[VFX_INIT] ParticleSystem Ä³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: {(targetPS != null ? "OK" : "NULL")}</color>");
 
-            // 3. VFX ¿ÀºêÁ§Æ® È°¼ºÈ­
+            // 3. VFX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® È°ï¿½ï¿½È­
             targetVFXObject.SetActive(true);
 
-            // [¡Ú·Î±× Ãß°¡ 4¡Ú] È°¼ºÈ­ ½Ãµµ Á÷ÈÄ
-            Debug.Log($"<color=yellow>[VFX_INIT] {targetVFXObject.name}.SetActive(true) È£Ãâ ¿Ï·á.</color>");
+            // [ï¿½Ú·Î±ï¿½ ï¿½ß°ï¿½ 4ï¿½ï¿½] È°ï¿½ï¿½È­ ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
+            Debug.Log($"<color=yellow>[VFX_INIT] {targetVFXObject.name}.SetActive(true) È£ï¿½ï¿½ ï¿½Ï·ï¿½.</color>");
 
 
-            // 4. [¡ÚÇÙ½É¡Ú] ParticleSystem.Play()¸¦ ¸í½ÃÀûÀ¸·Î È£Ãâ
+            // 4. [ï¿½ï¿½ï¿½Ù½É¡ï¿½] ParticleSystem.Play()ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
             if (targetPS != null)
             {
                 targetPS.Play();
-                Debug.Log($"<color=yellow>[VFX_INIT] {targetVFXObject.name} - ParticleSystem.Play() È£Ãâ ¿Ï·á.</color>");
+                Debug.Log($"<color=yellow>[VFX_INIT] {targetVFXObject.name} - ParticleSystem.Play() È£ï¿½ï¿½ ï¿½Ï·ï¿½.</color>");
             }
             else
             {
-                Debug.LogError($"[VFX ERROR] '{grade}' µî±Þ VFX ¿ÀºêÁ§Æ®¿¡ ParticleSystem ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù.");
+                Debug.LogError($"[VFX ERROR] '{grade}' ï¿½ï¿½ï¿½ VFX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ParticleSystem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
             }
         }
         else
         {
-            Debug.LogError($"[VFX ERROR] '{grade}' µî±Þ¿¡ ÇØ´çÇÏ´Â VFX ÇÁ¸®ÆÕÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogError($"[VFX ERROR] '{grade}' ï¿½ï¿½Þ¿ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ VFX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò½ï¿½ï¿½Ï´ï¿½.");
         }
 
-        // [¡Ú·Î±× Ãß°¡ 5¡Ú] Áß½ÉÁ¡ ¿ÀºêÁ§Æ® »óÅÂ È®ÀÎ (È°¼ºÈ­ ¹®Á¦ Áø´Ü¿ë)
+        // [ï¿½Ú·Î±ï¿½ ï¿½ß°ï¿½ 5ï¿½ï¿½] ï¿½ß½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ (È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ü¿ï¿½)
         if (vfxCenter)
         {
             Debug.Log($"<color=yellow>[VFX_INIT] VFX Center '{vfxCenter.name}' Active State: {vfxCenter.activeInHierarchy}</color>");

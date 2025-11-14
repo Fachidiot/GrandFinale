@@ -118,13 +118,6 @@ namespace InfinityPBR
 
             WardrobePrefabManagers = foundObjects;
             return WardrobePrefabManagers;
-
-            return foundObjects
-                .Distinct() // Only distinct assets
-                .OrderBy(x => x.name) // Alphabetize
-                .Where(x => !PrefabUtility.IsPartOfPrefabInstance(x.gameObject)) // Ensure it is not part of an instance (i.e in the scene)
-                .Select(x => x.gameObject) // Select the game object itself
-                .ToList();
         }
     }
 }

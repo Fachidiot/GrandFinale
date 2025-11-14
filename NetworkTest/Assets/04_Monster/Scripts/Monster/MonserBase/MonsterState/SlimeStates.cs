@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace SlimeStates
 {
-    // --- 1. Idle »óÅÂ ---
+    // --- 1. Idle ï¿½ï¿½ï¿½ï¿½ ---
     // (Locomotion 0)
     public class Idle : ZombieBaseState<MonsterAIController>
     {
@@ -31,7 +31,7 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 2. Patrol »óÅÂ ---
+    // --- 2. Patrol ï¿½ï¿½ï¿½ï¿½ ---
     // (Locomotion 1)
     public class Patrol : ZombieBaseState<MonsterAIController>
     {
@@ -64,12 +64,10 @@ namespace SlimeStates
         }
     }
 
-    // --- 3. Trace »óÅÂ ---
+    // --- 3. Trace ï¿½ï¿½ï¿½ï¿½ ---
     // (Locomotion 2)
     public class Trace : ZombieBaseState<MonsterAIController>
     {
-        private float timer = 10;
-
         public override void EnterState(MonsterAIController monster)
         {
             monster.SetAnimFloat(monster.hashMoveSpeed, 2f); // Locomotion 2 (Run)
@@ -92,12 +90,12 @@ namespace SlimeStates
         }
         public override void ExitState(MonsterAIController monster)
         {
-            // (StopMovingÀº Attack/LookAround »óÅÂ°¡ ÇÏ¹Ç·Î ¿©±â¼­ ¾È ÇÔ)
+            // (StopMovingï¿½ï¿½ Attack/LookAround ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Ï¹Ç·ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ ï¿½ï¿½)
         }
     }
 
-    // --- 4. (¼öÁ¤) ·£´ý °ø°Ý »óÅÂ ---
-    // (attack1, 2, 3 Áß ·£´ý)
+    // --- 4. (ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ---
+    // (attack1, 2, 3 ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     public class Attack : ZombieBaseState<MonsterAIController>
     {
         private float timer;
@@ -111,7 +109,7 @@ namespace SlimeStates
             if (monster.player != null)
                 monster.LookAt(monster.player.transform.position);
 
-            // (¿äÃ») Attack 1~3 Áß ÇÏ³ª¸¦ ·£´ýÀ¸·Î ½ÇÇà
+            // (ï¿½ï¿½Ã») Attack 1~3 ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             int attackIndex = Random.Range(0, 3); // 0, 1, 2
 
             if (attackIndex == 0)
@@ -149,14 +147,14 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 5. LookAround »óÅÂ (ÃãÃß±â) ---
+    // --- 5. LookAround ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ß±ï¿½) ---
     public class LookAround : ZombieBaseState<MonsterAIController>
     {
         private float timer;
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
-            // (¿äÃ») LookAround ÇØ½Ã(idleBreak) ¹ßµ¿
+            // (ï¿½ï¿½Ã») LookAround ï¿½Ø½ï¿½(idleBreak) ï¿½ßµï¿½
             monster.SetAnimTrigger(monster.hashLookAround);
             timer = 0f;
         }
@@ -176,7 +174,7 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 6. Hit »óÅÂ ---
+    // --- 6. Hit ï¿½ï¿½ï¿½ï¿½ ---
     public class Hit : ZombieBaseState<MonsterAIController>
     {
         private float hitStunDuration = 0.5f;
@@ -199,7 +197,7 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 7. Die »óÅÂ ---
+    // --- 7. Die ï¿½ï¿½ï¿½ï¿½ ---
     public class Die : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)
@@ -219,23 +217,23 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController m) { }
     }
 
-    // --- 8. (½Å±Ô) È¸ÇÇ »óÅÂ ---
+    // --- 8. (ï¿½Å±ï¿½) È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ---
     public class DodgeState : ZombieBaseState<MonsterAIController>
     {
         private float timer;
-        private float dodgeAnimTime = 1.2f; // (Dodge ¾Ö´Ï¸ÞÀÌ¼Ç ±æÀÌ¿¡ ¸Â°Ô Á¶Àý)
+        private float dodgeAnimTime = 1.2f; // (Dodge ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½Ì¿ï¿½ ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½)
 
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
-            // (Taunt ½½·Ô¿¡ ¿¬°áµÈ 'dodge' Æ®¸®°Å ¹ßµ¿)
+            // (Taunt ï¿½ï¿½ï¿½Ô¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ 'dodge' Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ßµï¿½)
             monster.SetAnimTrigger(monster.hashTaunt);
             timer = 0f;
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
             timer += Time.deltaTime;
-            // ¾Ö´Ï¸ÞÀÌ¼Ç ½Ã°£ÀÌ ³¡³ª¸é ÃßÀû »óÅÂ·Î º¹±Í
+            // ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (timer >= dodgeAnimTime)
             {
                 return monster.fsm.TraceState;

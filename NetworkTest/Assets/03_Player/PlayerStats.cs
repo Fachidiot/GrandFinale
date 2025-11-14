@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System; // 'Action' ÀÌº¥Æ®¸¦ »ç¿ëÇÏ±â À§ÇÔ
+using System; // 'Action' ì´ë²¤íŠ¸ë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•´
 
 public class PlayerStats : MonoBehaviour
 {
-    [Header("±âº» ´É·ÂÄ¡ (Base Stats)")]
+    [Header("ê¸°ë³¸ ëŠ¥ë ¥ì¹˜ (Base Stats)")]
     public float baseWalkSpeed = 2f;
     public float baseRunSpeed = 3f;
     public float baseSprintSpeed = 5f;
@@ -14,7 +14,7 @@ public class PlayerStats : MonoBehaviour
     public float baseMaxHealth = 100f;
     public float baseDamageModifier = 1.0f;
 
-    [Header("ÇöÀç »óÅÂ (½Ç½Ã°£ µğ¹ö±×¿ë)")]
+    [Header("í˜„ì¬ ìŠ¤íƒ¯ (ì‹¤ì‹œê°„ ë””ë²„ê·¸ìš©)")]
     [SerializeField] private float currentHealth;
     [SerializeField] private float currentMaxHealth;
     [SerializeField] private float currentShield;
@@ -33,17 +33,17 @@ public class PlayerStats : MonoBehaviour
     public float CurrentSprintSpeed { get { return currentSprintSpeed; } private set { currentSprintSpeed = value; } }
     public float CurrentDamageModifier { get { return currentDamageModifier; } private set { currentDamageModifier = value; } }
     public float CurrentCooldownReduction { get { return currentCooldownReduction; } private set { currentCooldownReduction = value; } }
-    // UI ¾÷µ¥ÀÌÆ®¸¦ À§ÇÑ ÀÌº¥Æ® (¿É¼Ç)
-    // ¿¹: public event Action<string> OnStatChanged;
+    // UI ì—…ë°ì´íŠ¸ë¥¼ ìœ„í•œ ì´ë²¤íŠ¸ (ì˜µì…˜)
+    // ì˜ˆ: public event Action<string> OnStatChanged;
 
     void Awake()
     {
         ResetToBaseStats(); 
-        CurrentHealth = CurrentMaxHealth; // Ã¼·Â ²Ë Ã¤¿ò
+        CurrentHealth = CurrentMaxHealth; // ì²´ë ¥ í’€ë¡œ ì±„ì›€
     }
 
     // ====================================================================
-    // 1. µ¥¹ÌÁö ¹× È¸º¹ Ã³¸® (±âÁ¸ ÄÚµå¿Í µ¿ÀÏ)
+    // 1. ë°ë¯¸ì§€ ë° íšŒë³µ ì²˜ë¦¬ (ê¸°ì¡´ ì½”ë“œì™€ ë™ì¼)
     // ====================================================================
 
     public void TakeDamage(float damage) 
@@ -69,7 +69,7 @@ public class PlayerStats : MonoBehaviour
             CurrentHealth -= damageToTake; 
         }
 
-        Debug.Log($"µ¥¹ÌÁö {damage} ¹ŞÀ½. ÇöÀç Ã¼·Â: {CurrentHealth}, ÇöÀç ½Çµå: {CurrentShield}"); //
+        Debug.Log($"ë°ë¯¸ì§€ {damage} ë°›ìŒ. í˜„ì¬ ì²´ë ¥: {CurrentHealth}, í˜„ì¬ ì‰´ë“œ: {CurrentShield}"); //
 
         if (CurrentHealth <= 0) 
         {
@@ -89,15 +89,15 @@ public class PlayerStats : MonoBehaviour
 
     private void Die() 
     {
-        Debug.Log("ÇÃ·¹ÀÌ¾î°¡ »ç¸ÁÇß½À´Ï´Ù."); 
+        Debug.Log("í”Œë ˆì´ì–´ê°€ ì‚¬ë§í–ˆìŠµë‹ˆë‹¤."); 
     }
 
     // ====================================================================
-    // 2. ½ºÅÈ Àû¿ë (AbilityManager°¡ È£Ãâ)
+    // 2. ìŠ¤íƒ¯ ì ìš© (AbilityManagerê°€ í˜¸ì¶œ)
     // ====================================================================
     /// <summary>
-    /// ¸ğµç 'ÇöÀç ½ºÅÈ'À» '±âº» ½ºÅÈ'À¸·Î µÇµ¹¸³´Ï´Ù.
-    /// (AbilityManager°¡ ½ºÅÈ Àç°è»ê Àü È£Ãâ)
+    /// ëª¨ë“  'í˜„ì¬ ìŠ¤íƒ¯'ì„ 'ê¸°ë³¸ ìŠ¤íƒ¯'ìœ¼ë¡œ ë˜ëŒë¦½ë‹ˆë‹¤.
+    /// (AbilityManagerê°€ ìŠ¤íƒ¯ ì ìš© ì „ í˜¸ì¶œ)
     /// </summary>
     public void ResetToBaseStats()
     {
@@ -109,10 +109,10 @@ public class PlayerStats : MonoBehaviour
         currentSprintSpeed = baseSprintSpeed;
     }
 
-    // ¡Ú¡Ú¡Ú (½Å±Ô) 2. Ã¼·Â º¸Á¤ ÇÔ¼ö ¡Ú¡Ú¡Ú
+    // ìº¬ìº¬ (ì‹ ê·œ) 2. ì²´ë ¥ ë³´ì • í•¨ìˆ˜ ìº¬ìº¬
     /// <summary>
-    /// ½ºÅÈ Àç°è»ê ÈÄ, ÇöÀç Ã¼·ÂÀÌ ÃÖ´ë Ã¼·Âº¸´Ù ³ôÀ¸¸é ÃÖ´ë Ã¼·ÂÀ¸·Î ¸ÂÃä´Ï´Ù.
-    /// (¿¹: ¾ÆÀÌÅÛÀ» ¹ö·Á¼­ ÃÖ´ë Ã¼·ÂÀÌ 150 -> 100ÀÌ µÇ¾úÀ» ¶§)
+    /// ìŠ¤íƒ¯ ì ìš© í›„, í˜„ì¬ ì²´ë ¥ì´ ìµœëŒ€ ì²´ë ¥ë³´ë‹¤ ë†’ìœ¼ë©´ ìµœëŒ€ ì²´ë ¥ìœ¼ë¡œ ë§ì¶¥ë‹ˆë‹¤.
+    /// (ì˜ˆ: ì•„ì´í…œìœ¼ë¡œ ìµœëŒ€ ì²´ë ¥ì´ 150 -> 100ì´ ë˜ì—ˆì„ ë•Œ)
     /// </summary>
     public void ValidateHealth()
     {
@@ -123,7 +123,7 @@ public class PlayerStats : MonoBehaviour
     }
 
     /// <summary>
-    /// (ABIL_001) ÇÕ¿¬»ê ½ºÅÈÀ» Àû¿ëÇÕ´Ï´Ù. (¿¹: ÃÖ´ë Ã¼·Â +50)
+    /// (ABIL_001) ê³ ì •ê°’ìœ¼ë¡œ ìŠ¤íƒ¯ì„ ë”í•©ë‹ˆë‹¤. (ì˜ˆ: ìµœëŒ€ ì²´ë ¥ +50)
     /// </summary>
     public void AddStat(string statName, float value) 
     {
@@ -132,17 +132,17 @@ public class PlayerStats : MonoBehaviour
             case "MaxHealth":
                 CurrentMaxHealth += value; 
                 CurrentHealth += value; 
-                Debug.Log($"MaxHealth Áõ°¡: +{value} (ÃÑ {CurrentMaxHealth})"); 
+                Debug.Log($"MaxHealth ì¦ê°€: +{value} (ì´ {CurrentMaxHealth})"); 
                 break;
             case "BaseDamage":
-                Debug.Log($"BaseDamage Áõ°¡: +{value} (±¸Çö ÇÊ¿ä)"); 
+                Debug.Log($"BaseDamage ì¦ê°€: +{value} (ì ìš© í•„ìš”)"); 
                 break;
         }
     }
 
 
     /// <summary>
-    /// (ABIL_002) °ö¿¬»ê(%) ½ºÅÈÀ» Àû¿ëÇÕ´Ï´Ù. (¿¹: ÀÌµ¿ ¼Óµµ +10%)
+    /// (ABIL_002) í¼ì„¼íŠ¸(%)ë¡œ ìŠ¤íƒ¯ì„ ë”í•©ë‹ˆë‹¤. (ì˜ˆ: ì´ë™ ì†ë„ +10%)
     /// </summary>
     public void AddStatPercent(string statName, float value)
     {
@@ -156,18 +156,18 @@ public class PlayerStats : MonoBehaviour
                 CurrentWalkSpeed += walkBonus;
                 CurrentRunSpeed += runBonus;
                 CurrentSprintSpeed += sprintBonus;
-                Debug.Log($"¸ğµç MoveSpeed Áõ°¡: +{value}% (ÇöÀç ½ºÇÁ¸°Æ®: {CurrentSprintSpeed})");
+                Debug.Log($"ëª¨ë“  MoveSpeed ì¦ê°€: +{value}% (í˜„ì¬ ìŠ¤í”„ë¦°íŠ¸: {CurrentSprintSpeed})");
                 break;
 
             case "CooldownReduction":
                 CurrentCooldownReduction += value;
-                Debug.Log($"CooldownReduction Áõ°¡: +{value}% (ÃÑ {CurrentCooldownReduction}%)");
+                Debug.Log($"CooldownReduction ì¦ê°€: +{value}% (ì´ {CurrentCooldownReduction}%)");
                 break;
         }
     }
 
     /// <summary>
-    /// (ABIL_006) ÁöÁ¤µÈ ½Ã°£ µ¿¾È ½Çµå¸¦ Ãß°¡ÇÕ´Ï´Ù.
+    /// (ABIL_006) ì •í•´ì§„ ì‹œê°„ ë™ì•ˆ ì‰´ë“œë¥¼ ì¶”ê°€í•©ë‹ˆë‹¤.
     /// </summary>
     public void AddTemporaryShield(float amount, float duration) 
     {
@@ -177,12 +177,12 @@ public class PlayerStats : MonoBehaviour
     private IEnumerator ShieldRoutine(float amount, float duration) 
     {
         CurrentShield += amount; 
-        Debug.Log($"½Çµå {amount} È¹µæ! (ÃÑ {CurrentShield})"); 
+        Debug.Log($"ì‰´ë“œ {amount} íšë“! (ì´ {CurrentShield})"); 
 
         yield return new WaitForSeconds(duration); 
 
         CurrentShield -= amount; 
         if (CurrentShield < 0) CurrentShield = 0; 
-        Debug.Log($"½Çµå {amount} Á¾·á. (³²Àº ½Çµå {CurrentShield})"); 
+        Debug.Log($"ì‰´ë“œ {amount} ì†Œë©¸. (ë‚¨ì€ ì‰´ë“œ {CurrentShield})"); 
     }
 }

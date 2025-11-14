@@ -485,7 +485,6 @@ namespace InfinityPBR
         /// <param name="type"></param>
         private void CheckForDefaultGroup(string type)
         {
-            int defaultGroupIndex = -1;
             for (int g = 0; g < prefabGroups.Count; g++)
             {
                 if (prefabGroups[g].groupType != type) continue; // Continue if the type is wrong
@@ -503,10 +502,8 @@ namespace InfinityPBR
             {
 #if UNITY_EDITOR
                 // July 9, 2022 - Can't do this, as it unpacks the prefab...need to fix the issue another way
-                bool wasPrefab = false;
                 if (PrefabUtility.IsPartOfAnyPrefab(inGameObject))
                 {
-                    wasPrefab = true;
                     inGameObject.SetActive(false);
                 }
                 else
@@ -544,32 +541,6 @@ namespace InfinityPBR
             if (renderableObjects == 0) return 0;
             if (renderableObjects == liveObjects) return 2;
             if (renderableObjects > liveObjects && liveObjects > 0) return 1;
-            return 0;
-            
-            
-            
-            int prefabs = 0;
-            int inGameObjects = 0;
-            
-            for (int i = 0; i < group.groupObjects.Count; i++)
-            {
-                if (!group.groupObjects[i].objectToHandle)
-                    continue;
-                
-                // If render is true, then increase the count of prefabs for this group                
-                if (group.groupObjects[i].render)
-                    prefabs++;
-                else if (group.groupObjects[i].isPrefab && group.groupObjects[i].inGameObject)
-                    inGameObjects++;
-                else if (!group.groupObjects[i].isPrefab && group.groupObjects[i].objectToHandle.activeSelf)
-                    inGameObjects++;
-            }
-
-            if (prefabs == inGameObjects && (prefabs > 0 || group.isActive))
-                return 2;
-            if (prefabs > inGameObjects && inGameObjects > 0)
-                return 1;
-
             return 0;
         }
 
@@ -816,8 +787,9 @@ namespace InfinityPBR
         {
 #if UNITY_EDITOR
             return GUID.Generate().ToString();
+#else
+            return "ThisShouldNotHappen";
 #endif
-            return "ThisShoutNotHappen";
         }
     }
 

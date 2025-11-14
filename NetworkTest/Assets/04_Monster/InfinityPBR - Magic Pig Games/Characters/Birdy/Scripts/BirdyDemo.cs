@@ -36,7 +36,7 @@ namespace InfinityPBR.Demo
         private bool IsAirValue => animator.GetBool(IsAir);
         private Vector3 StartPositionAir => new Vector3(_startPosition.x, airHeight, _startPosition.z);
 
-        void Start()
+        new void Start()
         {
             base.Start();
         }

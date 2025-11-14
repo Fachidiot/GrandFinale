@@ -4,9 +4,9 @@ using UnityEngine.Events;
 
 public class MonsterHealth : MonoBehaviour
 {
-    #region ÇÊµå
-    [Header("¾ÆÀÌÅÛ µå¶ø ¼³Á¤")]
-    [Tooltip("¸ğµç ¾ÆÀÌÅÛÀÌ °ø¿ëÀ¸·Î »ç¿ëÇÒ 'GenericLootDrop' ÇÁ¸®ÆÕ")]
+    #region í•„ë“œ
+    [Header("ì•„ì´í…œ ë“œë ê´€ë ¨")]
+    [Tooltip("ëª¬ìŠ¤í„°ê°€ ì‚¬ë§í–ˆì„ ë•Œ ìƒì„±í•  'GenericLootDrop' í”„ë¦¬íŒ¹")]
     [SerializeField] private GameObject genericLootPrefab;
 
 
@@ -15,20 +15,20 @@ public class MonsterHealth : MonoBehaviour
     private float _defense;
 
     [Space(10)]
-    [Header("¹æ¾î/¹İ°İ ¼³Á¤")]
-    [Tooltip("ÀÌ ½Ã°£(ÃÊ) ¾È¿¡")]
+    [Header("ë°©ì–´/ë°˜ê²© ê´€ë ¨")]
+    [Tooltip("ì´ ì‹œê°„(ì´ˆ) ì•ˆì—")]
     public float blockTriggerTime = 2.0f;
-    [Tooltip("ÀÌ È½¼ö(¹ø) ÀÌ»ó ÇÇ°İ ½Ã")]
+    [Tooltip("ì´ íšŸìˆ˜(ë²ˆ) ì´ìƒ í”¼ê²© ì‹œ")]
     public int blockTriggerHits = 5;
-    [Tooltip("¹æ¾î/¹İ°İ ÀÌº¥Æ®")]
+    [Tooltip("ë°©ì–´/ë°˜ê²© ì´ë²¤íŠ¸")]
     public UnityEvent OnBlock;
 
-    public int hitCounter { get; private set; } = 0; // <-- ÀÌ·¸°Ô º¯°æ
+    public int hitCounter { get; private set; } = 0; // <-- ì´ë ‡ê²Œ ì´ˆê¸°í™”
     private float hitTimer = 0f;
 
-    [Header("Ã¼·Â »óÅÂ (½Ç½Ã°£)")]
+    [Header("ì²´ë ¥ ìƒíƒœ (ì‹¤ì‹œê°„)")]
     [SerializeField]
-    [Tooltip("ÇöÀç Ã¼·Â (½Ç½Ã°£ µğ¹ö±×¿ë)")]
+    [Tooltip("í˜„ì¬ ì²´ë ¥ (ì‹¤ì‹œê°„ ë””ë²„ê·¸ìš©)")]
     private float currentHP;
 
     public float CurrentHP
@@ -42,7 +42,7 @@ public class MonsterHealth : MonoBehaviour
     public UnityEvent OnHit;
     public UnityEvent OnDeath;
 
-    // ¡Ú 1. (Ãß°¡) AI ÄÁÆ®·Ñ·¯ ÂüÁ¶
+    // ê³¨ë ˜ 1. (ì¶”ê°€) AI ì»¨íŠ¸ë¡¤ëŸ¬ ì°¸ì¡°
     private MonsterAIController ai;
 
     [Space(10)]
@@ -53,17 +53,17 @@ public class MonsterHealth : MonoBehaviour
 
     private void Awake()
     {
-        // ¡Ú 2. (¼öÁ¤) AI ÄÁÆ®·Ñ·¯ ÂüÁ¶ ÀúÀå
+        // ê³¨ë ˜ 2. (ìˆ˜ì •) AI ì»¨íŠ¸ë¡¤ëŸ¬ ì°¸ì¡° ê°€ì ¸ì˜¤ê¸°
         ai = GetComponent<MonsterAIController>();
     }
 
     private void Update()
     {
-        // ... (Debug ·ÎÁ÷Àº ±×´ë·Î) ...
+        // ... (Debug ê¸°ëŠ¥ì€ ê·¸ëŒ€ë¡œ) ...
         if (_DEBUG_ForceDie) { /* ... */ }
         else if (_DEBUG_ForceHit) { /* ... */ }
 
-        // (Block Å¸ÀÌ¸Ó ·ÎÁ÷Àº ±×´ë·Î)
+        // (Block íƒ€ì´ë¨¸ ë¡œì§ì€ ê·¸ëŒ€ë¡œ)
         if (hitTimer > 0)
         {
             hitTimer -= Time.deltaTime;
@@ -80,57 +80,57 @@ public class MonsterHealth : MonoBehaviour
         _defense = config.defense;
         currentHP = _maxHP;
         IsDead = false;
-        Debug.Log($"[{gameObject.name}] Health ÃÊ±âÈ­ ¿Ï·á: HP={_maxHP}, DEF={_defense}");
+        Debug.Log($"[{gameObject.name}] Health ì´ˆê¸°í™” ì™„ë£Œ: HP={_maxHP}, DEF={_defense}");
     }
 
     /// <summary>
-    /// ¿ÜºÎ·ÎºÎÅÍ µ¥¹ÌÁö¸¦ ¹Ş´Â ÇÔ¼öÀÔ´Ï´Ù.
+    /// ì™¸ë¶€ë¡œë¶€í„° ë°ë¯¸ì§€ë¥¼ ë°›ëŠ” í•¨ìˆ˜ì…ë‹ˆë‹¤.
     /// </summary>
     public void TakeDamage(float damage)
     {
         if (IsDead) return;
 
         float actualDamage = 0f;
-        float currentDefense = 0f; // ±âº» ¹æ¾î·ÂÀº 0
+        float currentDefense = 0f; // ê¸°ë³¸ ë°©ì–´ë ¥ 0
 
-        // --- ¡Ú 1. (¼öÁ¤) °ñ·½ ¹æ¾î »óÅÂÀÎÁö Ã¼Å© ---
+        // --- ê³¨ë ˜ 1. (ìˆ˜ì •) ê³¨ë ˜ ë°©ì–´ ìƒíƒœì¸ì§€ ì²´í¬ ---
         if (ai != null && ai.fsm is GolemFSM && ai.CurrentState == ai.fsm.BlockState)
         {
-            // Block »óÅÂ¶ó¸é, ÇöÀç 'ÆäÀÌÁî'¸¦ °¡Á®¿É´Ï´Ù.
+            // Block ìƒíƒœì¼ë•Œ, í˜„ì¬ 'í˜ì´ì¦ˆ'ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
             var blockState = ai.CurrentState as GolemStates.Block;
             if (blockState != null && blockState.CurrentPhase == GolemStates.Block.Phase.Blocking)
             {
-                // "¹æ¾î Áß" ÆäÀÌÁîÀÏ ¶§¸¸ ¼³Á¤µÈ ¹æ¾î·Â(_defense)À» »ç¿ëÇÕ´Ï´Ù.
+                // "ë°©ì–´ ì¤‘" í˜ì´ì¦ˆì¼ ë•Œë§Œ ëª¬ìŠ¤í„°ì˜ ë°©ì–´ë ¥(_defense)ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
                 currentDefense = _defense;
-                Debug.Log("GOLEM BLOCK: ¹æ¾î ¼º°ø! ¹æ¾î·Â " + currentDefense + " Àû¿ë.");
+                Debug.Log("GOLEM BLOCK: ë°©ì–´ ì„±ê³µ! ë°ë¯¸ì§€ " + currentDefense + " ê°ì†Œ.");
             }
-            // (else: VulnerableCheck ÆäÀÌÁî³ª CounterRush ÆäÀÌÁîÀÏ¶§´Â ¹æ¾î·Â 0)
+            // (else: VulnerableCheck ìƒíƒœì´ê±°ë‚˜ CounterRush ìƒíƒœì¼ë•ŒëŠ” ë°©ì–´ë ¥ 0)
         }
-        // --- (Gazer³ª ´Ù¸¥ ¸ó½ºÅÍ´Â Ç×»ó ¹æ¾î·Â 0, ¶Ç´Â ±âº» _defense°ªÀ» ¾²°Ô ÇÏ·Á¸é
-        //    else { currentDefense = _defense; } ¸¦ Ãß°¡ÇÏ¼¼¿ä) ---
+        // --- (Gazerë‚˜ ë‹¤ë¥¸ ëª¬ìŠ¤í„°ëŠ” í•­ìƒ ë°©ì–´ë ¥ 0, ë˜ëŠ” ê¸°ë³¸ _defenseë¥¼ ì‚¬ìš©í•˜ë ¤ë©´
+        //    else { currentDefense = _defense; } ë¥¼ ì¶”ê°€í•˜ì„¸ìš”) ---
 
 
-        // 2. ÃÖÁ¾ µ¥¹ÌÁö °è»ê (±âÁ¸ ·ÎÁ÷)
+        // 2. ìµœì¢… ë°ë¯¸ì§€ ê³„ì‚° (ë°©ì–´ë ¥ ì ìš©)
         actualDamage = Mathf.Max(damage - currentDefense, 0f);
         currentHP -= actualDamage;
 
-        // (µğ¹ö±× ·Î±× ¼öÁ¤)
-        Debug.Log($"<color=orange>[{gameObject.name}] ÇÇÇØ! (ÀÔÈù µ¥¹ÌÁö: {damage}, ÇöÀç ¹æ¾î·Â: {currentDefense}, ½ÇÁ¦ ÇÇÇØ: {actualDamage}) -> ÇöÀç Ã¼·Â: {currentHP}/{_maxHP}</color>");
+        // (ìƒì„¸í•œ ë¡œê·¸ ì¶œë ¥)
+        Debug.Log($"<color=orange>[{gameObject.name}] í”¼ê²©! (ë“¤ì–´ì˜¨ ë°ë¯¸ì§€: {damage}, í˜„ì¬ ë°©ì–´ë ¥: {currentDefense}, ì‹¤ì œ ë°ë¯¸ì§€: {actualDamage}) -> ë‚¨ì€ ì²´ë ¥: {currentHP}/{_maxHP}</color>");
 
         if (currentHP <= 0)
         {
             currentHP = 0;
             IsDead = true;
             OnDeath?.Invoke();
-            Debug.Log("<color=red>»ç¸Á ½ÅÈ£ ¹ß»ı!</color>");
+            Debug.Log("<color=red>ì‚¬ë§ ì‹ í˜¸ ë°œìƒ!</color>");
         }
         else
         {
-            // (»ì¾ÆÀÖÀ» ¶§ ÇÇ°İ ´çÇÔ)
+            // (ì‚¬ë§í•˜ì§€ ì•Šì•˜ë‹¤ë©´ í”¼ê²© ì‹ í˜¸ ë°œìƒ)
             OnHit?.Invoke();
-            Debug.Log("<color=yellow>ÇÇ°İ ½ÅÈ£ ¹ß»ı!</color>");
+            Debug.Log("<color=yellow>í”¼ê²© ì‹ í˜¸ ë°œìƒ!</color>");
 
-            // (°ñ·½ ¹æ¾î Ä«¿îÅÍ ·ÎÁ÷ - ±âÁ¸°ú µ¿ÀÏ)
+            // (ê³¨ë ˜ ë°©ì–´ ì¹´ìš´í„° ë¡œì§ - ë°©ì–´ë ¥ê³¼ ë¬´ê´€)
             if (ai != null && ai.fsm is GolemFSM)
             {
                 if (hitTimer <= 0)
@@ -145,7 +145,7 @@ public class MonsterHealth : MonoBehaviour
 
                 if (hitCounter >= blockTriggerHits)
                 {
-                    Debug.Log($"[{gameObject.name}] ¹æ¾î/¹İ°İ ¹ßµ¿!");
+                    Debug.Log($"[{gameObject.name}] ë°©ì–´/ë°˜ê²© ì¡°ê±´ ì¶©ì¡±!");
                     OnBlock?.Invoke();
                     hitTimer = 0;
                     hitCounter = 0;
@@ -159,34 +159,34 @@ public class MonsterHealth : MonoBehaviour
     {
         if (lootTable == null || lootTable.items == null)
         {
-            Debug.LogWarning("LootTableÀÌ ºñ¾îÀÖ½À´Ï´Ù.", this);
+            Debug.LogWarning("LootTableì´ ë¹„ì–´ìˆìŠµë‹ˆë‹¤.", this);
             return;
         }
         if (genericLootPrefab == null)
         {
-            Debug.LogError($"[µå¶ø ½ÇÆĞ] {gameObject.name}¿¡ genericLootPrefabÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù!", this);
+            Debug.LogError($"[ì•„ì´í…œ ë“œë] {gameObject.name}ì˜ genericLootPrefabì´ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!", this);
             return;
         }
 
-        // 1. [¡ÚÇÙ½É¡Ú] ¸ó½ºÅÍ À§Ä¡ (X, Z)¸¦ ±âÁØÀ¸·Î Áö¸éÀÇ Y ÁÂÇ¥¸¦ Ã£½À´Ï´Ù.
-        float groundY = transform.position.y; // ±âº»°ªÀº ¸ó½ºÅÍ ÇÇ¹şÀÇ Y
+        // 1. [ë°”ë‹¥ì²´í¬] í˜„ì¬ ìœ„ì¹˜ (X, Z)ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë°”ë‹¥ì˜ Y ì¢Œí‘œë¥¼ ì°¾ìŠµë‹ˆë‹¤.
+        float groundY = transform.position.y; // ê¸°ë³¸ê°’ì€ í˜„ì¬ ëª¬ìŠ¤í„°ì˜ Y
         RaycastHit hit;
 
-        // ¸ó½ºÅÍÀÇ À§Ä¡¿¡¼­ ¾Æ·¡·Î 100m ·¹ÀÌÄ³½ºÆ®¸¦ ½÷¼­ ÁöÇüÀ» Ã£½À´Ï´Ù.
-        // LayerMask¸¦ ÁöÁ¤ÇÏ¸é ´õ ÁÁ½À´Ï´Ù. (¿¹: LayerMask.GetMask("Ground"))
+        // ëª¬ìŠ¤í„° ìœ„ì¹˜ì—ì„œ ì•„ë˜ë¡œ 100m ë ˆì´ìºìŠ¤íŠ¸ë¥¼ ì´ì„œ ë°”ë‹¥ì„ ì°¾ìŠµë‹ˆë‹¤.
+        // LayerMaskë¥¼ ì‚¬ìš©í•˜ë©´ ë” ì •í™•í•©ë‹ˆë‹¤. (ì˜ˆ: LayerMask.GetMask("Ground"))
         if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out hit, 100f))
         {
-            // ·¹ÀÌ°¡ ¸ÂÀº ÁöÁ¡ÀÇ Y ÁÂÇ¥¸¦ »ç¿ëÇÕ´Ï´Ù.
+            // ë ˆì´ê°€ ì¶©ëŒí•œ ì§€ì ì˜ Y ì¢Œí‘œë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
             groundY = hit.point.y;
-            Debug.Log($"[Raycast] Áö¸é Ã£À½: Y = {groundY}");
+            Debug.Log($"[Raycast] ë°”ë‹¥ ì°¾ìŒ: Y = {groundY}");
         }
         else
         {
-            Debug.LogWarning("Áö¸éÀ» Ã£Áö ¸øÇß½À´Ï´Ù. ¾ÆÀÌÅÛÀÌ °øÁß¿¡ »ı¼ºµÉ ¼ö ÀÖ½À´Ï´Ù.");
+            Debug.LogWarning("ë°”ë‹¥ì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ì•„ì´í…œì´ ê³µì¤‘ì— ëœ° ìˆ˜ ìˆìŠµë‹ˆë‹¤.");
         }
 
 
-        float scatterDistance = 1.0f; // ¾ÆÀÌÅÛÀ» Èğ»Ñ¸± ¹üÀ§
+        float scatterDistance = 1.0f; // ì•„ì´í…œì´ í©ë¿Œë ¤ì§ˆ ë°˜ê²½
 
         foreach (var entry in lootTable.items)
         {
@@ -196,43 +196,43 @@ public class MonsterHealth : MonoBehaviour
             {
                 GameObject prefabToSpawn = genericLootPrefab;
 
-                // 2. ·£´ı ¿ÀÇÁ¼Â °è»ê (Èğ»Ñ¸²)
+                // 2. ìƒì„± ìœ„ì¹˜ë¥¼ ëœë¤í•˜ê²Œ ì„¤ì • (í©ë¿Œë¦¬ê¸°)
                 Vector2 randomCircle = Random.insideUnitCircle * scatterDistance;
 
-                // 3. »ı¼º À§Ä¡¸¦ ·¹ÀÌÄ³½ºÆ®·Î Ã£Àº Áö¸é(groundY)À¸·Î °íÁ¤ÇÕ´Ï´Ù.
+                // 3. ìƒì„± ìœ„ì¹˜ì˜ Yë¥¼ ë ˆì´ìºìŠ¤íŠ¸ë¡œ ì°¾ì€ ë°”ë‹¥(groundY)ìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
                 Vector3 spawnPos = transform.position;
                 spawnPos.x += randomCircle.x;
                 spawnPos.z += randomCircle.y;
 
-                // [¡ÚÇÙ½É¡Ú] Y ÁÂÇ¥¸¦ Ã£Àº Áö¸é + ±¸Ã¼ÀÇ ¹İÁö¸§(0.5f)¸¸Å­ ¿Ã·ÁÁİ´Ï´Ù.
-                // ±¸Ã¼ Äİ¶óÀÌ´õ Áß½ÉÀÌ Y=0.5ÀÌ¹Ç·Î, ±¸Ã¼ ¹Ù´ÚÀÌ groundY¿¡ ´ê°Ô µË´Ï´Ù.
+                // [ë°”ë‹¥ì²´í¬] Y ì¢Œí‘œë¥¼ ì°¾ì€ ë°”ë‹¥ + ì˜¤ë¸Œì íŠ¸ì˜ ì ˆë°˜ë†’ì´(0.5f)ë§Œí¼ ë„ì›ë‹ˆë‹¤.
+                // ì½œë¼ì´ë” ì¤‘ì‹¬ì´ Y=0.5ì´ë¯€ë¡œ, ì˜¤ë¸Œì íŠ¸ ë°”ë‹¥ì´ groundYì— ë‹¿ê²Œ ë©ë‹ˆë‹¤.
                 spawnPos.y = groundY + 0.5f;
 
-                Debug.Log($"<color=cyan>[LootSpawn] µå¶ø ½ÃÀÛ: {entry.item.itemName}, Grade: {entry.item.grade}</color>");
+                Debug.Log($"<color=cyan>[LootSpawn] ì•„ì´í…œ ìƒì„±: {entry.item.itemName}, Grade: {entry.item.grade}</color>");
 
                 GameObject spawnedItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
-                Debug.Log($"<color=cyan>[LootSpawn] {entry.item.itemName} µå¶ø! (»ı¼º Y: {spawnPos.y}, ÀÌ¸§: {spawnedItem.name})</color>");
+                Debug.Log($"<color=cyan>[LootSpawn] {entry.item.itemName} ìƒì„±! (ìƒì„± Y: {spawnPos.y}, ì´ë¦„: {spawnedItem.name})</color>");
 
 
-                // 4. »ı¼ºµÈ ±¸Ã¼¿¡ µ¥ÀÌÅÍ ÁÖÀÔ
+                // 4. ìƒì„±ëœ ì˜¤ë¸Œì íŠ¸ì— ì•„ì´í…œ ë°ì´í„° ì„¤ì •
                 ItemPickup pickupScript = spawnedItem.GetComponent<ItemPickup>();
                 if (pickupScript != null)
                 {
                     pickupScript.itemData = entry.item;
                     pickupScript.addToInventoryInstead = true;
-                    Debug.Log($"<color=cyan>[LootSpawn] ItemPickup µ¥ÀÌÅÍ ÁÖÀÔ ¿Ï·á.</color>");
+                    Debug.Log($"<color=cyan>[LootSpawn] ItemPickup ë°ì´í„° ì„¤ì • ì™„ë£Œ.</color>");
                 }
 
-                // 5. VFX ½ºÅ©¸³Æ®¿¡ µî±Ş ÁÖÀÔ (VFX À§Ä¡ Á¦¾î´Â LootOrbVisuals°¡ Àü´ã)
+                // 5. VFX ìŠ¤í¬ë¦½íŠ¸ì— ë“±ê¸‰ ì „ë‹¬ (VFX ìƒ‰ìƒ ê²°ì •ì€ LootOrbVisualsê°€ ë‹´ë‹¹)
                 LootOrbVisuals visualScript = spawnedItem.GetComponent<LootOrbVisuals>();
                 if (visualScript != null)
                 {
                     visualScript.Initialize(entry.item.grade);
-                    Debug.Log($"<color=cyan>[LootSpawn] LootOrbVisuals.Initialize('{entry.item.grade}') È£Ãâ ¿Ï·á.</color>");
+                    Debug.Log($"<color=cyan>[LootSpawn] LootOrbVisuals.Initialize('{entry.item.grade}') í˜¸ì¶œ ì™„ë£Œ.</color>");
                 }
                 else
                 {
-                    Debug.LogError("[LootSpawn ERROR] GenericLootDrop ÇÁ¸®ÆÕ¿¡ LootOrbVisuals.cs°¡ ¾ø½À´Ï´Ù!");
+                    Debug.LogError("[LootSpawn ERROR] GenericLootDrop í”„ë¦¬íŒ¹ì— LootOrbVisuals.csê°€ ì—†ìŠµë‹ˆë‹¤!");
                 }
             }
         }
