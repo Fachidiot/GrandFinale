@@ -10,7 +10,6 @@ public class RoomUIManager : MonoBehaviour
     [SerializeField] private Transform playerListContent;
     [SerializeField] private GameObject playerListItemPrefab;
     [SerializeField] private TextMeshProUGUI roomNameText;
-    [SerializeField] private GameObject launchButton;
 
     private void OnEnable()
     {
@@ -74,18 +73,6 @@ public class RoomUIManager : MonoBehaviour
             {
                 item.Setup(playerInfo, playerInfo.player_id == hostId);
             }
-        }
-
-        // Update Launch Button
-        UpdateLaunchButtonVisibility();
-    }
-
-    private void UpdateLaunchButtonVisibility()
-    {
-        if (launchButton != null && ServerRoomManager.Instance != null)
-        {
-            bool shouldBeActive = NetworkManager.Instance.Mode == NetworkMode.Host && ServerRoomManager.Instance.SelectedPlanetId != -1;
-            launchButton.SetActive(shouldBeActive);
         }
     }
 

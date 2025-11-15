@@ -8,6 +8,7 @@ public class InGameUIManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text ammoCountText;
     [SerializeField] private TMP_Text healthText;
+    [SerializeField] private TMP_Text interactText;
 
     private WeaponController weaponController;
 
@@ -19,6 +20,7 @@ public class InGameUIManager : MonoBehaviour
 
     public void SetInit(WeaponController weaponController)
     {
+        Debug.Log($"{weaponController}");
         this.weaponController = weaponController;
     }
 
@@ -27,6 +29,21 @@ public class InGameUIManager : MonoBehaviour
         if (!healthText)
             return;
         healthText.text = value.ToString();
+    }
+
+    public void SetInteractText(string _text)
+    {
+        if (interactText == null) return;
+
+        if (string.IsNullOrEmpty(_text))
+        {
+            interactText.gameObject.SetActive(false);
+        }
+        else
+        {
+            interactText.text = _text;
+            interactText.gameObject.SetActive(true);
+        }
     }
 
     // Update is called once per frame

@@ -199,7 +199,7 @@ public class ServerRoomManager : MonoBehaviour
         roomInfo["players"] = playersArray;
 
         NetworkManager.Instance.BroadcastJsonMessage(roomInfo);
-        
+
         // Also update host's local data directly
         UpdateLocalRoomData(roomInfo);
     }
@@ -248,7 +248,7 @@ public class ServerRoomManager : MonoBehaviour
         if (players != null)
         {
             PlayerList = players.ToObject<List<PlayerInfo>>();
-            
+
             // This is the new central point for updating other managers
             if (NetworkPlayerManager.Instance != null)
             {
@@ -286,6 +286,7 @@ public class ServerRoomManager : MonoBehaviour
     {
         if (NetworkManager.Instance.CurrentLobbyID.IsValid())
         {
+            Debug.Log("[ServerRoomManager] : SteamInvite Overlay Open.");
             SteamFriends.ActivateGameOverlayInviteDialog(NetworkManager.Instance.CurrentLobbyID);
         }
     }

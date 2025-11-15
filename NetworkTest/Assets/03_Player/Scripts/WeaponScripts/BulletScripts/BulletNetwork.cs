@@ -103,7 +103,12 @@ public class BulletNetwork : BulletBehaviour
                     }
                     else
                     {// 몬스터 공격시.
-                        // hit.transform.root.GetComponent<MonsterHealth>()
+                        var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                        if (monsterHealth != null)
+                        {
+                            float damage = PlayerDamage * (hit.collider.name == "Head" ? 2 : 1);
+                            monsterHealth.TakeDamage(damage);
+                        }
                     }
                 }
 
