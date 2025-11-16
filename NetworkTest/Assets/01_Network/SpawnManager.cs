@@ -16,9 +16,11 @@ public class SpawnManager : MonoBehaviour
     public static SpawnManager Instance { get; private set; }
 
     [Header("Spawning Configuration")]
-    public List<MonsterPrefabMapping> monsterPrefabs; // List of all available monster prefabs
-    public Transform spawnPoint; // Assign a spawn point in the Inspector
+    public List<MonsterPrefabMapping> monsterPrefabs;
+    public Transform spawnPoint;
+    public int initialPoolSize = 10; // Number of each monster type to pre-spawn
 
+    [Header("Wave Settings")]
     public float timeBetweenWaves = 5f;
     public int monstersPerWave = 5;
     public float spawnInterval = 1f;
@@ -28,6 +30,9 @@ public class SpawnManager : MonoBehaviour
 
     private readonly List<GameObject> spawnedMonsters = new List<GameObject>();
     public IReadOnlyList<GameObject> SpawnedMonsters => spawnedMonsters;
+
+    // Object Pooling
+    private Dictionary<MonsterType, Queue<GameObject>> monsterPools = new Dictionary<MonsterType, Queue<GameObject>>();
 
     private void Awake()
     {
@@ -43,25 +48,48 @@ public class SpawnManager : MonoBehaviour
 
     void Start()
     {
-        // Spawning is a host-only responsibility
         if (NetworkManager.Instance.Mode != NetworkMode.Host)
         {
             enabled = false;
             return;
         }
 
-        if (monsterPrefabs == null || monsterPrefabs.Count == 0)
+        if (monsterPrefabs == null || monsterPrefabs.Count == 0 || spawnPoint == null)
         {
-            Debug.LogError("Monster Prefabs are not assigned in SpawnManager.");
-            return;
-        }
-        if (spawnPoint == null)
-        {
-            Debug.LogError("Spawn Point is not assigned in SpawnManager.");
+            Debug.LogError("SpawnManager is not configured correctly.");
             return;
         }
 
+        PrewarmPools();
         StartCoroutine(WaveSpawner());
+    }
+
+    void PrewarmPools()
+    {
+        foreach (var mapping in monsterPrefabs)
+        {
+            if (mapping.prefab == null)
+            {
+                Debug.LogWarning($"SpawnManager: Prefab for monster type '{mapping.type}' is null. Skipping.");
+                continue;
+            }
+
+            if (!monsterPools.ContainsKey(mapping.type))
+            {
+                Queue<GameObject> pool = new Queue<GameObject>();
+                monsterPools.Add(mapping.type, pool);
+                for (int i = 0; i < initialPoolSize; i++)
+                {
+                    GameObject monsterGO = Instantiate(mapping.prefab);
+                    monsterGO.SetActive(false);
+                    pool.Enqueue(monsterGO);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"SpawnManager: Duplicate monster type '{mapping.type}' found in prefab list. Ignoring duplicate.");
+            }
+        }
     }
 
     IEnumerator WaveSpawner()
@@ -79,7 +107,6 @@ public class SpawnManager : MonoBehaviour
     {
         for (int i = 0; i < monstersPerWave; i++)
         {
-            // Randomly select a monster type to spawn from the available prefabs
             if (monsterPrefabs.Count > 0)
             {
                 int randomIndex = Random.Range(0, monsterPrefabs.Count);
@@ -91,39 +118,82 @@ public class SpawnManager : MonoBehaviour
         Debug.Log($"[SpawnManager] Wave {currentWave} finished spawning.");
     }
 
-    void SpawnMonster(MonsterType monsterType)
+    GameObject SpawnMonster(MonsterType monsterType)
     {
         GameObject monsterPrefab = GetPrefab(monsterType);
-        if (monsterPrefab == null)
-        {
-            Debug.LogError($"No prefab found for monster type: {monsterType}");
-            return;
-        }
+        if (monsterPrefab == null) return null;
 
-        GameObject monsterGO = Instantiate(monsterPrefab, spawnPoint.position, spawnPoint.rotation);
+        GameObject monsterGO = null;
+        if (monsterPools.TryGetValue(monsterType, out Queue<GameObject> pool) && pool.Count > 0)
+        {
+            monsterGO = pool.Dequeue();
+            monsterGO.transform.position = spawnPoint.position;
+            monsterGO.transform.rotation = spawnPoint.rotation;
+            monsterGO.SetActive(true);
+        }
+        else
+        {
+            monsterGO = Instantiate(monsterPrefab, spawnPoint.position, spawnPoint.rotation);
+        }
         
-        // Initialize network identity
         NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
         if (networkMonster == null)
         {
             Debug.LogError("Monster prefab is missing the NetworkMonster component!");
             Destroy(monsterGO);
-            return;
+            return null;
         }
         
         ushort newId = nextMonsterId++;
-        networkMonster.Initialize(newId, monsterType); // Pass monster type during initialization
+        networkMonster.Initialize(newId, monsterType);
         monsterGO.name = $"{monsterPrefab.name}_{newId}";
         
         spawnedMonsters.Add(monsterGO);
         Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
-
-        // AI logic is now handled by MonsterMovement.cs on the host
+        return monsterGO;
     }
 
-    /// <summary>
-    /// Gets the prefab associated with a given MonsterType.
-    /// </summary>
+    public void ReturnMonsterToPool(GameObject monsterGO)
+    {
+        var networkMonster = monsterGO.GetComponent<NetworkMonster>();
+        if (networkMonster == null)
+        {
+            Destroy(monsterGO); // Not a pooled monster
+            return;
+        }
+
+        if (monsterPools.TryGetValue(networkMonster.MonsterType, out Queue<GameObject> pool))
+        {
+            monsterGO.SetActive(false);
+            pool.Enqueue(monsterGO);
+            spawnedMonsters.Remove(monsterGO);
+        }
+        else
+        {
+            Destroy(monsterGO); // No pool for this type
+        }
+    }
+
+    public GameObject GetMonsterFromPool(MonsterType monsterType)
+    {
+        GameObject monsterGO = null;
+        if (monsterPools.TryGetValue(monsterType, out Queue<GameObject> pool) && pool.Count > 0)
+        {
+            monsterGO = pool.Dequeue();
+            monsterGO.SetActive(true);
+        }
+        else
+        {
+            // If pool is empty, instantiate a new one (fallback)
+            GameObject prefab = GetPrefab(monsterType);
+            if (prefab != null)
+            {
+                monsterGO = Instantiate(prefab);
+            }
+        }
+        return monsterGO;
+    }
+
     public GameObject GetPrefab(MonsterType type)
     {
         var mapping = monsterPrefabs.FirstOrDefault(m => m.type == type);

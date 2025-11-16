@@ -18,6 +18,8 @@ public class NetworkPlayerManager : MonoBehaviour
     public IReadOnlyDictionary<string, GameObject> Players => players;
     public IReadOnlyDictionary<ushort, GameObject> Monsters => monsters;
 
+    public GameObject LocalPlayer { get; private set; }
+
     private void Awake()
     {
         if (Instance == null)
@@ -110,44 +112,22 @@ public class NetworkPlayerManager : MonoBehaviour
         GameObject playerObject = Instantiate(playerPrefab, new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = $"Player_{playerInfo.nickname}";
         players.Add(playerInfo.steam_id, playerObject);
-        PlayerNicknameUI nicknameUI = playerObject.GetComponentInChildren<PlayerNicknameUI>();
 
-        if (nicknameUI != null)
-            nicknameUI.SetNickname(playerInfo.nickname);
+        // Add and initialize the NetworkPlayer component
+        var networkPlayer = playerObject.AddComponent<NetworkPlayer>();
+        networkPlayer.Initialize(playerInfo.steam_id, playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
 
-        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
-        var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-
-        foreach (var view in transformSyncs)
-            view.Initialize(playerInfo.steam_id, isMine);
-
-        var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
-
-        if (animSync != null)
-            animSync.Initialize(playerInfo.steam_id, isMine);
-
-        var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
-
-        if (nsm != null)
-            nsm.Initialize(isMine);
-
-        if (isMine)
+        if (networkPlayer.IsMine)
         {
-            if (nicknameUI != null)
-                nicknameUI.gameObject.SetActive(false);
-            var inGameUI = FindObjectOfType<InGameUIManager>();
-            if (inGameUI != null)
-            {
-                inGameUI.SetInit(playerObject.GetComponent<WeaponController>());
-            }
+            LocalPlayer = playerObject;
         }
-        else
+
+        if (networkPlayer.NicknameUI != null)
         {
-            playerObject.GetComponent<CharacterMove>().enabled = false;
-            playerObject.GetComponentInChildren<InputHandler>().enabled = false;
-            playerObject.GetComponentInChildren<CameraController>().enabled = false;
-            playerObject.GetComponentInChildren<CameraSwitcher>()?.gameObject.SetActive(false);
+            networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
         }
+
+        // playerObject.tag = "NetworkPlayer"; // Add tag for easy lookup
 
         DontDestroyOnLoad(playerObject);
 
@@ -158,6 +138,10 @@ public class NetworkPlayerManager : MonoBehaviour
     {
         if (players.TryGetValue(steamId, out GameObject playerToDestroy))
         {
+            if (playerToDestroy == LocalPlayer)
+            {
+                LocalPlayer = null;
+            }
             Debug.Log($"[NetworkPlayerManager] Removing player {steamId}.");
             Destroy(playerToDestroy);
             players.Remove(steamId);
@@ -183,22 +167,21 @@ public class NetworkPlayerManager : MonoBehaviour
                 if (steamId == NetworkManager.Instance.PlayerId)
                     continue;
 
-                var transformSyncs = playerObject.GetComponentsInChildren<NetworkTransformSync>();
-                var bodySync = transformSyncs.FirstOrDefault(s => s.viewId == 0);
-                var cameraSync = transformSyncs.FirstOrDefault(s => s.viewId == 1);
-                if (bodySync != null)
+                var networkPlayer = playerObject.GetComponent<NetworkPlayer>();
+                if (networkPlayer == null) continue;
+
+                if (networkPlayer.BodyTransformSync != null)
                 {
-                    bodySync.OnTransformReceived(playerState.position, playerState.rotation);
+                    networkPlayer.BodyTransformSync.OnTransformReceived(playerState.position, playerState.rotation);
                 }
-                if (cameraSync != null)
+                if (networkPlayer.CameraTransformSync != null)
                 {
-                    cameraSync.OnTransformReceived(cameraSync.transform.position, playerState.cameraRotation);
+                    networkPlayer.CameraTransformSync.OnTransformReceived(networkPlayer.CameraTransformSync.transform.position, playerState.cameraRotation);
                 }
 
-                var animSync = playerObject.GetComponentInChildren<NetworkAnimatorSync>();
-                if (animSync != null)
+                if (networkPlayer.AnimatorSync != null)
                 {
-                    animSync.OnAnimationDataReceived(
+                    networkPlayer.AnimatorSync.OnAnimationDataReceived(
                         playerState.moveX,
                         playerState.moveY,
                         AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk),
@@ -209,10 +192,9 @@ public class NetworkPlayerManager : MonoBehaviour
                     );
                 }
 
-                var weaponController = playerObject.GetComponentInChildren<WeaponController>();
-                if (weaponController != null && weaponController.activeID != playerState.weaponId)
+                if (networkPlayer.WeaponController != null && networkPlayer.WeaponController.activeID != playerState.weaponId)
                 {
-                    weaponController.ToChange(playerState.weaponId);
+                    networkPlayer.WeaponController.ToChange(playerState.weaponId);
                 }
             }
         }
@@ -261,7 +243,7 @@ public class NetworkPlayerManager : MonoBehaviour
         {
             if (monsters.TryGetValue(monsterId, out GameObject monsterToDestroy))
             {
-                Destroy(monsterToDestroy);
+                SpawnManager.Instance.ReturnMonsterToPool(monsterToDestroy);
             }
             monsters.Remove(monsterId);
         }
@@ -272,27 +254,27 @@ public class NetworkPlayerManager : MonoBehaviour
 
     private void SpawnMonster(MonsterState state)
     {
-        // Get the correct prefab from the SpawnManager using the monsterType from the state
-        GameObject prefabToSpawn = SpawnManager.Instance.GetPrefab(state.monsterType);
-        if (prefabToSpawn == null)
+        GameObject monsterGO = SpawnManager.Instance.GetMonsterFromPool(state.monsterType);
+        if (monsterGO == null)
         {
-            Debug.LogError($"[NetworkPlayerManager] No prefab found for monster type: {state.monsterType}");
+            Debug.LogError($"[NetworkPlayerManager] Could not get monster from pool for type: {state.monsterType}");
             return;
         }
 
-        GameObject monsterGO = Instantiate(prefabToSpawn, state.position, state.rotation);
+        monsterGO.transform.position = state.position;
+        monsterGO.transform.rotation = state.rotation;
 
         NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
         if (networkMonster == null)
         {
-            Debug.LogError($"Monster prefab '{prefabToSpawn.name}' is missing the NetworkMonster component!");
-            Destroy(monsterGO);
+            Debug.LogError($"Monster prefab '{monsterGO.name}' is missing the NetworkMonster component!");
+            SpawnManager.Instance.ReturnMonsterToPool(monsterGO); // Return to pool
             return;
         }
 
         // Initialize with both ID and Type
         networkMonster.Initialize(state.monsterId, state.monsterType);
-        monsterGO.name = $"{prefabToSpawn.name}_{state.monsterId}";
+        monsterGO.name = $"{GetPrefabName(state.monsterType)}_{state.monsterId}";
 
         monsters.Add(state.monsterId, monsterGO);
         Debug.Log($"[NetworkPlayerManager] Spawned monster {monsterGO.name} from network state.");
@@ -309,6 +291,12 @@ public class NetworkPlayerManager : MonoBehaviour
         {
             monsterAI.enabled = false;
         }
+    }
+
+    private string GetPrefabName(MonsterType type)
+    {
+        GameObject prefab = SpawnManager.Instance.GetPrefab(type);
+        return prefab != null ? prefab.name : "UnknownMonster";
     }
 
     #endregion
@@ -333,6 +321,7 @@ public class NetworkPlayerManager : MonoBehaviour
         foreach (var player in players.Values) Destroy(player);
         players.Clear();
         byteIdToSteamId.Clear();
+        LocalPlayer = null;
 
         foreach (var monster in monsters.Values) Destroy(monster);
         monsters.Clear();

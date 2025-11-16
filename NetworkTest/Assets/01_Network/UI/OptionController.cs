@@ -38,7 +38,11 @@ public class OptionController : MonoBehaviour
             //     inventoryUI.SetActive(false);
             else if (terminalManager && terminalManager.IsTerminalActive)
             {
-                terminalManager.ToggleTerminal(null);
+                terminalManager.ToggleTerminal();
+
+                //  임시방편 마우스 focus해제되는 버그
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
             }
             else
                 optionPanel.SetActive(true);

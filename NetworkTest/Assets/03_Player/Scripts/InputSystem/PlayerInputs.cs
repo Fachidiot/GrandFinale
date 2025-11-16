@@ -5,11 +5,14 @@ using UnityEngine;
 public class PlayerInputs : MonoBehaviour
 {
     [SerializeField] private OptionKeyData keyData;
+    [SerializeField] private float interactionDistance = 8f;
 
     private float horizontalInput = 0f;
     private float verticalInput = 0f;
     private float bending = 0f;
     private bool isPaused = false;
+    private Camera mainCamera;
+    private Interactable lastInteractable;
 
     // Movement
     public float GetAxisHorizontal()
@@ -127,6 +130,7 @@ public class PlayerInputs : MonoBehaviour
         if (OptionDataManager.Instance)
             keyData = OptionDataManager.Instance.OptionData.m_keyData;
         GameManager.OnPauseStateChanged += OnPause; // Subscribe to pause event
+        mainCamera = Camera.main;
     }
 
     void OnPause(bool pause)
@@ -143,6 +147,9 @@ public class PlayerInputs : MonoBehaviour
             bending = 0f;
             return;
         }
+
+        HandleInteraction();
+        CheckForInteractableUI();
 
         // Axis Raw
         float horizontalRaw = Input.GetKey(keyData.m_KeyMoveLeft) ? -1 : Input.GetKey(keyData.m_KeyMoveRight) ? 1 : 0;
@@ -161,6 +168,56 @@ public class PlayerInputs : MonoBehaviour
         if (keyData != OptionDataManager.Instance.OptionData.m_keyData)
             keyData = OptionDataManager.Instance.OptionData.m_keyData;
 
+    }
+
+    private void HandleInteraction()
+    {
+        if (GetInteract())
+        {
+            TryInteract();
+        }
+    }
+
+    private void TryInteract()
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        int layerMask = 1 << LayerMask.NameToLayer(GameManager.Instance.GameSettings.interactableLayer);
+        if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, layerMask))
+        {
+            if (hit.collider.TryGetComponent<Interactable>(out var interactable))
+            {
+                interactable.Interact();
+            }
+        }
+    }
+
+    private void CheckForInteractableUI()
+    {
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        int layerMask = 1 << LayerMask.NameToLayer(GameManager.Instance.GameSettings.interactableLayer);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, layerMask))
+        {
+            if (hit.collider.TryGetComponent<Interactable>(out var interactable))
+            {
+                if (interactable != lastInteractable)
+                {
+                    UIEvents.InteractableFocusChanged(interactable.interactionText);
+                    lastInteractable = interactable;
+                }
+                return;
+            }
+        }
+
+        // If we hit nothing or something not interactable
+        if (lastInteractable != null)
+        {
+            UIEvents.InteractableFocusChanged("");
+            lastInteractable = null;
+        }
     }
 }
 

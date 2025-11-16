@@ -211,9 +211,16 @@ public class NetworkManager : MonoBehaviour
 
     private PlayerState GetPlayerStateFromGameObject(GameObject playerGo, CSteamID steamId)
     {
-        var animSync = playerGo.GetComponentInChildren<NetworkAnimatorSync>();
-        var weaponCtrl = playerGo.GetComponentInChildren<WeaponController>();
-        var camTransformSync = playerGo.GetComponentsInChildren<NetworkTransformSync>().FirstOrDefault(s => s.viewId == 1);
+        var networkPlayer = playerGo.GetComponent<NetworkPlayer>();
+        if (networkPlayer == null)
+        {
+            // Return a default or empty state if the component isn't ready yet
+            return new PlayerState { playerId = 255 };
+        }
+
+        var animSync = networkPlayer.AnimatorSync;
+        var weaponCtrl = networkPlayer.WeaponController;
+        var camTransformSync = networkPlayer.CameraTransformSync;
 
         return new PlayerState
         {

@@ -1,8 +1,6 @@
 using UnityEngine;
 using TMPro;
-using Steamworks;
 using UnityEngine.SceneManagement;
-using Newtonsoft.Json.Linq;
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -73,59 +71,6 @@ public class RoomUIManager : MonoBehaviour
             {
                 item.Setup(playerInfo, playerInfo.player_id == hostId);
             }
-        }
-    }
-
-    // This method is called by the "Launch" button
-    public void OnLaunchGameClicked()
-    {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
-        if (ServerRoomManager.Instance.SelectedPlanetId == -1)
-        {
-            Debug.LogWarning("[RoomUIManager] Cannot launch, no planet selected.");
-            return;
-        }
-
-        Debug.Log($"[RoomUIManager] Host clicked launch for planet {ServerRoomManager.Instance.SelectedPlanetId}.");
-        ServerRoomManager.Instance.LaunchToPlanet(ServerRoomManager.Instance.SelectedPlanetId);
-    }
-
-    // This method is called by a UI button's OnClick event
-    public void OnPlanetSelect(int planetId)
-    {
-        Debug.Log($"[RoomUIManager] UI button clicked. Proposing planet {planetId}.");
-        ProposePlanet(planetId);
-    }
-
-    private void ProposePlanet(int planetId)
-    {
-        if (NetworkManager.Instance == null || ServerRoomManager.Instance == null) return;
-
-        if (NetworkManager.Instance.Mode == NetworkMode.Host)
-        {
-            ServerRoomManager.Instance.SelectPlanet(planetId);
-        }
-        else // Client
-        {
-            JObject message = new JObject
-            {
-                { "type", "propose_planet" },
-                { "planet_id", planetId }
-            };
-
-            CSteamID hostId = NetworkManager.Instance.LobbyHostID;
-            if (hostId.IsValid())
-            {
-                NetworkManager.Instance.SendJsonMessage(hostId, message);
-            }
-        }
-    }
-
-    public void OnInviteFriends()
-    {
-        if (ServerRoomManager.Instance != null)
-        {
-            ServerRoomManager.Instance.OnInviteFriendsButtonClicked();
         }
     }
 }

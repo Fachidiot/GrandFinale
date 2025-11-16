@@ -24,7 +24,6 @@ public class TerminalManager : MonoBehaviour
     private bool isTerminalActive = false;
     public bool IsTerminalActive { get { return isTerminalActive; } }
 
-    private PlayerInputs playerInputs;
     private GameObject activePlayer;
     private CameraSwitcher activeCameraSwitcher;
 
@@ -52,29 +51,12 @@ public class TerminalManager : MonoBehaviour
             return;
         }
 
-        playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
         inputField.onSubmit.AddListener(OnSubmitCommand);
         terminalPanel.SetActive(false); // Start with the terminal closed
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        if (isTerminalActive) return;
 
-        if (other.CompareTag("Player"))
-        {
-            InputHandler handler = other.GetComponentInChildren<InputHandler>();
-            if (handler != null && handler.enabled)
-            {
-                if (playerInputs.GetInteract())
-                {
-                    ToggleTerminal(other.gameObject);
-                }
-            }
-        }
-    }
-
-    public void ToggleTerminal(GameObject playerObject)
+    public void ToggleTerminal()
     {
         isTerminalActive = !isTerminalActive;
 
@@ -83,10 +65,13 @@ public class TerminalManager : MonoBehaviour
 
         if (isTerminalActive)
         {
-            activePlayer = playerObject;
+            activePlayer = NetworkPlayerManager.Instance.LocalPlayer;
             if (activePlayer == null)
             {
-                ToggleTerminal(null);
+                Debug.LogError("Terminal cannot be activated: Local player not found.");
+                isTerminalActive = false; // Revert state
+                GameManager.Instance.SetPause(false);
+                terminalPanel.SetActive(false);
                 return;
             }
 
@@ -126,6 +111,10 @@ public class TerminalManager : MonoBehaviour
             activePlayer = null;
             activeCameraSwitcher = null;
         }
+
+        //  임시방편 마우스 focus해제되는 버그
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void PrintWelcomeMessage()
@@ -156,7 +145,7 @@ public class TerminalManager : MonoBehaviour
             case "planets": ExecutePlanets(); break;
             case "goto": ExecuteGoto(parts); break;
             case "clear": ExecuteClear(); break;
-            case "exit": ToggleTerminal(null); break;
+            case "exit": ToggleTerminal(); break;
             default: AppendToLog($"Unknown command: '{commandWord}'"); break;
         }
     }

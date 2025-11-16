@@ -12,15 +12,23 @@ public class InGameUIManager : MonoBehaviour
 
     private WeaponController weaponController;
 
-    void Start()
+    void Awake()
     {
-        // ONLY AT TEST MODE
-        // weaponController = FindAnyObjectByType<WeaponController>().GetComponent<WeaponController>();
+        // Subscribe to UI events
+        UIEvents.OnInteractableFocusChanged += SetInteractText;
+        UIEvents.OnPlayerInitialized += SetInit;
+    }
+
+    private void OnDestroy()
+    {
+        // Unsubscribe to prevent memory leaks
+        UIEvents.OnInteractableFocusChanged -= SetInteractText;
+        UIEvents.OnPlayerInitialized -= SetInit;
     }
 
     public void SetInit(WeaponController weaponController)
     {
-        Debug.Log($"{weaponController}");
+        Debug.Log($"InGameUIManager received WeaponController: {weaponController}");
         this.weaponController = weaponController;
     }
 
@@ -50,9 +58,24 @@ public class InGameUIManager : MonoBehaviour
     void Update()
     {
         if (weaponController == null)
+        {
+            if (ammoCountText != null && ammoCountText.enabled)
+            {
+                ammoCountText.enabled = false;
+            }
             return;
+        }
+
+        if (!ammoCountText.enabled)
+        {
+            ammoCountText.enabled = true;
+        }
+
         if (weaponController.GETCurrentWeapon == null)
+        {
+            ammoCountText.text = "-";
             return;
+        }
 
         ammoCountText.text = weaponController.GETCurrentWeapon.CurrentAmmo.ToString();
     }

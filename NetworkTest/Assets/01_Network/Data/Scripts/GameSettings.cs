@@ -9,4 +9,7 @@ public class GameSettings : ScriptableObject
 
     [Header("Room Settings")]
     public string defaultRoomName = "Test Room";
+
+    [Header("Control")]
+    public string interactableLayer = "Interactable";
 }
