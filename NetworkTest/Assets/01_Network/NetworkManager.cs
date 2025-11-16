@@ -317,6 +317,10 @@ public class NetworkManager : MonoBehaviour
         if (selfSteamId != lobbyHostID)
         {
             Mode = NetworkMode.Client;
+            if (ServerRoomManager.Instance != null)
+            {
+                ServerRoomManager.Instance.SendNickname();
+            }
         }
         else
         {

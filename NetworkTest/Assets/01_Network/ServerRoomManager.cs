@@ -57,10 +57,6 @@ public class ServerRoomManager : MonoBehaviour
         {
             AddHostPlayer(NetworkManager.Instance.selfSteamId, CustomSteamManager.Instance.PlayerName);
         }
-        else if (NetworkManager.Instance.Mode == NetworkMode.Client)
-        {
-            SendNickname();
-        }
     }
 
     private void OnDestroy()
@@ -260,7 +256,7 @@ public class ServerRoomManager : MonoBehaviour
         OnRoomDataUpdated?.Invoke();
     }
 
-    private void SendNickname()
+    public void SendNickname()
     {
         string nickname = CustomSteamManager.Instance.PlayerName;
         JObject msg = new JObject { { "type", "set_nickname" }, { "nickname", nickname } };

@@ -17,6 +17,7 @@ public class InGameUIManager : MonoBehaviour
         // Subscribe to UI events
         UIEvents.OnInteractableFocusChanged += SetInteractText;
         UIEvents.OnPlayerInitialized += SetInit;
+        NetworkManager.OnDisconnected += HandleDisconnection;
     }
 
     private void OnDestroy()
@@ -24,6 +25,16 @@ public class InGameUIManager : MonoBehaviour
         // Unsubscribe to prevent memory leaks
         UIEvents.OnInteractableFocusChanged -= SetInteractText;
         UIEvents.OnPlayerInitialized -= SetInit;
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.OnDisconnected -= HandleDisconnection;
+        }
+    }
+
+    private void HandleDisconnection()
+    {
+        Debug.Log($"[InGameUIManager] Disconnected. Returning to main menu.");
+        SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
     }
 
     public void SetInit(WeaponController weaponController)

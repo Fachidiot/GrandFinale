@@ -43,3 +43,6 @@
     - 이전 리팩토링 과정에서 실수로 추가된 중복 코드를 제거하여 클래스 정의 오류 해결
 - `SpawnManager.cs`의 `PrewarmPools`에서 발생하는 NavMesh 경고 수정
     - 오브젝트 풀 생성을 위해 `Instantiate` 호출 시 `spawnPoint`의 위치를 사용하도록 하여 NavMesh와 가까운 곳에서 생성되도록 변경
+- 멀티플레이 재접속 및 연결 종료 관련 버그 수정
+    - **재접속 시 플레이어 미생성 버그**: 클라이언트가 로비에 입장할 때마다 `SendNickname`이 호출되도록 로직을 `ServerRoomManager.Start`에서 `NetworkManager.OnLobbyEnter`로 이동하여 해결.
+    - **호스트 퇴장 시 클라이언트 잔류 버그**: `InGameUIManager`가 `OnDisconnected` 이벤트를 구독하고 메인 메뉴 씬을 로드하도록 하여 해결.
