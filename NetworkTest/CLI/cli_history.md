@@ -35,3 +35,11 @@
     - UI 관련 정적 이벤트를 관리하는 `UIEvents.cs` 스크립트 생성
     - `PlayerInputs`와 `NetworkPlayer`가 `InGameUIManager`를 직접 호출하는 대신 `UIEvents`의 이벤트를 발생시키도록 수정
     - `InGameUIManager`가 싱글톤이 아닌, `UIEvents`의 이벤트를 구독하여 UI를 업데이트하도록 변경
+- 클라이언트 디싱크 문제를 해결하기 위해 네트워크 아키텍처 리팩토링
+    - 몬스터 생성/소멸 메시지를 분리하여 신뢰성 있는(Reliable) 패킷으로 전송하도록 변경
+    - 몬스터 위치/애니메이션 업데이트를 별도의 비신뢰성(Unreliable) 패킷으로 분리하여 메인 `GameState` 패킷 크기 축소
+    - `NetworkManager`, `NetworkPlayerManager`, `SpawnManager`, `GameStateModels` 등 관련 스크립트 전반을 수정하여 새로운 메시지 타입과 처리 로직 구현
+- `NetworkManager.cs`의 컴파일 오류 수정
+    - 이전 리팩토링 과정에서 실수로 추가된 중복 코드를 제거하여 클래스 정의 오류 해결
+- `SpawnManager.cs`의 `PrewarmPools`에서 발생하는 NavMesh 경고 수정
+    - 오브젝트 풀 생성을 위해 `Instantiate` 호출 시 `spawnPoint`의 위치를 사용하도록 하여 NavMesh와 가까운 곳에서 생성되도록 변경

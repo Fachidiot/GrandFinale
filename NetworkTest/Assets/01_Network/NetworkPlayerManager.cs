@@ -198,16 +198,14 @@ public class NetworkPlayerManager : MonoBehaviour
                 }
             }
         }
+    }
 
-        // --- Monster States ---
-        if (NetworkManager.Instance.Mode == NetworkMode.Host) return; // Host manages its own monsters
-
-        HashSet<ushort> receivedMonsterIds = new HashSet<ushort>();
+    public void OnMonsterUpdateReceived(NetworkMonsterUpdateState state)
+    {
+        if (NetworkManager.Instance.Mode == NetworkMode.Host) return;
 
         foreach (var monsterState in state.monsters)
         {
-            receivedMonsterIds.Add(monsterState.monsterId);
-
             if (monsters.TryGetValue(monsterState.monsterId, out GameObject monsterGO))
             {
                 // Monster exists, update its state
@@ -222,29 +220,17 @@ public class NetworkPlayerManager : MonoBehaviour
                     monsterAnimSync.OnAnimationDataReceived(animData);
                 }
             }
-            else
-            {
-                // Monster is new, spawn it
-                SpawnMonster(monsterState);
-            }
+            // Note: We no longer spawn monsters from the unreliable update packet.
+            // Spawning is handled by the reliable MonsterSpawn message.
         }
+    }
 
-        // Despawn any monsters that are no longer in the game state
-        List<ushort> monstersToDestroy = new List<ushort>();
-        foreach (var monsterId in monsters.Keys)
+    public void DespawnMonster(ushort monsterId)
+    {
+        if (monsters.TryGetValue(monsterId, out GameObject monsterToDestroy))
         {
-            if (!receivedMonsterIds.Contains(monsterId))
-            {
-                monstersToDestroy.Add(monsterId);
-            }
-        }
-
-        foreach (var monsterId in monstersToDestroy)
-        {
-            if (monsters.TryGetValue(monsterId, out GameObject monsterToDestroy))
-            {
-                SpawnManager.Instance.ReturnMonsterToPool(monsterToDestroy);
-            }
+            Debug.Log($"[NetworkPlayerManager] Despawning monster {monsterId} by network message.");
+            SpawnManager.Instance.ReturnMonsterToPool(monsterToDestroy);
             monsters.Remove(monsterId);
         }
     }
@@ -297,6 +283,55 @@ public class NetworkPlayerManager : MonoBehaviour
     {
         GameObject prefab = SpawnManager.Instance.GetPrefab(type);
         return prefab != null ? prefab.name : "UnknownMonster";
+    }
+
+    public void SpawnMonsterFromState(MonsterState state)
+    {
+        // This method is called on clients when a reliable spawn message is received.
+        if (monsters.ContainsKey(state.monsterId))
+        {
+            // We already know about this monster, maybe just update its state
+            GameObject monsterGO = monsters[state.monsterId];
+            monsterGO.transform.position = state.position;
+            monsterGO.transform.rotation = state.rotation;
+            return;
+        }
+
+        // If we get here, it's a new monster for us.
+        GameObject prefab = SpawnManager.Instance.GetPrefab(state.monsterType);
+        if (prefab == null)
+        {
+            Debug.LogError($"[NetworkPlayerManager] Could not find prefab for monster type: {state.monsterType}");
+            return;
+        }
+
+        GameObject newMonsterGO = Instantiate(prefab, state.position, state.rotation);
+        
+        NetworkMonster networkMonster = newMonsterGO.GetComponent<NetworkMonster>();
+        if (networkMonster == null)
+        {
+            Debug.LogError($"[NetworkPlayerManager] Monster prefab '{prefab.name}' is missing the NetworkMonster component!");
+            Destroy(newMonsterGO);
+            return;
+        }
+
+        networkMonster.Initialize(state.monsterId, state.monsterType);
+        newMonsterGO.name = $"{prefab.name}_{state.monsterId}";
+        monsters.Add(state.monsterId, newMonsterGO);
+        Debug.Log($"[NetworkPlayerManager] Client spawned monster {newMonsterGO.name} from network message.");
+
+        // Disable components that are host-authoritative
+        var monsterMovement = newMonsterGO.GetComponent<IMonsterMovement>();
+        if (monsterMovement != null && monsterMovement is MonoBehaviour)
+        {
+            (monsterMovement as MonoBehaviour).enabled = false;
+        }
+
+        var monsterAI = newMonsterGO.GetComponent<MonsterAIController>();
+        if (monsterAI != null)
+        {
+            monsterAI.enabled = false;
+        }
     }
 
     #endregion

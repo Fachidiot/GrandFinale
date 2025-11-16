@@ -80,7 +80,7 @@ public class SpawnManager : MonoBehaviour
                 monsterPools.Add(mapping.type, pool);
                 for (int i = 0; i < initialPoolSize; i++)
                 {
-                    GameObject monsterGO = Instantiate(mapping.prefab);
+                    GameObject monsterGO = Instantiate(mapping.prefab, spawnPoint.position, spawnPoint.rotation);
                     monsterGO.SetActive(false);
                     pool.Enqueue(monsterGO);
                 }
@@ -150,6 +150,18 @@ public class SpawnManager : MonoBehaviour
         
         spawnedMonsters.Add(monsterGO);
         Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
+
+        // Broadcast the spawn event to all clients
+        var monsterState = new MonsterState
+        {
+            monsterId = newId,
+            monsterType = monsterType,
+            position = monsterGO.transform.position,
+            rotation = monsterGO.transform.rotation,
+            animationData = null // Animation data will be sent in the regular game state updates
+        };
+        NetworkManager.Instance.BroadcastMonsterSpawn(monsterState);
+
         return monsterGO;
     }
 
@@ -164,6 +176,12 @@ public class SpawnManager : MonoBehaviour
 
         if (monsterPools.TryGetValue(networkMonster.MonsterType, out Queue<GameObject> pool))
         {
+            // Only the host should broadcast despawn messages
+            if (NetworkManager.Instance.Mode == NetworkMode.Host)
+            {
+                NetworkManager.Instance.BroadcastMonsterDespawn(networkMonster.MonsterId);
+            }
+
             monsterGO.SetActive(false);
             pool.Enqueue(monsterGO);
             spawnedMonsters.Remove(monsterGO);

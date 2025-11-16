@@ -88,13 +88,57 @@ public struct MonsterState
     public Vector3 position;
     public Quaternion rotation;
     public byte[] animationData;
+
+    public byte[] ToByteArray()
+    {
+        using (MemoryStream stream = new MemoryStream())
+        using (BinaryWriter writer = new BinaryWriter(stream))
+        {
+            writer.Write(monsterId);
+            writer.Write((byte)monsterType);
+            writer.Write(position.x);
+            writer.Write(position.y);
+            writer.Write(position.z);
+            writer.Write(rotation.x);
+            writer.Write(rotation.y);
+            writer.Write(rotation.z);
+            writer.Write(rotation.w);
+
+            byte dataLength = (byte)(animationData?.Length ?? 0);
+            writer.Write(dataLength);
+            if (dataLength > 0)
+            {
+                writer.Write(animationData);
+            }
+            return stream.ToArray();
+        }
+    }
+
+    public static MonsterState FromBytes(byte[] data)
+    {
+        var state = new MonsterState();
+        using (MemoryStream stream = new MemoryStream(data))
+        using (BinaryReader reader = new BinaryReader(stream))
+        {
+            state.monsterId = reader.ReadUInt16();
+            state.monsterType = (MonsterType)reader.ReadByte();
+            state.position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            state.rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            
+            byte dataLength = reader.ReadByte();
+            if (dataLength > 0)
+            {
+                state.animationData = reader.ReadBytes(dataLength);
+            }
+        }
+        return state;
+    }
 }
 
 // The main container for all real-time game data
 public class NetworkGameState
 {
     public List<PlayerState> players = new List<PlayerState>();
-    public List<MonsterState> monsters = new List<MonsterState>();
     public int selectedPlanetId = -1; // Default to -1, indicating no planet is selected
 
     // --- Serialization (Host) ---
@@ -123,29 +167,6 @@ public class NetworkGameState
                 writer.Write(p.moveX);
                 writer.Write(p.moveY);
                 writer.Write(p.weaponId);
-            }
-
-            // Write monster states
-            writer.Write((byte)monsters.Count);
-            foreach (var m in monsters)
-            {
-                writer.Write(m.monsterId);
-                writer.Write((byte)m.monsterType); // Write monster type
-                writer.Write(m.position.x);
-                writer.Write(m.position.y);
-                writer.Write(m.position.z);
-                writer.Write(m.rotation.x);
-                writer.Write(m.rotation.y);
-                writer.Write(m.rotation.z);
-                writer.Write(m.rotation.w);
-                
-                // Write animation data
-                byte dataLength = (byte)(m.animationData?.Length ?? 0);
-                writer.Write(dataLength);
-                if (dataLength > 0)
-                {
-                    writer.Write(m.animationData);
-                }
             }
             
             // Write game-level state
@@ -179,28 +200,6 @@ public class NetworkGameState
                 };
                 gameState.players.Add(p);
             }
-
-            // Read monster states
-            byte monsterCount = reader.ReadByte();
-            for (int i = 0; i < monsterCount; i++)
-            {
-                var m = new MonsterState
-                {
-                    monsterId = reader.ReadUInt16(),
-                    monsterType = (MonsterType)reader.ReadByte(), // Read monster type
-                    position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                };
-                
-                // Read animation data
-                byte dataLength = reader.ReadByte();
-                if (dataLength > 0)
-                {
-                    m.animationData = reader.ReadBytes(dataLength);
-                }
-
-                gameState.monsters.Add(m);
-            }
             
             // Read game-level state
             if (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -209,5 +208,68 @@ public class NetworkGameState
             }
         }
         return gameState;
+    }
+}
+
+// A dedicated container for monster state updates
+public class NetworkMonsterUpdateState
+{
+    public List<MonsterState> monsters = new List<MonsterState>();
+
+    public byte[] ToByteArray()
+    {
+        using (MemoryStream stream = new MemoryStream())
+        using (BinaryWriter writer = new BinaryWriter(stream))
+        {
+            writer.Write((byte)monsters.Count);
+            foreach (var m in monsters)
+            {
+                writer.Write(m.monsterId);
+                writer.Write((byte)m.monsterType);
+                writer.Write(m.position.x);
+                writer.Write(m.position.y);
+                writer.Write(m.position.z);
+                writer.Write(m.rotation.x);
+                writer.Write(m.rotation.y);
+                writer.Write(m.rotation.z);
+                writer.Write(m.rotation.w);
+
+                byte dataLength = (byte)(m.animationData?.Length ?? 0);
+                writer.Write(dataLength);
+                if (dataLength > 0)
+                {
+                    writer.Write(m.animationData);
+                }
+            }
+            return stream.ToArray();
+        }
+    }
+
+    public static NetworkMonsterUpdateState FromBytes(byte[] data)
+    {
+        var updateState = new NetworkMonsterUpdateState();
+        using (MemoryStream stream = new MemoryStream(data))
+        using (BinaryReader reader = new BinaryReader(stream))
+        {
+            byte monsterCount = reader.ReadByte();
+            for (int i = 0; i < monsterCount; i++)
+            {
+                var m = new MonsterState
+                {
+                    monsterId = reader.ReadUInt16(),
+                    monsterType = (MonsterType)reader.ReadByte(),
+                    position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle())
+                };
+
+                byte dataLength = reader.ReadByte();
+                if (dataLength > 0)
+                {
+                    m.animationData = reader.ReadBytes(dataLength);
+                }
+                updateState.monsters.Add(m);
+            }
+        }
+        return updateState;
     }
 }

@@ -194,7 +194,10 @@ public class PlayerInputs : MonoBehaviour
     private void CheckForInteractableUI()
     {
         if (mainCamera == null)
+        {
             mainCamera = Camera.main;
+            return;
+        }
 
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         int layerMask = 1 << LayerMask.NameToLayer(GameManager.Instance.GameSettings.interactableLayer);

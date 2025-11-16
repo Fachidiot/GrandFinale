@@ -152,12 +152,13 @@ public class NetworkManager : MonoBehaviour
                 authoritativeState.players.Add(playerState);
             }
 
-            // 2. Gather Monster States
+            // 2. Create and broadcast the monster update state
+            var monsterUpdateState = new NetworkMonsterUpdateState();
             if (SpawnManager.Instance != null)
             {
                 foreach (var monsterGo in SpawnManager.Instance.SpawnedMonsters)
                 {
-                    if (monsterGo == null) continue; // Monster might have been destroyed
+                    if (monsterGo == null || !monsterGo.activeInHierarchy) continue;
 
                     var networkMonster = monsterGo.GetComponent<NetworkMonster>();
                     if (networkMonster == null) continue;
@@ -173,22 +174,21 @@ public class NetworkManager : MonoBehaviour
                     var monsterState = new MonsterState
                     {
                         monsterId = networkMonster.MonsterId,
-                        monsterType = networkMonster.MonsterType, // Get monster type from NetworkMonster
+                        monsterType = networkMonster.MonsterType,
                         position = monsterGo.transform.position,
                         rotation = monsterGo.transform.rotation,
                         animationData = animDataBytes
                     };
-                    authoritativeState.monsters.Add(monsterState);
+                    monsterUpdateState.monsters.Add(monsterState);
                 }
             }
+            
+            byte[] monsterStateBytes = monsterUpdateState.ToByteArray();
+            byte[] monsterMessage = new byte[monsterStateBytes.Length + 1];
+            monsterMessage[0] = (byte)NetworkMessageType.MonsterUpdate;
+            Buffer.BlockCopy(monsterStateBytes, 0, monsterMessage, 1, monsterStateBytes.Length);
+            BroadcastP2PMessage(monsterMessage, EP2PSend.k_EP2PSendUnreliable);
 
-            // 3. Broadcast the combined state
-            byte[] gameStateBytes = authoritativeState.ToByteArray();
-            byte[] message = new byte[gameStateBytes.Length + 1];
-            message[0] = (byte)NetworkMessageType.GameState;
-            Buffer.BlockCopy(gameStateBytes, 0, message, 1, gameStateBytes.Length);
-
-            BroadcastP2PMessage(message, EP2PSend.k_EP2PSendUnreliable);
 
             // 4. Update host's local game state directly
             if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(authoritativeState);
@@ -431,15 +431,28 @@ public class NetworkManager : MonoBehaviour
         // Client receives game state from host
         else
         {
-            if (messageType == NetworkMessageType.GameState)
+            switch (messageType)
             {
-                var gameState = NetworkGameState.FromBytes(content);
-                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
-            }
-            else if (messageType == NetworkMessageType.JsonMessage)
-            {
-                string jsonMsg = Encoding.UTF8.GetString(content);
-                OnJsonMessageReceived?.Invoke(sender, jsonMsg);
+                case NetworkMessageType.GameState:
+                    var gameState = NetworkGameState.FromBytes(content);
+                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
+                    break;
+                case NetworkMessageType.MonsterSpawn:
+                    var monsterState = MonsterState.FromBytes(content);
+                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.SpawnMonsterFromState(monsterState);
+                    break;
+                case NetworkMessageType.MonsterUpdate:
+                    var monsterUpdateState = NetworkMonsterUpdateState.FromBytes(content);
+                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.OnMonsterUpdateReceived(monsterUpdateState);
+                    break;
+                case NetworkMessageType.MonsterDespawn:
+                    ushort monsterId = BitConverter.ToUInt16(content, 0);
+                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.DespawnMonster(monsterId);
+                    break;
+                case NetworkMessageType.JsonMessage:
+                    string jsonMsg = Encoding.UTF8.GetString(content);
+                    OnJsonMessageReceived?.Invoke(sender, jsonMsg);
+                    break;
             }
         }
     }
@@ -472,6 +485,30 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    public void BroadcastMonsterSpawn(MonsterState monsterState)
+    {
+        if (Mode != NetworkMode.Host) return;
+
+        byte[] monsterBytes = monsterState.ToByteArray();
+        byte[] message = new byte[monsterBytes.Length + 1];
+        message[0] = (byte)NetworkMessageType.MonsterSpawn;
+        Buffer.BlockCopy(monsterBytes, 0, message, 1, monsterBytes.Length);
+
+        BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
+    }
+
+    public void BroadcastMonsterDespawn(ushort monsterId)
+    {
+        if (Mode != NetworkMode.Host) return;
+
+        byte[] idBytes = BitConverter.GetBytes(monsterId);
+        byte[] message = new byte[idBytes.Length + 1];
+        message[0] = (byte)NetworkMessageType.MonsterDespawn;
+        Buffer.BlockCopy(idBytes, 0, message, 1, idBytes.Length);
+
+        BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
+    }
+
     private void SendP2PMessage(CSteamID target, byte[] data, EP2PSend sendType)
     {
         SteamNetworking.SendP2PPacket(target, data, (uint)data.Length, sendType);
@@ -495,5 +532,8 @@ public enum NetworkMessageType : byte
 {
     GameState = 0,
     PlayerState = 1,
-    JsonMessage = 2
+    JsonMessage = 2,
+    MonsterSpawn = 3,
+    MonsterUpdate = 4,
+    MonsterDespawn = 5
 }
