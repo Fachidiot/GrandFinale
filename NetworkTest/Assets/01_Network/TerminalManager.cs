@@ -65,6 +65,9 @@ public class TerminalManager : MonoBehaviour
 
         if (isTerminalActive)
         {
+            // Clear the interact text when the terminal is activated
+            UIEvents.InteractableFocusChanged("");
+
             activePlayer = NetworkPlayerManager.Instance.LocalPlayer;
             if (activePlayer == null)
             {

@@ -128,7 +128,8 @@ public class NetworkPlayerManager : MonoBehaviour
         foreach (JObject playerInfoJson in playerList)
         {
             PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            if (!players.ContainsKey(playerInfo.steam_id))
+            // If the player is not in our list, or if their GameObject has been destroyed (stale entry), spawn them.
+            if (!players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) || playerGO == null)
             {
                 SpawnPlayer(playerInfo);
             }
@@ -141,6 +142,12 @@ public class NetworkPlayerManager : MonoBehaviour
         {
             Debug.LogError("[NetworkPlayerManager] Player Prefab is not assigned!");
             return null;
+        }
+
+        // If there's a stale entry, remove it before adding the new one.
+        if (players.ContainsKey(playerInfo.steam_id))
+        {
+            players.Remove(playerInfo.steam_id);
         }
 
         GameObject playerObject = Instantiate(playerPrefab, new Vector3(0, 1.4f, 0), Quaternion.identity);

@@ -22,3 +22,10 @@
     - 리팩토링 과정에서 누락된 `HandleServerJsonMessage` 메소드를 다시 추가하여 `player_action` JSON 메시지 라우팅 기능 복원.
 - **네트워크 매니저 구독 버그 수정**:
     - `ServerRoomManager`와 `NetworkPlayerManager`가 재접속 시 네트워크 이벤트를 중복으로 구독하던 버그를 수정. `Initialize` 또는 `Awake` 메소드에서 구독 전에 항상 구독을 취소하도록 변경하여 안정성 향상.
+- **플레이어 재접속 및 동기화 버그 최종 수정**:
+    - **호스트 재접속 버그**: `ServerRoomManager.Start`에 있던 호스트 플레이어 추가 로직을 `NetworkManager.OnLobbyCreated`로 이동하여, 호스트가 방을 새로 만들 때마다 자신의 프리팹이 생성되도록 수정.
+    - **클라이언트->호스트 동기화 버그**: `NetworkManager`의 호스트 `FixedUpdate` 로직에 `UpdateFromGameState` 호출을 다시 추가하여, 호스트가 클라이언트의 상태 업데이트를 자신의 씬에 올바르게 적용하도록 수정.
+- **`TerminalManager` 상호작용 텍스트 잔류 버그 수정**:
+    - `TerminalManager.ToggleTerminal` 메소드 내부에 터미널이 활성화될 때 `UIEvents.InteractableFocusChanged("")`를 호출하여 상호작용 텍스트를 명시적으로 숨기도록 수정.
+- **채팅 시스템 리팩토링 및 오류 수정**:
+    - `ChatManager.cs`를 대대적으로 리팩토링하여 Enter키로 메시지를 전송하고, 네트워크를 통해 메시지를 송수신하며, UI에 채팅 로그를 표시하는 전체 기능 구현.

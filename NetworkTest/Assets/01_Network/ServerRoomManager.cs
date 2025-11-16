@@ -69,15 +69,6 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        // If we are the host, we add ourselves to the player list immediately.
-        if (NetworkManager.Instance.Mode == NetworkMode.Host)
-        {
-            AddHostPlayer(NetworkManager.Instance.selfSteamId, CustomSteamManager.Instance.PlayerName);
-        }
-    }
-
     private void OnDestroy()
     {
         if (Instance == this)

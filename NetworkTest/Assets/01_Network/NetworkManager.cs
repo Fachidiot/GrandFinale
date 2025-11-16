@@ -165,6 +165,12 @@ public class NetworkManager : MonoBehaviour
         monsterMessage[0] = (byte)NetworkMessageType.MonsterUpdate;
         Buffer.BlockCopy(monsterStateBytes, 0, monsterMessage, 1, monsterStateBytes.Length);
         BroadcastP2PMessage(monsterMessage, EP2PSend.k_EP2PSendUnreliable);
+        // The host is the authority, but it still needs to update its local representation
+        // of other players based on the state it has received and is broadcasting.
+        if (NetworkPlayerManager.Instance != null)
+        {
+            NetworkPlayerManager.Instance.UpdateFromGameState(authoritativeState);
+        }
     }
 
     /// <summary>
@@ -346,6 +352,8 @@ public class NetworkManager : MonoBehaviour
             gameObject.AddComponent<ServerRoomManager>();
         }
         ServerRoomManager.Instance.Initialize(Mode);
+        // Add the host player to the room immediately upon creation.
+        ServerRoomManager.Instance.AddHostPlayer(selfSteamId, CustomSteamManager.Instance.PlayerName);
 
         SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
     }
