@@ -7,25 +7,34 @@ using System.Collections;
 using System;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Manages the state of the lobby/room, including the list of players and game settings like the selected planet.
+/// This manager is host-authoritative, meaning the host is the single source of truth for all room data.
+/// </summary>
 public class ServerRoomManager : MonoBehaviour
 {
     public static ServerRoomManager Instance { get; private set; }
 
-    // This list is the single source of truth for all players in the room.
-    // It's updated by the host and synchronized to clients.
+    // --- Public State (synchronized from host) ---
     public List<PlayerInfo> PlayerList { get; private set; } = new List<PlayerInfo>();
     public int SelectedPlanetId { get; private set; } = -1;
     public string RoomName { get; private set; } = "Space Crew"; // Default name
     public string HostId { get; private set; }
 
-    // Event for UI to subscribe to.
+    /// <summary>
+    /// Fired whenever room data is updated by the host. UI subscribes to this.
+    /// </summary>
     public static event Action OnRoomDataUpdated;
 
-    // Host-only data
-    private Dictionary<CSteamID, PlayerInfo> playersInRoom = new Dictionary<CSteamID, PlayerInfo>();
-    private Dictionary<CSteamID, byte> steamIdToByteId = new Dictionary<CSteamID, byte>();
-    private Dictionary<byte, CSteamID> byteIdToSteamId = new Dictionary<byte, CSteamID>();
-    private byte nextPlayerId = 0;
+    // --- Host-Only Data ---
+    // The authoritative dictionary of players currently in the room.
+    private readonly Dictionary<CSteamID, PlayerInfo> playersInRoom = new Dictionary<CSteamID, PlayerInfo>();
+    // Host-only lookups to map between a player's permanent SteamID and their temporary, session-specific byte ID.
+    private readonly Dictionary<CSteamID, byte> steamIdToByteId = new Dictionary<CSteamID, byte>();
+    private readonly Dictionary<byte, CSteamID> byteIdToSteamId = new Dictionary<byte, CSteamID>();
+    private byte nextPlayerId = 0; // Simple counter for assigning player IDs. Host is always 0.
+
+    #region Unity Lifecycle & Initialization
 
     private void Awake()
     {
@@ -33,16 +42,6 @@ public class ServerRoomManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            // Register message handlers based on network mode
-            if (NetworkManager.Instance.Mode == NetworkMode.Host)
-            {
-                NetworkManager.OnJsonMessageReceived += HandleHostJsonMessage;
-            }
-            else // Client
-            {
-                NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
-            }
         }
         else
         {
@@ -50,9 +49,25 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Called by NetworkManager after the network mode has been determined.
+    /// Subscribes to the correct message handlers based on whether we are the host or a client.
+    /// </summary>
+    public void Initialize(NetworkMode mode)
+    {
+        if (mode == NetworkMode.Host)
+        {
+            NetworkManager.OnJsonMessageReceived += HandleHostJsonMessage;
+        }
+        else // Client
+        {
+            NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
+        }
+    }
+
     private void Start()
     {
-        // This logic is now centralized here instead of RoomUIManager
+        // If we are the host, we add ourselves to the player list immediately.
         if (NetworkManager.Instance.Mode == NetworkMode.Host)
         {
             AddHostPlayer(NetworkManager.Instance.selfSteamId, CustomSteamManager.Instance.PlayerName);
@@ -66,15 +81,20 @@ public class ServerRoomManager : MonoBehaviour
             Instance = null;
             if (NetworkManager.Instance != null)
             {
-                // Unregister all handlers
+                // Unsubscribe from all possible handlers to prevent errors on shutdown
                 NetworkManager.OnJsonMessageReceived -= HandleHostJsonMessage;
                 NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
             }
         }
     }
 
+    #endregion
+
     #region Host-Only Logic
 
+    /// <summary>
+    /// (Host-only) Main router for JSON messages received from clients.
+    /// </summary>
     private void HandleHostJsonMessage(CSteamID sender, string jsonMsg)
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
@@ -93,17 +113,20 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// (Host-only) Handles a new client's request to join the room.
+    /// </summary>
     private void HandleSetNickname(CSteamID sender, JObject data)
     {
         string nickname = data["nickname"]?.ToString();
-        if (string.IsNullOrEmpty(nickname)) return;
-
-        if (!playersInRoom.ContainsKey(sender))
-        {
-            AddPlayer(sender, nickname);
-        }
+        if (string.IsNullOrEmpty(nickname) || playersInRoom.ContainsKey(sender)) return;
+        
+        AddPlayer(sender, nickname);
     }
 
+    /// <summary>
+    /// (Host-only) Handles a client's vote for a planet.
+    /// </summary>
     private void HandlePlanetProposal(CSteamID sender, JObject data)
     {
         int planetId = data["planet_id"]?.ToObject<int>() ?? -1;
@@ -114,12 +137,18 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// (Host-only) Adds the host player to the room.
+    /// </summary>
     public void AddHostPlayer(CSteamID hostSteamId, string nickname)
     {
         if (playersInRoom.ContainsKey(hostSteamId)) return;
         AddPlayer(hostSteamId, nickname, true);
     }
 
+    /// <summary>
+    /// (Host-only) Core logic to add a player, assign an ID, and update all clients.
+    /// </summary>
     private void AddPlayer(CSteamID steamId, string nickname, bool isHost = false)
     {
         byte newId = nextPlayerId++;
@@ -135,9 +164,13 @@ public class ServerRoomManager : MonoBehaviour
         };
         playersInRoom[steamId] = playerInfo;
 
+        // Broadcast the updated room state to everyone.
         StartCoroutine(DelayedBroadcast());
     }
 
+    /// <summary>
+    /// (Host-only) Removes a player who has disconnected and broadcasts the change.
+    /// </summary>
     public void RemovePlayer(CSteamID steamId)
     {
         if (playersInRoom.Remove(steamId) && steamIdToByteId.TryGetValue(steamId, out byte id))
@@ -149,6 +182,9 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// (Host-only) Sets the selected planet and broadcasts the change.
+    /// </summary>
     public void SelectPlanet(int planetId)
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
@@ -157,6 +193,9 @@ public class ServerRoomManager : MonoBehaviour
         BroadcastRoomUpdate();
     }
 
+    /// <summary>
+    /// (Host-only) Tells all clients to load the game scene, then loads it locally.
+    /// </summary>
     public void LaunchToPlanet(int planetId)
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
@@ -170,15 +209,16 @@ public class ServerRoomManager : MonoBehaviour
 
         string sceneToLoad = planet.sceneName;
 
-        // Broadcast to clients
         JObject message = new JObject { { "type", "load_scene" }, { "scene_name", sceneToLoad } };
         NetworkManager.Instance.BroadcastJsonMessage(message);
 
-        // Host loads the scene directly
         Debug.Log($"[ServerRoomManager] Host is loading scene: {sceneToLoad}");
         SceneManager.LoadScene(sceneToLoad);
     }
 
+    /// <summary>
+    /// (Host-only) Gathers all current room data and broadcasts it to all clients.
+    /// </summary>
     public void BroadcastRoomUpdate()
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
@@ -196,10 +236,12 @@ public class ServerRoomManager : MonoBehaviour
 
         NetworkManager.Instance.BroadcastJsonMessage(roomInfo);
 
-        // Also update host's local data directly
+        // The host also needs to process this message to update its own local state (e.g., PlayerList).
         UpdateLocalRoomData(roomInfo);
     }
 
+    // Waits until the end of the frame to broadcast. This can prevent race conditions
+    // where a client receives an update before its own local setup is complete.
     IEnumerator DelayedBroadcast()
     {
         yield return new WaitForEndOfFrame();
@@ -208,11 +250,14 @@ public class ServerRoomManager : MonoBehaviour
 
     #endregion
 
-    #region Client & Host Logic
+    #region Client & Shared Logic
 
+    /// <summary>
+    /// (Client-only) Main router for JSON messages received from the host.
+    /// </summary>
     private void HandleServerJsonMessage(CSteamID sender, string jsonMsg)
     {
-        if (NetworkManager.Instance.Mode == NetworkMode.Host) return; // Host handles messages differently
+        if (NetworkManager.Instance.Mode == NetworkMode.Host) return;
 
         JObject response = JObject.Parse(jsonMsg);
         string type = response["type"]?.ToString();
@@ -234,6 +279,9 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// (Client & Host) Updates the local, synchronized state from a host broadcast.
+    /// </summary>
     private void UpdateLocalRoomData(JObject data)
     {
         RoomName = data["room_name"]?.ToString() ?? RoomName;
@@ -245,7 +293,7 @@ public class ServerRoomManager : MonoBehaviour
         {
             PlayerList = players.ToObject<List<PlayerInfo>>();
 
-            // This is the new central point for updating other managers
+            // Trigger the NetworkPlayerManager to sync player GameObjects with this new list.
             if (NetworkPlayerManager.Instance != null)
             {
                 NetworkPlayerManager.Instance.UpdatePlayerList(players);
@@ -256,6 +304,9 @@ public class ServerRoomManager : MonoBehaviour
         OnRoomDataUpdated?.Invoke();
     }
 
+    /// <summary>
+    /// (Client-only) Sends the local player's nickname to the host to formally join the room.
+    /// </summary>
     public void SendNickname()
     {
         string nickname = CustomSteamManager.Instance.PlayerName;
@@ -264,15 +315,16 @@ public class ServerRoomManager : MonoBehaviour
         NetworkManager.Instance.SendJsonMessage(hostId, msg);
     }
 
+    /// <summary>
+    /// Resets all room data. Called on disconnect.
+    /// </summary>
     public void ClearRoom()
     {
-        // Host data
         playersInRoom.Clear();
         steamIdToByteId.Clear();
         byteIdToSteamId.Clear();
         nextPlayerId = 0;
 
-        // Shared data
         PlayerList.Clear();
         SelectedPlanetId = -1;
         OnRoomDataUpdated?.Invoke();
@@ -286,6 +338,8 @@ public class ServerRoomManager : MonoBehaviour
             SteamFriends.ActivateGameOverlayInviteDialog(NetworkManager.Instance.CurrentLobbyID);
         }
     }
+
+    // --- ID Lookups ---
 
     public string GetPlayerId(CSteamID steamId)
     {

@@ -3,46 +3,20 @@
 ## 2025년 11월 16일 일요일
 
 - `TriggerInteractor`를 마우스와 Raycast를 사용하는 방식으로 변경
-    - `Assets/01_Network/Interactable.cs` 생성
-    - `Assets/03_Player/Scripts/InputSystem/PlayerInputs.cs`에 Raycast 상호작용 로직 추가
-    - `Assets/01_Network/TriggerInteractor.cs` 삭제
-- 사용자는 이제 `TriggerInteractor` 컴포넌트 대신 `Interactable` 컴포넌트를 사용해야 합니다.
 - `TerminalManager`에서 `OnTriggerStay`를 사용하는 기존 상호작용 방식 삭제
-    - `Interactable` 컴포넌트가 상호작용한 `GameObject`를 전달하도록 수정
-    - `PlayerInputs`가 상호작용 시 자신의 `GameObject`를 전달하도록 수정
-    - `TerminalManager`의 `OnTriggerStay` 메서드 삭제
-- 사용자는 `TerminalManager`가 있는 게임 오브젝트에 `Interactable` 컴포넌트를 추가하고, `onInteract` 이벤트에 `TerminalManager.ToggleTerminal` 메서드를 연결해야 합니다.
 - `PlayerInputs.cs`의 `TryInteract` 메서드에서 Raycast가 `interactableLayer`만 감지하도록 수정
-    - `LayerMask.NameToLayer`가 반환하는 레이어 인덱스를 비트마스크로 변환하여 `Physics.Raycast`에 전달하도록 수정
 - `TerminalManager` 리팩토링
-    - `NetworkPlayerManager`가 로컬 플레이어의 `GameObject`를 저장하도록 `LocalPlayer` 속성 추가
-    - `Interactable` 이벤트를 다시 파라미터가 없는 `UnityEvent`로 변경
-    - `PlayerInputs`가 파라미터 없이 `Interact()`를 호출하도록 수정
-    - `TerminalManager.ToggleTerminal`이 `NetworkPlayerManager`에서 로컬 플레이어를 참조하도록 변경하고, 파라미터를 받지 않도록 수정
-- 사용자는 `TerminalManager`의 `Interactable` 컴포넌트가 새로 변경된 `ToggleTerminal()` 메서드를 호출하도록 Unity 에디터에서 재설정해야 합니다.
 - `NetworkPlayer` 스크립트에 `IsMine` 속성이 없는 문제 수정
-    - `NetworkPlayer.cs`에 `public bool IsMine { get; private set; }` 속성 추가
-    - `Initialize` 메서드에서 `IsMine` 속성 설정
-    - `NetworkPlayerManager.cs`가 이 속성을 사용하여 로컬 플레이어를 올바르게 식별하도록 함
 - 상호작용 가능한 오브젝트를 바라볼 때 UI 텍스트 표시 기능 추가
-    - `Interactable.cs`에 `interactionText` 문자열 필드 추가
-    - `PlayerInputs.cs`에 매 프레임 Raycast를 수행하여 `InGameUIManager`에 상호작용 텍스트를 표시/숨김 처리하는 `CheckForInteractableUI` 메서드 추가
-- 사용자는 `Interactable` 컴포넌트의 `Interaction Text` 필드에 원하는 텍스트를 입력해야 합니다.
 - `SpawnManager.cs`의 `PrewarmPools` 메서드에서 발생하는 `ArgumentException` 버그 수정
-    - `monsterPools.Add` 호출을 잘못된 루프에서 올바른 위치로 이동
-    - 사전에 키를 추가하기 전에 `ContainsKey` 확인을 추가하여 코드 안정성 향상
 - `InGameUIManager`의 싱글톤 패턴을 이벤트 기반 아키텍처로 리팩토링
-    - UI 관련 정적 이벤트를 관리하는 `UIEvents.cs` 스크립트 생성
-    - `PlayerInputs`와 `NetworkPlayer`가 `InGameUIManager`를 직접 호출하는 대신 `UIEvents`의 이벤트를 발생시키도록 수정
-    - `InGameUIManager`가 싱글톤이 아닌, `UIEvents`의 이벤트를 구독하여 UI를 업데이트하도록 변경
 - 클라이언트 디싱크 문제를 해결하기 위해 네트워크 아키텍처 리팩토링
-    - 몬스터 생성/소멸 메시지를 분리하여 신뢰성 있는(Reliable) 패킷으로 전송하도록 변경
-    - 몬스터 위치/애니메이션 업데이트를 별도의 비신뢰성(Unreliable) 패킷으로 분리하여 메인 `GameState` 패킷 크기 축소
-    - `NetworkManager`, `NetworkPlayerManager`, `SpawnManager`, `GameStateModels` 등 관련 스크립트 전반을 수정하여 새로운 메시지 타입과 처리 로직 구현
 - `NetworkManager.cs`의 컴파일 오류 수정
-    - 이전 리팩토링 과정에서 실수로 추가된 중복 코드를 제거하여 클래스 정의 오류 해결
 - `SpawnManager.cs`의 `PrewarmPools`에서 발생하는 NavMesh 경고 수정
-    - 오브젝트 풀 생성을 위해 `Instantiate` 호출 시 `spawnPoint`의 위치를 사용하도록 하여 NavMesh와 가까운 곳에서 생성되도록 변경
 - 멀티플레이 재접속 및 연결 종료 관련 버그 수정
-    - **재접속 시 플레이어 미생성 버그**: 클라이언트가 로비에 입장할 때마다 `SendNickname`이 호출되도록 로직을 `ServerRoomManager.Start`에서 `NetworkManager.OnLobbyEnter`로 이동하여 해결.
-    - **호스트 퇴장 시 클라이언트 잔류 버그**: `InGameUIManager`가 `OnDisconnected` 이벤트를 구독하고 메인 메뉴 씬을 로드하도록 하여 해결.
+- **네트워크 코드 전체 검토 및 리팩토링**:
+    - **`NetworkManager.cs`**: `FixedUpdate` 로직을 작은 메소드들로 분리하고, 코드 전반에 설명 주석을 추가하여 가독성 및 유지보수성 향상.
+    - **`NetworkPlayerManager.cs`**: 더 이상 사용되지 않는 `SpawnMonster` 메소드를 제거하고, 전반적인 구조를 개선하고 설명 주석을 추가.
+    - **`ServerRoomManager.cs`**: `Awake`에서 메시지 핸들러를 구독하던 로직을 `Initialize` 메소드로 분리하여, `NetworkManager`가 모드를 결정한 후 호출하도록 변경. 이를 통해 잠재적인 레이스 컨디션 및 재접속 버그를 해결하고, 코드 전반에 설명 주석을 추가.
+- **`NetworkPlayerManager.cs` 컴파일 오류 수정**:
+    - 리팩토링 과정에서 누락된 `HandleServerJsonMessage` 메소드를 다시 추가하여 `player_action` JSON 메시지 라우팅 기능 복원.

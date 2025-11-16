@@ -9,6 +9,9 @@ using Steamworks;
 using UnityEngine.SceneManagement;
 using System.Text;
 
+/// <summary>
+/// Defines the role of the current machine in the network.
+/// </summary>
 public enum NetworkMode
 {
     None,
@@ -16,44 +19,49 @@ public enum NetworkMode
     Host
 }
 
+/// <summary>
+/// Core class for managing the network session, including lobby management and P2P data transfer.
+/// This class is a singleton and persists across scenes.
+/// </summary>
 public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance { get; private set; }
 
+    public const byte INVALID_PLAYER_ID = 255;
+
     public NetworkMode Mode { get; private set; } = NetworkMode.None;
-    public byte MyPlayerId { get; private set; } = 255; // 0=Host, >0=Client, 255=NotSet
+    public byte MyPlayerId { get; private set; } = INVALID_PLAYER_ID;
     public bool IsConnected { get; private set; }
-
-    private readonly ConcurrentQueue<(CSteamID, byte[])> p2pPacketQueue = new ConcurrentQueue<(CSteamID, byte[])>();
-    private readonly ConcurrentDictionary<byte, PlayerState> receivedPlayerStates = new ConcurrentDictionary<byte, PlayerState>();
-
-    public string PlayerId { get; private set; }
+    public string PlayerId { get; private set; } // SteamID as a string
     public CSteamID selfSteamId { get; private set; }
+    public CSteamID CurrentLobbyID => m_CurrentLobbyID;
+    public CSteamID LobbyHostID => lobbyHostID;
 
+    // --- Events ---
     public static event Action OnConnected;
     public static event Action<string> OnConnectionFailed;
     public static event Action OnDisconnected;
     public static event Action<CSteamID, string> OnJsonMessageReceived;
 
+    // --- Networking Internals ---
+    // Queue for packets received on the networking thread, to be processed on the main thread in Update.
+    private readonly ConcurrentQueue<(CSteamID, byte[])> p2pPacketQueue = new ConcurrentQueue<(CSteamID, byte[])>();
+    // Host-only cache of the latest state received from each client.
+    private readonly ConcurrentDictionary<byte, PlayerState> receivedPlayerStates = new ConcurrentDictionary<byte, PlayerState>();
+
+    // --- Steam Lobby Internals ---
     private CSteamID m_CurrentLobbyID;
-    private List<CSteamID> lobbyMembers = new List<CSteamID>();
     private CSteamID lobbyHostID;
+    private List<CSteamID> lobbyMembers = new List<CSteamID>();
 
-    public CSteamID LobbyHostID { get { return lobbyHostID; } }
-
+    // --- Steam Callbacks ---
     private Callback<LobbyCreated_t> m_LobbyCreated;
     private Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
     private Callback<LobbyEnter_t> m_LobbyEnter;
     private Callback<LobbyChatUpdate_t> m_LobbyChatUpdate;
     private Callback<P2PSessionRequest_t> m_P2PSessionRequest;
 
-    public CSteamID CurrentLobbyID { get { return m_CurrentLobbyID; } }
-
-    public void SetMyPlayerId(byte id)
-    {
-        MyPlayerId = id;
-        // Debug.Log($"[NetworkManager] My Player ID is set to: {MyPlayerId}");
-    }
+    #region Unity Lifecycle
 
     private void Awake()
     {
@@ -65,7 +73,6 @@ public class NetworkManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
-            return;
         }
     }
 
@@ -76,17 +83,13 @@ public class NetworkManager : MonoBehaviour
             selfSteamId = SteamUser.GetSteamID();
             PlayerId = selfSteamId.ToString();
 
+            // Register Steam callback handlers
             m_LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             m_GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             m_LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
             m_LobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
             m_P2PSessionRequest = Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
         }
-    }
-
-    private void OnApplicationQuit()
-    {
-        Disconnect();
     }
 
     private void OnDestroy()
@@ -98,6 +101,14 @@ public class NetworkManager : MonoBehaviour
         Disconnect();
     }
 
+    private void OnApplicationQuit()
+    {
+        Disconnect();
+    }
+
+    /// <summary>
+    /// Main thread loop for processing received packets.
+    /// </summary>
     private void Update()
     {
         ListenForP2PPackets();
@@ -109,130 +120,183 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Physics-timed loop for sending network state updates.
+    /// </summary>
     private void FixedUpdate()
     {
-        if (string.IsNullOrEmpty(PlayerId)) return;
-        if (!IsConnected || MyPlayerId == 255 || NetworkPlayerManager.Instance == null) return;
-
+        // Guard clauses to prevent sending updates when not in a valid state
+        if (!IsConnected || MyPlayerId == INVALID_PLAYER_ID || NetworkPlayerManager.Instance == null) return;
         if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
 
-        // Host Logic
-        if (MyPlayerId == 0)
+        if (Mode == NetworkMode.Host)
         {
-            if (ServerRoomManager.Instance == null) return;
-
-            var authoritativeState = new NetworkGameState();
-
-            // 1. Gather Player States
-            foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
-            {
-                string steamIdStr = playerEntry.Key;
-                CSteamID steamId = new CSteamID(ulong.Parse(steamIdStr));
-                string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
-
-                if (!byte.TryParse(byteIdStr, out byte playerId)) continue;
-
-                PlayerState playerState;
-                if (playerId == 0) // Host's own state
-                {
-                    playerState = GetPlayerStateFromGameObject(playerEntry.Value, selfSteamId);
-                }
-                else // Client's state
-                {
-                    if (receivedPlayerStates.TryGetValue(playerId, out playerState))
-                    {
-                        // We have the client's state, use it
-                    }
-                    else
-                    {
-                        // Client state not received yet, maybe skip or use last known
-                        continue;
-                    }
-                }
-                authoritativeState.players.Add(playerState);
-            }
-
-            // 2. Create and broadcast the monster update state
-            var monsterUpdateState = new NetworkMonsterUpdateState();
-            if (SpawnManager.Instance != null)
-            {
-                foreach (var monsterGo in SpawnManager.Instance.SpawnedMonsters)
-                {
-                    if (monsterGo == null || !monsterGo.activeInHierarchy) continue;
-
-                    var networkMonster = monsterGo.GetComponent<NetworkMonster>();
-                    if (networkMonster == null) continue;
-
-                    var monsterAnimSync = monsterGo.GetComponent<NetworkMonsterAnimatorSync>();
-                    byte[] animDataBytes = null;
-                    if (monsterAnimSync != null)
-                    {
-                        var animData = monsterAnimSync.GetAnimationData();
-                        animDataBytes = NetworkMonsterAnimatorSync.Serialize(animData);
-                    }
-
-                    var monsterState = new MonsterState
-                    {
-                        monsterId = networkMonster.MonsterId,
-                        monsterType = networkMonster.MonsterType,
-                        position = monsterGo.transform.position,
-                        rotation = monsterGo.transform.rotation,
-                        animationData = animDataBytes
-                    };
-                    monsterUpdateState.monsters.Add(monsterState);
-                }
-            }
-            
-            byte[] monsterStateBytes = monsterUpdateState.ToByteArray();
-            byte[] monsterMessage = new byte[monsterStateBytes.Length + 1];
-            monsterMessage[0] = (byte)NetworkMessageType.MonsterUpdate;
-            Buffer.BlockCopy(monsterStateBytes, 0, monsterMessage, 1, monsterStateBytes.Length);
-            BroadcastP2PMessage(monsterMessage, EP2PSend.k_EP2PSendUnreliable);
-
-
-            // 4. Update host's local game state directly
-            if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(authoritativeState);
+            SendHostUpdates();
         }
-        // Client Logic
-        else
+        else // Client
         {
-            PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo, selfSteamId);
-
-            if (playerState.playerId == 255) return;
-
-            byte[] stateBytes = playerState.ToByteArray();
-            byte[] messageBytes = new byte[stateBytes.Length + 1];
-            messageBytes[0] = (byte)NetworkMessageType.PlayerState;
-            Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
-
-            SendP2PMessage(lobbyHostID, messageBytes, EP2PSend.k_EP2PSendUnreliable);
+            SendClientUpdates(myPlayerGo);
         }
     }
 
-    private PlayerState GetPlayerStateFromGameObject(GameObject playerGo, CSteamID steamId)
+    #endregion
+
+    #region State Sending
+
+    /// <summary>
+    /// Executed by the host. Gathers all game state and broadcasts it to clients.
+    /// </summary>
+    private void SendHostUpdates()
+    {
+        if (ServerRoomManager.Instance == null) return;
+
+        // 1. Send Player States
+        var authoritativeState = new NetworkGameState { players = GatherPlayerStates() };
+        byte[] playerStateBytes = authoritativeState.ToByteArray();
+        byte[] playerMessage = new byte[playerStateBytes.Length + 1];
+        playerMessage[0] = (byte)NetworkMessageType.GameState;
+        Buffer.BlockCopy(playerStateBytes, 0, playerMessage, 1, playerStateBytes.Length);
+        BroadcastP2PMessage(playerMessage, EP2PSend.k_EP2PSendUnreliable);
+
+        // 2. Send Monster States
+        var monsterUpdateState = new NetworkMonsterUpdateState { monsters = GatherMonsterStates() };
+        byte[] monsterStateBytes = monsterUpdateState.ToByteArray();
+        byte[] monsterMessage = new byte[monsterStateBytes.Length + 1];
+        monsterMessage[0] = (byte)NetworkMessageType.MonsterUpdate;
+        Buffer.BlockCopy(monsterStateBytes, 0, monsterMessage, 1, monsterStateBytes.Length);
+        BroadcastP2PMessage(monsterMessage, EP2PSend.k_EP2PSendUnreliable);
+    }
+
+    /// <summary>
+    /// Executed by the host. Collects the state of all players in the room.
+    /// </summary>
+    private List<PlayerState> GatherPlayerStates()
+    {
+        var playerStates = new List<PlayerState>();
+        foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
+        {
+            string steamIdStr = playerEntry.Key;
+            CSteamID steamId = new CSteamID(ulong.Parse(steamIdStr));
+            string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
+
+            if (!byte.TryParse(byteIdStr, out byte playerId)) continue;
+
+            PlayerState playerState;
+            if (playerId == 0) // Host's own state
+            {
+                playerState = GetPlayerStateFromGameObject(playerEntry.Value);
+            }
+            else // Client's state
+            {
+                if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
+                {
+                    continue; // Skip if we haven't received an update from this client yet
+                }
+            }
+            playerStates.Add(playerState);
+        }
+        return playerStates;
+    }
+
+    /// <summary>
+    /// Executed by the host. Collects the state of all active monsters.
+    /// </summary>
+    private List<MonsterState> GatherMonsterStates()
+    {
+        var monsterStates = new List<MonsterState>();
+        if (SpawnManager.Instance == null) return monsterStates;
+
+        foreach (var monsterGo in SpawnManager.Instance.SpawnedMonsters)
+        {
+            if (monsterGo == null || !monsterGo.activeInHierarchy) continue;
+
+            var networkMonster = monsterGo.GetComponent<NetworkMonster>();
+            if (networkMonster == null) continue;
+
+            var monsterAnimSync = monsterGo.GetComponent<NetworkMonsterAnimatorSync>();
+            byte[] animDataBytes = null;
+            if (monsterAnimSync != null)
+            {
+                var animData = monsterAnimSync.GetAnimationData();
+                animDataBytes = NetworkMonsterAnimatorSync.Serialize(animData);
+            }
+
+            var monsterState = new MonsterState
+            {
+                monsterId = networkMonster.MonsterId,
+                monsterType = networkMonster.MonsterType,
+                position = monsterGo.transform.position,
+                rotation = monsterGo.transform.rotation,
+                animationData = animDataBytes
+            };
+            monsterStates.Add(monsterState);
+        }
+        return monsterStates;
+    }
+
+    /// <summary>
+    /// Executed by the client. Sends its own input and state to the host.
+    /// </summary>
+    private void SendClientUpdates(GameObject myPlayerGo)
+    {
+        PlayerState playerState = GetPlayerStateFromGameObject(myPlayerGo);
+        if (playerState.playerId == INVALID_PLAYER_ID) return;
+
+        byte[] stateBytes = playerState.ToByteArray();
+        byte[] messageBytes = new byte[stateBytes.Length + 1];
+        messageBytes[0] = (byte)NetworkMessageType.PlayerState;
+        Buffer.BlockCopy(stateBytes, 0, messageBytes, 1, stateBytes.Length);
+
+        SendP2PMessage(lobbyHostID, messageBytes, EP2PSend.k_EP2PSendUnreliable);
+    }
+
+    /// <summary>
+    /// Gathers the current state of a player GameObject.
+    /// </summary>
+    private PlayerState GetPlayerStateFromGameObject(GameObject playerGo)
     {
         var networkPlayer = playerGo.GetComponent<NetworkPlayer>();
         if (networkPlayer == null)
         {
-            // Return a default or empty state if the component isn't ready yet
-            return new PlayerState { playerId = 255 };
+            return new PlayerState { playerId = INVALID_PLAYER_ID };
         }
-
-        var animSync = networkPlayer.AnimatorSync;
-        var weaponCtrl = networkPlayer.WeaponController;
-        var camTransformSync = networkPlayer.CameraTransformSync;
 
         return new PlayerState
         {
             playerId = MyPlayerId,
             position = playerGo.transform.position,
             rotation = playerGo.transform.rotation,
-            cameraRotation = camTransformSync != null ? camTransformSync.transform.rotation : Quaternion.identity,
-            animationMask = animSync != null ? animSync.GetAnimationMask() : (byte)0,
-            moveX = animSync != null ? animSync.GetHorizontal() : 0,
-            moveY = animSync != null ? animSync.GetVertical() : 0,
-            weaponId = weaponCtrl != null ? weaponCtrl.activeID : 0
+            cameraRotation = networkPlayer.CameraTransformSync != null ? networkPlayer.CameraTransformSync.transform.rotation : Quaternion.identity,
+            animationMask = networkPlayer.AnimatorSync != null ? networkPlayer.AnimatorSync.GetAnimationMask() : (byte)0,
+            moveX = networkPlayer.AnimatorSync != null ? networkPlayer.AnimatorSync.GetHorizontal() : 0,
+            moveY = networkPlayer.AnimatorSync != null ? networkPlayer.AnimatorSync.GetVertical() : 0,
+            weaponId = networkPlayer.WeaponController != null ? networkPlayer.WeaponController.activeID : 0
         };
+    }
+
+    #endregion
+
+    #region Public Session Management
+
+    public void SetMyPlayerId(byte id)
+    {
+        MyPlayerId = id;
+    }
+
+    public void CreateSteamLobby()
+    {
+        if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
+        {
+            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+        }
+    }
+
+    public void JoinSteamLobby(CSteamID lobbyID)
+    {
+        if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
+        {
+            SteamMatchmaking.JoinLobby(lobbyID);
+        }
     }
 
     public void Disconnect()
@@ -240,7 +304,7 @@ public class NetworkManager : MonoBehaviour
         if (!IsConnected) return;
 
         IsConnected = false;
-        MyPlayerId = 255;
+        MyPlayerId = INVALID_PLAYER_ID;
         Mode = NetworkMode.None;
 
         if (m_CurrentLobbyID.IsValid())
@@ -249,6 +313,7 @@ public class NetworkManager : MonoBehaviour
             m_CurrentLobbyID = CSteamID.Nil;
         }
 
+        // Clean up persistent managers
         if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.ClearAllNetworkEntities();
         if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.ClearRoom();
 
@@ -259,15 +324,9 @@ public class NetworkManager : MonoBehaviour
         OnDisconnected?.Invoke();
     }
 
-    #region Steam Lobby Callbacks and Methods
+    #endregion
 
-    public void CreateSteamLobby()
-    {
-        if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
-        {
-            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
-        }
-    }
+    #region Steam Lobby Callbacks
 
     private void OnLobbyCreated(LobbyCreated_t pCallback)
     {
@@ -277,25 +336,18 @@ public class NetworkManager : MonoBehaviour
             return;
         }
 
-        Mode = NetworkMode.Host;
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = selfSteamId;
         IsConnected = true;
+        Mode = NetworkMode.Host;
 
         if (ServerRoomManager.Instance == null)
         {
             gameObject.AddComponent<ServerRoomManager>();
         }
+        ServerRoomManager.Instance.Initialize(Mode);
 
         SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
-    }
-
-    public void JoinSteamLobby(CSteamID lobbyID)
-    {
-        if (CustomSteamManager.Instance != null && CustomSteamManager.Instance.IsSteamInitialized)
-        {
-            SteamMatchmaking.JoinLobby(lobbyID);
-        }
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t pCallback)
@@ -314,29 +366,26 @@ public class NetworkManager : MonoBehaviour
         m_CurrentLobbyID = new CSteamID(pCallback.m_ulSteamIDLobby);
         lobbyHostID = SteamMatchmaking.GetLobbyOwner(m_CurrentLobbyID);
 
-        if (selfSteamId != lobbyHostID)
-        {
-            Mode = NetworkMode.Client;
-            if (ServerRoomManager.Instance != null)
-            {
-                ServerRoomManager.Instance.SendNickname();
-            }
-        }
-        else
-        {
-            // If we are the lobby owner, ensure mode is Host.
-            // This can happen if OnLobbyCreated hasn't set it yet in some race conditions.
-            Mode = NetworkMode.Host;
-        }
-
-        // Ensure ServerRoomManager exists for both Host and Client
+        // Ensure ServerRoomManager exists for both Host and Client BEFORE we use it.
         if (ServerRoomManager.Instance == null)
         {
             gameObject.AddComponent<ServerRoomManager>();
         }
 
-        UpdateLobbyMembers();
+        if (selfSteamId != lobbyHostID)
+        {
+            Mode = NetworkMode.Client;
+            ServerRoomManager.Instance.Initialize(Mode);
+            // Now that we know the instance exists and is initialized, we can safely call this.
+            ServerRoomManager.Instance.SendNickname();
+        }
+        else
+        {
+            Mode = NetworkMode.Host;
+            ServerRoomManager.Instance.Initialize(Mode);
+        }
 
+        UpdateLobbyMembers();
         IsConnected = true;
         OnConnected?.Invoke();
 
@@ -353,21 +402,15 @@ public class NetworkManager : MonoBehaviour
         {
             Debug.Log($"Player {userChanged} left the lobby (Reason: {stateChange}).");
 
-            // If we are the host, we need to clean up the disconnected player
             if (Mode == NetworkMode.Host)
             {
-                if (ServerRoomManager.Instance != null)
-                {
-                    ServerRoomManager.Instance.RemovePlayer(userChanged);
-                }
-                if (NetworkPlayerManager.Instance != null)
-                {
-                    NetworkPlayerManager.Instance.RemovePlayer(userChanged.ToString());
-                }
+                // Host cleans up the disconnected player's data
+                if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.RemovePlayer(userChanged);
+                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.RemovePlayer(userChanged.ToString());
             }
-            // If we are a client and the user who left was the host, we must disconnect
             else if (Mode == NetworkMode.Client && userChanged == lobbyHostID)
             {
+                // Client gets disconnected if the host leaves
                 Debug.LogError("Host has left the lobby. Disconnecting.");
                 Disconnect();
             }
@@ -391,25 +434,33 @@ public class NetworkManager : MonoBehaviour
 
     #region P2P Networking
 
+    /// <summary>
+    /// Steam callback when a user wants to establish a P2P connection. We automatically accept.
+    /// </summary>
     private void OnP2PSessionRequest(P2PSessionRequest_t pCallback)
     {
         SteamNetworking.AcceptP2PSessionWithUser(pCallback.m_steamIDRemote);
     }
 
+    /// <summary>
+    /// Polls Steamworks for available P2P packets and adds them to a thread-safe queue.
+    /// </summary>
     private void ListenForP2PPackets()
     {
         uint packetSize;
         while (SteamNetworking.IsP2PPacketAvailable(out packetSize))
         {
             byte[] buffer = new byte[packetSize];
-            CSteamID remoteId;
-            if (SteamNetworking.ReadP2PPacket(buffer, packetSize, out uint bytesRead, out remoteId))
+            if (SteamNetworking.ReadP2PPacket(buffer, packetSize, out _, out CSteamID remoteId))
             {
                 p2pPacketQueue.Enqueue((remoteId, buffer));
             }
         }
     }
 
+    /// <summary>
+    /// Main router for incoming data packets. Deserializes the message type and routes the content.
+    /// </summary>
     private void HandleP2PPacket(CSteamID sender, byte[] data)
     {
         if (data.Length == 0) return;
@@ -417,50 +468,61 @@ public class NetworkManager : MonoBehaviour
         byte[] content = new byte[data.Length - 1];
         Buffer.BlockCopy(data, 1, content, 0, content.Length);
 
-        // Host receives state from clients
-        if (MyPlayerId == 0)
+        if (Mode == NetworkMode.Host)
         {
-            if (messageType == NetworkMessageType.PlayerState)
-            {
-                PlayerState state = PlayerState.FromBytes(content);
-
-                receivedPlayerStates[state.playerId] = state;
-            }
-            else if (messageType == NetworkMessageType.JsonMessage)
-            {
-                string jsonMsg = Encoding.UTF8.GetString(content);
-                OnJsonMessageReceived?.Invoke(sender, jsonMsg);
-            }
+            HandleHostPacket(messageType, content, sender);
         }
-        // Client receives game state from host
-        else
+        else // Client
         {
-            switch (messageType)
-            {
-                case NetworkMessageType.GameState:
-                    var gameState = NetworkGameState.FromBytes(content);
-                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
-                    break;
-                case NetworkMessageType.MonsterSpawn:
-                    var monsterState = MonsterState.FromBytes(content);
-                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.SpawnMonsterFromState(monsterState);
-                    break;
-                case NetworkMessageType.MonsterUpdate:
-                    var monsterUpdateState = NetworkMonsterUpdateState.FromBytes(content);
-                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.OnMonsterUpdateReceived(monsterUpdateState);
-                    break;
-                case NetworkMessageType.MonsterDespawn:
-                    ushort monsterId = BitConverter.ToUInt16(content, 0);
-                    if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.DespawnMonster(monsterId);
-                    break;
-                case NetworkMessageType.JsonMessage:
-                    string jsonMsg = Encoding.UTF8.GetString(content);
-                    OnJsonMessageReceived?.Invoke(sender, jsonMsg);
-                    break;
-            }
+            HandleClientPacket(messageType, content, sender);
         }
     }
 
+    private void HandleHostPacket(NetworkMessageType messageType, byte[] content, CSteamID sender)
+    {
+        switch (messageType)
+        {
+            case NetworkMessageType.PlayerState:
+                PlayerState state = PlayerState.FromBytes(content);
+                receivedPlayerStates[state.playerId] = state;
+                break;
+            case NetworkMessageType.JsonMessage:
+                string jsonMsg = Encoding.UTF8.GetString(content);
+                OnJsonMessageReceived?.Invoke(sender, jsonMsg);
+                break;
+        }
+    }
+
+    private void HandleClientPacket(NetworkMessageType messageType, byte[] content, CSteamID sender)
+    {
+        switch (messageType)
+        {
+            case NetworkMessageType.GameState:
+                var gameState = NetworkGameState.FromBytes(content);
+                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
+                break;
+            case NetworkMessageType.MonsterSpawn:
+                var monsterState = MonsterState.FromBytes(content);
+                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.SpawnMonsterFromState(monsterState);
+                break;
+            case NetworkMessageType.MonsterUpdate:
+                var monsterUpdateState = NetworkMonsterUpdateState.FromBytes(content);
+                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.OnMonsterUpdateReceived(monsterUpdateState);
+                break;
+            case NetworkMessageType.MonsterDespawn:
+                ushort monsterId = BitConverter.ToUInt16(content, 0);
+                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.DespawnMonster(monsterId);
+                break;
+            case NetworkMessageType.JsonMessage:
+                string jsonMsg = Encoding.UTF8.GetString(content);
+                OnJsonMessageReceived?.Invoke(sender, jsonMsg);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Sends a message containing a JSON object. Sent reliably.
+    /// </summary>
     public void SendJsonMessage(CSteamID target, JObject json)
     {
         string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
@@ -471,6 +533,9 @@ public class NetworkManager : MonoBehaviour
         SendP2PMessage(target, message, EP2PSend.k_EP2PSendReliable);
     }
 
+    /// <summary>
+    /// Broadcasts a JSON message to all lobby members. Sent reliably.
+    /// </summary>
     public void BroadcastJsonMessage(JObject json)
     {
         string jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
@@ -481,14 +546,15 @@ public class NetworkManager : MonoBehaviour
 
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
 
-        // Host also processes its own JSON messages
         if (Mode == NetworkMode.Host)
         {
-            // Debug.Log("NetworkManager: BroadcastJsonMessage() called. Invoking locally for host.");
             OnJsonMessageReceived?.Invoke(selfSteamId, jsonString);
         }
     }
 
+    /// <summary>
+    /// Broadcasts a command to spawn a specific monster. Sent reliably.
+    /// </summary>
     public void BroadcastMonsterSpawn(MonsterState monsterState)
     {
         if (Mode != NetworkMode.Host) return;
@@ -501,6 +567,9 @@ public class NetworkManager : MonoBehaviour
         BroadcastP2PMessage(message, EP2PSend.k_EP2PSendReliable);
     }
 
+    /// <summary>
+    /// Broadcasts a command to despawn a specific monster. Sent reliably.
+    /// </summary>
     public void BroadcastMonsterDespawn(ushort monsterId)
     {
         if (Mode != NetworkMode.Host) return;
@@ -532,12 +601,16 @@ public class NetworkManager : MonoBehaviour
     #endregion
 }
 
+/// <summary>
+/// Defines the different types of network messages that can be sent.
+/// The first byte of any packet corresponds to a value in this enum.
+/// </summary>
 public enum NetworkMessageType : byte
 {
-    GameState = 0,
-    PlayerState = 1,
-    JsonMessage = 2,
-    MonsterSpawn = 3,
-    MonsterUpdate = 4,
-    MonsterDespawn = 5
+    GameState = 0,      // Unreliable update of all player states
+    PlayerState = 1,    // Unreliable update of a single client's state sent to the host
+    JsonMessage = 2,    // Reliable message for generic, non-realtime events (e.g., chat, planet proposals)
+    MonsterSpawn = 3,   // Reliable command to spawn a monster
+    MonsterUpdate = 4,  // Unreliable update of all monster states
+    MonsterDespawn = 5  // Reliable command to despawn a monster
 }
