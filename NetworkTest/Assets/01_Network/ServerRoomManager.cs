@@ -55,6 +55,10 @@ public class ServerRoomManager : MonoBehaviour
     /// </summary>
     public void Initialize(NetworkMode mode)
     {
+        // Unsubscribe first to prevent duplicate subscriptions on re-join
+        NetworkManager.OnJsonMessageReceived -= HandleHostJsonMessage;
+        NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
+
         if (mode == NetworkMode.Host)
         {
             NetworkManager.OnJsonMessageReceived += HandleHostJsonMessage;

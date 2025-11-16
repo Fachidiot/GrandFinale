@@ -44,7 +44,8 @@ public class NetworkPlayerManager : MonoBehaviour
             return;
         }
 
-        // This manager only listens for player-specific JSON actions, not general state.
+        // Unsubscribe first to prevent duplicates, then subscribe.
+        NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
         NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
     }
 
