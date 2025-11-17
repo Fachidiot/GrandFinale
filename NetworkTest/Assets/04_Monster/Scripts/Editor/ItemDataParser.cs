@@ -1,33 +1,32 @@
-// Assets/Scripts/Editor/ItemDataParser.cs
 using UnityEngine;
-using UnityEditor; // Editor ½ºÅ©¸³Æ®
-using System.IO;   // ÆÄÀÏ ÀĞ±â/¾²±â
+using UnityEditor; // Editor ìŠ¤í¬ë¦½íŠ¸
+using System.IO;   // íŒŒì¼ ì½ê¸°/ì“°ê¸°
 using System.Collections.Generic; // List
 
 public class ItemDataParser
 {
-    // µ¥ÀÌÅÍ ¿¡¼ÂÀÌ ÀúÀåµÉ ±âº» °æ·Î
-    private const string ABILITY_DATA_PATH = "Assets/Monster_v1/Data/Abilities";
-    private const string RELIC_DATA_PATH = "Assets/Monster_v1/Data/Relics";
+    // ë°ì´í„° ì—ì…‹ì´ ì €ì¥ë  ê¸°ë³¸ ê²½ë¡œ
+    private const string ABILITY_DATA_PATH = "Assets/Item/Data/Abilities";
+    private const string RELIC_DATA_PATH = "Assets/Item/Data/Relics";
 
-    private const string MASTER_DB_PATH = "Assets/Monster_v1/Data/MasterDatabase.asset";
+    private const string MASTER_DB_PATH = "Assets/Item/Data/MasterDatabase/MasterDatabase.asset";
 
-    // 1. AbilityData ÀÓÆ÷Æ® ¸Ş´º
+    // 1. AbilityData ì„í¬íŠ¸ ë©”ë‰´
     [MenuItem("MyTools/Import Data/1. Import AbilityData (CSV)")]
     public static void ImportAbilityData()
     {
         string path = EditorUtility.OpenFilePanel("Import Ability CSV", "", "csv");
         if (string.IsNullOrEmpty(path)) return;
 
-        // ´ë»ó Æú´õ°¡ ¾øÀ¸¸é »ı¼º
+        // ëŒ€ìƒ í´ë”ê°€ ì—†ìœ¼ë©´ ìƒì„±
         Directory.CreateDirectory(ABILITY_DATA_PATH);
 
         string[] allLines = File.ReadAllLines(path);
-        if (allLines.Length <= 1) return; // Çì´õ¸¸ ÀÖÀ¸¸é Á¾·á
+        if (allLines.Length <= 1) return; // í—¤ë”ë§Œ ìˆìœ¼ë©´ ì¢…ë£Œ
 
-        Debug.Log($"[AbilityParser] {allLines.Length - 1}°³ µ¥ÀÌÅÍ ÀÓÆ÷Æ® ½ÃÀÛ...");
+        Debug.Log($"[AbilityParser] {allLines.Length - 1}ê°œ ë°ì´í„° ì„í¬íŠ¸ ì‹œì‘...");
 
-        // Ã¹ ÁÙÀº Çì´õÀÌ¹Ç·Î 1ºÎÅÍ ½ÃÀÛ
+        // ì²« ì¤„ì€ í—¤ë”ì´ë¯€ë¡œ 1ë¶€í„° ì‹œì‘
         for (int i = 1; i < allLines.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(allLines[i])) continue;
@@ -36,26 +35,26 @@ public class ItemDataParser
 
             if (row.Length < 9)
             {
-                Debug.LogWarning($"[AbilityParser] ÁÙ ¹«½ÃµÊ (¿­ ºÎÁ·, 9°³ ¹Ì¸¸): {allLines[i]}");
+                Debug.LogWarning($"[AbilityParser] ì¤„ ë¬´ì‹œë¨ (ì—´ ë¶€ì¡±, 9ê°œ ë¯¸ë§Œ): {allLines[i]}");
                 continue;
             }
 
             string abilityID = row[0].Trim();
             if (string.IsNullOrEmpty(abilityID)) continue;
 
-            // 1. ¿¡¼Â °æ·Î ÁöÁ¤ (¿¹: ABIL_001.asset)
+            // 1. ì—ì…‹ ê²½ë¡œ ì§€ì • (ì˜ˆ: ABIL_001.asset)
             string assetPath = $"{ABILITY_DATA_PATH}/{abilityID}.asset";
 
-            // 2. ±âÁ¸ ¿¡¼Â ·Îµå ¶Ç´Â ½Å±Ô »ı¼º
+            // 2. ê¸°ì¡´ ì—ì…‹ ë¡œë“œ ë˜ëŠ” ì‹ ê·œ ìƒì„±
             AbilityData ability = AssetDatabase.LoadAssetAtPath<AbilityData>(assetPath);
             if (ability == null)
             {
-                // ÆÄÀÏÀÌ ¾øÀ¸¸é »õ·Î ¸¸µì´Ï´Ù.
+                // íŒŒì¼ì´ ì—†ìœ¼ë©´ ìƒˆë¡œ ë§Œë“­ë‹ˆë‹¤.
                 ability = ScriptableObject.CreateInstance<AbilityData>();
                 AssetDatabase.CreateAsset(ability, assetPath);
             }
 
-            // 3. CSV µ¥ÀÌÅÍ·Î ScriptableObject ÇÊµå Ã¤¿ì±â
+            // 3. CSV ë°ì´í„°ë¡œ ScriptableObject í•„ë“œ ì±„ìš°ê¸°
             ability.abilityID = abilityID;
             ability.abilityName = row[1].Trim();
             ability.activationType = row[2].Trim();
@@ -66,21 +65,17 @@ public class ItemDataParser
             ability.param_ValueC = row[7].Trim();
             ability.resourcePath = row[8].Trim();
 
-            // 4. º¯°æ »çÇ× ÀúÀå
+            // 4. ë³€ê²½ ì‚¬í•­ ì €ì¥
             EditorUtility.SetDirty(ability);
-
-            // ¡Ú¡Ú¡Ú (ÃÖÀûÈ­) ·çÇÁ ¾È¿¡¼­ UpdateMasterDatabase() È£Ãâ Á¦°Å ¡Ú¡Ú¡Ú
-            // UpdateMasterDatabase(); // (Á¦°Å)
         }
 
         AssetDatabase.SaveAssets();
-        Debug.Log("[AbilityParser] ÀÓÆ÷Æ® ¿Ï·á!");
+        Debug.Log("[AbilityParser] ì„í¬íŠ¸ ì™„ë£Œ!");
 
-        // ¡Ú¡Ú¡Ú (ÃÖÀûÈ­) ÀÓÆ÷Æ®°¡ ¸ğµÎ ³¡³­ ÈÄ 'ÇÑ ¹ø¸¸' È£Ãâ ¡Ú¡Ú¡Ú
+        // ì„í¬íŠ¸ê°€ ëª¨ë‘ ëë‚œ í›„ 'í•œ ë²ˆë§Œ' í˜¸ì¶œ
         UpdateMasterDatabase();
     }
 
-    // 2. RelicData ÀÓÆ÷Æ® ¸Ş´º
     [MenuItem("MyTools/Import Data/2. Import RelicData (CSV)")]
     public static void ImportRelicData()
     {
@@ -92,14 +87,20 @@ public class ItemDataParser
         string[] allLines = File.ReadAllLines(path);
         if (allLines.Length <= 1) return;
 
-        Debug.Log($"[RelicParser] {allLines.Length - 1}°³ µ¥ÀÌÅÍ ÀÓÆ÷Æ® ½ÃÀÛ...");
+        Debug.Log($"[RelicParser] {allLines.Length - 1}ê°œ ë°ì´í„° ì„í¬íŠ¸ ì‹œì‘...");
 
         for (int i = 1; i < allLines.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(allLines[i])) continue;
 
             string[] row = SplitCSVLine(allLines[i]);
-            if (row.Length < 7) continue;
+
+            // [ìˆ˜ì •] ì—´ ê°œìˆ˜ ê²€ì‚¬ë¥¼ 10ê°œë¡œ ë³€ê²½
+            if (row.Length < 10)
+            {
+                Debug.LogWarning($"[RelicParser] ì¤„ ë¬´ì‹œë¨ (ì—´ ë¶€ì¡±, 10ê°œ ë¯¸ë§Œ): {allLines[i]}");
+                continue;
+            }
 
             string itemID = row[0].Trim();
             if (string.IsNullOrEmpty(itemID)) continue;
@@ -113,19 +114,47 @@ public class ItemDataParser
                 AssetDatabase.CreateAsset(relic, assetPath);
             }
 
-            // RelicData ÇÊµå Ã¤¿ì±â
-            relic.itemID = itemID;
+            // RelicData í•„ë“œ ì±„ìš°ê¸°
+            relic.itemID = row[0].Trim();
             relic.itemName = row[1].Trim();
-            relic.itemType = row[2].Trim();
-            relic.grade = row[3].Trim();
-            relic.description = row[4].Trim();
-            relic.iconPath = row[5].Trim();
 
-            // maxStack ÆÄ½Ì (¼ıÀÚ º¯È¯)
-            int.TryParse(row[7].Trim(), out relic.maxStack);
+            // ItemType íŒŒì‹± (row[2])
+            string itemTypeString = row[2].Trim();
+            if (System.Enum.TryParse(itemTypeString, true, out ItemType parsedItemType))
+            {
+                relic.itemTypeEnum = parsedItemType;
+            }
+            else
+            {
+                Debug.LogWarning($"[RelicParser] ItemType '{itemTypeString}' íŒŒì‹± ì‹¤íŒ¨! '{itemID}'ì— ItemType.Etc í• ë‹¹.");
+                relic.itemTypeEnum = ItemType.Etc;
+            }
 
-            // ¡Ú¡Ú¡Ú ÇÙ½É ¿¬µ¿ ·ÎÁ÷ ¡Ú¡Ú¡Ú
-            string abilityIDString = row[6].Trim(); // ½ÃÆ®ÀÇ "ABIL_001"
+            // [ì¶”ê°€] equipmentSlot íŒŒì‹± (row[3])
+            string slotString = row[3].Trim();
+            if (System.Enum.TryParse(slotString, true, out EquipmentSlot parsedSlotType))
+            {
+                relic.equipmentSlot = parsedSlotType;
+            }
+            else
+            {
+                // "None" ë¬¸ìì—´ì´ê±°ë‚˜ ë¹„ì–´ìˆëŠ” ê²½ìš°
+                if (string.Equals(slotString, "None", System.StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(slotString))
+                {
+                    relic.equipmentSlot = EquipmentSlot.None;
+                }
+                else
+                {
+                    Debug.LogWarning($"[RelicParser] EquipmentSlot '{slotString}' íŒŒì‹± ì‹¤íŒ¨! '{itemID}'ì— EquipmentSlot.None í• ë‹¹.");
+                    relic.equipmentSlot = EquipmentSlot.None;
+                }
+            }
+            relic.grade = row[4].Trim();            // (ê¸°ì¡´ row[3])
+            relic.description = row[5].Trim();      // (ê¸°ì¡´ row[4])
+            relic.iconPath = row[6].Trim();         // (ê¸°ì¡´ row[5])
+
+            // Ability ID íŒŒì‹± (row[7]) - (ê¸°ì¡´ row[6])
+            string abilityIDString = row[7].Trim();
             if (!string.IsNullOrEmpty(abilityIDString))
             {
                 string abilityAssetPath = $"{ABILITY_DATA_PATH}/{abilityIDString}.asset";
@@ -137,41 +166,46 @@ public class ItemDataParser
                 }
                 else
                 {
-                    Debug.LogWarning($"[RelicParser] Ability ¿¡¼ÂÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù: '{abilityIDString}' (Relic: '{itemID}')");
+                    Debug.LogWarning($"[RelicParser] Ability ì—ì…‹ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤: '{abilityIDString}' (Relic: '{itemID}')");
                     relic.grantedAbility = null;
                 }
             }
             else
             {
-                relic.grantedAbility = null; // ¿¬°áµÈ ´É·ÂÀÌ ¾øÀ½
+                relic.grantedAbility = null; // ì—°ê²°ëœ ëŠ¥ë ¥ì´ ì—†ìŒ
             }
+
+            // maxStack íŒŒì‹± (row[8]) - (ê¸°ì¡´ row[7])
+            int.TryParse(row[8].Trim(), out relic.maxStack);
+
+            // price íŒŒì‹± (row[9]) - (ê¸°ì¡´ row[8])
+            int.TryParse(row[9].Trim(), out relic.price);
 
             EditorUtility.SetDirty(relic);
         }
 
         AssetDatabase.SaveAssets();
-        Debug.Log("[RelicParser] ÀÓÆ÷Æ® ¿Ï·á!");
+        Debug.Log("[RelicParser] ì„í¬íŠ¸ ì™„ë£Œ!");
 
-        // ¡Ú¡Ú¡Ú (¹ö±× ¼öÁ¤) Relic ÀÓÆ÷Æ® ÈÄ¿¡µµ DB ¾÷µ¥ÀÌÆ® È£Ãâ ¡Ú¡Ú¡Ú
+        // ì„í¬íŠ¸ê°€ ëª¨ë‘ ëë‚œ í›„ ë§ˆìŠ¤í„° ë°ì´í„°ë² ì´ìŠ¤ ì—…ë°ì´íŠ¸
         UpdateMasterDatabase();
     }
-
 
     [MenuItem("MyTools/Import Data/3. Update Master Database")]
     public static void UpdateMasterDatabase()
     {
-        Debug.Log("[MasterDB] ¸¶½ºÅÍ µ¥ÀÌÅÍº£ÀÌ½º ¾÷µ¥ÀÌÆ® ½ÃÀÛ...");
+        Debug.Log("[MasterDB] ë§ˆìŠ¤í„° ë°ì´í„°ë² ì´ìŠ¤ ì—…ë°ì´íŠ¸ ì‹œì‘...");
 
-        // 1. MasterDatabase.asset Ã£±â (¾øÀ¸¸é »ı¼º)
+        // 1. MasterDatabase.asset ì°¾ê¸° (ì—†ìœ¼ë©´ ìƒì„±)
         MasterDatabase db = AssetDatabase.LoadAssetAtPath<MasterDatabase>(MASTER_DB_PATH);
         if (db == null)
         {
-            Debug.Log("[MasterDB] MasterDatabase.assetÀ» »õ·Î »ı¼ºÇÕ´Ï´Ù.");
+            Debug.Log("[MasterDB] MasterDatabase.assetì„ ìƒˆë¡œ ìƒì„±í•©ë‹ˆë‹¤.");
             db = ScriptableObject.CreateInstance<MasterDatabase>();
             AssetDatabase.CreateAsset(db, MASTER_DB_PATH);
         }
 
-        // ¡Ú¡Ú¡Ú (¿À·ù ¼öÁ¤) ¸®½ºÆ®°¡ nullÀÏ °æ¿ì »õ·Î »ı¼º ¡Ú¡Ú¡Ú
+        // (ì•ˆì •ì„±) ë¦¬ìŠ¤íŠ¸ê°€ nullì´ë©´ ìƒˆë¡œ ìƒì„±
         if (db.allAbilities == null)
         {
             db.allAbilities = new List<AbilityData>();
@@ -181,11 +215,11 @@ public class ItemDataParser
             db.allRelics = new List<RelicData>();
         }
 
-        // 2. ±âÁ¸ ¸®½ºÆ® ÃÊ±âÈ­ (ÀÌÁ¦ ¾ÈÀüÇÔ)
+        // 2. ê¸°ì¡´ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™” (ì´ì œ ì•ˆì „í•¨)
         db.allAbilities.Clear();
         db.allRelics.Clear();
 
-        // 3. Abilities Æú´õÀÇ ¸ğµç AbilityData.asset ÆÄÀÏ Ã£±â
+        // 3. Abilities í´ë”ì˜ ëª¨ë“  AbilityData.asset íŒŒì¼ ì°¾ê¸°
         string[] abilityGUIDs = AssetDatabase.FindAssets("t:AbilityData", new[] { ABILITY_DATA_PATH });
         foreach (string guid in abilityGUIDs)
         {
@@ -193,22 +227,21 @@ public class ItemDataParser
             db.allAbilities.Add(AssetDatabase.LoadAssetAtPath<AbilityData>(path));
         }
 
-        // 4. Relics Æú´õÀÇ ¸ğµç RelicData.asset ÆÄÀÏ Ã£±â
+        // 4. Relics í´ë”ì˜ ëª¨ë“  RelicData.asset íŒŒì¼ ì°¾ê¸°
         string[] relicGUIDs = AssetDatabase.FindAssets("t:RelicData", new[] { RELIC_DATA_PATH });
         foreach (string guid in relicGUIDs)
         {
+            // [ìˆ˜ì •] ì˜¤íƒ€(stray 's')ê°€ ì œê±°ëœ ê¹¨ë—í•œ ì½”ë“œ
             string path = AssetDatabase.GUIDToAssetPath(guid);
             db.allRelics.Add(AssetDatabase.LoadAssetAtPath<RelicData>(path));
         }
 
-        // 5. º¯°æ»çÇ× ÀúÀå
+        // 5. ë³€ê²½ì‚¬í•­ ì €ì¥
         EditorUtility.SetDirty(db);
         AssetDatabase.SaveAssets();
 
-        Debug.Log($"[MasterDB] ¾÷µ¥ÀÌÆ® ¿Ï·á: Abilities({db.allAbilities.Count}), Relics({db.allRelics.Count})");
+        Debug.Log($"[MasterDB] ì—…ë°ì´íŠ¸ ì™„ë£Œ: Abilities({db.allAbilities.Count}), Relics({db.allRelics.Count})");
     }
-
-    // Á¦°øÇØÁÖ½Å CSV ÆÄ½Ì À¯Æ¿¸®Æ¼ (µû¿ÈÇ¥(")·Î ¹­ÀÎ ÄŞ¸¶ ¹«½Ã)
     private static string[] SplitCSVLine(string line)
     {
         List<string> result = new();

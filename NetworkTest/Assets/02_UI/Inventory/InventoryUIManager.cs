@@ -1,37 +1,53 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.Text;
-using UnityEngine.EventSystems;
 
-public class InventoryUIManager : MonoBehaviour, IBeginDragHandler, IDragHandler
+/// <summary>
+/// 인벤토리 UI 총괄 매니저 (슬림화 버전)
+/// - 모든 하위 컨트롤러 조율
+/// - 외부 인터페이스 제공
+/// - 최소한의 책임만 보유
+/// </summary>
+public class InventoryUIManager : MonoBehaviour
 {
+    private Slot_UI currentSelectedSlot = null;
+
+    #region Singleton
+
     public static InventoryUIManager Instance { get; private set; }
 
-    [Header("UI Movement")]
-    // 이 스크립트가 붙은 패널 자체 (RectTransform)
-    [SerializeField] private RectTransform rectTransform;
-    // 드래그 가능한 영역 (Header_Bar)
-    [SerializeField] private RectTransform headerBarRect;
-    private Vector2 dragOffset;
+    #endregion
 
-    [Header("Drag & Drop")]
-    [SerializeField] private Image dragIcon;
+    #region Serialized Fields - Panel References
 
-    [Header("Inventory Details")]
-    [SerializeField] private TextMeshProUGUI titleText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private TextMeshProUGUI statsText;
-    [SerializeField] private GameObject statsBoxObject;
+    [Header("UI Panel Roots")]
+    [SerializeField] private GameObject smallInventoryPanel;
+    [SerializeField] private GameObject fullInventoryPanel;
 
-    [Header("Item Tooltip")] // ★ L26: Tooltip 관련 필드 추가
-    [SerializeField] private GameObject tooltipPanel;
-    [SerializeField] private TextMeshProUGUI tooltipTitleText;
-    [SerializeField] private TextMeshProUGUI tooltipDescriptionText;
+    #endregion
 
-    [SerializeField] private Vector2 tooltipOffset = new Vector2(20f, -50f); // 마우스 오른쪽 아래에 표시
+    #region Serialized Fields - Controllers
+
+    [Header("Controllers")]
+    [SerializeField] private TooltipController tooltipController;
+    [SerializeField] private DragDropHandler dragDropHandler;
+    [SerializeField] private TabSwitchController tabSwitchController;
+    [SerializeField] private LeftPanelController leftPanelController;
+    [SerializeField] private InventoryStatsUI inventoryStatsUI;
+
+    #endregion
+
+    #region Initialization
 
     void Awake()
+    {
+        InitializeSingleton();
+    }
+
+    void Start()
+    {
+        ValidateControllers();
+    }
+
+    private void InitializeSingleton()
     {
         if (Instance == null)
         {
@@ -39,203 +55,211 @@ public class InventoryUIManager : MonoBehaviour, IBeginDragHandler, IDragHandler
         }
         else if (Instance != this)
         {
-            // Destroy(gameObject); 
-        }
-
-        if (rectTransform == null)
-        {
-            rectTransform = GetComponent<RectTransform>();
-        }
-
-        if (tooltipPanel) tooltipPanel.SetActive(false);
-    }
-
-    void Start()
-    {
-        // Full UI에 붙어 있을 경우만 Instance를 설정 (Small UI는 Detail Panel이 없으므로)
-        // 이 로직은 실제 프로젝트 구성에 따라 달라질 수 있습니다.
-        if (titleText != null && Instance == null)
-        {
-            Instance = this;
+            Destroy(gameObject);
         }
     }
 
-
-    #region UI Movement Functions
-
-    public void OnBeginDrag(PointerEventData eventData)
+    private void ValidateControllers()
     {
-        if (eventData.button != PointerEventData.InputButton.Left) return;
-
-        RectTransform targetRect = headerBarRect != null ? headerBarRect : rectTransform;
-
-        // Header Bar 영역 안에서 드래그를 시작했는지 확인
-        if (RectTransformUtility.RectangleContainsScreenPoint(targetRect, eventData.position, eventData.pressEventCamera))
+        if (tooltipController == null)
         {
-            // 마우스 포인터의 스크린 좌표를 부모의 로컬 좌표로 변환
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rectTransform.parent.GetComponent<RectTransform>(),
-                eventData.position,
-                eventData.pressEventCamera,
-                out Vector2 localPoint
-            ))
-            {
-                // 드래그 오프셋 계산 (패널의 현재 위치 - 마우스의 현재 위치)
-                dragOffset = rectTransform.anchoredPosition - localPoint;
-            }
-        }
-        else
-        {
-            // Header Bar 밖에서 드래그 시작 시 이벤트 무시
-            eventData.pointerDrag = null;
-        }
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (eventData.button != PointerEventData.InputButton.Left) return;
-
-        Vector2 localPointerPosition;
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rectTransform.parent.GetComponent<RectTransform>(),
-            eventData.position,
-            eventData.pressEventCamera,
-            out localPointerPosition
-        ))
-        {
-            // 마우스 현재 위치 + 오프셋 = 새로운 앵커드 포지션
-            rectTransform.anchoredPosition = localPointerPosition + dragOffset;
-        }
-    }
-
-    public void ShowTooltip(RelicData item, Vector3 slotScreenPosition)
-    {
-        if (tooltipPanel == null || tooltipPanel.transform.parent == null) return;
-
-        // 1. 스크린 마우스 위치를 툴팁 패널의 부모(캔버스)의 로컬 좌표로 변환
-        RectTransform parentCanvas = tooltipPanel.transform.parent.GetComponent<RectTransform>();
-        Vector2 localPointerPosition;
-
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            parentCanvas,
-            Input.mousePosition,
-            null, // eventData.pressEventCamera 대신 null 사용 (스크린 포인트 기준)
-            out localPointerPosition))
-        {
-            // 2. 툴팁 오프셋을 적용하여 로컬 위치 설정
-            RectTransform tooltipRect = tooltipPanel.GetComponent<RectTransform>();
-            if (tooltipRect != null)
-            {
-                tooltipRect.localPosition = localPointerPosition + tooltipOffset;
-            }
-            else
-            {
-                // RectTransform이 없을 경우를 대비한 안전장치 (localPosition 사용)
-                tooltipPanel.transform.localPosition = new Vector3(localPointerPosition.x + tooltipOffset.x, localPointerPosition.y + tooltipOffset.y, 0);
-            }
+            Debug.LogWarning("[InventoryUIManager] TooltipController가 할당되지 않았습니다!");
         }
 
-        // 이전 코드: tooltipPanel.transform.position = Input.mousePosition + new Vector3(20, -50, 0); 
-        // ^ 이 코드는 캔버스 스케일이 다를 때 위치 오류를 일으킬 수 있습니다.
-
-        tooltipTitleText.text = $"<color={GetGradeColor(item.grade)}>{item.itemName}</color>";
-        tooltipDescriptionText.text = item.description;
-
-        tooltipPanel.SetActive(true);
-    }
-    // L130: HideTooltip 함수 추가
-    public void HideTooltip()
-    {
-        if (tooltipPanel)
+        if (dragDropHandler == null)
         {
-            tooltipPanel.SetActive(false);
+            Debug.LogWarning("[InventoryUIManager] DragDropHandler가 할당되지 않았습니다!");
+        }
+
+        if (tabSwitchController == null)
+        {
+            Debug.LogWarning("[InventoryUIManager] TabSwitchController가 할당되지 않았습니다!");
+        }
+
+        if (leftPanelController == null)
+        {
+            Debug.LogWarning("[InventoryUIManager] LeftPanelController가 할당되지 않았습니다!");
+        }
+
+        if (inventoryStatsUI == null)
+        {
+            Debug.LogWarning("[InventoryUIManager] InventoryStatsUI가 할당되지 않았습니다!");
         }
     }
 
     #endregion
 
+    #region Public API - Tooltip
 
-    #region Drag & Drop Functions
+    /// <summary>
+    /// 툴팁 표시
+    /// </summary>
+    public void ShowTooltip(RelicData item, Vector3 slotScreenPosition)
+    {
+        if (tooltipController == null) return;
 
+        InventoryType type = GetCurrentInventoryType();
+        tooltipController.ShowTooltip(item, type);
+    }
+
+    /// <summary>
+    /// 툴팁 숨기기
+    /// </summary>
+    public void HideTooltip()
+    {
+        if (tooltipController != null)
+        {
+            tooltipController.HideTooltip();
+        }
+    }
+
+    #endregion
+
+    #region Public API - Drag & Drop
+
+    /// <summary>
+    /// 아이템 드래그 시작
+    /// </summary>
     public void StartDrag(Sprite iconSprite)
     {
-        dragIcon.sprite = iconSprite;
-        dragIcon.gameObject.SetActive(true);
+        if (dragDropHandler != null)
+        {
+            dragDropHandler.StartItemDrag(iconSprite);
+        }
     }
 
+    /// <summary>
+    /// 드래그 아이콘 위치 업데이트
+    /// </summary>
     public void UpdateDragIcon(Vector2 position)
     {
-        dragIcon.rectTransform.position = position;
+        if (dragDropHandler != null)
+        {
+            dragDropHandler.UpdateDragIconPosition(position);
+        }
     }
 
+    /// <summary>
+    /// 드래그 종료
+    /// </summary>
     public void EndDrag()
     {
-        dragIcon.gameObject.SetActive(false);
-        // 드래그가 끝날 때 상세 정보 창을 비웁니다.
+        if (dragDropHandler != null)
+        {
+            dragDropHandler.EndItemDrag();
+        }
+
+        // 드래그 종료 시 상세 정보 초기화
         ClearDetails();
     }
 
     #endregion
 
-    #region Item Details Functions
+    #region Public API - Item Details
 
+    /// <summary>
+    /// (HandleSlotClick을 대체) 아이템 상세 정보 업데이트
+    /// </summary>
     public void UpdateDetails(RelicData item)
     {
-        if (item == null)
+        // 이 함수는 이제 Slot_UI에서 직접 호출되지 않습니다.
+        // HandleSlotClick이 이 로직을 대체합니다.
+        // 혹시 모르니 남겨두지만, LeftPanelController를 직접 호출합니다.
+        if (leftPanelController != null && item != null)
         {
-            ClearDetails();
-            return;
-        }
-
-        titleText.text = $"<color={GetGradeColor(item.grade)}>{item.itemName}</color>";
-        descriptionText.text = item.description;
-
-        if (item.grantedAbility != null)
-        {
-            statsBoxObject.SetActive(true);
-            StringBuilder statsBuilder = new StringBuilder();
-            AbilityData ability = item.grantedAbility;
-
-            if (ability.abilityLogicID == "Stat_Add")
-            {
-                statsBuilder.AppendLine($"{ability.param_Key} : +{ability.param_ValueA}");
-            }
-            else if (ability.abilityLogicID == "Projectile")
-            {
-                statsBuilder.AppendLine($"능력 : {ability.abilityName}");
-                statsBuilder.AppendLine($"쿨타임 : {ability.param_ValueA}초");
-            }
-            else
-            {
-                statsBuilder.AppendLine($"능력 : {ability.abilityName}");
-            }
-
-            statsText.text = statsBuilder.ToString();
-        }
-        else
-        {
-            statsBoxObject.SetActive(false);
+            leftPanelController.ShowItemInfoPanel(item);
         }
     }
 
-    private string GetGradeColor(string grade)
-    {
-        return grade.ToLower() switch
-        {
-            "common" => "#FFFFFF",
-            "rare" => "#00CCFF",
-            "epic" => "#9900FF",
-            _ => "#FFFFFF",
-        };
-    }
-
+    /// <summary>
+    /// 상세 정보 초기화 (선택 해제)
+    /// </summary>
     public void ClearDetails()
     {
-        if (titleText != null) titleText.text = "인벤토리";
-        if (descriptionText != null) descriptionText.text = "";
-        if (statsBoxObject != null) statsBoxObject.SetActive(false);
+        if (IsFullInventoryActive())
+        {
+            // 1. 현재 선택된 슬롯이 있다면 선택 해제
+            if (currentSelectedSlot != null)
+            {
+                currentSelectedSlot.SetSelected(false, false); // 애니메이션 없이 즉시 해제
+                currentSelectedSlot = null;
+            }
+
+            // 2. LeftPanelController에 기본 패널(장비) 표시 요청
+            if (leftPanelController != null)
+            {
+                leftPanelController.ShowEquipmentPanel();
+            }
+        }
     }
 
     #endregion
+
+    #region Public API - Search
+
+    /// <summary>
+    /// 검색 쿼리 설정 (UI Input Field에서 호출)
+    /// </summary>
+    public void SetSearchQueryFromUI(string query)
+    {
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.SetSearchQuery(query);
+        }
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private InventoryType GetCurrentInventoryType()
+    {
+        return IsFullInventoryActive() ? InventoryType.Full : InventoryType.Small;
+    }
+
+    private bool IsSmallInventoryActive()
+    {
+        return smallInventoryPanel != null && smallInventoryPanel.activeSelf;
+    }
+
+    private bool IsFullInventoryActive()
+    {
+        return fullInventoryPanel != null && fullInventoryPanel.activeSelf;
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Slot_UI가 클릭되었을 때 호출됩니다 (토글 로직).
+    /// </summary>
+    public void HandleSlotClick(Slot_UI clickedSlot, RelicData item)
+    {
+        if (IsSmallInventoryActive()) return;
+
+        if (clickedSlot == currentSelectedSlot)
+        {
+            // 이미 선택된 슬롯을 다시 클릭 -> 선택 해제
+            ClearDetails();
+        }
+        else
+        {
+            // 다른 슬롯을 클릭 -> 기존 것 해제 후 새 것 선택
+
+            // 1. 이전에 선택된 슬롯이 있다면 선택 해제
+            if (currentSelectedSlot != null)
+            {
+                currentSelectedSlot.SetSelected(false, false); // 애니메이션 없이 즉시 해제
+            }
+
+            // 2. 새 슬롯을 현재 선택된 슬롯으로 지정
+            currentSelectedSlot = clickedSlot;
+            currentSelectedSlot.SetSelected(true, true); // 애니메이션과 함께 선택
+
+            // 3. LeftPanelController에 정보 표시 요청
+            if (leftPanelController != null && item != null)
+            {
+                leftPanelController.ShowItemInfoPanel(item);
+            }
+        }
+    }
 }

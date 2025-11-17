@@ -1,26 +1,34 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; // 드롭 감지!
+using UnityEngine.EventSystems;
+using System.Collections;
+using TMPro;
 
 public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
-    IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
+    IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler,
+    IPointerEnterHandler, IPointerExitHandler
 {
-    // 1. 이 슬롯이 받을 수 있는 아이템 타입 (RelicData.itemType과 비교할 문자열)
-    [Tooltip("이 슬롯이 받을 itemType 문자열 (예: Relic, Artifact, Skill...)")]
-    public string requiredType = "Relic"; // (RelicData의 itemType에 맞게 수정하세요)
+    [Header("필터 설정")]
+    public EquipmentSlot requiredSlotType = EquipmentSlot.None;
+    public ItemType requiredItemType = ItemType.Etc;
 
-    [Header("UI (선택 사항)")]
-    public Image slotIcon; // 장착된 아이템 아이콘을 표시할 이미지
-    public int equipmentSlotIndex; // 이 슬롯이 0,1,2,3 중 몇 번째인지
+    [Header("UI")]
+    public Image slotIcon;
+    public TextMeshProUGUI slotNameText;
 
-    public RelicData currentItem { get; private set; } // 이 슬롯이 현재 들고있는 아이템
+    public int equipmentSlotIndex;
+    public RelicData currentItem { get; private set; }
     public bool dropSuccessful = false;
+
+    private bool isIgnoringClick = false;
+    private Coroutine hideTooltipCoroutine;
+    private Coroutine tooltipCoroutine;
+    private const float TooltipDelay = 0.5f;
 
     void Start()
     {
-        // 2. EquipmentManager의 신호를 구독해서 아이콘 업데이트
         EquipmentManager.OnEquipmentChanged += UpdateSlotVisuals;
-        UpdateSlotVisuals(); // 시작할 때 한 번 실행
+        UpdateSlotVisuals();
     }
 
     void OnDestroy()
@@ -28,75 +36,145 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         EquipmentManager.OnEquipmentChanged -= UpdateSlotVisuals;
     }
 
-    // 3. (Slot_UI와 동일) 매니저를 보고 내 아이콘을 업데이트
+    // 슬롯 비주얼 업데이트
     void UpdateSlotVisuals()
     {
         if (EquipmentManager.Instance == null) return;
 
-        // 내 인덱스에 맞는 RelicData를 가져옴
         currentItem = EquipmentManager.Instance.equipmentSlots[equipmentSlotIndex];
-        if (currentItem != null && !string.IsNullOrEmpty(currentItem.iconPath))
+
+        if (HasValidItem())
         {
-            Sprite icon = Resources.Load<Sprite>(currentItem.iconPath);
-            if (icon != null)
-            {
-                slotIcon.sprite = icon;
-                slotIcon.enabled = true;
-            }
-            else
-            {
-                slotIcon.enabled = false;
-            }
+            DisplayItem();
         }
         else
         {
-            slotIcon.sprite = null;
+            HideItem();
+        }
+    }
+
+    // 유효한 아이템이 있는지 확인
+    private bool HasValidItem()
+    {
+        return currentItem != null && !string.IsNullOrEmpty(currentItem.iconPath);
+    }
+
+    // 아이템 표시
+    private void DisplayItem()
+    {
+        Sprite icon = Resources.Load<Sprite>(currentItem.iconPath);
+        if (icon != null)
+        {
+            slotIcon.sprite = icon;
+            slotIcon.enabled = true;
+        }
+        else
+        {
+            slotIcon.enabled = false;
+        }
+
+        if (slotNameText != null)
+        {
+            slotNameText.text = currentItem.itemName;
+            slotNameText.gameObject.SetActive(true);
+        }
+    }
+
+    // 아이템 숨기기
+    private void HideItem()
+    {
+        slotIcon.sprite = null;
+        slotIcon.enabled = false;
+
+        if (slotNameText != null)
+        {
+            slotNameText.text = "";
+            slotNameText.gameObject.SetActive(false);
+        }
+    }
+
+    // 드롭 이벤트 처리
+    public void OnDrop(PointerEventData eventData)
+    {
+        Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
+
+        if (!IsValidSourceSlot(sourceSlot)) return;
+
+        RelicData itemToEquip = sourceSlot.currentSlot.item;
+
+        if (CanEquipItem(itemToEquip))
+        {
+            TryEquipItem(sourceSlot, itemToEquip);
+        }
+    }
+
+    // 소스 슬롯 유효성 검사
+    private bool IsValidSourceSlot(Slot_UI sourceSlot)
+    {
+        return sourceSlot != null &&
+               sourceSlot.currentSlot != null &&
+               sourceSlot.currentSlot.item != null &&
+               sourceSlot.currentSlot.slotIndex != -1;
+    }
+
+    // 아이템 장착 시도
+    private void TryEquipItem(Slot_UI sourceSlot, RelicData itemToEquip)
+    {
+        bool success = EquipmentManager.Instance.EquipItem(
+            itemToEquip,
+            sourceSlot.currentSlot.slotIndex,
+            this.equipmentSlotIndex
+        );
+
+        if (success)
+        {
+            sourceSlot.dropSuccessful = true;
+            StartCoroutine(IgnoreNextClick());
+        }
+    }
+
+    // 다음 클릭 무시
+    private IEnumerator IgnoreNextClick()
+    {
+        isIgnoringClick = true;
+        yield return null;
+        isIgnoringClick = false;
+    }
+
+    // 아이템 장착 가능 여부 확인
+    public bool CanEquipItem(RelicData item)
+    {
+        if (item == null) return false;
+
+        if (requiredSlotType != EquipmentSlot.None)
+        {
+            return item.equipmentSlot == requiredSlotType;
+        }
+
+        if (requiredItemType != ItemType.Etc)
+        {
+            return item.itemTypeEnum == requiredItemType;
+        }
+
+        return false;
+    }
+
+    // 드래그 시작
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (currentItem == null) return;
+
+        dropSuccessful = false;
+        Sprite icon = Resources.Load<Sprite>(currentItem.iconPath);
+
+        if (icon != null)
+        {
+            InventoryUIManager.Instance.StartDrag(icon);
             slotIcon.enabled = false;
         }
     }
 
-
-    public void OnDrop(PointerEventData eventData)
-    {
-        // 1. 드래그한 슬롯이 인벤토리 슬롯(Slot_UI)인지 확인
-        Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
-        if (sourceSlot == null || sourceSlot.currentItem == null)
-        {
-            return; // 인벤토리 슬롯이 아님
-        }
-
-        // 2. (문자열 비교) 아이템의 itemType과 이 슬롯이 요구하는 requiredType이 일치하는지 확인
-        if (sourceSlot.currentItem.itemType == this.requiredType)
-        {
-            // 3. 타입이 일치하면, EquipmentManager에게 장착 요청
-            bool success = EquipmentManager.Instance.EquipItem(sourceSlot.currentItem, sourceSlot.slotIndex);
-
-            if (success)
-            {
-                sourceSlot.dropSuccessful = true;
-            }
-        }
-        else
-        {
-            Debug.Log($"타입이 맞지 않습니다. 이 슬롯은 '{requiredType}'만 받습니다. (아이템 타입: '{sourceSlot.currentItem.itemType}')");
-        }
-    }
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (currentItem != null)
-        {
-            dropSuccessful = false; // 플래그 리셋
-            Sprite icon = Resources.Load<Sprite>(currentItem.iconPath);
-            if (icon != null)
-            {
-                // NOTE: InventoryUIManager.Instance != null 체크는 편의상 생략했습니다.
-                InventoryUIManager.Instance.StartDrag(icon);
-                slotIcon.enabled = false;
-            }
-        }
-    }
-
+    // 드래그 중
     public void OnDrag(PointerEventData eventData)
     {
         if (currentItem != null)
@@ -105,15 +183,14 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
+    // 드래그 종료
     public void OnEndDrag(PointerEventData eventData)
     {
-        // 유령 아이콘 무조건 끔
         if (InventoryUIManager.Instance != null)
             InventoryUIManager.Instance.EndDrag();
 
         if (currentItem == null) return;
 
-        // 드롭에 실패했고, UI 밖으로 버린 것도 아니라면 (제자리 복귀)
         if (!dropSuccessful && eventData.pointerEnter != null)
         {
             slotIcon.enabled = true;
@@ -122,49 +199,88 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         dropSuccessful = false;
     }
 
+    // 드롭 성공 표시
     public void MarkDropSuccessful()
     {
         dropSuccessful = true;
     }
 
+    // 클릭 이벤트 처리
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (currentItem == null) return; // 슬롯이 비어있으면 아무것도 안 함
-
-        // 1. 좌클릭 (한 번 클릭) -> 상세 정보 표시
-        if (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 1)
+        // 드롭 직후 클릭 무시
+        if (isIgnoringClick)
         {
-            // Debug.Log("장비 상세정보 표시");
-            if (InventoryUIManager.Instance != null)
-                InventoryUIManager.Instance.UpdateDetails(currentItem);
+            isIgnoringClick = false;
+            return;
         }
 
-        // 2. 좌 더블클릭 (두 번 클릭) -> 장착 해제 시도
-        if (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 2)
+        if (currentItem == null) return;
+
+        if (eventData.button == PointerEventData.InputButton.Right)
         {
             UnequipItemAttempt();
         }
-
-        // ★ L126: 3. 우클릭 -> 장착 해제 시도 (요청 기능 추가)
-        if (eventData.button == PointerEventData.InputButton.Right)
+        else if (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 2)
         {
             UnequipItemAttempt();
         }
     }
 
-    /// <summary>
-    /// 장착 해제를 시도합니다. (인벤토리가 꽉 찼는지 확인)
-    /// </summary>
+    // 장비 해제 시도
     private void UnequipItemAttempt()
     {
         if (currentItem == null) return;
 
-        // (UnequipItem 함수가 알아서 빈 인벤토리 슬롯을 찾고, 스탯을 제거함)
-        bool success = EquipmentManager.Instance.UnequipItem(currentItem, this.equipmentSlotIndex);
+        EquipmentManager.Instance.UnequipItem(currentItem, this.equipmentSlotIndex);
+    }
 
-        if (!success)
+    // 마우스 진입
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (hideTooltipCoroutine != null)
         {
-            Debug.Log("인벤토리가 꽉 차서 장비를 해제할 수 없습니다.");
+            StopCoroutine(hideTooltipCoroutine);
+            hideTooltipCoroutine = null;
         }
+
+        if (currentItem == null) return;
+
+        if (tooltipCoroutine != null) StopCoroutine(tooltipCoroutine);
+        tooltipCoroutine = StartCoroutine(ShowTooltipAfterDelay(currentItem));
+    }
+
+    // 마우스 이탈
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (tooltipCoroutine != null) StopCoroutine(tooltipCoroutine);
+        tooltipCoroutine = null;
+
+        if (hideTooltipCoroutine != null) StopCoroutine(hideTooltipCoroutine);
+        hideTooltipCoroutine = StartCoroutine(HideTooltipAfterDelay(0.1f));
+    }
+
+    // 툴팁 표시 (딜레이 후)
+    private IEnumerator ShowTooltipAfterDelay(RelicData item)
+    {
+        yield return new WaitForSeconds(TooltipDelay);
+
+        if (InventoryUIManager.Instance != null)
+        {
+            InventoryUIManager.Instance.ShowTooltip(item, transform.position);
+        }
+    }
+
+    // 툴팁 숨기기 (딜레이 후)
+    private IEnumerator HideTooltipAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (InventoryUIManager.Instance != null)
+        {
+            InventoryUIManager.Instance.HideTooltip();
+        }
+
+        hideTooltipCoroutine = null;
     }
 }

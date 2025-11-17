@@ -49,6 +49,8 @@ MonoBehaviour:
   gameScene: 
   stageInfo: {fileID: 0}
   playerPrefab: {fileID: 0}
+  gameSettings: {fileID: 11400000, guid: 7795b41ca5f48b948ba5e68bfc5ea337, type: 2}
+  planetDatabase: {fileID: 11400000, guid: a9e7ff44d6aad874883a7204d50efc8f, type: 2}
   gameState: 0
   initialKey:
     m_KeyMoveLeft: 97
@@ -60,8 +62,6 @@ MonoBehaviour:
     m_KeyCrouch: 99
     m_BendingRight: 101
     m_BendingLeft: 113
-    m_KeyAttack: 323
-    m_KeyAimed: 324
     m_KeyUnArmed: 120
     m_KeySlot1: 49
     m_KeySlot2: 50
@@ -70,8 +70,6 @@ MonoBehaviour:
     m_KeyInteract: 101
     m_KeyInventory: 9
     m_KeyReload: 114
-    m_KeyEscape: 27
-    m_KeyChat: 13
 --- !u!114 &1278723525724786473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94,8 +92,6 @@ MonoBehaviour:
     m_KeyCrouch: 99
     m_BendingRight: 101
     m_BendingLeft: 113
-    m_KeyAttack: 323
-    m_KeyAimed: 324
     m_KeyUnArmed: 120
     m_KeySlot1: 49
     m_KeySlot2: 50
@@ -104,5 +100,4 @@ MonoBehaviour:
     m_KeyInteract: 101
     m_KeyInventory: 9
     m_KeyReload: 114
-    m_KeyEscape: 27
-    m_KeyChat: 13
+  interactionDistance: 8

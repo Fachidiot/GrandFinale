@@ -46,8 +46,8 @@ GameObject:
   - component: {fileID: 7941073443263530669}
   - component: {fileID: 2145462757340449413}
   - component: {fileID: 8503601400582392744}
-  - component: {fileID: 7422393935755569291}
   - component: {fileID: 1177581042059214535}
+  - component: {fileID: 9086909070764095958}
   m_Layer: 0
   m_Name: GenericLootDrop
   m_TagString: Untagged
@@ -142,20 +142,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7422393935755569291
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1983626663567947396}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fac4f4b6aac1b94c81bcfd431a868a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemData: {fileID: 0}
-  addToInventoryInstead: 1
 --- !u!114 &1177581042059214535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +158,20 @@ MonoBehaviour:
   vfxRare: {fileID: 8443063110352461817}
   vfxEpic: {fileID: 7554926039197921554}
   vfxCenter: {fileID: 168139762174419455}
+--- !u!114 &9086909070764095958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1983626663567947396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fac4f4b6aac1b94c81bcfd431a868a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemData: {fileID: 0}
+  addToInventoryInstead: 1
 --- !u!1001 &5272040971637680200
 PrefabInstance:
   m_ObjectHideFlags: 0

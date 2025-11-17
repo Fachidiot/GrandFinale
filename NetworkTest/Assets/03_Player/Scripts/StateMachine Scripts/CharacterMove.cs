@@ -185,4 +185,49 @@ public class CharacterMove : MonoBehaviour
         crouchID = Animator.StringToHash("crouch");
     }
 
+    public void StopAllActions()
+    {
+        // 1. 모든 입력 기반 속도를 0으로 만듭니다.
+        moveVelocity = Vector3.zero;
+        rollVelocity = Vector3.zero;
+
+        // 2. 땅에 있다면 Y축 속도(중력)도 초기화합니다.
+        if (isGrounded)
+        {
+            velocity = new Vector3(0, -2f, 0);
+        }
+        // (공중에 있다면 Y축 속도는 유지해서 계속 떨어지게 합니다)
+
+        // 3. 애니메이터를 'Idle' 상태로 되돌립니다.
+        if (animator != null)
+        {
+            animator.SetFloat(horizontalInputID, 0f);
+            animator.SetFloat(verticalInputID, 0f);
+            animator.SetBool(sprintID, false);
+            animator.SetBool(rollID, false);
+            animator.SetBool(walkID, false);
+        }
+
+        // 4. 현재 상태(점프 중, 구르기 중)를 강제로 기본 상태로 되돌립니다.
+        if (isGrounded)
+        {
+            if (currentState != crouchState) // 웅크린 상태가 아니라면
+            {
+                SetState(moveState); // 기본 이동 상태로
+            }
+        }
+        else
+        {
+            if (currentState != inAirState) // 공중 상태가 아니라면
+            {
+                SetState(inAirState); // 공중 상태로
+            }
+        }
+
+        // 5. 몸 회전(Turn)을 멈춥니다.
+        if (bodyTurnHandler != null)
+        {
+            bodyTurnHandler.momentaryTurn = false;
+        }
+    }
 }

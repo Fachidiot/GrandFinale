@@ -23,10 +23,6 @@ public class DataManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // 씬이 바뀌어도 이 매니저는 파괴되지 않고 유지됩니다.
-            //DontDestroyOnLoad(gameObject);
-
-            // ★★★ 4. LoadAllData -> BuildDictionaries 함수 호출로 변경 ★★★
             BuildDictionaries();
         }
         else
@@ -36,26 +32,20 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    // ★★★ 5. 함수 이름 및 로직 변경 ★★★
     private void BuildDictionaries()
     {
-        // 5-1. MasterDatabase가 인스펙터에 연결되었는지 확인
         if (masterDatabase == null)
         {
             Debug.LogError("[DataManager] MasterDatabase 에셋이 인스펙터에 연결되지 않았습니다!");
             return;
         }
 
-        Debug.Log("[DataManager] MasterDatabase로부터 딕셔너리 빌드 시작...");
 
         // 5-2. Resources.LoadAll 대신, masterDatabase의 리스트에서 직접 딕셔너리 생성
         AbilityDB = masterDatabase.allAbilities.ToDictionary(ability => ability.abilityID, ability => ability);
         RelicDB = masterDatabase.allRelics.ToDictionary(relic => relic.itemID, relic => relic);
-
-        Debug.Log($"[DataManager] 로드 완료: Abilities({AbilityDB.Count}개), Relics({RelicDB.Count}개)");
     }
 
-    // 7. (선택사항) 외부에서 데이터를 안전하게 가져오는 헬퍼 함수
     public AbilityData GetAbility(string abilityID)
     {
         if (AbilityDB.TryGetValue(abilityID, out AbilityData ability))

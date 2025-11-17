@@ -1,32 +1,38 @@
 using UnityEngine;
 using System;
-using System.Collections.Generic; // List 사용
+using System.Collections.Generic;
 
 public class EquipmentManager : MonoBehaviour
 {
     public static EquipmentManager Instance;
 
-    // 1. RelicData를 담을 4개의 장비 슬롯
-    private int equipmentSlotCapacity = 5;
+    private int equipmentSlotCapacity = 13;
     public List<RelicData> equipmentSlots;
 
-    // 장비가 변경될 때 UI에 보낼 신호
     public static event Action OnEquipmentChanged;
 
     void Awake()
     {
+        InitializeSingleton();
+        InitializeEquipmentSlots();
+    }
+
+    // 싱글톤 초기화
+    private void InitializeSingleton()
+    {
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
-            return;
         }
+    }
 
-        // 2. RelicData 리스트로 4칸 초기화
+    // 장비 슬롯 초기화
+    private void InitializeEquipmentSlots()
+    {
         equipmentSlots = new List<RelicData>();
         for (int i = 0; i < equipmentSlotCapacity; i++)
         {
@@ -34,113 +40,145 @@ public class EquipmentManager : MonoBehaviour
         }
     }
 
-    public bool EquipItem(RelicData itemToEquip, int inventorySlotIndex)
+    // 장비 착용
+    public bool EquipItem(RelicData itemToEquip, int inventorySlotIndex, int targetEquipSlotIndex)
     {
-        // 1. 인벤토리에서 아이템 제거 (EquipmentManager가 Equip을 시작할 때 인벤토리에서 제거합니다.)
-        bool removedFromInventory = InventoryManager.Instance.RemoveItem(inventorySlotIndex);
+        InventoryManager.Instance.RemoveItemFromSlot(inventorySlotIndex, 1);
 
-        if (!removedFromInventory)
+        RelicData oldItem = equipmentSlots[targetEquipSlotIndex];
+
+        // 기존 장비가 있으면 교체
+        if (oldItem != null)
         {
-            Debug.LogError($"[EquipItem] 인벤토리 슬롯 {inventorySlotIndex}에서 아이템을 제거하는 데 실패했습니다.");
+            if (!TrySwapEquipment(itemToEquip, oldItem))
+            {
+                RestoreItemToInventory(itemToEquip);
+                return false;
+            }
+        }
+
+        // 새 장비 착용
+        equipmentSlots[targetEquipSlotIndex] = itemToEquip;
+        ApplyItemAbility(itemToEquip, true);
+
+        OnEquipmentChanged?.Invoke();
+        return true;
+    }
+
+    // 장비 교체 시도
+    private bool TrySwapEquipment(RelicData newItem, RelicData oldItem)
+    {
+        bool addBackSuccess = InventoryManager.Instance.AddItem(oldItem);
+
+        if (!addBackSuccess)
+        {
             return false;
         }
 
-        // 2. 장착 가능한 빈 슬롯을 찾거나 0번 인덱스부터 교체
-        int equipIndex = FindNextEmptyEquipSlot();
-        RelicData oldItem = null;
+        ApplyItemAbility(oldItem, false);
+        return true;
+    }
 
-        if (equipIndex == -1) // 빈 슬롯이 없으면 (꽉 찼다면)
+    // 인벤토리에 아이템 복구
+    private void RestoreItemToInventory(RelicData item)
+    {
+        InventoryManager.Instance.AddItem(item);
+        InventoryManager.Instance.NotifyInventoryChanged();
+    }
+
+    // 사용 가능한 첫 슬롯에 장비 착용
+    public bool EquipItemToFirstAvailableSlot(RelicData itemToEquip, int inventorySlotIndex)
+    {
+        EquipmentSlot_UI[] allEquipSlots = FindObjectsOfType<EquipmentSlot_UI>(true);
+
+        int targetEmptySlotIndex = -1;
+        int targetFilledSlotIndex = -1;
+
+        // 빈 슬롯 또는 채워진 슬롯 찾기
+        foreach (EquipmentSlot_UI slotUI in allEquipSlots)
         {
-            // 사용자의 요청: 0번 인덱스부터 교체
-            equipIndex = 0; // 0번 슬롯으로 지정
-            oldItem = equipmentSlots[equipIndex]; // 기존 아이템을 저장
-
-            // 2-1. 기존 아이템(oldItem)을 인벤토리로 되돌림
-            bool addBackSuccess = InventoryManager.Instance.AddItem(oldItem);
-
-            if (!addBackSuccess)
+            if (slotUI.CanEquipItem(itemToEquip))
             {
-                InventoryManager.Instance.inventorySlots[inventorySlotIndex] = itemToEquip;
-                InventoryManager.Instance.NotifyInventoryChanged();
-
-                Debug.LogError("[EquipItem] 0번 교체 시도 중, 기존 장비가 인벤토리에 들어갈 공간이 없어 장착 실패! 아이템이 복구되었습니다.");
-                return false;
-            }
-
-            // 2-2. 기존 아이템의 능력치 해제
-            if (oldItem.grantedAbility != null)
-            {
-                PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();
-                if (playerAbilities != null)
+                if (slotUI.currentItem == null)
                 {
-                    playerAbilities.RemoveRelic(oldItem.itemID);
+                    targetEmptySlotIndex = slotUI.equipmentSlotIndex;
+                    break;
+                }
+                else if (targetFilledSlotIndex == -1)
+                {
+                    targetFilledSlotIndex = slotUI.equipmentSlotIndex;
                 }
             }
         }
 
-        // 3. 새 아이템 장착 (빈 슬롯이거나 0번 슬롯)
-        equipmentSlots[equipIndex] = itemToEquip;
-
-        // 4. 새 아이템의 능력치 적용
-        if (itemToEquip.grantedAbility != null)
+        // 빈 슬롯 우선, 없으면 채워진 슬롯에 교체
+        if (targetEmptySlotIndex != -1)
         {
-            PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();
-            if (playerAbilities != null)
-            {
-                playerAbilities.AddRelic(itemToEquip.itemID);
-            }
+            return EquipItem(itemToEquip, inventorySlotIndex, targetEmptySlotIndex);
         }
 
-        // 5. 장비 변경 이벤트 알림
-        OnEquipmentChanged?.Invoke();
-
-        return true;
-    }
-
-    // 빈 장비 슬롯을 0번부터 찾는 함수
-    private int FindNextEmptyEquipSlot()
-    {
-        for (int i = 0; i < equipmentSlotCapacity; i++)
+        if (targetFilledSlotIndex != -1)
         {
-            if (equipmentSlots[i] == null)
-            {
-                return i;
-            }
+            return EquipItem(itemToEquip, inventorySlotIndex, targetFilledSlotIndex);
         }
-        return -1; // 꽉 찼음
+
+        return false;
     }
 
+    // 장비 해제
     public bool UnequipItem(RelicData itemToUnequip, int equipSlotIndex)
     {
-        // 1. InventoryManager의 AddItem 함수를 호출합니다.
-        // (이 함수가 알아서 빈 슬롯을 찾고, 꽉 찼는지 확인하며, OnInventoryChanged 이벤트도 호출합니다)
         bool success = InventoryManager.Instance.AddItem(itemToUnequip);
 
-        // 2. AddItem이 실패했다면 (인벤토리 꽉 참)
         if (!success)
         {
-            Debug.Log("인벤토리가 꽉 차서 장비를 해제할 수 없습니다.");
-            return false; // 해제 실패
+            return false;
         }
 
-        // 3. AddItem이 성공했다면, 장비 슬롯에서 이 아이템을 제거
         equipmentSlots[equipSlotIndex] = null;
+        ApplyItemAbility(itemToUnequip, false);
 
-        // 4. (플레이어 스탯 적용 해제 - PlayerAbilityManager 호출)
-        if (itemToUnequip.grantedAbility != null)
+        OnEquipmentChanged?.Invoke();
+        return true;
+    }
+
+    // 장비 슬롯 교체
+    public bool SwapEquipmentSlots(int slotIndexA, int slotIndexB)
+    {
+        if (!IsValidSlotIndex(slotIndexA) || !IsValidSlotIndex(slotIndexB))
         {
-            PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();
-            if (playerAbilities != null)
-            {
-                // playerAbilities에 "RemoveRelic" 함수가 있다고 가정
-                playerAbilities.RemoveRelic(itemToUnequip.itemID);
-            }
+            return false;
         }
 
-        // 5. '장비' UI에만 신호를 보냄 (인벤토리 신호는 AddItem이 알아서 보냄)
-        OnEquipmentChanged?.Invoke();
+        RelicData temp = equipmentSlots[slotIndexA];
+        equipmentSlots[slotIndexA] = equipmentSlots[slotIndexB];
+        equipmentSlots[slotIndexB] = temp;
 
-        Debug.Log(itemToUnequip.itemName + "을(를) 장착 해제했습니다.");
+        OnEquipmentChanged?.Invoke();
         return true;
+    }
+
+    // 슬롯 인덱스 유효성 검사
+    private bool IsValidSlotIndex(int index)
+    {
+        return index >= 0 && index < equipmentSlots.Count;
+    }
+
+    // 아이템 능력 적용/제거
+    private void ApplyItemAbility(RelicData item, bool isEquipping)
+    {
+        if (item.grantedAbility == null) return;
+
+        PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();
+        if (playerAbilities == null) return;
+
+        if (isEquipping)
+        {
+            playerAbilities.AddRelic(item.itemID);
+        }
+        else
+        {
+            playerAbilities.RemoveRelic(item.itemID);
+        }
     }
 }

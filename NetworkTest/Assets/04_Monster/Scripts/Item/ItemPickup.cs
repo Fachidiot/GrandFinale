@@ -27,14 +27,14 @@ public class ItemPickup : MonoBehaviour
         sphereCollider = GetComponent<SphereCollider>();
         sphereCollider.isTrigger = true;
 
-        // 1. (수정) Awake에서는 GameManager.Instance를 호출하지 않습니다. (순서 문제 방지)
+        // 1.  Awake에서는 GameManager.Instance를 호출하지 않습니다. (순서 문제 방지)
 
 
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // 2. (수정) 플레이어가 들어왔는지 확인
+        // 2.  플레이어가 들어왔는지 확인
         if (other.CompareTag("Player"))
         {
             // 3. (핵심 수정!) PlayerInputs가 GameManager에 있으므로 GameManager.Instance에서 찾아옵니다.
@@ -47,7 +47,7 @@ public class ItemPickup : MonoBehaviour
             if (playerInputs != null && playerInputs.enabled)
             {
                 playerInRange = true;
-                nearbyPlayer = other.gameObject; // PlayerAbilityManager를 찾기 위해 저장
+                nearbyPlayer = other.gameObject; 
                 OnPlayerNearbyPickup?.Invoke(true, this);
             }
         }
@@ -59,19 +59,17 @@ public class ItemPickup : MonoBehaviour
         {
             playerInRange = false;
             nearbyPlayer = null;
-            playerInputs = null; // 5. (추가) 플레이어가 나가면 PlayerInputs 참조 해제
+            playerInputs = null; 
             OnPlayerNearbyPickup?.Invoke(false, this);
         }
     }
 
     private void Update()
     {
-        // 6. (수정) playerInputs가 null이 아닌지 다시 한번 확인
         if (playerInRange && playerInputs != null)
         {
             if (playerInputs.GetInteract())
             {
-                Debug.Log($"### 상호작용 키('E') 입력 감지! -> {itemData.itemName} 줍기 시도 ###");
                 TryPickupItem();
             }
         }
@@ -100,7 +98,6 @@ public class ItemPickup : MonoBehaviour
         }
         else
         {
-            // 7. (수정) nearbyPlayer는 PlayerAbilityManager를 찾는 용도로만 사용
             PlayerAbilityManager manager = nearbyPlayer.GetComponentInParent<PlayerAbilityManager>();
             if (manager != null)
             {

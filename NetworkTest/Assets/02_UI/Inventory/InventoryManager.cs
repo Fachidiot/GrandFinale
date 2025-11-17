@@ -1,38 +1,52 @@
-using UnityEngine;
-using System.Collections.Generic;
+using DG.Tweening;
 using System;
-using Cinemachine;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
+    public InventoryFilterType currentFilter { get; private set; } = InventoryFilterType.All;
 
-    private int slotCapacity = 8;
-    public List<RelicData> inventorySlots;
+    private int slotCapacity = 60;
+
+    private string currentSearchQuery = string.Empty;
+
+    //private PlayerInputs playerInputs;
+    public List<InventorySlot> inventorySlots;
+    
 
     public static event Action OnInventoryChanged;
     public static event Action<bool> OnInventoryToggle;
+    public bool IsFocused { get; private set; } = false;
 
     [Header("UI Reference")]
-    // [SerializeField] private GameObject inventoryUI; // L18: ï¿½ï¿½ï¿½ï¿½ UI ï¿½Êµï¿½ ï¿½ï¿½ï¿½ï¿½
-    [SerializeField] private GameObject smallInventoryUI; // L19: ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸® UI (I Å°)
-    [SerializeField] private GameObject fullInventoryUI;  // L20: ï¿½ï¿½Ã¼ ï¿½Îºï¿½ï¿½ä¸® UI (O Å°)
+    [SerializeField] private GameObject smallInventoryUI;
+    [SerializeField] private GameObject fullInventoryUI;
 
     [Header("Loot Settings")]
     [SerializeField] private GameObject genericLootPrefab;
 
     [Header("Player Control References")]
-    [SerializeField] private PlayerInputs playerInput;    // PlayerInputs.cs
-    [SerializeField] private CharacterMove characterMove;  // CharacterMove.cs (ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½) - NOTE: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ InputHandlerï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½
-    [SerializeField] private CameraController cameraController; // Ä«ï¿½Þ¶ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - NOTE: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ InputHandlerï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½
-    [SerializeField] private WeaponController weaponController; // ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½ - NOTE: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ InputHandlerï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½
+    [SerializeField] private CharacterMove characterMove;
+    [SerializeField] private CameraSwitcher cameraSwitcher;
 
-    // ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸®/UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+    [Header("DOTween References")]
+    [SerializeField] private CanvasGroup fullCanvasGroup;
+    [SerializeField] private CanvasGroup smallCanvasGroup;
+    [SerializeField] private float fadeDuration = 0.2f;
+
+    private Animator playerAnimator;
+
     public bool IsUIOpen => (smallInventoryUI != null && smallInventoryUI.activeSelf) ||
                             (fullInventoryUI != null && fullInventoryUI.activeSelf);
 
     void Awake()
     {
+        //PlayerInputs = GetComponent<PlayerInputs>();
         if (Instance == null)
         {
             Instance = this;
@@ -43,140 +57,256 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        // 2. RelicData ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ê±ï¿½È­
-        inventorySlots = new List<RelicData>();
+        inventorySlots = new List<InventorySlot>();
         for (int i = 0; i < slotCapacity; i++)
         {
-            inventorySlots.Add(null);
+            inventorySlots.Add(new InventorySlot() { slotIndex = i });
+        }
+
+        // ÇÃ·¹ÀÌ¾î ¾Ö´Ï¸ÞÀÌÅÍ Ã£±â
+        if (characterMove != null)
+        {
+            playerAnimator = characterMove.GetComponent<Animator>();
+        }
+
+        if (fullInventoryUI != null)
+        {
+            fullCanvasGroup = fullInventoryUI.GetComponent<CanvasGroup>();
+            if (fullCanvasGroup == null) fullCanvasGroup = fullInventoryUI.AddComponent<CanvasGroup>();
+
+            fullCanvasGroup.alpha = 0f;
+            fullCanvasGroup.blocksRaycasts = false;
+            fullInventoryUI.SetActive(false);
+        }
+
+        if (smallInventoryUI != null)
+        {
+            smallCanvasGroup = smallInventoryUI.GetComponent<CanvasGroup>();
+            if (smallCanvasGroup == null) smallCanvasGroup = smallInventoryUI.AddComponent<CanvasGroup>();
+
+            smallCanvasGroup.alpha = 0f;
+            smallCanvasGroup.blocksRaycasts = false;
+            smallInventoryUI.SetActive(false);
         }
     }
 
     void Update()
     {
-        if (playerInput == null)
-            return;
+        /*if (playerInput != null && playerInput.GetInventory())
+        {
+            Debug.Log("ÀÎº¥Åä¸® Å° ÀÔ·Â °¨Áö (by PlayerInputs)!");
+            // ToggleSmallInventory(); // (ÀÌÀü¿¡ 'O'Å°¿¡ ¿¬°áµÈ ToggleInventory() ´ë½Å)
+        }
 
-        // L61: I Å° ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸®)
-        if (playerInput.GetInventory())
+        if (playerInput != null && playerInput.GetFullInventoryToggle())
+        {
+            Debug.Log("Full ÀÎº¥Åä¸® Å° ÀÔ·Â °¨Áö (by PlayerInputs)!");
+            ToggleInventory(); // (±âÁ¸ 'O'Å°¿¡ ¿¬°áµÈ ÇÔ¼ö)
+        }*/
+
+
+        // Tab Å°: Small ÀÎº¥Åä¸® Åä±Û
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
             ToggleSmallInventory();
         }
 
-        // L66: O Å° ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½Ã¼ ï¿½Îºï¿½ï¿½ä¸® - InputHandlerï¿½ï¿½ GetFullCharacterToggle()ï¿½ï¿½ ï¿½Ö´Ù°ï¿½ ï¿½ï¿½ï¿½ï¿½)
-        if (playerInput.GetFullInventory())
+        // O Å°: Full ÀÎº¥Åä¸® Åä±Û
+        if (Input.GetKeyDown(KeyCode.O))
         {
             ToggleFullInventory();
         }
 
-        // L71: ESC Å° ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸® ï¿½Ý±ï¿½)
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // ESC Å°: ÀÎº¥Åä¸®°¡ ¿­·ÁÀÖÀ¸¸é ´Ý±â
+        if (IsFocused && Input.GetKeyDown(KeyCode.Escape))
         {
             CloseAllInventories();
         }
+
+        // UI ¿ÜºÎ Å¬¸¯ ½Ã Æ÷Ä¿½º ÇØÁ¦
+        if (IsFocused && Input.GetMouseButtonDown(0))
+        {
+            bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+
+            if (!isOverUI)
+            {
+                SetFocusState(false);
+            }
+        }
     }
 
-    // L77: ï¿½ï¿½ï¿½ï¿½ ToggleInventoryï¿½ï¿½ CloseAllInventoriesï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½Ï°ï¿½, ToggleSmall/FullInventoryï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
-
-    /// <summary>
-    /// I Å° ï¿½Ô·ï¿½ Ã³ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸® Ã¢(ï¿½ï¿½ï¿½Ô¸ï¿½)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
-    /// </summary>
     public void ToggleSmallInventory()
     {
         if (smallInventoryUI == null) return;
 
-        // 1. ï¿½ï¿½Ã¼ Ã¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // ÀüÃ¼ Ã¢ÀÌ ÄÑÁ® ÀÖÀ¸¸é ²ô±â
         if (fullInventoryUI != null && fullInventoryUI.activeSelf)
         {
             fullInventoryUI.SetActive(false);
+            if (IsFocused) SetFocusState(false);
         }
 
-        // 2. ï¿½ï¿½ï¿½ï¿½ Ã¢ ï¿½ï¿½ï¿½
-        bool shouldBeActive = !smallInventoryUI.activeSelf;
-        smallInventoryUI.SetActive(shouldBeActive);
+        bool currentActive = smallInventoryUI.activeSelf;
 
-        // 3. Ä¿ï¿½ï¿½ ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-        SetPlayerInputState(shouldBeActive);
+        if (currentActive && IsFocused)
+        {
+            smallCanvasGroup.blocksRaycasts = false;
+            smallCanvasGroup.DOFade(0f, fadeDuration)
+                .OnComplete(() =>
+                {
+                    smallInventoryUI.SetActive(false);
+                    SetFocusState(false);
+                });
+        }
+        else if (!currentActive)
+        {
+            smallInventoryUI.SetActive(true);
+            smallCanvasGroup.alpha = 0f;
+            smallCanvasGroup.blocksRaycasts = true;
+            smallCanvasGroup.DOFade(1f, fadeDuration);
+            SetFocusState(true);
+        }
+        else
+        {
+            SetFocusState(true);
+        }
     }
 
-    /// <summary>
-    /// O Å° ï¿½Ô·ï¿½ Ã³ï¿½ï¿½: ï¿½ï¿½Ã¼ ï¿½Îºï¿½ï¿½ä¸® Ã¢(ï¿½ï¿½ï¿½ï¿½ + ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
-    /// </summary>
     public void ToggleFullInventory()
     {
         if (fullInventoryUI == null) return;
 
-        // 1. ï¿½ï¿½ï¿½ï¿½ Ã¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (smallInventoryUI != null && smallInventoryUI.activeSelf)
         {
             smallInventoryUI.SetActive(false);
+            if (IsFocused) SetFocusState(false);
         }
 
-        // 2. ï¿½ï¿½Ã¼ Ã¢ ï¿½ï¿½ï¿½
-        bool shouldBeActive = !fullInventoryUI.activeSelf;
-        fullInventoryUI.SetActive(shouldBeActive);
+        bool currentActive = fullInventoryUI.activeSelf;
 
-        // 3. Ä¿ï¿½ï¿½ ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-        SetPlayerInputState(shouldBeActive);
+        if (currentActive && IsFocused)
+        {
+            InventoryAnimation_Close();
+            fullInventoryUI.SetActive(false);
+            SetFocusState(false);
+        }
+        else if (!currentActive)
+        {
+            InventoryAnimation_Open();
+            fullInventoryUI.SetActive(true);
+            SetFocusState(true);
+        }
+        else
+        {
+            SetFocusState(true);
+        }
     }
 
-    /// <summary>
-    /// ESC Å° ï¿½Ô·ï¿½ Ã³ï¿½ï¿½: ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸® Ã¢ï¿½ï¿½ ï¿½Ý°ï¿½ Ä¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Þ´Ï´ï¿½.
-    /// </summary>
     public void CloseAllInventories()
     {
         if (!IsUIOpen) return;
 
+        InventoryAnimation_Close();
         if (smallInventoryUI != null) smallInventoryUI.SetActive(false);
         if (fullInventoryUI != null) fullInventoryUI.SetActive(false);
 
-        // Ä¿ï¿½ï¿½ ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½)
-        SetPlayerInputState(false);
+        SetFocusState(false);
     }
 
-
-    /// <summary>
-    /// UI È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½ï¿½ ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½Ô·ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
-    /// </summary>
-    private void SetPlayerInputState(bool uiIsActive)
+    private void SetFocusState(bool isFocused)
     {
-        if (uiIsActive)
+        if (this.IsFocused == isFocused) return;
+
+        this.IsFocused = isFocused;
+
+        // Ä¿¼­ Á¦¾î
+        if (isFocused)
         {
-            Cursor.lockState = CursorLockMode.None; // Ä¿ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked; // Ä¿ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½)
+            Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
-        // L159: InputHandlerï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® È£ï¿½ï¿½
-        OnInventoryToggle?.Invoke(uiIsActive);
+        // ¾Ö´Ï¸ÞÀÌ¼Ç Á¦¾î
+        if (isFocused)
+        {
+            StopPlayerAnimation();
+        }
+        else
+        {
+            ResumePlayerAnimation();
+        }
 
-        // NOTE: ï¿½ï¿½ï¿½ï¿½ ToggleInventoryï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ® È°ï¿½ï¿½È­/ï¿½ï¿½È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
-        // InputHandlerï¿½ï¿½ OnInventoryToggleï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ìµï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
-        // InputHandlerï¿½ï¿½ ï¿½ï¿½ï¿½ì½º ï¿½Ô·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½, ï¿½Ìµï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®(CharacterMove, CameraController ï¿½ï¿½)ï¿½ï¿½ 
-        // InventoryManagerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È°ï¿½ï¿½È­/ï¿½ï¿½È°ï¿½ï¿½È­ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö½ï¿½ï¿½Ï´ï¿½. 
-        // ï¿½ï¿½ï¿½â¼­ï¿½ï¿½ InputHandlerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ô´Ï´ï¿½.
+        OnInventoryToggle?.Invoke(isFocused);
     }
 
-
-    /// <summary>
-    /// RelicData ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ä¸®ï¿½ï¿½ ï¿½ß°ï¿½ï¿½Õ´Ï´ï¿½.
-    /// </summary>
-    public bool AddItem(RelicData itemToAdd) // 3. ItemData -> RelicData
+    private void StopPlayerAnimation()
     {
+        if (playerAnimator != null)
+        {
+            playerAnimator.speed = 0f;
+        }
+
+        if (characterMove != null)
+        {
+            characterMove.StopAllActions();
+        }
+
+        // Á¶ÁØ ÁßÀÌ¸é °­Á¦·Î ÇØÁ¦
+        if (cameraSwitcher != null)
+        {
+            cameraSwitcher.StopAiming();
+        }
+    }
+
+    private void ResumePlayerAnimation()
+    {
+        if (playerAnimator != null)
+        {
+            playerAnimator.speed = 1f;
+        }
+    }
+
+    public bool AddItem(RelicData itemToAdd)
+    {
+        // 1. ½ºÅÃ °¡´ÉÇÑ ¾ÆÀÌÅÛÀÎÁö È®ÀÎ (maxStack > 1)
+        if (itemToAdd.maxStack > 1)
+        {
+            // 2. ÀÎº¥Åä¸®¸¦ ¼øÈ¸ÇÏ¸ç °°Àº ¾ÆÀÌÅÛÀÌ ÀÖ°í, ½ºÅÃÀÌ °¡µæ Â÷Áö ¾Ê¾Ò´ÂÁö È®ÀÎ
+            for (int i = 0; i < slotCapacity; i++)
+            {
+                InventorySlot slot = inventorySlots[i];
+                if (slot.item != null &&
+                    slot.item.itemID == itemToAdd.itemID &&
+                    slot.quantity < slot.item.maxStack)
+                {
+                    // 3. (½ºÅÃ ¼º°ø) ¼ö·®À» 1 Áõ°¡½ÃÅ°°í ¾Ë¸²
+                    slot.AddQuantity(1);
+                    OnInventoryChanged?.Invoke();
+                    return true;
+                }
+            }
+            // 4. (½ÇÆÐ) °°Àº ¾ÆÀÌÅÛÀ» Ã£Áö ¸øÇß°Å³ª ¸ðµÎ °¡µæ Ã¡À½. -> ´ÙÀ½ ´Ü°è(ºó ½½·Ô Ã£±â)·Î ÀÌµ¿
+        }
+
+        // 5. (½ºÅÃ ºÒ°¡ ¶Ç´Â ½ºÅÃ ½ÇÆÐ) ºó ½½·ÔÀ» Ã£½À´Ï´Ù.
         int emptySlotIndex = FindNextEmptySlot();
 
         if (emptySlotIndex == -1)
         {
-            Debug.Log("ï¿½Îºï¿½ï¿½ä¸®ï¿½ï¿½ ï¿½ï¿½ Ã¡ï¿½ï¿½ï¿½Ï´ï¿½.");
+            Debug.Log("ÀÎº¥Åä¸®°¡ ²Ë Ã¡½À´Ï´Ù.");
             return false;
         }
 
-        inventorySlots[emptySlotIndex] = itemToAdd;
+        // 6. ºó ½½·Ô¿¡ ¾ÆÀÌÅÛ Á¤º¸¿Í ¼ö·® 1À» ¼³Á¤ÇÕ´Ï´Ù.
+        inventorySlots[emptySlotIndex].item = itemToAdd;
+        inventorySlots[emptySlotIndex].quantity = 1;
+
         OnInventoryChanged?.Invoke();
-        Debug.Log(itemToAdd.itemName + "ï¿½ï¿½(ï¿½ï¿½) " + (emptySlotIndex + 1) + "ï¿½ï¿½ ï¿½ï¿½ï¿½Ô¿ï¿½ ï¿½ß°ï¿½ï¿½ß½ï¿½ï¿½Ï´ï¿½.");
         return true;
     }
 
@@ -184,7 +314,7 @@ public class InventoryManager : MonoBehaviour
     {
         for (int i = 0; i < slotCapacity; i++)
         {
-            if (inventorySlots[i] == null)
+            if (inventorySlots[i].item == null)
             {
                 return i;
             }
@@ -192,50 +322,66 @@ public class InventoryManager : MonoBehaviour
         return -1;
     }
 
-    // 4. RelicDataï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-    public void SwapItems(int indexA, int indexB)
+    public void RemoveItemFromSlot(int slotIndex, int amountToRemove = 1)
     {
-        RelicData temp = inventorySlots[indexA];
-        inventorySlots[indexA] = inventorySlots[indexB];
-        inventorySlots[indexB] = temp;
+        if (slotIndex < 0 || slotIndex >= slotCapacity || inventorySlots[slotIndex].item == null)
+        {
+            return;
+        }
+
+        InventorySlot slot = inventorySlots[slotIndex];
+        slot.quantity -= amountToRemove;
+
+        if (slot.quantity <= 0)
+        {
+            slot.ClearSlot();
+        }
+
         OnInventoryChanged?.Invoke();
     }
 
-    // L215: RelicDataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ + bool ï¿½ï¿½È¯ ï¿½ß°ï¿½ (CS0029 ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+    public void SwapItems(int indexA, int indexB)
+    {
+        InventorySlot temp = inventorySlots[indexA];
+        inventorySlots[indexA] = inventorySlots[indexB];
+        inventorySlots[indexB] = temp;
+
+        inventorySlots[indexA].slotIndex = indexA;
+        inventorySlots[indexB].slotIndex = indexB;
+
+        OnInventoryChanged?.Invoke();
+    }
+
     public bool RemoveItem(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= slotCapacity)
         {
-            Debug.LogError($"[InventoryManager] ï¿½ß¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½: {slotIndex}");
+            Debug.LogError($"[InventoryManager] Àß¸øµÈ ½½·Ô ÀÎµ¦½º: {slotIndex}");
             return false;
         }
-
-        inventorySlots[slotIndex] = null;
+        inventorySlots[slotIndex].ClearSlot();
         OnInventoryChanged?.Invoke();
-        return true; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        return true;
     }
-
 
     public void DropItem(int slotIndex)
     {
-        RelicData itemToDrop = inventorySlots[slotIndex];
-        if (itemToDrop == null) return;
+        InventorySlot slotToDrop = inventorySlots[slotIndex];
+        if (slotToDrop.item == null) return;
 
-        // 1. (ï¿½ß¿ï¿½!) RelicDataï¿½ï¿½ dropPrefabï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+        RelicData itemToDrop = slotToDrop.item;
+
         if (genericLootPrefab != null)
         {
-            // 2. ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ Ã£ï¿½ï¿½ (ï¿½Ó½Ã·ï¿½ "Player" ï¿½Â±ï¿½ ï¿½ï¿½ï¿½)
             GameObject player = GameObject.FindWithTag("Player");
             Vector3 dropPosition;
 
             if (player != null)
             {
-                // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ 1ï¿½ï¿½ï¿½ï¿½ ï¿½Õ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
                 dropPosition = player.transform.position + (player.transform.forward * 1f);
             }
             else
             {
-                // ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½ï¿½ Ã£ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ 1ï¿½ï¿½ï¿½ï¿½ ï¿½Õ¿ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡)
                 dropPosition = Camera.main.transform.position + (Camera.main.transform.forward * 1f);
             }
 
@@ -244,7 +390,7 @@ public class InventoryManager : MonoBehaviour
             ItemPickup pickupScript = orbInstance.GetComponent<ItemPickup>();
             if (pickupScript != null)
             {
-                pickupScript.itemData = itemToDrop; // [ï¿½ß¿ï¿½] ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½î¶² ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                pickupScript.itemData = itemToDrop;
             }
             LootOrbVisuals visualScript = orbInstance.GetComponent<LootOrbVisuals>();
             if (visualScript != null)
@@ -252,21 +398,168 @@ public class InventoryManager : MonoBehaviour
                 visualScript.Initialize(itemToDrop.grade);
             }
 
-            // 4. ï¿½Îºï¿½ï¿½ä¸®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-            RemoveItem(slotIndex); // (ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ OnInventoryChangedï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½)
-            Debug.Log(itemToDrop.itemName + "ï¿½ï¿½(ï¿½ï¿½) ï¿½Ù´Ú¿ï¿½ ï¿½ï¿½ï¿½È½ï¿½ï¿½Ï´ï¿½.");
+            RemoveItemFromSlot(slotIndex, 1);
+
+            Debug.Log($"{itemToDrop.itemName}À»(¸¦) ¹Ù´Ú¿¡ 1°³ ¹ö·È½À´Ï´Ù. (³²Àº ¼ö·®: {slotToDrop.quantity})");
         }
         else
         {
-            Debug.LogWarning("InventoryManagerï¿½ï¿½ genericLootPrefabï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
+            Debug.LogWarning("InventoryManager¿¡ genericLootPrefabÀÌ ¼³Á¤µÇÁö ¾Ê¾Æ ¾ÆÀÌÅÛÀ» ¹ö¸± ¼ö ¾ø½À´Ï´Ù.");
         }
     }
 
-    /// <summary>
-    /// ï¿½Îºï¿½ï¿½ä¸® ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½ÜºÎ¿ï¿½ ï¿½Ë¸ï¿½ï¿½Ï´ï¿½. (ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
-    /// </summary>
     public void NotifyInventoryChanged()
     {
         OnInventoryChanged?.Invoke();
+    }
+
+    public void SetFilter(InventoryFilterType newFilter)
+    {
+        if (currentFilter != newFilter)
+        {
+            currentFilter = newFilter;
+            Debug.Log($"[InventoryManager] ÇÊÅÍ º¯°æ: {currentFilter}");
+            OnInventoryChanged?.Invoke();
+        }
+    }
+
+    public bool IsCombatInputBlockedByUI()
+    {
+        return IsFocused;
+    }
+
+    public void SortInventory()
+    {
+        // 1. ¾ÆÀÌÅÛÀÌ ÀÖ´Â ½½·Ô°ú ºñ¾îÀÖ´Â ½½·ÔÀ» ºÐ¸®
+        List<InventorySlot> filledSlots = inventorySlots
+            .Where(slot => slot.item != null)
+            .ToList();
+
+        List<InventorySlot> emptySlots = inventorySlots
+            .Where(slot => slot.item == null)
+            .ToList();
+
+        // 2. ¾ÆÀÌÅÛÀÌ ÀÖ´Â ½½·ÔÀ» Á¤·Ä
+        filledSlots = filledSlots
+            .OrderBy(slot => slot.item.itemName)
+            .ThenByDescending(slot => slot.quantity)
+            .ToList();
+
+        // 3. Á¤·ÄµÈ ½½·Ô°ú ºó ½½·ÔÀ» ´Ù½Ã ÇÕÄ¡±â
+        inventorySlots.Clear();
+        inventorySlots.AddRange(filledSlots);
+        inventorySlots.AddRange(emptySlots);
+
+        // 4. ½½·Ô ÀÎµ¦½º Àç¼³Á¤
+        for (int i = 0; i < slotCapacity; i++)
+        {
+            inventorySlots[i].slotIndex = i;
+        }
+
+        // 5. UI ¾÷µ¥ÀÌÆ® ÀÌº¥Æ® È£Ãâ
+        OnInventoryChanged?.Invoke();
+        Debug.Log("[InventoryManager] ÀÎº¥Åä¸® Á¤·Ä ¿Ï·á.");
+    }
+
+    public void SetSearchQuery(string query)
+    {
+        // ¼Ò¹®ÀÚ·Î º¯È¯ÇÏ¿© ÀúÀå (´ë¼Ò¹®ÀÚ ±¸ºÐ ¾øÀÌ °Ë»öÇÏ±â À§ÇÔ)
+        string newQuery = query.Trim().ToLower();
+
+        if (currentSearchQuery != newQuery)
+        {
+            currentSearchQuery = newQuery;
+            Debug.Log($"[InventoryManager] °Ë»ö¾î º¯°æ: {currentSearchQuery}");
+            // °Ë»ö¾î°¡ º¯°æµÇ¸é UI¸¦ ¾÷µ¥ÀÌÆ®ÇØ¾ß ÇÔ
+            OnInventoryChanged?.Invoke();
+        }
+    }
+
+
+    /// <summary>
+    /// Full Inventory UI¸¦ ¿­ ¶§ÀÇ ¾Ö´Ï¸ÞÀÌ¼Ç (ÆäÀÌµå ÀÎ)
+    /// </summary>
+    private void InventoryAnimation_Open()
+    {
+        if (fullCanvasGroup == null || fullInventoryUI == null) return;
+
+        // 1. ÃÊ±â ¼³Á¤
+        fullInventoryUI.SetActive(true);
+        fullCanvasGroup.alpha = 0f;
+        fullCanvasGroup.blocksRaycasts = true;
+
+        // 2. DOTween ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà (ÆäÀÌµå ÀÎ)
+        fullCanvasGroup.DOFade(1f, fadeDuration).SetEase(Ease.OutSine);
+
+        // (Å×½ºÆ®¿ë ´Ù¸¥ ¾Ö´Ï¸ÞÀÌ¼Ç ¹öÀü: ½ºÄÉÀÏ È®´ë)
+        /*
+        fullInventoryUI.transform.localScale = Vector3.one * 0.8f;
+        fullInventoryUI.transform.DOScale(1f, fadeDuration).SetEase(Ease.OutBack);
+        */
+    }
+
+    /// <summary>
+    /// Full Inventory UI¸¦ ´ÝÀ» ¶§ÀÇ ¾Ö´Ï¸ÞÀÌ¼Ç (ÆäÀÌµå ¾Æ¿ô)
+    /// </summary>
+    private void InventoryAnimation_Close()
+    {
+        if (fullCanvasGroup == null || fullInventoryUI == null) return;
+
+        // 1. DOTween ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà (ÆäÀÌµå ¾Æ¿ô)
+        fullCanvasGroup.blocksRaycasts = false;
+
+        fullCanvasGroup.DOFade(0f, fadeDuration)
+            .SetEase(Ease.InSine)
+            .OnComplete(() =>
+            {
+                // 2. ¾Ö´Ï¸ÞÀÌ¼Ç ¿Ï·á ÈÄ ºñÈ°¼ºÈ­ ¹× Æ÷Ä¿½º ÇØÁ¦
+                fullInventoryUI.SetActive(false);
+                SetFocusState(false);
+            });
+    }
+
+    public List<InventorySlot> GetFilteredInventory()
+    {
+        int capacity = slotCapacity;
+
+        if (currentFilter == InventoryFilterType.All)
+        {
+            return new List<InventorySlot>(inventorySlots);
+        }
+
+        List<InventorySlot> filteredList = new List<InventorySlot>();
+
+        foreach (InventorySlot slot in inventorySlots)
+        {
+            RelicData item = slot.item;
+            if (item == null) continue;
+
+            ItemType itemType = item.itemTypeEnum;
+
+            bool match = currentFilter switch
+            {
+                InventoryFilterType.Weapon => itemType == ItemType.Weapon,
+                InventoryFilterType.Equipment => itemType == ItemType.Equipment,
+                InventoryFilterType.Accessory => itemType == ItemType.Accessory,
+                InventoryFilterType.Relic => itemType == ItemType.Artifact,
+                InventoryFilterType.Etc => itemType != ItemType.Weapon &&
+                                           itemType != ItemType.Equipment &&
+                                           itemType != ItemType.Accessory &&
+                                           itemType != ItemType.Artifact,
+                _ => false,
+            };
+
+            if (match)
+            {
+                filteredList.Add(slot);
+            }
+        }
+
+        while (filteredList.Count < capacity)
+        {
+            filteredList.Add(new InventorySlot() { slotIndex = -1 });
+        }
+
+        return filteredList;
     }
 }
