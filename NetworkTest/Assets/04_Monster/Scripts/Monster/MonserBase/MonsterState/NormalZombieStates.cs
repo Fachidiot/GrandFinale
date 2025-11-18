@@ -19,13 +19,13 @@ namespace NormalZombieStates
         {
             if (monster.sensor.CanSeePlayer)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
             timer += Time.deltaTime;
             if (timer >= idleTime)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.PatrolState;
             }
             return this;
@@ -49,7 +49,7 @@ namespace NormalZombieStates
         {
             if (monster.sensor.CanSeePlayer)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
 
@@ -58,7 +58,7 @@ namespace NormalZombieStates
 
             if (entryTimer > 0.1f && monster.arrivedAtDestination)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.IdleState;
             }
 
@@ -87,14 +87,14 @@ namespace NormalZombieStates
         {
             if (monster.GetDistanceToPlayer() <= monster.config.attackRange)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.AttackState;
             }
             Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
             monster.MoveTo(targetPosition);
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.LookAroundState;
             }
             return this;
@@ -120,7 +120,7 @@ namespace NormalZombieStates
         {
             if (monster.sensor.CanSeePlayer)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
 
@@ -128,7 +128,7 @@ namespace NormalZombieStates
 
             if (timer >= monster.config.lookAroundTime)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.PatrolState;
             }
             return this;
@@ -164,7 +164,7 @@ namespace NormalZombieStates
 
             if (timer >= monster.config.attackCooldown)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
 
@@ -182,7 +182,7 @@ namespace NormalZombieStates
 
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
-            // (¼öÁ¤) monster.fsm »ç¿ë
+            // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
             return monster.fsm.TraceState;
         }
         public override void ExitState(MonsterAIController monster) { }

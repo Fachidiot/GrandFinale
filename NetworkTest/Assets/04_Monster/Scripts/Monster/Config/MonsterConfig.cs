@@ -1,46 +1,46 @@
 using UnityEngine;
 
 /// <summary>
-/// ¸ğµç ¸ó½ºÅÍ°¡ °øÅëÀ¸·Î »ç¿ëÇÒ ÃÖÁ¾ ¼³Á¤ ÆÄÀÏÀÔ´Ï´Ù.
+/// ëª¨ë“  ëª¬ìŠ¤í„°ê°€ ê³µí†µìœ¼ë¡œ ì‚¬ìš©í•  ìµœì¢… ì„¤ì • íŒŒì¼ì…ë‹ˆë‹¤.
 /// </summary>
 [CreateAssetMenu(fileName = "NewMonsterConfig", menuName = "Monster/Monster Config")]
 public class MonsterConfig : ScriptableObject
 {
-    [Header("±âº» ´É·ÂÄ¡")]
+    [Header("ê¸°ë³¸ ëŠ¥ë ¥ì¹˜")]
     public float maxHP = 100f;
     public float attackDamage = 10f;
     public float defense = 0f;
-    // 'currentHP'´Â ÀÌÁ¦ MonsterHealth.cs°¡ °ü¸®ÇÏ¹Ç·Î ¿©±â¼­ Á¦°ÅÇÕ´Ï´Ù.
+    // 'currentHP'ëŠ” ì´ì œ MonsterHealth.csê°€ ê´€ë¦¬í•˜ë¯€ë¡œ ì—¬ê¸°ì„œ ì œê±°í•©ë‹ˆë‹¤.
 
-    [Header("AI Çàµ¿ ¹× °¨Áö")]
+    [Header("AI í–‰ë™ ë° ê°ì§€")]
     public float fovRange = 10f;
     [Range(0, 360)]
     public float fovAngle = 120f;
     public float soundRange = 15f;
     public float attackRange = 2f;
     public float stoppingDistance = 1.5f;
-    public float persistenceTime = 5f; // ÃßÀû À¯Áö ½Ã°£ (SpiderConfig¿¡¼­ °¡Á®¿È)
+    public float persistenceTime = 5f; // ì¶”ì  ìœ ì§€ ì‹œê°„ (SpiderConfigì—ì„œ ê°€ì ¸ì˜´)
 
-    [Header("¼øÂû ¹× ´ë±â")]
+    [Header("ìˆœì°° ë° ëŒ€ê¸°")]
     public float patrolRadiusMin = 5f;
     public float patrolRadiusMax = 10f;
     public float idleTimeMin = 10f;
     public float idleTimeMax = 15f;
 
-    [Header("ÁÖº¯ µÑ·¯º¸±â")]
-    public float lookAroundTime = 3f; // looktime ´ë½Å lookAroundTimeÀ¸·Î ÅëÀÏ
+    [Header("ì£¼ë³€ ë‘˜ëŸ¬ë³´ê¸°")]
+    public float lookAroundTime = 3f; // looktime ëŒ€ì‹  lookAroundTimeìœ¼ë¡œ í†µì¼
     public float lookAroundTurnInterval = 1.5f;
 
-    [Header("ÀÌµ¿ °ü·Ã")]
+    [Header("ì´ë™ ê´€ë ¨")]
     public float walkSpeed = 1.5f;
     public float runSpeed = 3f;
     public float turnSpeed = 2000f;
 
-    [Header("°ø°İ ÆĞÅÏ")]
+    [Header("ê³µê²© íŒ¨í„´")]
     public float attackDelay = 0.5f;
     public float attackCooldown = 10f;
 
-    [Header("»ç¿îµå ¹× ÀÌÆåÆ® (SpiderConfig¿¡¼­ °¡Á®¿È)")]
+    [Header("ì‚¬ìš´ë“œ ë° ì´í™íŠ¸ (SpiderConfigì—ì„œ ê°€ì ¸ì˜´)")]
     public AudioClip idleSound;
     public AudioClip chaseSound;
     public AudioClip attackSound;
@@ -49,14 +49,14 @@ public class MonsterConfig : ScriptableObject
     public GameObject hitEffect;
     public GameObject dieEffect;
 
-    /*    [Header("º¸»ó (SpiderConfig¿¡¼­ °¡Á®¿È)")]
+    /*    [Header("ë³´ìƒ (SpiderConfigì—ì„œ ê°€ì ¸ì˜´)")]
         public int experiencePoints = 50;
         public GameObject[] lootItems;
     */
-    [Header("º¸»ó (LootTable °¡Á®¿È)")]
+    [Header("ë³´ìƒ (LootTable ê°€ì ¸ì˜´)")]
     public LootTable lootTable;
 
-    [Header("»ç¸Á ÈÄ Ã³¸®")]
-    [Tooltip("¸ó½ºÅÍ°¡ Á×Àº ÈÄ ½ÃÃ¼°¡ »ç¶óÁö±â±îÁö °É¸®´Â ½Ã°£ (ÃÊ)")]
-    public float corpseDestroyDelay = 5.0f; // 5ÃÊ µÚ »ç¶óÁü
+    [Header("ì‚¬ë§ í›„ ì²˜ë¦¬")]
+    [Tooltip("ëª¬ìŠ¤í„°ê°€ ì£½ì€ í›„ ì‹œì²´ê°€ ì‚¬ë¼ì§€ê¸°ê¹Œì§€ ê±¸ë¦¬ëŠ” ì‹œê°„ (ì´ˆ)")]
+    public float corpseDestroyDelay = 5.0f; // 5ì´ˆ ë’¤ ì‚¬ë¼ì§
 }

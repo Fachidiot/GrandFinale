@@ -11,13 +11,13 @@ public class SpiderMovement : MonoBehaviour, IMonsterMovement
         spider = GetComponent<Spider>();
     }
 
-    // AI¿¡°Ô ¹ŞÀº ¸ñÀûÁö¸¦ °Å¹Ì°¡ ÇÊ¿äÇÑ ¹æÇâÀ¸·Î ¹ø¿ª
+    // AIì—ê²Œ ë°›ì€ ëª©ì ì§€ë¥¼ ê±°ë¯¸ê°€ í•„ìš”í•œ ë°©í–¥ìœ¼ë¡œ ë²ˆì—­
     public void Move(Vector3 destination, float speed)
     {
-        // ¸ñÀûÁö±îÁöÀÇ ¿ùµå °ø°£ ¹æÇâÀ» °è»êÇÕ´Ï´Ù.
+        // ëª©ì ì§€ê¹Œì§€ì˜ ì›”ë“œ ê³µê°„ ë°©í–¥ì„ ê³„ì‚°í•©ë‹ˆë‹¤.
         Vector3 worldDirection = (destination - transform.position).normalized;
 
-        // ¿ùµå ¹æÇâÀ» °Å¹ÌÀÇ ·ÎÄÃ ¹æÇâÀ¸·Î º¯È¯ÇÏ¿© Àü´ŞÇÕ´Ï´Ù.
+        // ì›”ë“œ ë°©í–¥ì„ ê±°ë¯¸ì˜ ë¡œì»¬ ë°©í–¥ìœ¼ë¡œ ë³€í™˜í•˜ì—¬ ì „ë‹¬í•©ë‹ˆë‹¤.
         Vector3 localDirection = transform.InverseTransformDirection(worldDirection);
         spider.walk(localDirection, speed);
     }

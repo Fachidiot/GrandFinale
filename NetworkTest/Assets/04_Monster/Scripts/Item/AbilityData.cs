@@ -4,18 +4,18 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ABIL_", menuName = "Data/Ability")]
 public class AbilityData : ScriptableObject
 {
-    [Header("½ÃÆ® ¿øº» Á¤º¸")]
+    [Header("ì‹œíŠ¸ ì›ë³¸ ì •ë³´")]
     public string abilityID;
     public string abilityName;
     public string activationType; // Passive, Active
     public string abilityLogicID; // Stat_Add, Projectile, Aura...
 
-    [Header("´É·Â ÆÄ¶ó¹ÌÅÍ (Key, Value A, B, C)")]
-    public string param_Key;    // ½ºÅÈ¸í("MaxHealth"), ÁÖ ¼öÄ¡("25"), Å¸ÀÔ("InfiniteAmmo") µî
-    public string param_ValueA; // º¸Á¶ ¼öÄ¡ 1 (¹üÀ§, ÄğÅ¸ÀÓ µî)
-    public string param_ValueB; // º¸Á¶ ¼öÄ¡ 2 (Áö¼Ó½Ã°£, ¼Óµµ µî)
-    public string param_ValueC; // º¸Á¶ ¼öÄ¡ 3 (±âÅ¸, Æ½·¹ÀÌÆ® µî)
+    [Header("ëŠ¥ë ¥ íŒŒë¼ë¯¸í„° (Key, Value A, B, C)")]
+    public string param_Key;    // ìŠ¤íƒ¯ëª…("MaxHealth"), ì£¼ ìˆ˜ì¹˜("25"), íƒ€ì…("InfiniteAmmo") ë“±
+    public string param_ValueA; // ë³´ì¡° ìˆ˜ì¹˜ 1 (ë²”ìœ„, ì¿¨íƒ€ì„ ë“±)
+    public string param_ValueB; // ë³´ì¡° ìˆ˜ì¹˜ 2 (ì§€ì†ì‹œê°„, ì†ë„ ë“±)
+    public string param_ValueC; // ë³´ì¡° ìˆ˜ì¹˜ 3 (ê¸°íƒ€, í‹±ë ˆì´íŠ¸ ë“±)
 
-    [Header("¸®¼Ò½º °æ·Î")]
+    [Header("ë¦¬ì†ŒìŠ¤ ê²½ë¡œ")]
     public string resourcePath; // Prefabs/VFX/HealAura
 }

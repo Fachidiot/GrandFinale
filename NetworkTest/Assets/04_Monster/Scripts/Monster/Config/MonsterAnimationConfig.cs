@@ -5,36 +5,36 @@ using UnityEngine;
 public class MonsterAnimationConfig : ScriptableObject
 {
     [Header("Movement Parameters")]
-    [Tooltip("ÀÌµ¿ ¼Óµµ¸¦ Á¦¾îÇÏ´Â Float ÆÄ¶ó¹ÌÅÍ ÀÌ¸§ (¿¹: Speed, Locomotion)")]
-    public string moveSpeedFloat = "Locomotion"; // NavMeshMovement¿Í ÀÏÄ¡½ÃÅ³ ¼ö ÀÖÀ½
+    [Tooltip("ì´ë™ ì†ë„ë¥¼ ì œì–´í•˜ëŠ” Float íŒŒë¼ë¯¸í„° ì´ë¦„ (ì˜ˆ: Speed, Locomotion)")]
+    public string moveSpeedFloat = "Locomotion"; // NavMeshMovementì™€ ì¼ì¹˜ì‹œí‚¬ ìˆ˜ ìˆìŒ
 
-    [Tooltip("Idle ¾Ö´Ï¸ŞÀÌ¼Ç Å¸ÀÔÀ» Á¦¾îÇÏ´Â Int ÆÄ¶ó¹ÌÅÍ ÀÌ¸§ (¿¹: IdleType)")]
+    [Tooltip("Idle ì• ë‹ˆë©”ì´ì…˜ íƒ€ì…ì„ ì œì–´í•˜ëŠ” Int íŒŒë¼ë¯¸í„° ì´ë¦„ (ì˜ˆ: IdleType)")]
     public string idleTypeInt = "IdleType";
 
     [Header("State Parameters (Bool)")]
-    [Tooltip("ÇÊ¿äÇÑ °æ¿ì Bool »óÅÂ ÆÄ¶ó¹ÌÅÍ (¿¹: isWalking, isStunned)")]
-    public string isWalkingBool = "Patrol"; // (±âÁ¸ Á»ºñ È£È¯¿ë)
-    public string isRunningBool = "Trace"; // (±âÁ¸ Á»ºñ È£È¯¿ë)
+    [Tooltip("í•„ìš”í•œ ê²½ìš° Bool ìƒíƒœ íŒŒë¼ë¯¸í„° (ì˜ˆ: isWalking, isStunned)")]
+    public string isWalkingBool = "Patrol"; // (ê¸°ì¡´ ì¢€ë¹„ í˜¸í™˜ìš©)
+    public string isRunningBool = "Trace"; // (ê¸°ì¡´ ì¢€ë¹„ í˜¸í™˜ìš©)
 
     [Header("Action Parameters (Trigger)")]
-    [Tooltip("°ø°İ 1¹ø Æ®¸®°Å")]
-    public string attackTrigger1 = "Attack"; // (±âÁ¸ Á»ºñ È£È¯¿ë)
-    [Tooltip("°ø°İ 2¹ø Æ®¸®°Å")]
+    [Tooltip("ê³µê²© 1ë²ˆ íŠ¸ë¦¬ê±°")]
+    public string attackTrigger1 = "Attack"; // (ê¸°ì¡´ ì¢€ë¹„ í˜¸í™˜ìš©)
+    [Tooltip("ê³µê²© 2ë²ˆ íŠ¸ë¦¬ê±°")]
     public string attackTrigger2 = "Attack2";
-    [Tooltip("°ø°İ 3¹ø Æ®¸®°Å")]
+    [Tooltip("ê³µê²© 3ë²ˆ íŠ¸ë¦¬ê±°")]
     public string attackTrigger3 = "Attack3";
-    [Tooltip("°ø°İ 4¹ø Æ®¸®°Å")]
+    [Tooltip("ê³µê²© 4ë²ˆ íŠ¸ë¦¬ê±°")]
     public string attackTrigger4 = "Attack4";
 
     [Space(10)]
-    [Tooltip("ÇÇ°İ Æ®¸®°Å")]
+    [Tooltip("í”¼ê²© íŠ¸ë¦¬ê±°")]
     public string hitTrigger = "GotHit";
     public string hitTrigger2 = "GotHit2";
 
-    [Tooltip("»ç¸Á Æ®¸®°Å ¶Ç´Â Bool (Æ®¸®°Å ±ÇÀå)")]
-    public string dieTrigger = "Death1"; // (±âÁ¸ Á»ºñ Die Bool°ú ÀÌ¸§ÀÌ °°À½)
+    [Tooltip("ì‚¬ë§ íŠ¸ë¦¬ê±° ë˜ëŠ” Bool (íŠ¸ë¦¬ê±° ê¶Œì¥)")]
+    public string dieTrigger = "Death1"; // (ê¸°ì¡´ ì¢€ë¹„ Die Boolê³¼ ì´ë¦„ì´ ê°™ìŒ)
 
-    [Tooltip("»ç¸Á 2¹ø Æ®¸®°Å")]
+    [Tooltip("ì‚¬ë§ 2ë²ˆ íŠ¸ë¦¬ê±°")]
     public string dieTrigger2 = "Death2";
 
     [Header("Defense Triggers")]

@@ -1,25 +1,25 @@
 // Assets/Scripts/Managers/DataManager.cs
 using System.Collections.Generic;
-using System.Linq; // Dictionary º¯È¯(ToDictionary)À» À§ÇØ ÇÊ¿ä
+using System.Linq; // Dictionary ë³€í™˜(ToDictionary)ì„ ìœ„í•´ í•„ìš”
 using UnityEngine;
 
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance { get; private set; }
 
-    [Header("µ¥ÀÌÅÍº£ÀÌ½º ¿øº» ¿¡¼Â")]
+    [Header("ë°ì´í„°ë² ì´ìŠ¤ ì›ë³¸ ì—ì…‹")]
     [SerializeField]
-    private MasterDatabase masterDatabase; // (MasterDatabase.assetÀ» ¿©±â·Î µå·¡±×)
+    private MasterDatabase masterDatabase; // (MasterDatabase.assetì„ ì—¬ê¸°ë¡œ ë“œë˜ê·¸)
 
 
-    // ID(string)¸¦ Key·Î, ½ÇÁ¦ ScriptableObject(.asset)¸¦ Value·Î °¡Áı´Ï´Ù.
+    // ID(string)ë¥¼ Keyë¡œ, ì‹¤ì œ ScriptableObject(.asset)ë¥¼ Valueë¡œ ê°€ì§‘ë‹ˆë‹¤.
     public Dictionary<string, RelicData> RelicDB { get; private set; }
     public Dictionary<string, AbilityData> AbilityDB { get; private set; }
 
 
     void Awake()
     {
-        // 3. ½Ì±ÛÅæ ÃÊ±âÈ­
+        // 3. ì‹±ê¸€í†¤ ì´ˆê¸°í™”
         if (Instance == null)
         {
             Instance = this;
@@ -27,7 +27,7 @@ public class DataManager : MonoBehaviour
         }
         else
         {
-            // ÀÌ¹Ì ¾À¿¡ DataManager°¡ ÀÖ´Ù¸é, »õ·Î »ı±ä °ÍÀº ÆÄ±«ÇÕ´Ï´Ù.
+            // ì´ë¯¸ ì”¬ì— DataManagerê°€ ìˆë‹¤ë©´, ìƒˆë¡œ ìƒê¸´ ê²ƒì€ íŒŒê´´í•©ë‹ˆë‹¤.
             Destroy(gameObject);
         }
     }
@@ -36,12 +36,12 @@ public class DataManager : MonoBehaviour
     {
         if (masterDatabase == null)
         {
-            Debug.LogError("[DataManager] MasterDatabase ¿¡¼ÂÀÌ ÀÎ½ºÆåÅÍ¿¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("[DataManager] MasterDatabase ì—ì…‹ì´ ì¸ìŠ¤í™í„°ì— ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
             return;
         }
 
 
-        // 5-2. Resources.LoadAll ´ë½Å, masterDatabaseÀÇ ¸®½ºÆ®¿¡¼­ Á÷Á¢ µñ¼Å³Ê¸® »ı¼º
+        // 5-2. Resources.LoadAll ëŒ€ì‹ , masterDatabaseì˜ ë¦¬ìŠ¤íŠ¸ì—ì„œ ì§ì ‘ ë”•ì…”ë„ˆë¦¬ ìƒì„±
         AbilityDB = masterDatabase.allAbilities.ToDictionary(ability => ability.abilityID, ability => ability);
         RelicDB = masterDatabase.allRelics.ToDictionary(relic => relic.itemID, relic => relic);
     }
@@ -52,7 +52,7 @@ public class DataManager : MonoBehaviour
         {
             return ability;
         }
-        Debug.LogWarning($"[DataManager] AbilityDB¿¡¼­ ID¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù: {abilityID}");
+        Debug.LogWarning($"[DataManager] AbilityDBì—ì„œ IDë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤: {abilityID}");
         return null;
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using GolemStates;
 
-// 1. MonsterFSM ¼³°èµµ¸¦ »ó¼Ó
+// 1. MonsterFSM ì„¤ê³„ë„ë¥¼ ìƒì†
 public class GolemFSM : MonsterFSM
 {
     [HideInInspector]
@@ -38,7 +38,7 @@ public class GolemFSM : MonsterFSM
 
     }
 
-    // 2. GolemStatesÀÇ »óÅÂ Å¬·¡½ºµéÀ» »ı¼º
+    // 2. GolemStatesì˜ ìƒíƒœ í´ë˜ìŠ¤ë“¤ì„ ìƒì„±
     private readonly Idle _idleState = new Idle();
     private readonly Patrol _patrolState = new Patrol();
     private readonly Trace _traceState = new Trace();
@@ -46,9 +46,9 @@ public class GolemFSM : MonsterFSM
     private readonly LookAround _lookAroundState = new LookAround();
     private readonly Hit _hitState = new Hit();
     private readonly Die _dieState = new Die();
-    private readonly Block _blockState = new Block(); // ¡Ú °ñ·½ Àü¿ë ¹æ¾î »óÅÂ
+    private readonly Block _blockState = new Block(); // â˜… ê³¨ë ˜ ì „ìš© ë°©ì–´ ìƒíƒœ
 
-    // 3. FSM ½½·Ô¿¡ »óÅÂµéÀ» ¹İÈ¯
+    // 3. FSM ìŠ¬ë¡¯ì— ìƒíƒœë“¤ì„ ë°˜í™˜
     public override ZombieBaseState<MonsterAIController> IdleState => _idleState;
     public override ZombieBaseState<MonsterAIController> PatrolState => _patrolState;
     public override ZombieBaseState<MonsterAIController> TraceState => _traceState;

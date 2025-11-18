@@ -4,7 +4,7 @@ using UnityEngine;
 public class SpiderConfig : ScriptableObject
 {
     #region Core Stats
-    [Header("±âº» ´É·ÂÄ¡")]
+    [Header("ê¸°ë³¸ ëŠ¥ë ¥ì¹˜")]
     public float maxHP = 100f;
     public float attackDamage = 10f;
     public float defense = 0f;
@@ -12,21 +12,21 @@ public class SpiderConfig : ScriptableObject
     #endregion
 
     #region AI & Sensing
-    [Header("AI Çàµ¿ ¹× °¨Áö")]
+    [Header("AI í–‰ë™ ë° ê°ì§€")]
     public float fovRange = 10f;
     public float fovAngle = 120f;
-    public float soundRange = 15f; // ¼Ò¸® °¨Áö ¹üÀ§
+    public float soundRange = 15f; // ì†Œë¦¬ ê°ì§€ ë²”ìœ„
     public float attackRange = 2f;
     public float stoppingDistance = 1.5f;
     public float patrolRadiusMin = 5f;
     public float patrolRadiusMax = 10f;
     public float idleTimeMin = 2f;
     public float idleTimeMax = 4f;
-    public float persistenceTime = 5f; // ÃßÀû À¯Áö ½Ã°£
+    public float persistenceTime = 5f; // ì¶”ì  ìœ ì§€ ì‹œê°„
     #endregion
 
     #region Movement
-    [Header("ÀÌµ¿ °ü·Ã")]
+    [Header("ì´ë™ ê´€ë ¨")]
     public float walkSpeed = 1.5f;
     public float runSpeed = 3f;
     public float turnSpeed = 5f;
@@ -36,13 +36,13 @@ public class SpiderConfig : ScriptableObject
     #endregion
 
     #region Attack Pattern
-    [Header("°ø°İ ÆĞÅÏ")]
-    public float attackDelay = 0.5f; // °ø°İ ¼±µô·¹ÀÌ
-    public float attackCooldown = 2f; // °ø°İ ÈÄµô·¹ÀÌ (ÄğÅ¸ÀÓ)
+    [Header("ê³µê²© íŒ¨í„´")]
+    public float attackDelay = 0.5f; // ê³µê²© ì„ ë”œë ˆì´
+    public float attackCooldown = 2f; // ê³µê²© í›„ë”œë ˆì´ (ì¿¨íƒ€ì„)
     #endregion
 
     #region Sound & Effects
-    [Header("»ç¿îµå ¹× ÀÌÆåÆ®")]
+    [Header("ì‚¬ìš´ë“œ ë° ì´í™íŠ¸")]
     public AudioClip idleSound;
     public AudioClip chaseSound;
     public AudioClip attackSound;
@@ -53,7 +53,7 @@ public class SpiderConfig : ScriptableObject
     #endregion
 
     #region Rewards
-    [Header("º¸»ó")]
+    [Header("ë³´ìƒ")]
     public int experiencePoints = 50;
     public GameObject[] lootItems;
     #endregion

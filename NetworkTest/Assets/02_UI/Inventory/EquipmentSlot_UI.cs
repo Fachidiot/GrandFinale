@@ -8,7 +8,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler,
     IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("ÇÊÅÍ ¼³Á¤")]
+    [Header("í•„í„° ì„¤ì •")]
     public EquipmentSlot requiredSlotType = EquipmentSlot.None;
     public ItemType requiredItemType = ItemType.Etc;
 
@@ -36,7 +36,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         EquipmentManager.OnEquipmentChanged -= UpdateSlotVisuals;
     }
 
-    // ½½·Ô ºñÁÖ¾ó ¾÷µ¥ÀÌÆ®
+    // ìŠ¬ë¡¯ ë¹„ì£¼ì–¼ ì—…ë°ì´íŠ¸
     void UpdateSlotVisuals()
     {
         if (EquipmentManager.Instance == null) return;
@@ -53,13 +53,13 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // À¯È¿ÇÑ ¾ÆÀÌÅÛÀÌ ÀÖ´ÂÁö È®ÀÎ
+    // ìœ íš¨í•œ ì•„ì´í…œì´ ìˆëŠ”ì§€ í™•ì¸
     private bool HasValidItem()
     {
         return currentItem != null && !string.IsNullOrEmpty(currentItem.iconPath);
     }
 
-    // ¾ÆÀÌÅÛ Ç¥½Ã
+    // ì•„ì´í…œ í‘œì‹œ
     private void DisplayItem()
     {
         Sprite icon = Resources.Load<Sprite>(currentItem.iconPath);
@@ -80,7 +80,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // ¾ÆÀÌÅÛ ¼û±â±â
+    // ì•„ì´í…œ ìˆ¨ê¸°ê¸°
     private void HideItem()
     {
         slotIcon.sprite = null;
@@ -93,7 +93,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // µå·Ó ÀÌº¥Æ® Ã³¸®
+    // ë“œë¡­ ì´ë²¤íŠ¸ ì²˜ë¦¬
     public void OnDrop(PointerEventData eventData)
     {
         Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
@@ -108,7 +108,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // ¼Ò½º ½½·Ô À¯È¿¼º °Ë»ç
+    // ì†ŒìŠ¤ ìŠ¬ë¡¯ ìœ íš¨ì„± ê²€ì‚¬
     private bool IsValidSourceSlot(Slot_UI sourceSlot)
     {
         return sourceSlot != null &&
@@ -117,7 +117,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
                sourceSlot.currentSlot.slotIndex != -1;
     }
 
-    // ¾ÆÀÌÅÛ ÀåÂø ½Ãµµ
+    // ì•„ì´í…œ ì¥ì°© ì‹œë„
     private void TryEquipItem(Slot_UI sourceSlot, RelicData itemToEquip)
     {
         bool success = EquipmentManager.Instance.EquipItem(
@@ -133,7 +133,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // ´ÙÀ½ Å¬¸¯ ¹«½Ã
+    // ë‹¤ìŒ í´ë¦­ ë¬´ì‹œ
     private IEnumerator IgnoreNextClick()
     {
         isIgnoringClick = true;
@@ -141,7 +141,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         isIgnoringClick = false;
     }
 
-    // ¾ÆÀÌÅÛ ÀåÂø °¡´É ¿©ºÎ È®ÀÎ
+    // ì•„ì´í…œ ì¥ì°© ê°€ëŠ¥ ì—¬ë¶€ í™•ì¸
     public bool CanEquipItem(RelicData item)
     {
         if (item == null) return false;
@@ -159,7 +159,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         return false;
     }
 
-    // µå·¡±× ½ÃÀÛ
+    // ë“œë˜ê·¸ ì‹œì‘
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (currentItem == null) return;
@@ -174,7 +174,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // µå·¡±× Áß
+    // ë“œë˜ê·¸ ì¤‘
     public void OnDrag(PointerEventData eventData)
     {
         if (currentItem != null)
@@ -183,7 +183,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // µå·¡±× Á¾·á
+    // ë“œë˜ê·¸ ì¢…ë£Œ
     public void OnEndDrag(PointerEventData eventData)
     {
         if (InventoryUIManager.Instance != null)
@@ -199,16 +199,16 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         dropSuccessful = false;
     }
 
-    // µå·Ó ¼º°ø Ç¥½Ã
+    // ë“œë¡­ ì„±ê³µ í‘œì‹œ
     public void MarkDropSuccessful()
     {
         dropSuccessful = true;
     }
 
-    // Å¬¸¯ ÀÌº¥Æ® Ã³¸®
+    // í´ë¦­ ì´ë²¤íŠ¸ ì²˜ë¦¬
     public void OnPointerClick(PointerEventData eventData)
     {
-        // µå·Ó Á÷ÈÄ Å¬¸¯ ¹«½Ã
+        // ë“œë¡­ ì§í›„ í´ë¦­ ë¬´ì‹œ
         if (isIgnoringClick)
         {
             isIgnoringClick = false;
@@ -227,7 +227,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // Àåºñ ÇØÁ¦ ½Ãµµ
+    // ì¥ë¹„ í•´ì œ ì‹œë„
     private void UnequipItemAttempt()
     {
         if (currentItem == null) return;
@@ -235,7 +235,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         EquipmentManager.Instance.UnequipItem(currentItem, this.equipmentSlotIndex);
     }
 
-    // ¸¶¿ì½º ÁøÀÔ
+    // ë§ˆìš°ìŠ¤ ì§„ì…
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (hideTooltipCoroutine != null)
@@ -250,7 +250,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         tooltipCoroutine = StartCoroutine(ShowTooltipAfterDelay(currentItem));
     }
 
-    // ¸¶¿ì½º ÀÌÅ»
+    // ë§ˆìš°ìŠ¤ ì´íƒˆ
     public void OnPointerExit(PointerEventData eventData)
     {
         if (tooltipCoroutine != null) StopCoroutine(tooltipCoroutine);
@@ -260,7 +260,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         hideTooltipCoroutine = StartCoroutine(HideTooltipAfterDelay(0.1f));
     }
 
-    // ÅøÆÁ Ç¥½Ã (µô·¹ÀÌ ÈÄ)
+    // íˆ´íŒ í‘œì‹œ (ë”œë ˆì´ í›„)
     private IEnumerator ShowTooltipAfterDelay(RelicData item)
     {
         yield return new WaitForSeconds(TooltipDelay);
@@ -271,7 +271,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // ÅøÆÁ ¼û±â±â (µô·¹ÀÌ ÈÄ)
+    // íˆ´íŒ ìˆ¨ê¸°ê¸° (ë”œë ˆì´ í›„)
     private IEnumerator HideTooltipAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);

@@ -1,4 +1,4 @@
-// FloatingMovement.cs (¼öÁ¤µÈ ÃÖÁ¾º»)
+// FloatingMovement.cs (ìˆ˜ì •ëœ ìµœì¢…ë³¸)
 
 using UnityEngine;
 
@@ -15,10 +15,10 @@ public class FloatingMovement : MonoBehaviour, IMonsterMovement
     private float turnSpeed;
     private float currentSpeed = 0f;
 
-    // ¡Ú 1. (Ãß°¡) È¸Àü ¸ñÇ¥¸¦ µ¶¸³ÀûÀ¸·Î ÀúÀåÇÕ´Ï´Ù.
+    // â˜… 1. (ì¶”ê°€) íšŒì „ ëª©í‘œë¥¼ ë…ë¦½ì ìœ¼ë¡œ ì €ì¥í•©ë‹ˆë‹¤.
     private Quaternion targetRotation;
 
-    [Header("--- °¡¼Ó/°¨¼Ó ¼³Á¤ ---")]
+    [Header("--- ê°€ì†/ê°ì† ì„¤ì • ---")]
     [SerializeField] private float accelerationRate = 5f;
     [SerializeField] private float decelerationRate = 10f;
 
@@ -32,16 +32,16 @@ public class FloatingMovement : MonoBehaviour, IMonsterMovement
 
         rb.useGravity = false;
 
-        // ¡Ú 1. (¼öÁ¤) Rigidbody¸¦ KinematicÀ¸·Î º¯°æÇÕ´Ï´Ù.
-        // ÀÌ·¸°Ô ÇÏ¸é ¿ÜºÎ ¹°¸®·Â(ÃÑ¾Ë)¿¡ ¹Ğ·Á³ªÁö ¾Ê°í,
-        // rb.MovePosition()ÀÌ ¾ÈÁ¤ÀûÀ¸·Î ÀÛµ¿ÇÕ´Ï´Ù.
+        // â˜… 1. (ìˆ˜ì •) Rigidbodyë¥¼ Kinematicìœ¼ë¡œ ë³€ê²½í•©ë‹ˆë‹¤.
+        // ì´ë ‡ê²Œ í•˜ë©´ ì™¸ë¶€ ë¬¼ë¦¬ë ¥(ì´ì•Œ)ì— ë°€ë ¤ë‚˜ì§€ ì•Šê³ ,
+        // rb.MovePosition()ì´ ì•ˆì •ì ìœ¼ë¡œ ì‘ë™í•©ë‹ˆë‹¤.
         rb.isKinematic = true;
 
-        // ¡Ú 2. (¿øº» º¹±Í) È¸Àü¸¸ °íÁ¤ÇÕ´Ï´Ù.
-        // (isKinematic = trueÀÌ¹Ç·Î FreezePositionÀº ´õ ÀÌ»ó ÇÊ¿ä ¾ø½À´Ï´Ù.)
+        // â˜… 2. (ì›ë³¸ ë³µê·€) íšŒì „ë§Œ ê³ ì •í•©ë‹ˆë‹¤.
+        // (isKinematic = trueì´ë¯€ë¡œ FreezePositionì€ ë” ì´ìƒ í•„ìš” ì—†ìŠµë‹ˆë‹¤.)
         rb.constraints = RigidbodyConstraints.FreezeRotation;
 
-        // ¡Ú 3. (¼öÁ¤) ÃÊ±â È¸Àü°ªÀ» ÇöÀç ¹æÇâÀ¸·Î ¼³Á¤
+        // â˜… 3. (ìˆ˜ì •) ì´ˆê¸° íšŒì „ê°’ì„ í˜„ì¬ ë°©í–¥ìœ¼ë¡œ ì„¤ì •
         targetDestination = transform.position;
         targetRotation = transform.rotation;
         targetSpeed = 0f;
@@ -54,10 +54,10 @@ public class FloatingMovement : MonoBehaviour, IMonsterMovement
         }
         else
         {
-            Debug.LogError("FloatingMovement: animConfig°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogError("FloatingMovement: animConfigê°€ ì—†ìŠµë‹ˆë‹¤!");
         }
 
-        // (FSMÀÌ ½ÃÀÛÇÏ±â Àü¿¡ ÃÊ±âÈ­)
+        // (FSMì´ ì‹œì‘í•˜ê¸° ì „ì— ì´ˆê¸°í™”)
         if (animator != null && this.animSpeedHash != 0)
         {
             animator.SetFloat(this.animSpeedHash, 0f);
@@ -66,37 +66,37 @@ public class FloatingMovement : MonoBehaviour, IMonsterMovement
 
     private void FixedUpdate()
     {
-        // --- 1. ¼Óµµ °è»ê ---
+        // --- 1. ì†ë„ ê³„ì‚° ---
         float rate = (currentSpeed < targetSpeed) ? accelerationRate : decelerationRate;
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * rate);
 
-        // --- 2. ÀÌµ¿ Ã³¸® (¹°¸®) ---
+        // --- 2. ì´ë™ ì²˜ë¦¬ (ë¬¼ë¦¬) ---
         if (currentSpeed > 0.01f)
         {
             Vector3 direction = (targetDestination - rb.position).normalized;
             rb.MovePosition(rb.position + direction * currentSpeed * Time.fixedDeltaTime);
         }
 
-        // --- 3. È¸Àü Ã³¸® (¹°¸®) ¡Ú¡Ú¡Ú
-        // (¼Óµµ¿Í °ü°è¾øÀÌ Ç×»ó ºÎµå·´°Ô ¸ñÇ¥ ÁöÁ¡À» ¹Ù¶óº¾´Ï´Ù)
+        // --- 3. íšŒì „ ì²˜ë¦¬ (ë¬¼ë¦¬) â˜…â˜…â˜…
+        // (ì†ë„ì™€ ê´€ê³„ì—†ì´ í•­ìƒ ë¶€ë“œëŸ½ê²Œ ëª©í‘œ ì§€ì ì„ ë°”ë¼ë´…ë‹ˆë‹¤)
         rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime));
 
-        // --- 4. ¾Ö´Ï¸ŞÀÌ¼Ç Ã³¸® ---
-        // (¼Óµµ¿Í °ü°è¾øÀÌ Ç×»ó ÇöÀç ¼Óµµ¸¦ Àü´ŞÇÕ´Ï´Ù)
+        // --- 4. ì• ë‹ˆë©”ì´ì…˜ ì²˜ë¦¬ ---
+        // (ì†ë„ì™€ ê´€ê³„ì—†ì´ í•­ìƒ í˜„ì¬ ì†ë„ë¥¼ ì „ë‹¬í•©ë‹ˆë‹¤)
         if (animator != null && this.animSpeedHash != 0)
         {
             animator.SetFloat(this.animSpeedHash, currentSpeed);
         }
     }
 
-    // Move ÇÔ¼ö: ÀÌµ¿ ¹æÇâÀ¸·Î targetRotationÀ» ¼³Á¤
+    // Move í•¨ìˆ˜: ì´ë™ ë°©í–¥ìœ¼ë¡œ targetRotationì„ ì„¤ì •
     public void Move(Vector3 destination, float speed)
     {
         this.targetDestination = destination;
         this.targetSpeed = speed;
         this.turnSpeed = controller.config.turnSpeed;
 
-        // ¡Ú 4. (¼öÁ¤) ÀÌµ¿ ¹æÇâÀ» »õ·Î¿î 'È¸Àü ¸ñÇ¥'·Î ¼³Á¤
+        // â˜… 4. (ìˆ˜ì •) ì´ë™ ë°©í–¥ì„ ìƒˆë¡œìš´ 'íšŒì „ ëª©í‘œ'ë¡œ ì„¤ì •
         Vector3 direction = (destination - rb.position).normalized;
         if (direction != Vector3.zero)
         {
@@ -104,21 +104,21 @@ public class FloatingMovement : MonoBehaviour, IMonsterMovement
         }
     }
 
-    // TurnTowards ÇÔ¼ö: LookAt() È£Ãâ ½Ã, Æ¯Á¤ ¹æÇâÀ¸·Î targetRotationÀ» °­Á¦ ¼³Á¤
+    // TurnTowards í•¨ìˆ˜: LookAt() í˜¸ì¶œ ì‹œ, íŠ¹ì • ë°©í–¥ìœ¼ë¡œ targetRotationì„ ê°•ì œ ì„¤ì •
     public void TurnTowards(Vector3 worldTargetPosition, float turnSpeed)
     {
         this.turnSpeed = turnSpeed;
 
-        // ¡Ú 5. (¼öÁ¤) ¹Ù¶óº¼ ¹æÇâÀ» 'È¸Àü ¸ñÇ¥'·Î ¼³Á¤
+        // â˜… 5. (ìˆ˜ì •) ë°”ë¼ë³¼ ë°©í–¥ì„ 'íšŒì „ ëª©í‘œ'ë¡œ ì„¤ì •
         Vector3 direction = (worldTargetPosition - rb.position).normalized;
         if (direction != Vector3.zero)
         {
-            // (ÀÌÀü ÄÚµåÀÇ x=0, z=0 Á¦ÇÑÀ» Á¦°ÅÇÏ¿© 3D·Î ÀÚÀ¯·Ó°Ô ¹Ù¶óº¸°Ô ÇÔ)
+            // (ì´ì „ ì½”ë“œì˜ x=0, z=0 ì œí•œì„ ì œê±°í•˜ì—¬ 3Dë¡œ ììœ ë¡­ê²Œ ë°”ë¼ë³´ê²Œ í•¨)
             this.targetRotation = Quaternion.LookRotation(direction);
         }
     }
 
-    // Stop ÇÔ¼ö: ¼Óµµ¸¸ 0À¸·Î ÁÙÀÓ (È¸Àü ¸ñÇ¥´Â ±×´ë·Î µÒ)
+    // Stop í•¨ìˆ˜: ì†ë„ë§Œ 0ìœ¼ë¡œ ì¤„ì„ (íšŒì „ ëª©í‘œëŠ” ê·¸ëŒ€ë¡œ ë‘ )
     public void Stop()
     {
         this.targetSpeed = 0f;

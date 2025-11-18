@@ -53,11 +53,11 @@ namespace MinotaurStates
 
             monster.MoveTo(patrolDestination);
 
-            // Å¸ÀÌ¸Ó¸¦ ¸Å ÇÁ·¹ÀÓ Áõ°¡½ÃÅµ´Ï´Ù
+            // íƒ€ì´ë¨¸ë¥¼ ë§¤ í”„ë ˆì„ ì¦ê°€ì‹œí‚µë‹ˆë‹¤
             entryTimer += Time.deltaTime;
 
-            // ÅÂ ÁøÀÔ ÈÄ ¾ÆÁÖ ¾à°£ÀÇ ½Ã°£ÀÌ Áö³­ µÚ¿¡¸¸ µµÂø ¿©ºÎ¸¦ Ã¼Å©ÇÕ´Ï´Ù.
-            // ÀÌ·¸°Ô ÇÏ¸é NavMeshAgent°¡ °Å¸®¸¦ °è»êÇÒ ½Ã°£À» ¹ú ¼ö ÀÖ½À´Ï´Ù.
+            // íƒœ ì§„ì… í›„ ì•„ì£¼ ì•½ê°„ì˜ ì‹œê°„ì´ ì§€ë‚œ ë’¤ì—ë§Œ ë„ì°© ì—¬ë¶€ë¥¼ ì²´í¬í•©ë‹ˆë‹¤.
+            // ì´ë ‡ê²Œ í•˜ë©´ NavMeshAgentê°€ ê±°ë¦¬ë¥¼ ê³„ì‚°í•  ì‹œê°„ì„ ë²Œ ìˆ˜ ìˆìŠµë‹ˆë‹¤.
             if (entryTimer > 0.1f && monster.arrivedAtDestination)
             {
                 return monster.fsm.IdleState;
@@ -115,16 +115,16 @@ namespace MinotaurStates
 
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
-            // 1. ÇÃ·¹ÀÌ¾î¸¦ °¨ÁöÇÏ¸é Áï½Ã ÃßÀûÇÕ´Ï´Ù.
+            // 1. í”Œë ˆì´ì–´ë¥¼ ê°ì§€í•˜ë©´ ì¦‰ì‹œ ì¶”ì í•©ë‹ˆë‹¤.
             if (monster.sensor.CanSeePlayer)
             {
                 return monster.fsm.TraceState;
             }
 
-            // 2. C# Å¸ÀÌ¸Ó¸¦ Áõ°¡½ÃÅµ´Ï´Ù.
+            // 2. C# íƒ€ì´ë¨¸ë¥¼ ì¦ê°€ì‹œí‚µë‹ˆë‹¤.
             timer += Time.deltaTime;
 
-            // 3. MonsterConfig¿¡ ¼³Á¤µÈ ½Ã°£ÀÌ ´Ù µÇ¸é Patrol »óÅÂ·Î °©´Ï´Ù.
+            // 3. MonsterConfigì— ì„¤ì •ëœ ì‹œê°„ì´ ë‹¤ ë˜ë©´ Patrol ìƒíƒœë¡œ ê°‘ë‹ˆë‹¤.
             if (timer >= monster.config.lookAroundTime)
             {
                 return monster.fsm.PatrolState;
@@ -139,7 +139,7 @@ namespace MinotaurStates
 
     public class Attack : ZombieBaseState<MonsterAIController>
     {
-        // 1. Hit »óÅÂÃ³·³, °ø°İÀÌ Áö¼ÓµÇ´Â ½Ã°£À» Àê Å¸ÀÌ¸Ó¸¦ Ãß°¡ÇÕ´Ï´Ù.
+        // 1. Hit ìƒíƒœì²˜ëŸ¼, ê³µê²©ì´ ì§€ì†ë˜ëŠ” ì‹œê°„ì„ ì´ íƒ€ì´ë¨¸ë¥¼ ì¶”ê°€í•©ë‹ˆë‹¤.
         private float timer;
         private bool hasAppliedDamage;
 
@@ -172,14 +172,14 @@ namespace MinotaurStates
 
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
-            // 5. (À¯Áö) °ø°İ Áß¿¡µµ ÇÃ·¹ÀÌ¾î¸¦ °è¼Ó ¹Ù¶óº¾´Ï´Ù.
+            // 5. (ìœ ì§€) ê³µê²© ì¤‘ì—ë„ í”Œë ˆì´ì–´ë¥¼ ê³„ì† ë°”ë¼ë´…ë‹ˆë‹¤.
             monster.StopMoving();
             if (monster.player != null)
             {
                 monster.LookAt(monster.player.transform.position);
             }
 
-            // 6. (Ãß°¡) Å¸ÀÌ¸Ó¸¦ Áõ°¡½ÃÅµ´Ï´Ù.
+            // 6. (ì¶”ê°€) íƒ€ì´ë¨¸ë¥¼ ì¦ê°€ì‹œí‚µë‹ˆë‹¤.
             timer += Time.deltaTime;
 
             if (!hasAppliedDamage && timer >= monster.config.attackDelay)
@@ -193,19 +193,19 @@ namespace MinotaurStates
                 return monster.fsm.TraceState;
             }
 
-            // 8. ½Ã°£ÀÌ ´Ù µÇ±â Àü±îÁö´Â "Attack" »óÅÂ¿¡ "Àá°Ü" ÀÖ½À´Ï´Ù.
+            // 8. ì‹œê°„ì´ ë‹¤ ë˜ê¸° ì „ê¹Œì§€ëŠ” "Attack" ìƒíƒœì— "ì ê²¨" ìˆìŠµë‹ˆë‹¤.
             return this;
         }
 
         public override void ExitState(MonsterAIController monster)
         {
-            // 9. (À¯Áö) »óÅÂ¸¦ ³ª°¥ ¶§ ¾Ö´Ï¸ŞÀÌ¼ÇÀ» ²ü´Ï´Ù.
-            monster.StopAttackRoutine(); // (È£ÃâÇÑ Àû ¾øÁö¸¸, ¾ÈÀüÀ» À§ÇØ ³öµÒ)
+            // 9. (ìœ ì§€) ìƒíƒœë¥¼ ë‚˜ê°ˆ ë•Œ ì• ë‹ˆë©”ì´ì…˜ì„ ë•ë‹ˆë‹¤.
+            monster.StopAttackRoutine(); // (í˜¸ì¶œí•œ ì  ì—†ì§€ë§Œ, ì•ˆì „ì„ ìœ„í•´ ë†”ë‘ )
         }
     }
     public class Hit : ZombieBaseState<MonsterAIController>
     {
-        private float hitStunDuration = 0.5f; // ÇÇ°İ °æÁ÷ ½Ã°£ (0.5ÃÊ)
+        private float hitStunDuration = 0.5f; // í”¼ê²© ê²½ì§ ì‹œê°„ (0.5ì´ˆ)
         private float timer;
 
         public override void EnterState(MonsterAIController monster)
@@ -214,7 +214,7 @@ namespace MinotaurStates
 
             if (monster.TryGetComponent<UnityEngine.AI.NavMeshAgent>(out var agent))
             {
-                // Trace »óÅÂÀÇ ¼Óµµ(runSpeed)¸¦ ±âÁØÀ¸·Î ÁÙÀÔ´Ï´Ù.
+                // Trace ìƒíƒœì˜ ì†ë„(runSpeed)ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ì¤„ì…ë‹ˆë‹¤.
                 agent.speed = monster.config.runSpeed * 0.3f;
             }
         }
@@ -240,15 +240,15 @@ namespace MinotaurStates
         {
             monster.StopMoving();
             monster.StopAllCoroutines();
-            //monster.SetAnimation(monster.hashDie, true); // Die ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı -> Any State¿¡¼­ Ã³¸®
+            //monster.SetAnimation(monster.hashDie, true); // Die ì• ë‹ˆë©”ì´ì…˜ ì¬ìƒ -> Any Stateì—ì„œ ì²˜ë¦¬
 
-            // 1. Äİ¶óÀÌ´õ ²ô±â (´Ù¸¥ ¸ó½ºÅÍ³ª ÃÑ¾Ë¿¡ ¾È ¸Â°Ô)
+            // 1. ì½œë¼ì´ë” ë„ê¸° (ë‹¤ë¥¸ ëª¬ìŠ¤í„°ë‚˜ ì´ì•Œì— ì•ˆ ë§ê²Œ)
             if (monster.TryGetComponent<Collider>(out var collider))
             {
                 collider.enabled = false;
             }
 
-            // 2. NavMeshAgent ²ô±â
+            // 2. NavMeshAgent ë„ê¸°
             if (monster.TryGetComponent<UnityEngine.AI.NavMeshAgent>(out var agent))
             {
                 agent.enabled = false;

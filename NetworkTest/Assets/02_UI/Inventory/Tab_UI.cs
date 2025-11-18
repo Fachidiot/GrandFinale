@@ -16,7 +16,7 @@ public class Tab_UI : MonoBehaviour
         }
     }
 
-    // ÅÇ Å¬¸¯ ½Ã ÇÊÅÍ Àû¿ë
+    // íƒ­ í´ë¦­ ì‹œ í•„í„° ì ìš©
     private void OnTabClicked()
     {
         if (InventoryManager.Instance != null)

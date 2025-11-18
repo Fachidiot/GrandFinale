@@ -1,26 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System; // 'Action' ÀÌº¥Æ®¸¦ »ç¿ëÇÏ±â À§ÇÔ
+using System; // 'Action' ì´ë²¤íŠ¸ë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•¨
 
 public class PlayerStats : MonoBehaviour
 {
-    // [¡Ú¼öÁ¤¡Ú] ½ºÅÈÀÌ º¯°æµÉ ¶§¸¶´Ù UI ¸Å´ÏÀú¿¡°Ô ¾Ë¸®±â À§ÇÑ ÀÌº¥Æ®
+    // [â˜…ìˆ˜ì •â˜…] ìŠ¤íƒ¯ì´ ë³€ê²½ë  ë•Œë§ˆë‹¤ UI ë§¤ë‹ˆì €ì—ê²Œ ì•Œë¦¬ê¸° ìœ„í•œ ì´ë²¤íŠ¸
     public event Action OnStatsChanged;
 
-    [Header("±âº» ´É·ÂÄ¡ (Base Stats)")]
+    [Header("ê¸°ë³¸ ëŠ¥ë ¥ì¹˜ (Base Stats)")]
     public float baseWalkSpeed = 2f;
     public float baseRunSpeed = 3f;
     public float baseSprintSpeed = 5f;
     public float baseCooldownReduction = 0f;
     public float baseMaxHealth = 100f;
     public float baseDamageModifier = 1.0f;
-    public float baseDefense = 10f;  // [¡Ú½Å±Ô¡Ú] ±âº» ¹æ¾î·Â
-    public float basePower = 10f;    // [¡Ú½Å±Ô¡Ú] ±âº» ÆÄ¿ö
-    public int baseLevel = 1;        // [¡Ú½Å±Ô¡Ú] ±âº» ·¹º§
-    public int baseCurrency = 22222; // [¡Ú½Å±Ô¡Ú] ±âº» ÀçÈ­
+    public float baseDefense = 10f;  // [â˜…ì‹ ê·œâ˜…] ê¸°ë³¸ ë°©ì–´ë ¥
+    public float basePower = 10f;    // [â˜…ì‹ ê·œâ˜…] ê¸°ë³¸ íŒŒì›Œ
+    public int baseLevel = 1;        // [â˜…ì‹ ê·œâ˜…] ê¸°ë³¸ ë ˆë²¨
+    public int baseCurrency = 22222; // [â˜…ì‹ ê·œâ˜…] ê¸°ë³¸ ì¬í™”
 
-    [Header("ÇöÀç »óÅÂ (½Ç½Ã°£ µğ¹ö±×¿ë)")]
+    [Header("í˜„ì¬ ìƒíƒœ (ì‹¤ì‹œê°„ ë””ë²„ê·¸ìš©)")]
     [SerializeField] private float currentHealth;
     [SerializeField] private float currentMaxHealth;
     [SerializeField] private float currentShield;
@@ -29,12 +29,12 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float currentSprintSpeed;
     [SerializeField] private float currentDamageModifier;
     [SerializeField] private float currentCooldownReduction;
-    [SerializeField] private float currentDefense; // [¡Ú½Å±Ô¡Ú]
-    [SerializeField] private float currentPower;   // [¡Ú½Å±Ô¡Ú]
-    [SerializeField] private int currentLevel;     // [¡Ú½Å±Ô¡Ú]
-    [SerializeField] private int currentCurrency;  // [¡Ú½Å±Ô¡Ú]
+    [SerializeField] private float currentDefense; // [â˜…ì‹ ê·œâ˜…]
+    [SerializeField] private float currentPower;   // [â˜…ì‹ ê·œâ˜…]
+    [SerializeField] private int currentLevel;     // [â˜…ì‹ ê·œâ˜…]
+    [SerializeField] private int currentCurrency;  // [â˜…ì‹ ê·œâ˜…]
 
-    // Public Properties (UI ¹× ´Ù¸¥ ½ºÅ©¸³Æ®°¡ Á¢±Ù¿ë)
+    // Public Properties (UI ë° ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ê°€ ì ‘ê·¼ìš©)
     public float CurrentHealth { get { return currentHealth; } private set { currentHealth = value; } }
     public float CurrentMaxHealth { get { return currentMaxHealth; } private set { currentMaxHealth = value; } }
     public float CurrentShield { get { return currentShield; } private set { currentShield = value; } }
@@ -43,21 +43,21 @@ public class PlayerStats : MonoBehaviour
     public float CurrentSprintSpeed { get { return currentSprintSpeed; } private set { currentSprintSpeed = value; } }
     public float CurrentDamageModifier { get { return currentDamageModifier; } private set { currentDamageModifier = value; } }
     public float CurrentCooldownReduction { get { return currentCooldownReduction; } private set { currentCooldownReduction = value; } }
-    public float CurrentDefense { get { return currentDefense; } private set { currentDefense = value; } } // [¡Ú½Å±Ô¡Ú]
-    public float CurrentPower { get { return currentPower; } private set { currentPower = value; } }     // [¡Ú½Å±Ô¡Ú]
-    public int CurrentLevel { get { return currentLevel; } private set { currentLevel = value; } }     // [¡Ú½Å±Ô¡Ú]
-    public int CurrentCurrency { get { return currentCurrency; } private set { currentCurrency = value; } } // [¡Ú½Å±Ô¡Ú]
+    public float CurrentDefense { get { return currentDefense; } private set { currentDefense = value; } } // [â˜…ì‹ ê·œâ˜…]
+    public float CurrentPower { get { return currentPower; } private set { currentPower = value; } }     // [â˜…ì‹ ê·œâ˜…]
+    public int CurrentLevel { get { return currentLevel; } private set { currentLevel = value; } }     // [â˜…ì‹ ê·œâ˜…]
+    public int CurrentCurrency { get { return currentCurrency; } private set { currentCurrency = value; } } // [â˜…ì‹ ê·œâ˜…]
 
 
     void Awake()
     {
         ResetToBaseStats();
         CurrentHealth = CurrentMaxHealth;
-        currentCurrency = baseCurrency; // [¡Ú½Å±Ô¡Ú] ±âº» ÀçÈ­·Î ½ÃÀÛ
+        currentCurrency = baseCurrency; // [â˜…ì‹ ê·œâ˜…] ê¸°ë³¸ ì¬í™”ë¡œ ì‹œì‘
     }
 
     // ====================================================================
-    // 1. µ¥¹ÌÁö ¹× È¸º¹ Ã³¸®
+    // 1. ë°ë¯¸ì§€ ë° íšŒë³µ ì²˜ë¦¬
     // ====================================================================
 
     public void TakeDamage(float damage)
@@ -89,7 +89,7 @@ public class PlayerStats : MonoBehaviour
             Die();
         }
 
-        // [¡Ú¼öÁ¤¡Ú] UI ¾÷µ¥ÀÌÆ® ½ÅÈ£ º¸³»±â
+        // [â˜…ìˆ˜ì •â˜…] UI ì—…ë°ì´íŠ¸ ì‹ í˜¸ ë³´ë‚´ê¸°
         OnStatsChanged?.Invoke();
     }
 
@@ -100,17 +100,17 @@ public class PlayerStats : MonoBehaviour
         {
             CurrentHealth = CurrentMaxHealth;
         }
-        // [¡Ú¼öÁ¤¡Ú] UI ¾÷µ¥ÀÌÆ® ½ÅÈ£ º¸³»±â
+        // [â˜…ìˆ˜ì •â˜…] UI ì—…ë°ì´íŠ¸ ì‹ í˜¸ ë³´ë‚´ê¸°
         OnStatsChanged?.Invoke();
     }
 
     private void Die()
     {
-        Debug.Log("ÇÃ·¹ÀÌ¾î°¡ »ç¸ÁÇß½À´Ï´Ù.");
+        Debug.Log("í”Œë ˆì´ì–´ê°€ ì‚¬ë§í–ˆìŠµë‹ˆë‹¤.");
     }
 
     // ====================================================================
-    // 2. [¡Ú½Å±Ô¡Ú] ÀçÈ­ °ü¸®
+    // 2. [â˜…ì‹ ê·œâ˜…] ì¬í™” ê´€ë¦¬
     // ====================================================================
 
     public void AddCurrency(int amount)
@@ -132,7 +132,7 @@ public class PlayerStats : MonoBehaviour
 
 
     // ====================================================================
-    // 3. ½ºÅÈ Àû¿ë (AbilityManager°¡ È£Ãâ)
+    // 3. ìŠ¤íƒ¯ ì ìš© (AbilityManagerê°€ í˜¸ì¶œ)
     // ====================================================================
 
     public void ResetToBaseStats()
@@ -147,7 +147,7 @@ public class PlayerStats : MonoBehaviour
         currentPower = basePower;    
         currentLevel = baseLevel;    
 
-        // [¡Ú¼öÁ¤¡Ú] UI ¾÷µ¥ÀÌÆ® ½ÅÈ£ º¸³»±â
+        // [â˜…ìˆ˜ì •â˜…] UI ì—…ë°ì´íŠ¸ ì‹ í˜¸ ë³´ë‚´ê¸°
         OnStatsChanged?.Invoke();
     }
 
@@ -157,7 +157,7 @@ public class PlayerStats : MonoBehaviour
         {
             CurrentHealth = CurrentMaxHealth;
         }
-        // [¡Ú¼öÁ¤¡Ú] UI ¾÷µ¥ÀÌÆ® ½ÅÈ£ º¸³»±â
+        // [â˜…ìˆ˜ì •â˜…] UI ì—…ë°ì´íŠ¸ ì‹ í˜¸ ë³´ë‚´ê¸°
         OnStatsChanged?.Invoke();
     }
 
@@ -170,13 +170,13 @@ public class PlayerStats : MonoBehaviour
                 CurrentHealth += value;
                 break;
             case "Defense":
-                CurrentDefense += value; // [¡Ú½Å±Ô¡Ú]
+                CurrentDefense += value; // [â˜…ì‹ ê·œâ˜…]
                 break;
             case "Power":
-                CurrentPower += value;   // [¡Ú½Å±Ô¡Ú]
+                CurrentPower += value;   // [â˜…ì‹ ê·œâ˜…]
                 break;
         }
-        // [¡Ú¼öÁ¤¡Ú] UI ¾÷µ¥ÀÌÆ® ½ÅÈ£ º¸³»±â
+        // [â˜…ìˆ˜ì •â˜…] UI ì—…ë°ì´íŠ¸ ì‹ í˜¸ ë³´ë‚´ê¸°
         OnStatsChanged?.Invoke();
     }
 
@@ -208,12 +208,12 @@ public class PlayerStats : MonoBehaviour
     private IEnumerator ShieldRoutine(float amount, float duration)
     {
         CurrentShield += amount;
-        OnStatsChanged?.Invoke(); // ½Çµå º¯°æµµ UI¿¡ ¾Ë¸² (ÇÊ¿ä½Ã)
+        OnStatsChanged?.Invoke(); // ì‹¤ë“œ ë³€ê²½ë„ UIì— ì•Œë¦¼ (í•„ìš”ì‹œ)
 
         yield return new WaitForSeconds(duration);
 
         CurrentShield -= amount;
         if (CurrentShield < 0) CurrentShield = 0;
-        OnStatsChanged?.Invoke(); // ½Çµå º¯°æµµ UI¿¡ ¾Ë¸² (ÇÊ¿ä½Ã)
+        OnStatsChanged?.Invoke(); // ì‹¤ë“œ ë³€ê²½ë„ UIì— ì•Œë¦¼ (í•„ìš”ì‹œ)
     }
 }

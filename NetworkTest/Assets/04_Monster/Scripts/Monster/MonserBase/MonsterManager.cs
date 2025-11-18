@@ -1,15 +1,15 @@
 using UnityEngine;
 
 /// <summary>
-/// °ÔÀÓ ÀüÃ¼ÀÇ ¸ó½ºÅÍ ¼ö¸¦ °ü¸®ÇÏ´Â ½Ì±ÛÅæ Å¬·¡½ºÀÔ´Ï´Ù.
-/// ¾À¿¡ ´Ü ÇÏ³ª¸¸ Á¸ÀçÇØ¾ß ÇÕ´Ï´Ù.
+/// ê²Œì„ ì „ì²´ì˜ ëª¬ìŠ¤í„° ìˆ˜ë¥¼ ê´€ë¦¬í•˜ëŠ” ì‹±ê¸€í†¤ í´ë˜ìŠ¤ì…ë‹ˆë‹¤.
+/// ì”¬ì— ë‹¨ í•˜ë‚˜ë§Œ ì¡´ì¬í•´ì•¼ í•©ë‹ˆë‹¤.
 /// </summary>
 public class MonsterManager : MonoBehaviour
 {
     public static MonsterManager Instance { get; private set; }
 
-    [Header("±Û·Î¹ú ¸ó½ºÅÍ ¼³Á¤")]
-    [Tooltip("°ÔÀÓ ÀüÃ¼¿¡ Á¸ÀçÇÒ ¼ö ÀÖ´Â ÃÖ´ë ¸ó½ºÅÍ ¼ö")]
+    [Header("ê¸€ë¡œë²Œ ëª¬ìŠ¤í„° ì„¤ì •")]
+    [Tooltip("ê²Œì„ ì „ì²´ì— ì¡´ì¬í•  ìˆ˜ ìˆëŠ” ìµœëŒ€ ëª¬ìŠ¤í„° ìˆ˜")]
     public int globalMonsterLimit = 50;
 
     public int CurrentMonsterCount { get; private set; }
@@ -23,12 +23,12 @@ public class MonsterManager : MonoBehaviour
         else
         {
             Instance = this;
-            // DontDestroyOnLoad(gameObject); // ¾ÀÀÌ ¹Ù²î¾îµµ À¯ÁöÇÒ °æ¿ì
+            // DontDestroyOnLoad(gameObject); // ì”¬ì´ ë°”ë€Œì–´ë„ ìœ ì§€í•  ê²½ìš°
         }
     }
 
     /// <summary>
-    /// ½ºÆ÷³Ê°¡ ¸ó½ºÅÍ ½ºÆùÀ» '¿äÃ»'ÇÒ ¶§ »ç¿ë
+    /// ìŠ¤í¬ë„ˆê°€ ëª¬ìŠ¤í„° ìŠ¤í°ì„ 'ìš”ì²­'í•  ë•Œ ì‚¬ìš©
     /// </summary>
     public bool CanSpawnMonster()
     {
@@ -36,20 +36,20 @@ public class MonsterManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½ºÆ÷³Ê°¡ ¸ó½ºÅÍ¸¦ ¼º°øÀûÀ¸·Î ½ºÆùÇßÀ» ¶§ È£Ãâ
+    /// ìŠ¤í¬ë„ˆê°€ ëª¬ìŠ¤í„°ë¥¼ ì„±ê³µì ìœ¼ë¡œ ìŠ¤í°í–ˆì„ ë•Œ í˜¸ì¶œ
     /// </summary>
     public void RegisterMonsterSpawned()
     {
         CurrentMonsterCount++;
-        Debug.Log($"[MonsterManager] ¸ó½ºÅÍ »ı¼º. ÇöÀç ÃÑ ¸ó½ºÅÍ: {CurrentMonsterCount}/{globalMonsterLimit}");
+        Debug.Log($"[MonsterManager] ëª¬ìŠ¤í„° ìƒì„±. í˜„ì¬ ì´ ëª¬ìŠ¤í„°: {CurrentMonsterCount}/{globalMonsterLimit}");
     }
 
     /// <summary>
-    /// ¸ó½ºÅÍ°¡ Á×À» ¶§ MonsterHealth°¡ È£Ãâ (ÀÌ°Ç ³ªÁß¿¡ Ãß°¡)
+    /// ëª¬ìŠ¤í„°ê°€ ì£½ì„ ë•Œ MonsterHealthê°€ í˜¸ì¶œ (ì´ê±´ ë‚˜ì¤‘ì— ì¶”ê°€)
     /// </summary>
     public void RegisterMonsterDied()
     {
         CurrentMonsterCount--;
-        Debug.Log($"[MonsterManager] ¸ó½ºÅÍ »ç¸Á. ÇöÀç ÃÑ ¸ó½ºÅÍ: {CurrentMonsterCount}/{globalMonsterLimit}");
+        Debug.Log($"[MonsterManager] ëª¬ìŠ¤í„° ì‚¬ë§. í˜„ì¬ ì´ ëª¬ìŠ¤í„°: {CurrentMonsterCount}/{globalMonsterLimit}");
     }
 }

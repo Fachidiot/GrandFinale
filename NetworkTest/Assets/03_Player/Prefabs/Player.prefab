@@ -7207,6 +7207,7 @@ GameObject:
   - component: {fileID: 4506929974751079687}
   - component: {fileID: 5330286128028421865}
   - component: {fileID: 7826982553445465768}
+  - component: {fileID: 729731253929241830}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -7288,12 +7289,13 @@ MonoBehaviour:
   walkSpeed: 2
   runSpeed: 4
   sprintSpeed: 7
-  crouchSpeed: 1
+  crouchSpeed: 2
   jumpHeight: 1
   moveVelocity: {x: 0, y: 0, z: 0}
   velocity: {x: 0, y: 0, z: 0}
   rollVelocity: {x: 0, y: 0, z: 0}
   edgeSlipVelocity: {x: 0, y: 0, z: 0}
+  groundNormal: {x: 0, y: 0, z: 0}
 --- !u!114 &5330286128028421865
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7339,6 +7341,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 622112187f5274d3985e9b13d15aa895, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &729731253929241830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32681d723493894d9f28364548b5dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseWalkSpeed: 2
+  baseRunSpeed: 3
+  baseSprintSpeed: 5
+  baseCooldownReduction: 0
+  baseMaxHealth: 100
+  baseDamageModifier: 1
+  baseDefense: 10
+  basePower: 10
+  baseLevel: 1
+  baseCurrency: 22222
+  currentHealth: 0
+  currentMaxHealth: 0
+  currentShield: 0
+  currentWalkSpeed: 0
+  currentRunSpeed: 0
+  currentSprintSpeed: 0
+  currentDamageModifier: 0
+  currentCooldownReduction: 0
+  currentDefense: 0
+  currentPower: 0
+  currentLevel: 0
+  currentCurrency: 0
 --- !u!1 &6572041794920199261
 GameObject:
   m_ObjectHideFlags: 0

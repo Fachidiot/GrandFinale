@@ -2,10 +2,10 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// ÀÎº¥Åä¸® ½ºÅÈ Ç¥½Ã Àü´ã ÄÁÆ®·Ñ·¯
-/// - ÇÃ·¹ÀÌ¾î ½ºÅÈ UI ¾÷µ¥ÀÌÆ®
-/// - ÅëÈ­ Á¤º¸ Ç¥½Ã
-/// - PlayerStats ÀÌº¥Æ® ±¸µ¶
+/// ì¸ë²¤í† ë¦¬ ìŠ¤íƒ¯ í‘œì‹œ ì „ë‹´ ì»¨íŠ¸ë¡¤ëŸ¬
+/// - í”Œë ˆì´ì–´ ìŠ¤íƒ¯ UI ì—…ë°ì´íŠ¸
+/// - í†µí™” ì •ë³´ í‘œì‹œ
+/// - PlayerStats ì´ë²¤íŠ¸ êµ¬ë…
 /// </summary>
 public class InventoryStatsUI : MonoBehaviour
 {
@@ -48,11 +48,11 @@ public class InventoryStatsUI : MonoBehaviour
         if (playerStats != null)
         {
             playerStats.OnStatsChanged += UpdateAllStats;
-            UpdateAllStats(); // ÃÊ±â Ç¥½Ã
+            UpdateAllStats(); // ì´ˆê¸° í‘œì‹œ
         }
         else
         {
-            Debug.LogWarning("[InventoryStatsUI] PlayerStats¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("[InventoryStatsUI] PlayerStatsë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
 
@@ -69,7 +69,7 @@ public class InventoryStatsUI : MonoBehaviour
     #region Public API
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î ½ºÅÈ UI ¾÷µ¥ÀÌÆ®
+    /// í”Œë ˆì´ì–´ ìŠ¤íƒ¯ UI ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdatePlayerStats(StatsData data)
     {
@@ -78,13 +78,13 @@ public class InventoryStatsUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ÅëÈ­ Á¤º¸ ¾÷µ¥ÀÌÆ®
+    /// í†µí™” ì •ë³´ ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateCurrency(int amount)
     {
         if (cashText != null)
         {
-            cashText.text = $"º¸À¯ ±İ¾× : {amount}";
+            cashText.text = $"ë³´ìœ  ê¸ˆì•¡ : {amount}";
         }
     }
 
@@ -129,7 +129,7 @@ public class InventoryStatsUI : MonoBehaviour
 
         if (statsTextMidBottom != null)
         {
-            statsTextMidBottom.text = $"·¹º§ : {data.Level}";
+            statsTextMidBottom.text = $"ë ˆë²¨ : {data.Level}";
         }
     }
 
@@ -138,17 +138,17 @@ public class InventoryStatsUI : MonoBehaviour
         if (statsInfoLeftText != null)
         {
             statsInfoLeftText.text =
-                $"Ã¼·Â : {data.MaxHealth}\n" +
-                $"¹æ¾î·Â : {data.Defense}\n" +
-                $"°ø°İ·Â : {data.Power}";
+                $"ì²´ë ¥ : {data.MaxHealth}\n" +
+                $"ë°©ì–´ë ¥ : {data.Defense}\n" +
+                $"ê³µê²©ë ¥ : {data.Power}";
         }
 
         if (statsInfoRightText != null)
         {
             statsInfoRightText.text =
-                $"½ºÇÇµå : {data.Speed}\n" +
-                $"º¸À¯ ´É·Â1 : ¾øÀ½\n" +
-                $"º¸À¯ ´É·Â2 : ¾øÀ½";
+                $"ìŠ¤í”¼ë“œ : {data.Speed}\n" +
+                $"ë³´ìœ  ëŠ¥ë ¥1 : ì—†ìŒ\n" +
+                $"ë³´ìœ  ëŠ¥ë ¥2 : ì—†ìŒ";
         }
     }
 
@@ -158,7 +158,7 @@ public class InventoryStatsUI : MonoBehaviour
 #region Data Structures
 
 /// <summary>
-/// ÇÃ·¹ÀÌ¾î ½ºÅÈ µ¥ÀÌÅÍ ±¸Á¶Ã¼
+/// í”Œë ˆì´ì–´ ìŠ¤íƒ¯ ë°ì´í„° êµ¬ì¡°ì²´
 /// </summary>
 public struct StatsData
 {

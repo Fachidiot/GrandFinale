@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace GolemStates
 {
-    // --- 1. Idle »óÅÂ ---
-    // (ÀÌÀü°ú µ¿ÀÏ)
+    // --- 1. Idle ìƒíƒœ ---
+    // (ì´ì „ê³¼ ë™ì¼)
     public class Idle : ZombieBaseState<MonsterAIController>
     {
         private float idleTime;
@@ -31,8 +31,8 @@ namespace GolemStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 2. Patrol »óÅÂ ---
-    // (ÀÌÀü°ú µ¿ÀÏ)
+    // --- 2. Patrol ìƒíƒœ ---
+    // (ì´ì „ê³¼ ë™ì¼)
     public class Patrol : ZombieBaseState<MonsterAIController>
     {
         private Vector3 patrolDestination;
@@ -64,8 +64,8 @@ namespace GolemStates
         }
     }
 
-    // --- 3. Trace »óÅÂ ---
-    // (ÀÌÀü°ú µ¿ÀÏ)
+    // --- 3. Trace ìƒíƒœ ---
+    // (ì´ì „ê³¼ ë™ì¼)
     public class Trace : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)
@@ -74,7 +74,7 @@ namespace GolemStates
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
-            // °ø°İ ¹üÀ§¿¡ µé¾î¿À¸é °ø°İ
+            // ê³µê²© ë²”ìœ„ì— ë“¤ì–´ì˜¤ë©´ ê³µê²©
             if (monster.GetDistanceToPlayer() <= monster.config.attackRange)
             {
                 return monster.fsm.AttackState;
@@ -99,7 +99,7 @@ namespace GolemStates
         }
     }
 
-    // --- 4. (¼öÁ¤) ÄŞº¸ °ø°İ »óÅÂ ---
+    // --- 4. (ìˆ˜ì •) ì½¤ë³´ ê³µê²© ìƒíƒœ ---
     public class Attack : ZombieBaseState<MonsterAIController>
     {
         private float timer;
@@ -112,7 +112,7 @@ namespace GolemStates
             if (monster.player != null)
                 monster.LookAt(monster.player.transform.position);
 
-            // (¿äÃ») Attack 1~4 Áß ÇÏ³ª¸¦ ·£´ıÀ¸·Î ½ÇÇà
+            // (ìš”ì²­) Attack 1~4 ì¤‘ í•˜ë‚˜ë¥¼ ëœë¤ìœ¼ë¡œ ì‹¤í–‰
             int attackIndex = Random.Range(0, 4); // 0, 1, 2, 3
 
             if (attackIndex == 0)
@@ -124,7 +124,7 @@ namespace GolemStates
             else
                 monster.SetAnimTrigger(monster.hashAttack4);
 
-            timer = 0f; // °ø°İ ¾Ö´Ï¸ŞÀÌ¼Ç Å¸ÀÌ¸Ó
+            timer = 0f; // ê³µê²© ì• ë‹ˆë©”ì´ì…˜ íƒ€ì´ë¨¸
 
             hasAppliedDamage = false;
         }
@@ -140,33 +140,33 @@ namespace GolemStates
 
             if (timer < monster.config.attackCooldown)
             {
-                return this; // »óÅÂ À¯Áö
+                return this; // ìƒíƒœ ìœ ì§€
             }
 
-            // Äğ´Ù¿îÀÌ Áö³µÀ¸¹Ç·Î Trace »óÅÂ·Î º¹±Í
+            // ì¿¨ë‹¤ìš´ì´ ì§€ë‚¬ìœ¼ë¯€ë¡œ Trace ìƒíƒœë¡œ ë³µê·€
             return monster.fsm.TraceState;
         }
 
         public override void ExitState(MonsterAIController monster)
         {
-            // (ÄŞº¸°¡ ¾øÀ¸¹Ç·Î ºñ¿öµÒ)
+            // (ì½¤ë³´ê°€ ì—†ìœ¼ë¯€ë¡œ ë¹„ì›Œë‘ )
         }
     }
-    // --- 5. (¼öÁ¤) ¹æ¾î/¹İ°İ »óÅÂ ---
+    // --- 5. (ìˆ˜ì •) ë°©ì–´/ë°˜ê²© ìƒíƒœ ---
     public class Block : ZombieBaseState<MonsterAIController>
     {
-        // (¿äÃ») ¹æ¾î(3-5ÃÊ) -> Ãë¾à(1ÃÊ) -> µ¹Áø
+        // (ìš”ì²­) ë°©ì–´(3-5ì´ˆ) -> ì·¨ì•½(1ì´ˆ) -> ëŒì§„
         public enum Phase { Blocking, VulnerableCheck, CounterRush }
         public Phase CurrentPhase { get; private set; }
 
         private float timer;
-        private float blockDuration; // 3~5ÃÊ ·£´ı ¹æ¾î ½Ã°£
-        private float vulnerableDuration = 1.0f; // 1ÃÊ Ãë¾à ½Ã°£
+        private float blockDuration; // 3~5ì´ˆ ëœë¤ ë°©ì–´ ì‹œê°„
+        private float vulnerableDuration = 1.0f; // 1ì´ˆ ì·¨ì•½ ì‹œê°„
 
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
-            monster.SetAnimTrigger(monster.hashBlockStart); // BlockStart ¾Ö´Ï¸ŞÀÌ¼Ç
+            monster.SetAnimTrigger(monster.hashBlockStart); // BlockStart ì• ë‹ˆë©”ì´ì…˜
 
             CurrentPhase = Phase.Blocking;
             timer = 0f;
@@ -177,23 +177,23 @@ namespace GolemStates
         {
             timer += Time.deltaTime;
 
-            // 1. "¹æ¾î Áß" ´Ü°è (3~5ÃÊ)
+            // 1. "ë°©ì–´ ì¤‘" ë‹¨ê³„ (3~5ì´ˆ)
             if (CurrentPhase == Phase.Blocking)
             {
-                // ¹æ¾î ½Ã°£ÀÌ ³¡³ª¸é "Ãë¾à" ´Ü°è·Î
+                // ë°©ì–´ ì‹œê°„ì´ ëë‚˜ë©´ "ì·¨ì•½" ë‹¨ê³„ë¡œ
                 if (timer >= blockDuration)
                 {
                     CurrentPhase = Phase.VulnerableCheck;
-                    timer = 0f; // Å¸ÀÌ¸Ó ¸®¼Â (1ÃÊ Ä«¿îÆ®)
+                    timer = 0f; // íƒ€ì´ë¨¸ ë¦¬ì…‹ (1ì´ˆ ì¹´ìš´íŠ¸)
                 }
             }
-            // 2. "Ãë¾à" ´Ü°è (1ÃÊ)
+            // 2. "ì·¨ì•½" ë‹¨ê³„ (1ì´ˆ)
             else if (CurrentPhase == Phase.VulnerableCheck)
             {
-                // (Âü°í: ÀÌ 1ÃÊ µ¿¾È MonsterAIController°¡ HandleHitÀ» ¹ŞÀ¸¸é
-                //  HitState·Î °­Á¦ ÀüÈ¯µÉ °ÍÀÓ)
+                // (ì°¸ê³ : ì´ 1ì´ˆ ë™ì•ˆ MonsterAIControllerê°€ HandleHitì„ ë°›ìœ¼ë©´
+                //  HitStateë¡œ ê°•ì œ ì „í™˜ë  ê²ƒì„)
 
-                // 1ÃÊ°¡ Áö³ª¸é "¹İ°İ µ¹Áø" ´Ü°è·Î
+                // 1ì´ˆê°€ ì§€ë‚˜ë©´ "ë°˜ê²© ëŒì§„" ë‹¨ê³„ë¡œ
                 if (timer >= vulnerableDuration)
                 {
                     CurrentPhase = Phase.CounterRush;
@@ -201,13 +201,13 @@ namespace GolemStates
                     monster.SetAnimFloat(monster.hashMoveSpeed, 2f); // Locomotion 2
                 }
             }
-            // 3. "¹İ°İ µ¹Áø" ´Ü°è
+            // 3. "ë°˜ê²© ëŒì§„" ë‹¨ê³„
             else if (CurrentPhase == Phase.CounterRush)
             {
                 if (monster.player != null)
                     monster.MoveTo(monster.player.transform.position);
 
-                // °ø°İ ¹üÀ§¿¡ µµÂøÇÏ¸é °ø°İ »óÅÂ·Î
+                // ê³µê²© ë²”ìœ„ì— ë„ì°©í•˜ë©´ ê³µê²© ìƒíƒœë¡œ
                 if (monster.GetDistanceToPlayer() <= monster.config.attackRange)
                 {
                     return monster.fsm.AttackState;
@@ -228,8 +228,8 @@ namespace GolemStates
         }
     }
 
-    // --- 6. LookAround »óÅÂ ---
-    // (ÀÌÀü°ú µ¿ÀÏ)
+    // --- 6. LookAround ìƒíƒœ ---
+    // (ì´ì „ê³¼ ë™ì¼)
     public class LookAround : ZombieBaseState<MonsterAIController>
     {
         private float timer;
@@ -255,8 +255,8 @@ namespace GolemStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 7. Hit »óÅÂ ---
-    // (ÀÌÀü°ú µ¿ÀÏ)
+    // --- 7. Hit ìƒíƒœ ---
+    // (ì´ì „ê³¼ ë™ì¼)
     public class Hit : ZombieBaseState<MonsterAIController>
     {
         private float hitStunDuration = 0.5f;
@@ -279,8 +279,8 @@ namespace GolemStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 8. Die »óÅÂ ---
-    // (ÀÌÀü°ú µ¿ÀÏ)
+    // --- 8. Die ìƒíƒœ ---
+    // (ì´ì „ê³¼ ë™ì¼)
     public class Die : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)

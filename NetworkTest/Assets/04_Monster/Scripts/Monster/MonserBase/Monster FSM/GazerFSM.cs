@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GazerFSM : MonsterFSM
 {
-    // --- Äğ´Ù¿î Å¸ÀÌ¸Ó ---
+    // --- ì¿¨ë‹¤ìš´ íƒ€ì´ë¨¸ ---
     private float beamCooldownTimer = 0f;
     private float strafeCooldownTimer = 0f;
     private float hitCooldownTimer = 0f;
@@ -28,34 +28,34 @@ public class GazerFSM : MonsterFSM
         if (hitCooldownTimer > 0) hitCooldownTimer -= Time.deltaTime;
     }
     /// <summary>
-    /// GazerÀÇ HP ÀÓ°èÁ¡À» È®ÀÎÇÏ°í, °æÁ÷ÀÌ ¹ßµ¿µÇ¾î¾ß ÇÏ´ÂÁö ¾Ë·ÁÁİ´Ï´Ù.
+    /// Gazerì˜ HP ì„ê³„ì ì„ í™•ì¸í•˜ê³ , ê²½ì§ì´ ë°œë™ë˜ì–´ì•¼ í•˜ëŠ”ì§€ ì•Œë ¤ì¤ë‹ˆë‹¤.
     /// </summary>
-    /// <returns>°æÁ÷ÀÌ ¹ßµ¿µÇ¸é true</returns>
+    /// <returns>ê²½ì§ì´ ë°œë™ë˜ë©´ true</returns>
     public bool CheckAndTriggerThreshold(float hpPercent)
     {
-        // Äğ´Ù¿îÀÌ ¾Æ´Ï¸ç, HP°¡ 30% ÀÌÇÏÀÌ°í, 30% ÇÃ·¡±×°¡ ÄÑÁ®ÀÖÀ» ¶§
+        // ì¿¨ë‹¤ìš´ì´ ì•„ë‹ˆë©°, HPê°€ 30% ì´í•˜ì´ê³ , 30% í”Œë˜ê·¸ê°€ ì¼œì ¸ìˆì„ ë•Œ
         if (hpPercent <= 0.3f && canTriggerHit30)
         {
-            canTriggerHit30 = false; // ÇÃ·¡±×¸¦ ²û (´ÙÀ½¿£ ¹ßµ¿ ¾È ÇÔ)
-            return true; // °æÁ÷ ¹ßµ¿!
+            canTriggerHit30 = false; // í”Œë˜ê·¸ë¥¼ ë” (ë‹¤ìŒì—” ë°œë™ ì•ˆ í•¨)
+            return true; // ê²½ì§ ë°œë™!
         }
         // 60%
         if (hpPercent <= 0.6f && canTriggerHit60)
         {
             canTriggerHit60 = false;
-            return true; // °æÁ÷ ¹ßµ¿!
+            return true; // ê²½ì§ ë°œë™!
         }
         // 90%
         if (hpPercent <= 0.9f && canTriggerHit90)
         {
             canTriggerHit90 = false;
-            return true; // °æÁ÷ ¹ßµ¿!
+            return true; // ê²½ì§ ë°œë™!
         }
 
-        return false; // °æÁ÷ ¹ßµ¿ Á¶°ÇÀÌ ¾Æ´Ô
+        return false; // ê²½ì§ ë°œë™ ì¡°ê±´ì´ ì•„ë‹˜
     }
 
-    // (Âü°í: ¸ó½ºÅÍ°¡ ¸®½ºÆùµÉ ¶§ ÀÌ ÇÃ·¡±×µéÀ» ´Ù½Ã true·Î ÄÑÁà¾ß ÇÕ´Ï´Ù.)
+    // (ì°¸ê³ : ëª¬ìŠ¤í„°ê°€ ë¦¬ìŠ¤í°ë  ë•Œ ì´ í”Œë˜ê·¸ë“¤ì„ ë‹¤ì‹œ trueë¡œ ì¼œì¤˜ì•¼ í•©ë‹ˆë‹¤.)
     public void ResetThresholds()
     {
         canTriggerHit90 = true;
@@ -63,17 +63,17 @@ public class GazerFSM : MonsterFSM
         canTriggerHit30 = true;
     }
 
-    // --- »óÅÂ Á¤ÀÇ ---
+    // --- ìƒíƒœ ì •ì˜ ---
     private readonly Idle _idleState = new Idle();
     private readonly Patrol _patrolState = new Patrol();
     private readonly Trace _traceState = new Trace();
     private readonly MeleeAttack _attackState = new MeleeAttack();
-    private readonly BeamAttack _lookAroundState = new BeamAttack(); // (LookAround ½½·Ô -> ºö)
+    private readonly BeamAttack _lookAroundState = new BeamAttack(); // (LookAround ìŠ¬ë¡¯ -> ë¹”)
     private readonly Hit _hitState = new Hit();
     private readonly Die _dieState = new Die();
-    private readonly Evasion _tauntState = new Evasion(); // (Taunt ½½·Ô -> È¸ÇÇ)
+    private readonly Evasion _tauntState = new Evasion(); // (Taunt ìŠ¬ë¡¯ -> íšŒí”¼)
 
-    // --- ½½·Ô ¿¬°á ---
+    // --- ìŠ¬ë¡¯ ì—°ê²° ---
     public override ZombieBaseState<MonsterAIController> IdleState => _idleState;
     public override ZombieBaseState<MonsterAIController> PatrolState => _patrolState;
     public override ZombieBaseState<MonsterAIController> TraceState => _traceState;

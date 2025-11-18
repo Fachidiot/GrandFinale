@@ -1,12 +1,12 @@
-// PoisonArea.cs (»õ ÆÄÀÏ)
+// PoisonArea.cs (ìƒˆ íŒŒì¼)
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// ¹Ù´Ú¿¡ ±ò¸®´Â µ¶ ÀåÆÇÀÇ ·ÎÁ÷À» Ã³¸®ÇÕ´Ï´Ù.
-/// - 5ÃÊ ÈÄ ÀÚµ¿ ÆÄ±«
-/// - ¹üÀ§ ³»ÀÇ ´ë»ó¿¡°Ô Æ½ µ¥¹ÌÁö Àû¿ë
+/// ë°”ë‹¥ì— ê¹”ë¦¬ëŠ” ë… ì¥íŒì˜ ë¡œì§ì„ ì²˜ë¦¬í•©ë‹ˆë‹¤.
+/// - 5ì´ˆ í›„ ìë™ íŒŒê´´
+/// - ë²”ìœ„ ë‚´ì˜ ëŒ€ìƒì—ê²Œ í‹± ë°ë¯¸ì§€ ì ìš©
 /// </summary>
 public class PoisonArea : MonoBehaviour
 {
@@ -14,11 +14,11 @@ public class PoisonArea : MonoBehaviour
     private float poisonDuration;
     private float poisonTickRate;
 
-    // ÀåÆÇ ¾È¿¡ µé¾î¿Í ÀÖ´Â ´ë»óµé (Áßº¹ ÇÇÇØ ¹æÁö)
+    // ì¥íŒ ì•ˆì— ë“¤ì–´ì™€ ìˆëŠ” ëŒ€ìƒë“¤ (ì¤‘ë³µ í”¼í•´ ë°©ì§€)
     private readonly List<Collider> targetsInArea = new List<Collider>();
 
     /// <summary>
-    /// Åõ»çÃ¼·ÎºÎÅÍ ¼³Á¤°ªÀ» ¹Ş¾Æ ·ÎÁ÷À» ½ÃÀÛÇÕ´Ï´Ù.
+    /// íˆ¬ì‚¬ì²´ë¡œë¶€í„° ì„¤ì •ê°’ì„ ë°›ì•„ ë¡œì§ì„ ì‹œì‘í•©ë‹ˆë‹¤.
     /// </summary>
     public void Initialize(float damage, float duration, float tickRate)
     {
@@ -26,29 +26,29 @@ public class PoisonArea : MonoBehaviour
         this.poisonDuration = duration;
         this.poisonTickRate = tickRate;
 
-        // 5ÃÊ ÈÄ ÆÄ±« ¹× Æ½ µ¥¹ÌÁö ÄÚ·çÆ¾ ½ÃÀÛ
+        // 5ì´ˆ í›„ íŒŒê´´ ë° í‹± ë°ë¯¸ì§€ ì½”ë£¨í‹´ ì‹œì‘
         StartCoroutine(DestroyAfterDuration(poisonDuration));
         StartCoroutine(TickDamageRoutine(poisonTickRate));
     }
 
-    // µ¶ ÀåÆÇ Áö¼Ó ½Ã°£ ÈÄ ÆÄ±«
+    // ë… ì¥íŒ ì§€ì† ì‹œê°„ í›„ íŒŒê´´
     private IEnumerator DestroyAfterDuration(float duration)
     {
         yield return new WaitForSeconds(duration);
-        // µ¶ ÀåÆÇÀÌ »ç¶óÁö´Â ÀÌÆåÆ®°¡ ÀÖ´Ù¸é ¿©±â¼­ È°¼ºÈ­/ºñÈ°¼ºÈ­
+        // ë… ì¥íŒì´ ì‚¬ë¼ì§€ëŠ” ì´í™íŠ¸ê°€ ìˆë‹¤ë©´ ì—¬ê¸°ì„œ í™œì„±í™”/ë¹„í™œì„±í™”
 
         Destroy(gameObject);
-        Debug.Log($"[PoisonArea] µ¶ ÀåÆÇ {duration}ÃÊ ÈÄ Á¦°Å ¿Ï·á.");
+        Debug.Log($"[PoisonArea] ë… ì¥íŒ {duration}ì´ˆ í›„ ì œê±° ì™„ë£Œ.");
     }
 
-    // Á¶°Ç 2: µ¶ ÀåÆÇ¿¡ ´ê¾ÆÀÖÀ¸¸é Æ½ µ¥¹ÌÁö ÁÖ±â
+    // ì¡°ê±´ 2: ë… ì¥íŒì— ë‹¿ì•„ìˆìœ¼ë©´ í‹± ë°ë¯¸ì§€ ì£¼ê¸°
     private IEnumerator TickDamageRoutine(float tickRate)
     {
         while (true)
         {
             yield return new WaitForSeconds(tickRate);
 
-            // ÀåÆÇ ¾È¿¡ ÀÖ´Â ¸ğµç ´ë»ó¿¡°Ô Æ½ µ¥¹ÌÁö Àû¿ë
+            // ì¥íŒ ì•ˆì— ìˆëŠ” ëª¨ë“  ëŒ€ìƒì—ê²Œ í‹± ë°ë¯¸ì§€ ì ìš©
             for (int i = targetsInArea.Count - 1; i >= 0; i--)
             {
                 Collider target = targetsInArea[i];
@@ -60,7 +60,7 @@ public class PoisonArea : MonoBehaviour
                 if (target.TryGetComponent<PlayerStats>(out var playerStats))
                 {
                     playerStats.TakeDamage(tickDamage);
-                    Debug.Log($"[PoisonArea] {target.name}¿¡°Ô µ¶ Æ½ ÇÇÇØ {tickDamage} Àû¿ë!");
+                    Debug.Log($"[PoisonArea] {target.name}ì—ê²Œ ë… í‹± í”¼í•´ {tickDamage} ì ìš©!");
                 }
             }
         }
@@ -68,7 +68,7 @@ public class PoisonArea : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // ÇÃ·¹ÀÌ¾î ÅÂ±× È®ÀÎ ¹× ¸®½ºÆ®¿¡ Ãß°¡
+        // í”Œë ˆì´ì–´ íƒœê·¸ í™•ì¸ ë° ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
         if (other.CompareTag("Player") && !targetsInArea.Contains(other))
         {
             targetsInArea.Add(other);
@@ -77,7 +77,7 @@ public class PoisonArea : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // ÇÃ·¹ÀÌ¾î ÅÂ±× È®ÀÎ ¹× ¸®½ºÆ®¿¡¼­ Á¦°Å
+        // í”Œë ˆì´ì–´ íƒœê·¸ í™•ì¸ ë° ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±°
         if (other.CompareTag("Player") && targetsInArea.Contains(other))
         {
             targetsInArea.Remove(other);

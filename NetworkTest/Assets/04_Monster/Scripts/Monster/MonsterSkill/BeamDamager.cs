@@ -1,30 +1,30 @@
 using UnityEngine;
-using System.Collections.Generic; // Dictionary¸¦ »ç¿ëÇÏ±â À§ÇØ Ãß°¡
+using System.Collections.Generic; // Dictionaryë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•´ ì¶”ê°€
 
 public class BeamDamager : MonoBehaviour
 {
-    [Header("°ø°İ ¼³Á¤")]
-    [Tooltip("ÃÊ´ç ÀÔÈ÷´Â µ¥¹ÌÁö")]
+    [Header("ê³µê²© ì„¤ì •")]
+    [Tooltip("ì´ˆë‹¹ ì…íˆëŠ” ë°ë¯¸ì§€")]
     public float damagePerSecond = 10f;
 
-    [Tooltip("µ¥¹ÌÁö°¡ ½ÇÁ¦·Î Àû¿ëµÇ´Â ÁÖ±â (ÃÊ) (0.25 = ÃÊ´ç 4¹ø)")]
+    [Tooltip("ë°ë¯¸ì§€ê°€ ì‹¤ì œë¡œ ì ìš©ë˜ëŠ” ì£¼ê¸° (ì´ˆ) (0.25 = ì´ˆë‹¹ 4ë²ˆ)")]
     public float damageTickRate = 0.25f;
 
-    // ÇÇÇØ¸¦ ÀÔÈù ÇÃ·¹ÀÌ¾î¿Í ´ÙÀ½ ÇÇÇØ ½Ã°£ ÀúÀå¿ë
+    // í”¼í•´ë¥¼ ì…íŒ í”Œë ˆì´ì–´ì™€ ë‹¤ìŒ í”¼í•´ ì‹œê°„ ì €ì¥ìš©
     private Dictionary<Collider, float> targetsHit = new Dictionary<Collider, float>();
 
     /// <summary>
-    /// ºöÀÇ Äİ¶óÀÌ´õ ¾È¿¡ ´©±º°¡ '¸Ó¹«¸£´Â µ¿¾È' ¸Å ÇÁ·¹ÀÓ È£ÃâµË´Ï´Ù.
+    /// ë¹”ì˜ ì½œë¼ì´ë” ì•ˆì— ëˆ„êµ°ê°€ 'ë¨¸ë¬´ë¥´ëŠ” ë™ì•ˆ' ë§¤ í”„ë ˆì„ í˜¸ì¶œë©ë‹ˆë‹¤.
     /// </summary>
     private void OnTriggerStay(Collider other)
     {
-        // 1. ÇÃ·¹ÀÌ¾î ÅÂ±×ÀÎÁö È®ÀÎ
+        // 1. í”Œë ˆì´ì–´ íƒœê·¸ì¸ì§€ í™•ì¸
         if (!other.CompareTag("Player"))
         {
             return;
         }
 
-        // 2. ÀÌ ÇÃ·¹ÀÌ¾î¸¦ ÀÌ¹Ì ¶§·È´ÂÁö, Äğ´Ù¿îÀÌ Áö³µ´ÂÁö È®ÀÎ
+        // 2. ì´ í”Œë ˆì´ì–´ë¥¼ ì´ë¯¸ ë•Œë ¸ëŠ”ì§€, ì¿¨ë‹¤ìš´ì´ ì§€ë‚¬ëŠ”ì§€ í™•ì¸
         if (targetsHit.ContainsKey(other))
         {
             if (Time.time < targetsHit[other])
@@ -35,23 +35,23 @@ public class BeamDamager : MonoBehaviour
 
         if (other.TryGetComponent<PlayerStats>(out var playerStats))
         {
-            // 4. µ¥¹ÌÁö °è»ê
+            // 4. ë°ë¯¸ì§€ ê³„ì‚°
             float damage = damagePerSecond * damageTickRate;
 
-            // 5. (¼öÁ¤ ¿Ï·á) PlayerStatsÀÇ TakeDamage ÇÔ¼ö È£Ãâ
+            // 5. (ìˆ˜ì • ì™„ë£Œ) PlayerStatsì˜ TakeDamage í•¨ìˆ˜ í˜¸ì¶œ
             playerStats.TakeDamage(damage);
 
-            // 6. ´ÙÀ½ µ¥¹ÌÁö ½Ã°£ ±â·Ï (Áö±İ ½Ã°£ + Äğ´Ù¿î)
+            // 6. ë‹¤ìŒ ë°ë¯¸ì§€ ì‹œê°„ ê¸°ë¡ (ì§€ê¸ˆ ì‹œê°„ + ì¿¨ë‹¤ìš´)
             targetsHit[other] = Time.time + damageTickRate;
         }
     }
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î°¡ ºö ¹üÀ§¿¡¼­ ³ª°¬À» ¶§ È£ÃâµË´Ï´Ù.
+    /// í”Œë ˆì´ì–´ê°€ ë¹” ë²”ìœ„ì—ì„œ ë‚˜ê°”ì„ ë•Œ í˜¸ì¶œë©ë‹ˆë‹¤.
     /// </summary>
     private void OnTriggerExit(Collider other)
     {
-        // 7. Äğ´Ù¿î ¸ñ·Ï¿¡¼­ Á¦°Å (´ÙÀ½¿¡ µé¾î¿À¸é Áï½Ã ¸Âµµ·Ï)
+        // 7. ì¿¨ë‹¤ìš´ ëª©ë¡ì—ì„œ ì œê±° (ë‹¤ìŒì— ë“¤ì–´ì˜¤ë©´ ì¦‰ì‹œ ë§ë„ë¡)
         if (targetsHit.ContainsKey(other))
         {
             targetsHit.Remove(other);

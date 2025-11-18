@@ -1,11 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// ÀÌ ¿¡¼ÂÀº 'Monster_v1/Data' Æú´õ¿¡ ÇÏ³ª¸¸ ¸¸µé °ÍÀÔ´Ï´Ù.
+// ì´ ì—ì…‹ì€ 'Monster_v1/Data' í´ë”ì— í•˜ë‚˜ë§Œ ë§Œë“¤ ê²ƒì…ë‹ˆë‹¤.
 [CreateAssetMenu(fileName = "MasterDatabase", menuName = "Monster_v1/Master Database")]
 public class MasterDatabase : ScriptableObject
 {
-    // ÆÄ¼­°¡ ÀÌ ¸®½ºÆ®µéÀ» ÀÚµ¿À¸·Î Ã¤¿öÁÙ °ÍÀÔ´Ï´Ù.
+    // íŒŒì„œê°€ ì´ ë¦¬ìŠ¤íŠ¸ë“¤ì„ ìë™ìœ¼ë¡œ ì±„ì›Œì¤„ ê²ƒì…ë‹ˆë‹¤.
     public List<AbilityData> allAbilities;
     public List<RelicData> allRelics;
 }

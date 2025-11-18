@@ -3,10 +3,10 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// µå·¡±× & µå·Ó Ã³¸® Àü´ã ÄÁÆ®·Ñ·¯
-/// - ¾ÆÀÌÅÛ µå·¡±× ½Ã°¢È­
-/// - ÆĞ³Î µå·¡±× ÀÌµ¿
-/// - µå·¡±× ¾ÆÀÌÄÜ °ü¸®
+/// ë“œë˜ê·¸ & ë“œë¡­ ì²˜ë¦¬ ì „ë‹´ ì»¨íŠ¸ë¡¤ëŸ¬
+/// - ì•„ì´í…œ ë“œë˜ê·¸ ì‹œê°í™”
+/// - íŒ¨ë„ ë“œë˜ê·¸ ì´ë™
+/// - ë“œë˜ê·¸ ì•„ì´ì½˜ ê´€ë¦¬
 /// </summary>
 public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 {
@@ -35,7 +35,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // Small Inventory Çì´õ¹Ù µå·¡±×¸¸ Çã¿ë
+        // Small Inventory í—¤ë”ë°” ë“œë˜ê·¸ë§Œ í—ˆìš©
         if (smallPanelRect != null && smallHeaderBarRect != null)
         {
             if (RectTransformUtility.RectangleContainsScreenPoint(
@@ -63,7 +63,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
     #region Public API - Item Drag
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ µå·¡±× ½ÃÀÛ
+    /// ì•„ì´í…œ ë“œë˜ê·¸ ì‹œì‘
     /// </summary>
     public void StartItemDrag(Sprite iconSprite)
     {
@@ -76,7 +76,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
     }
 
     /// <summary>
-    /// µå·¡±× ¾ÆÀÌÄÜ À§Ä¡ ¾÷µ¥ÀÌÆ®
+    /// ë“œë˜ê·¸ ì•„ì´ì½˜ ìœ„ì¹˜ ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateDragIconPosition(Vector2 screenPosition)
     {
@@ -88,7 +88,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ µå·¡±× Á¾·á
+    /// ì•„ì´í…œ ë“œë˜ê·¸ ì¢…ë£Œ
     /// </summary>
     public void EndItemDrag()
     {
@@ -140,13 +140,13 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     private Image GetActiveDragIcon()
     {
-        // ÀÌ¹Ì È°¼ºÈ­µÈ ¾ÆÀÌÄÜÀÌ ÀÖÀ¸¸é Àç»ç¿ë
+        // ì´ë¯¸ í™œì„±í™”ëœ ì•„ì´ì½˜ì´ ìˆìœ¼ë©´ ì¬ì‚¬ìš©
         if (currentActiveDragIcon != null)
         {
             return currentActiveDragIcon;
         }
 
-        // ÇöÀç È°¼ºÈ­µÈ ÀÎº¥Åä¸®¿¡ µû¶ó ¼±ÅÃ
+        // í˜„ì¬ í™œì„±í™”ëœ ì¸ë²¤í† ë¦¬ì— ë”°ë¼ ì„ íƒ
         if (IsInventoryActive(fullInventoryPanel))
         {
             return fullDragIcon;

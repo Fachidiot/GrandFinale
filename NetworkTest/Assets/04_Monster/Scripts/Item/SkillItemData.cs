@@ -3,10 +3,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewSkillItem", menuName = "Item/Skill")]
 public class SkillItemData : ItemData
 {
-    //½ÇÁ¦ ÀÔ·ÂÀ¸·Î »ç¿ëÇÏ´Â°Í / ÆĞ½Ãºê ½ºÅ³ µû·Î Á¾·ù ³ª´²¾ßÇÔ.
+    //ì‹¤ì œ ì…ë ¥ìœ¼ë¡œ ì‚¬ìš©í•˜ëŠ”ê²ƒ / íŒ¨ì‹œë¸Œ ìŠ¤í‚¬ ë”°ë¡œ ì¢…ë¥˜ ë‚˜ëˆ ì•¼í•¨.
 
-    [Header("½ºÅ³ ¼³Á¤")]
-    [Tooltip("»ç¿ë ½Ã »ı¼ºµÉ ÇÁ¸®ÆÕ (ºÒµ¢ÀÌ, ¾óÀ½ ¼Û°÷ µî)")]
+    [Header("ìŠ¤í‚¬ ì„¤ì •")]
+    [Tooltip("ì‚¬ìš© ì‹œ ìƒì„±ë  í”„ë¦¬íŒ¹ (ë¶ˆë©ì´, ì–¼ìŒ ì†¡ê³³ ë“±)")]
     public GameObject skillPrefab;
     public float cooldown;
     public float manaCost;

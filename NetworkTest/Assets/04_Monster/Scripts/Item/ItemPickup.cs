@@ -4,22 +4,20 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class ItemPickup : MonoBehaviour
 {
-
-
-    [Header("ÀÌ ¾ÆÀÌÅÛÀÇ µ¥ÀÌÅÍ")]
-    [Tooltip("¿©±â¿¡ RelicData ScriptableObject¸¦ ²ø¾î´Ù ³õÀ¸¼¼¿ä.")]
+    [Header("ì´ ì•„ì´í…œì˜ ë°ì´í„°")]
+    [Tooltip("ì—¬ê¸°ì— RelicData ScriptableObjectë¥¼ ëŒì–´ë‹¤ ë†“ìœ¼ì„¸ìš”.")]
     public RelicData itemData;
 
-    [Header("ÇÈ¾÷ ¹æ½Ä ¼³Á¤")]
-    [Tooltip("Ã¼Å©ÇÏ¸é 8Ä­ ÀÎº¥Åä¸®·Î, Ã¼Å© ÇØÁ¦ÇÏ¸é PlayerAbilityManager·Î Áï½Ã µî·ÏµË´Ï´Ù.")]
+    [Header("í”½ì—… ë°©ì‹ ì„¤ì •")]
+    [Tooltip("ì²´í¬í•˜ë©´ 8ì¹¸ ì¸ë²¤í† ë¦¬ë¡œ, ì²´í¬ í•´ì œí•˜ë©´ PlayerAbilityManagerë¡œ ì¦‰ì‹œ ë“±ë¡ë©ë‹ˆë‹¤.")]
     public bool addToInventoryInstead = false;
 
-    [Tooltip("ÇÃ·¹ÀÌ¾î°¡ Áİ±â ¹üÀ§ ³»¿¡ µé¾î¿ÔÀ» ¶§ UI¸¦ ¶ç¿ì±â À§ÇÑ ÀÌº¥Æ®")]
+    [Tooltip("í”Œë ˆì´ì–´ê°€ ì¤ê¸° ë²”ìœ„ ë‚´ì— ë“¤ì–´ì™”ì„ ë•Œ UIë¥¼ ë„ìš°ê¸° ìœ„í•œ ì´ë²¤íŠ¸")]
     public static event Action<bool, ItemPickup> OnPlayerNearbyPickup;
     private bool playerInRange = false;
-    private GameObject nearbyPlayer; // PlayerAbilityManager¸¦ Ã£±â À§ÇØ ÇÊ¿ä
+    private GameObject nearbyPlayer; // PlayerAbilityManagerë¥¼ ì°¾ê¸° ìœ„í•´ í•„ìš”
 
-    private PlayerInputs playerInputs; // GameManager¿¡ ÀÖ´Â PlayerInputs¸¦ ÀúÀåÇÒ º¯¼ö
+    private PlayerInputs playerInputs; // GameManagerì— ìˆëŠ” PlayerInputsë¥¼ ì €ì¥í•  ë³€ìˆ˜
     private SphereCollider sphereCollider;
 
     private void Awake()
@@ -27,27 +25,27 @@ public class ItemPickup : MonoBehaviour
         sphereCollider = GetComponent<SphereCollider>();
         sphereCollider.isTrigger = true;
 
-        // 1.  Awake¿¡¼­´Â GameManager.Instance¸¦ È£ÃâÇÏÁö ¾Ê½À´Ï´Ù. (¼ø¼­ ¹®Á¦ ¹æÁö)
+        // 1.  Awakeì—ì„œëŠ” GameManager.Instanceë¥¼ í˜¸ì¶œí•˜ì§€ ì•ŠìŠµë‹ˆë‹¤. (ìˆœì„œ ë¬¸ì œ ë°©ì§€)
 
 
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // 2.  ÇÃ·¹ÀÌ¾î°¡ µé¾î¿Ô´ÂÁö È®ÀÎ
+        // 2.  í”Œë ˆì´ì–´ê°€ ë“¤ì–´ì™”ëŠ”ì§€ í™•ì¸
         if (other.CompareTag("Player"))
         {
-            // 3. (ÇÙ½É ¼öÁ¤!) PlayerInputs°¡ GameManager¿¡ ÀÖÀ¸¹Ç·Î GameManager.Instance¿¡¼­ Ã£¾Æ¿É´Ï´Ù.
+            // 3. (í•µì‹¬ ìˆ˜ì •!) PlayerInputsê°€ GameManagerì— ìˆìœ¼ë¯€ë¡œ GameManager.Instanceì—ì„œ ì°¾ì•„ì˜µë‹ˆë‹¤.
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
             }
 
-            // 4. PlayerInputs¸¦ Ã£¾Ò°í, È°¼ºÈ­µÇ¾î ÀÖÀ» ¶§¸¸ ÇÈ¾÷ °¡´É »óÅÂ·Î º¯°æ
+            // 4. PlayerInputsë¥¼ ì°¾ì•˜ê³ , í™œì„±í™”ë˜ì–´ ìˆì„ ë•Œë§Œ í”½ì—… ê°€ëŠ¥ ìƒíƒœë¡œ ë³€ê²½
             if (playerInputs != null && playerInputs.enabled)
             {
                 playerInRange = true;
-                nearbyPlayer = other.gameObject; 
+                nearbyPlayer = other.gameObject;
                 OnPlayerNearbyPickup?.Invoke(true, this);
             }
         }
@@ -59,7 +57,7 @@ public class ItemPickup : MonoBehaviour
         {
             playerInRange = false;
             nearbyPlayer = null;
-            playerInputs = null; 
+            playerInputs = null;
             OnPlayerNearbyPickup?.Invoke(false, this);
         }
     }
@@ -79,7 +77,7 @@ public class ItemPickup : MonoBehaviour
     {
         if (itemData == null)
         {
-            Debug.LogWarning("ItemPickup¿¡ itemData°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!", this);
+            Debug.LogWarning("ItemPickupì— itemDataê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!", this);
             return;
         }
 
@@ -93,7 +91,7 @@ public class ItemPickup : MonoBehaviour
             }
             else
             {
-                Debug.Log("ÀÎº¥Åä¸®°¡ ²Ë Ã¡½À´Ï´Ù!");
+                Debug.Log("ì¸ë²¤í† ë¦¬ê°€ ê½‰ ì°¼ìŠµë‹ˆë‹¤!");
             }
         }
         else
@@ -107,13 +105,13 @@ public class ItemPickup : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"ÇÃ·¹ÀÌ¾î¿¡°Ô {itemData.itemName}¸¦ È¹µæÇÒ PlayerAbilityManager°¡ ¾ø½À´Ï´Ù.", nearbyPlayer);
+                Debug.LogWarning($"í”Œë ˆì´ì–´ì—ê²Œ {itemData.itemName}ë¥¼ íšë“í•  PlayerAbilityManagerê°€ ì—†ìŠµë‹ˆë‹¤.", nearbyPlayer);
             }
         }
     }
 
     /// <summary>
-    /// ¾À ºä¿¡¼­ ÀÌ ¿ÀºêÁ§Æ®¸¦ ¼±ÅÃÇßÀ» ¶§ ÇÈ¾÷ ¹üÀ§¸¦ ±×¸³´Ï´Ù.
+    /// ì”¬ ë·°ì—ì„œ ì´ ì˜¤ë¸Œì íŠ¸ë¥¼ ì„ íƒí–ˆì„ ë•Œ í”½ì—… ë²”ìœ„ë¥¼ ê·¸ë¦½ë‹ˆë‹¤.
     /// </summary>
     private void OnDrawGizmosSelected()
     {

@@ -4,7 +4,7 @@ using UnityEditor;
 [CustomEditor(typeof(DynamicButton))]
 public class DynamicButtonEditor : UnityEditor.Editor
 {
-    /* Inspector�� �׸��� �Լ� */
+    /* Inspector에 그리는 함수 */
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
@@ -17,7 +17,7 @@ public class DynamicButtonEditor : UnityEditor.Editor
         //    SerializedProperty arrayElementVar = arrayVar.GetArrayElementAtIndex(i);
         //}
 
-        //SerializedProperty structVar = serializedObject.FindProperty("structVar"); //����ü
+        //SerializedProperty structVar = serializedObject.FindProperty("structVar"); //구조체
 
         // Button Properties
         SerializedProperty interactableVar = serializedObject.FindProperty("interactable");

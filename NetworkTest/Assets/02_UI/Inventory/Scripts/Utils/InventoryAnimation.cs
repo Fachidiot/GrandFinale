@@ -3,29 +3,29 @@ using DG.Tweening;
 
 public class InventoryAnimation : MonoBehaviour
 {
-    // À¯´ÏÆ¼ ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ÇÒ º¯¼öµé
+    // ìœ ë‹ˆí‹° ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •í•  ë³€ìˆ˜ë“¤
     [SerializeField] private RectTransform _inventoryPanel;
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private float _openDuration = 0.5f;
-    [SerializeField] private float _startScale = 0.8f; // ½ÃÀÛ Å©±â (¿ø·¡ Å©±â 1.0fº¸´Ù ÀÛ°Ô)
+    [SerializeField] private float _startScale = 0.8f; // ì‹œì‘ í¬ê¸° (ì›ë˜ í¬ê¸° 1.0fë³´ë‹¤ ì‘ê²Œ)
 
     public void OpenInventory()
     {
-        // 1. ÃÊ±â »óÅÂ ¼³Á¤ (´İÇôÀÖÀ» ¶§)
+        // 1. ì´ˆê¸° ìƒíƒœ ì„¤ì • (ë‹«í˜€ìˆì„ ë•Œ)
         _canvasGroup.alpha = 0f;
         _inventoryPanel.localScale = Vector3.one * _startScale;
 
-        // 2. ¾Ö´Ï¸ŞÀÌ¼Ç Àû¿ë
+        // 2. ì• ë‹ˆë©”ì´ì…˜ ì ìš©
         _canvasGroup.DOFade(1f, _openDuration);
         _inventoryPanel.DOScale(1f, _openDuration)
-                       .SetEase(Ease.OutBack); // Æ¨±â´Â µíÇÑ È¿°ú
+                       .SetEase(Ease.OutBack); // íŠ•ê¸°ëŠ” ë“¯í•œ íš¨ê³¼
     }
 
     public void CloseInventory()
     {
-        // ´İÀ» ¶§´Â ºÎµå·´°Ô ÀÛ¾ÆÁö¸é¼­ »ç¶óÁı´Ï´Ù.
+        // ë‹«ì„ ë•ŒëŠ” ë¶€ë“œëŸ½ê²Œ ì‘ì•„ì§€ë©´ì„œ ì‚¬ë¼ì§‘ë‹ˆë‹¤.
         _canvasGroup.DOFade(0f, _openDuration);
         _inventoryPanel.DOScale(Vector3.one * _startScale, _openDuration)
-                       .SetEase(Ease.InBack); // µé¾î°¡´Â µíÇÑ È¿°ú
+                       .SetEase(Ease.InBack); // ë“¤ì–´ê°€ëŠ” ë“¯í•œ íš¨ê³¼
     }
 }

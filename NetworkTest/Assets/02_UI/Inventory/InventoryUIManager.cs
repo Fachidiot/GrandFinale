@@ -1,10 +1,10 @@
 using UnityEngine;
 
 /// <summary>
-/// ÀÎº¥Åä¸® UI ÃÑ°ı ¸Å´ÏÀú (½½¸²È­ ¹öÀü)
-/// - ¸ğµç ÇÏÀ§ ÄÁÆ®·Ñ·¯ Á¶À²
-/// - ¿ÜºÎ ÀÎÅÍÆäÀÌ½º Á¦°ø
-/// - ÃÖ¼ÒÇÑÀÇ Ã¥ÀÓ¸¸ º¸À¯
+/// ì¸ë²¤í† ë¦¬ UI ì´ê´„ ë§¤ë‹ˆì € (ìŠ¬ë¦¼í™” ë²„ì „)
+/// - ëª¨ë“  í•˜ìœ„ ì»¨íŠ¸ë¡¤ëŸ¬ ì¡°ìœ¨
+/// - ì™¸ë¶€ ì¸í„°í˜ì´ìŠ¤ ì œê³µ
+/// - ìµœì†Œí•œì˜ ì±…ì„ë§Œ ë³´ìœ 
 /// </summary>
 public class InventoryUIManager : MonoBehaviour
 {
@@ -63,27 +63,27 @@ public class InventoryUIManager : MonoBehaviour
     {
         if (tooltipController == null)
         {
-            Debug.LogWarning("[InventoryUIManager] TooltipController°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("[InventoryUIManager] TooltipControllerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
 
         if (dragDropHandler == null)
         {
-            Debug.LogWarning("[InventoryUIManager] DragDropHandler°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("[InventoryUIManager] DragDropHandlerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
 
         if (tabSwitchController == null)
         {
-            Debug.LogWarning("[InventoryUIManager] TabSwitchController°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("[InventoryUIManager] TabSwitchControllerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
 
         if (leftPanelController == null)
         {
-            Debug.LogWarning("[InventoryUIManager] LeftPanelController°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("[InventoryUIManager] LeftPanelControllerê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
 
         if (inventoryStatsUI == null)
         {
-            Debug.LogWarning("[InventoryUIManager] InventoryStatsUI°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("[InventoryUIManager] InventoryStatsUIê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
     }
 
@@ -92,7 +92,7 @@ public class InventoryUIManager : MonoBehaviour
     #region Public API - Tooltip
 
     /// <summary>
-    /// ÅøÆÁ Ç¥½Ã
+    /// íˆ´íŒ í‘œì‹œ
     /// </summary>
     public void ShowTooltip(RelicData item, Vector3 slotScreenPosition)
     {
@@ -103,7 +103,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÅøÆÁ ¼û±â±â
+    /// íˆ´íŒ ìˆ¨ê¸°ê¸°
     /// </summary>
     public void HideTooltip()
     {
@@ -118,7 +118,7 @@ public class InventoryUIManager : MonoBehaviour
     #region Public API - Drag & Drop
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ µå·¡±× ½ÃÀÛ
+    /// ì•„ì´í…œ ë“œë˜ê·¸ ì‹œì‘
     /// </summary>
     public void StartDrag(Sprite iconSprite)
     {
@@ -129,7 +129,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// µå·¡±× ¾ÆÀÌÄÜ À§Ä¡ ¾÷µ¥ÀÌÆ®
+    /// ë“œë˜ê·¸ ì•„ì´ì½˜ ìœ„ì¹˜ ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateDragIcon(Vector2 position)
     {
@@ -140,7 +140,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// µå·¡±× Á¾·á
+    /// ë“œë˜ê·¸ ì¢…ë£Œ
     /// </summary>
     public void EndDrag()
     {
@@ -149,7 +149,7 @@ public class InventoryUIManager : MonoBehaviour
             dragDropHandler.EndItemDrag();
         }
 
-        // µå·¡±× Á¾·á ½Ã »ó¼¼ Á¤º¸ ÃÊ±âÈ­
+        // ë“œë˜ê·¸ ì¢…ë£Œ ì‹œ ìƒì„¸ ì •ë³´ ì´ˆê¸°í™”
         ClearDetails();
     }
 
@@ -158,13 +158,13 @@ public class InventoryUIManager : MonoBehaviour
     #region Public API - Item Details
 
     /// <summary>
-    /// (HandleSlotClickÀ» ´ëÃ¼) ¾ÆÀÌÅÛ »ó¼¼ Á¤º¸ ¾÷µ¥ÀÌÆ®
+    /// (HandleSlotClickì„ ëŒ€ì²´) ì•„ì´í…œ ìƒì„¸ ì •ë³´ ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateDetails(RelicData item)
     {
-        // ÀÌ ÇÔ¼ö´Â ÀÌÁ¦ Slot_UI¿¡¼­ Á÷Á¢ È£ÃâµÇÁö ¾Ê½À´Ï´Ù.
-        // HandleSlotClickÀÌ ÀÌ ·ÎÁ÷À» ´ëÃ¼ÇÕ´Ï´Ù.
-        // È¤½Ã ¸ğ¸£´Ï ³²°ÜµÎÁö¸¸, LeftPanelController¸¦ Á÷Á¢ È£ÃâÇÕ´Ï´Ù.
+        // ì´ í•¨ìˆ˜ëŠ” ì´ì œ Slot_UIì—ì„œ ì§ì ‘ í˜¸ì¶œë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
+        // HandleSlotClickì´ ì´ ë¡œì§ì„ ëŒ€ì²´í•©ë‹ˆë‹¤.
+        // í˜¹ì‹œ ëª¨ë¥´ë‹ˆ ë‚¨ê²¨ë‘ì§€ë§Œ, LeftPanelControllerë¥¼ ì§ì ‘ í˜¸ì¶œí•©ë‹ˆë‹¤.
         if (leftPanelController != null && item != null)
         {
             leftPanelController.ShowItemInfoPanel(item);
@@ -172,20 +172,20 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// »ó¼¼ Á¤º¸ ÃÊ±âÈ­ (¼±ÅÃ ÇØÁ¦)
+    /// ìƒì„¸ ì •ë³´ ì´ˆê¸°í™” (ì„ íƒ í•´ì œ)
     /// </summary>
     public void ClearDetails()
     {
         if (IsFullInventoryActive())
         {
-            // 1. ÇöÀç ¼±ÅÃµÈ ½½·ÔÀÌ ÀÖ´Ù¸é ¼±ÅÃ ÇØÁ¦
+            // 1. í˜„ì¬ ì„ íƒëœ ìŠ¬ë¡¯ì´ ìˆë‹¤ë©´ ì„ íƒ í•´ì œ
             if (currentSelectedSlot != null)
             {
-                currentSelectedSlot.SetSelected(false, false); // ¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀÌ Áï½Ã ÇØÁ¦
+                currentSelectedSlot.SetSelected(false, false); // ì• ë‹ˆë©”ì´ì…˜ ì—†ì´ ì¦‰ì‹œ í•´ì œ
                 currentSelectedSlot = null;
             }
 
-            // 2. LeftPanelController¿¡ ±âº» ÆĞ³Î(Àåºñ) Ç¥½Ã ¿äÃ»
+            // 2. LeftPanelControllerì— ê¸°ë³¸ íŒ¨ë„(ì¥ë¹„) í‘œì‹œ ìš”ì²­
             if (leftPanelController != null)
             {
                 leftPanelController.ShowEquipmentPanel();
@@ -198,7 +198,7 @@ public class InventoryUIManager : MonoBehaviour
     #region Public API - Search
 
     /// <summary>
-    /// °Ë»ö Äõ¸® ¼³Á¤ (UI Input Field¿¡¼­ È£Ãâ)
+    /// ê²€ìƒ‰ ì¿¼ë¦¬ ì„¤ì • (UI Input Fieldì—ì„œ í˜¸ì¶œ)
     /// </summary>
     public void SetSearchQueryFromUI(string query)
     {
@@ -230,7 +230,7 @@ public class InventoryUIManager : MonoBehaviour
     #endregion
 
     /// <summary>
-    /// Slot_UI°¡ Å¬¸¯µÇ¾úÀ» ¶§ È£ÃâµË´Ï´Ù (Åä±Û ·ÎÁ÷).
+    /// Slot_UIê°€ í´ë¦­ë˜ì—ˆì„ ë•Œ í˜¸ì¶œë©ë‹ˆë‹¤ (í† ê¸€ ë¡œì§).
     /// </summary>
     public void HandleSlotClick(Slot_UI clickedSlot, RelicData item)
     {
@@ -238,24 +238,24 @@ public class InventoryUIManager : MonoBehaviour
 
         if (clickedSlot == currentSelectedSlot)
         {
-            // ÀÌ¹Ì ¼±ÅÃµÈ ½½·ÔÀ» ´Ù½Ã Å¬¸¯ -> ¼±ÅÃ ÇØÁ¦
+            // ì´ë¯¸ ì„ íƒëœ ìŠ¬ë¡¯ì„ ë‹¤ì‹œ í´ë¦­ -> ì„ íƒ í•´ì œ
             ClearDetails();
         }
         else
         {
-            // ´Ù¸¥ ½½·ÔÀ» Å¬¸¯ -> ±âÁ¸ °Í ÇØÁ¦ ÈÄ »õ °Í ¼±ÅÃ
+            // ë‹¤ë¥¸ ìŠ¬ë¡¯ì„ í´ë¦­ -> ê¸°ì¡´ ê²ƒ í•´ì œ í›„ ìƒˆ ê²ƒ ì„ íƒ
 
-            // 1. ÀÌÀü¿¡ ¼±ÅÃµÈ ½½·ÔÀÌ ÀÖ´Ù¸é ¼±ÅÃ ÇØÁ¦
+            // 1. ì´ì „ì— ì„ íƒëœ ìŠ¬ë¡¯ì´ ìˆë‹¤ë©´ ì„ íƒ í•´ì œ
             if (currentSelectedSlot != null)
             {
-                currentSelectedSlot.SetSelected(false, false); // ¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀÌ Áï½Ã ÇØÁ¦
+                currentSelectedSlot.SetSelected(false, false); // ì• ë‹ˆë©”ì´ì…˜ ì—†ì´ ì¦‰ì‹œ í•´ì œ
             }
 
-            // 2. »õ ½½·ÔÀ» ÇöÀç ¼±ÅÃµÈ ½½·ÔÀ¸·Î ÁöÁ¤
+            // 2. ìƒˆ ìŠ¬ë¡¯ì„ í˜„ì¬ ì„ íƒëœ ìŠ¬ë¡¯ìœ¼ë¡œ ì§€ì •
             currentSelectedSlot = clickedSlot;
-            currentSelectedSlot.SetSelected(true, true); // ¾Ö´Ï¸ŞÀÌ¼Ç°ú ÇÔ²² ¼±ÅÃ
+            currentSelectedSlot.SetSelected(true, true); // ì• ë‹ˆë©”ì´ì…˜ê³¼ í•¨ê»˜ ì„ íƒ
 
-            // 3. LeftPanelController¿¡ Á¤º¸ Ç¥½Ã ¿äÃ»
+            // 3. LeftPanelControllerì— ì •ë³´ í‘œì‹œ ìš”ì²­
             if (leftPanelController != null && item != null)
             {
                 leftPanelController.ShowItemInfoPanel(item);

@@ -10,18 +10,18 @@ public class SpiderMovementAdapter : MonoBehaviour, IMonsterMovement
         spider = GetComponent<Spider>();
     }
 
-    // 'Transform context' ÆÄ¶ó¹ÌÅÍ°¡ ¾ø½À´Ï´Ù.
+    // 'Transform context' íŒŒë¼ë¯¸í„°ê°€ ì—†ìŠµë‹ˆë‹¤.
     public void Move(Vector3 worldDirection, float speed)
     {
-        // ÀÚ±â ÀÚ½ÅÀÇ transformÀ» »ç¿ëÇÕ´Ï´Ù.
+        // ìê¸° ìì‹ ì˜ transformì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
         Vector3 localDirection = transform.InverseTransformDirection(worldDirection);
         spider.walk(localDirection, speed);
     }
 
-    // 'Transform context' ÆÄ¶ó¹ÌÅÍ°¡ ¾ø½À´Ï´Ù.
+    // 'Transform context' íŒŒë¼ë¯¸í„°ê°€ ì—†ìŠµë‹ˆë‹¤.
     public void TurnTowards(Vector3 worldTargetPosition, float turnSpeed)
     {
-        // ÀÚ±â ÀÚ½ÅÀÇ transformÀ» »ç¿ëÇÕ´Ï´Ù.
+        // ìê¸° ìì‹ ì˜ transformì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
         Vector3 worldDirection = (worldTargetPosition - transform.position).normalized;
         Vector3 localDirection = transform.InverseTransformDirection(worldDirection);
         spider.turn(localDirection);

@@ -2,10 +2,10 @@
 using UnityEngine;
 using MinotaurStates;
 
-// 1. MonsterFSM ¼³°èµµ¸¦ »ó¼Ó
+// 1. MonsterFSM ì„¤ê³„ë„ë¥¼ ìƒì†
 public class MinotaurFSM : MonsterFSM
 {
-    // 2. MinotaurStatesÀÇ »óÅÂ Å¬·¡½ºµéÀ» »ı¼º
+    // 2. MinotaurStatesì˜ ìƒíƒœ í´ë˜ìŠ¤ë“¤ì„ ìƒì„±
     private readonly Idle _idleState = new Idle();
     private readonly Patrol _patrolState = new Patrol();
     private readonly Trace _traceState = new Trace();
@@ -14,7 +14,7 @@ public class MinotaurFSM : MonsterFSM
     private readonly Hit _hitState = new Hit();
     private readonly Die _dieState = new Die();
 
-    // 3. FSM ½½·Ô¿¡ »óÅÂµéÀ» ¹İÈ¯
+    // 3. FSM ìŠ¬ë¡¯ì— ìƒíƒœë“¤ì„ ë°˜í™˜
     public override ZombieBaseState<MonsterAIController> IdleState => _idleState;
     public override ZombieBaseState<MonsterAIController> PatrolState => _patrolState;
     public override ZombieBaseState<MonsterAIController> TraceState => _traceState;

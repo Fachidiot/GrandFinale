@@ -1,27 +1,27 @@
-// GazerConfig.cs (¼öÁ¤µÈ ÄÚµå)
+// GazerConfig.cs (ìˆ˜ì •ëœ ì½”ë“œ)
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewGazerConfig", menuName = "Monster/Gazer Config")]
 public class GazerConfig : MonsterConfig
 {
     [Header("Gazer (Beam Attack)")]
-    [Tooltip("ºö °ø°İÀ» ½ÃµµÇÒ ÃÖ´ë »ç°Å¸®")]
+    [Tooltip("ë¹” ê³µê²©ì„ ì‹œë„í•  ìµœëŒ€ ì‚¬ê±°ë¦¬")]
     public float beamRange = 15f;
-    [Tooltip("ºö Ä³½ºÆÃ ½Ã°£ (Cast3Start -> Cast3End)")]
+    [Tooltip("ë¹” ìºìŠ¤íŒ… ì‹œê°„ (Cast3Start -> Cast3End)")]
     public float beamCastTime = 3.5f;
-    [Tooltip("ºö °ø°İÀÇ Äğ´Ù¿î")]
+    [Tooltip("ë¹” ê³µê²©ì˜ ì¿¨ë‹¤ìš´")]
     public float beamCooldown = 20f;
-    [Tooltip("Cast3Start ¾Ö´Ï¸ŞÀÌ¼Ç ÈÄ, ºöÀÌ ½ÇÁ¦·Î ¹ß»çµÉ ¶§±îÁöÀÇ µô·¹ÀÌ")]
+    [Tooltip("Cast3Start ì• ë‹ˆë©”ì´ì…˜ í›„, ë¹”ì´ ì‹¤ì œë¡œ ë°œì‚¬ë  ë•Œê¹Œì§€ì˜ ë”œë ˆì´")]
     public float beamFireDelay = 0.3f;
-    [Tooltip("ºö ÇÁ¸®ÆÕ (¾×¼Çºö)")]
+    [Tooltip("ë¹” í”„ë¦¬íŒ¹ (ì•¡ì…˜ë¹”)")]
     public GameObject beamPrefab;
 
 
     [Header("Gazer (Evasion)")]
-    [Tooltip("ÀÌ °Å¸®º¸´Ù °¡±î¿ì¸é È¸ÇÇ(Strafe)¸¦ ½ÃµµÇÕ´Ï´Ù.")]
+    [Tooltip("ì´ ê±°ë¦¬ë³´ë‹¤ ê°€ê¹Œìš°ë©´ íšŒí”¼(Strafe)ë¥¼ ì‹œë„í•©ë‹ˆë‹¤.")]
     public float strafeRange = 8f;
-    [Tooltip("È¸ÇÇ(Strafe) ±âµ¿ÀÇ Äğ´Ù¿î")]
+    [Tooltip("íšŒí”¼(Strafe) ê¸°ë™ì˜ ì¿¨ë‹¤ìš´")]
     public float strafeCooldown = 5f;
-    [Tooltip("È¸ÇÇ ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ Áö¼Ó ½Ã°£")]
+    [Tooltip("íšŒí”¼ ì• ë‹ˆë©”ì´ì…˜ì˜ ì§€ì† ì‹œê°„")]
     public float strafeDuration = 1.0f;
 }

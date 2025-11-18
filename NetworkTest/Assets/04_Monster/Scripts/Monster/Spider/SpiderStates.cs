@@ -17,13 +17,13 @@ namespace SpiderStates
         {
             if (monster.sensor.CanSeePlayer)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
             timer += Time.deltaTime;
             if (timer >= idleTime)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.PatrolState;
             }
             return this;
@@ -42,13 +42,13 @@ namespace SpiderStates
         {
             if (monster.sensor.CanSeePlayer)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
             monster.MoveTo(patrolDestination);
             if (monster.arrivedAtDestination)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.IdleState;
             }
             return this;
@@ -67,15 +67,15 @@ namespace SpiderStates
         {
             if (monster.GetDistanceToPlayer() <= monster.config.attackRange)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.AttackState;
             }
             Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
             monster.MoveTo(targetPosition);
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
-                return monster.fsm.PatrolState; // (°Å¹Ì´Â LookAround ´ë½Å Patrol·Î ¹Ù·Î °¨)
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
+                return monster.fsm.PatrolState; // (ê±°ë¯¸ëŠ” LookAround ëŒ€ì‹  Patrolë¡œ ë°”ë¡œ ê°)
             }
             return this;
         }
@@ -88,22 +88,22 @@ namespace SpiderStates
     public class Attack : ZombieBaseState<MonsterAIController>
     {
         private float attackTimer;
-        // (Âü°í) ÀÌ °ªÀº ³ªÁß¿¡ Config·Î »©´Â °ÍÀÌ ÁÁ½À´Ï´Ù.
+        // (ì°¸ê³ ) ì´ ê°’ì€ ë‚˜ì¤‘ì— Configë¡œ ë¹¼ëŠ” ê²ƒì´ ì¢‹ìŠµë‹ˆë‹¤.
         private float attackAnimationLength = 1.5f;
 
         public override void EnterState(MonsterAIController monster)
         {
             attackTimer = 0f;
             monster.StopMoving();
-            monster.SetProceduralMovement(false); // IK ºñÈ°¼ºÈ­
+            monster.SetProceduralMovement(false); // IK ë¹„í™œì„±í™”
 
             if (Random.value > 0.5f)
             {
                 monster.SetAnimTrigger(monster.hashAttack1);
             }
-            // (Âü°í) °Å¹ÌÀÇ 2¹øÂ° °ø°İ ÇØ½Ã(hashAttack2)µµ Config¿¡ Á¤ÀÇÇÏ°í
+            // (ì°¸ê³ ) ê±°ë¯¸ì˜ 2ë²ˆì§¸ ê³µê²© í•´ì‹œ(hashAttack2)ë„ Configì— ì •ì˜í•˜ê³ 
             // else { monster.SetAnimTrigger(monster.hashAttack2); }
-            // Ã³·³ »ç¿ëÇÏ´Â °ÍÀ» ±ÇÀåÇÕ´Ï´Ù.
+            // ì²˜ëŸ¼ ì‚¬ìš©í•˜ëŠ” ê²ƒì„ ê¶Œì¥í•©ë‹ˆë‹¤.
 
 
             if (monster.player != null) { monster.LookAt(monster.player.transform.position); }
@@ -113,14 +113,14 @@ namespace SpiderStates
             attackTimer += Time.deltaTime;
             if (attackTimer >= attackAnimationLength)
             {
-                // (¼öÁ¤) monster.fsm »ç¿ë
+                // (ìˆ˜ì •) monster.fsm ì‚¬ìš©
                 return monster.fsm.TraceState;
             }
             return this;
         }
         public override void ExitState(MonsterAIController monster)
         {
-            monster.SetProceduralMovement(true); // IK ´Ù½Ã È°¼ºÈ­
+            monster.SetProceduralMovement(true); // IK ë‹¤ì‹œ í™œì„±í™”
         }
     }
 
@@ -132,7 +132,7 @@ namespace SpiderStates
             monster.StopAllCoroutines();
             monster.SetProceduralMovement(false);
 
-            // (Âü°í) °Å¹Ì »ç¸Á ¾Ö´Ï¸ŞÀÌ¼Ç ÇØ½Ã
+            // (ì°¸ê³ ) ê±°ë¯¸ ì‚¬ë§ ì• ë‹ˆë©”ì´ì…˜ í•´ì‹œ
             // monster.SetAnimTrigger(monster.hashDie);
 
             if (monster.TryGetComponent<Collider>(out var collider))
@@ -140,7 +140,7 @@ namespace SpiderStates
                 collider.enabled = false;
             }
 
-            // (Âü°í) °Å¹Ì´Â NavMeshAgent°¡ ¾øÀ¸¹Ç·Î Ã¼Å©ÇÒ ÇÊ¿ä ¾øÀ½
+            // (ì°¸ê³ ) ê±°ë¯¸ëŠ” NavMeshAgentê°€ ì—†ìœ¼ë¯€ë¡œ ì²´í¬í•  í•„ìš” ì—†ìŒ
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster) { return this; }
         public override void ExitState(MonsterAIController monster) { }

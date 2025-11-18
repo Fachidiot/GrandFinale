@@ -1,51 +1,51 @@
 using UnityEngine;
 
 /// <summary>
-/// ¸ó½ºÅÍÀÇ ¸ğµç ¼³Á¤ °ªÀ» ´ã´Â ScriptableObjectÀÔ´Ï´Ù.
-/// ÀÌ ÆÄÀÏÀ» ¿¡¼ÂÀ¸·Î ¸¸µé¾îµÎ¸é, ÄÚµå¸¦ ¼öÁ¤ÇÏÁö ¾Ê°íµµ ¸ó½ºÅÍÀÇ ´É·ÂÄ¡¿Í Çàµ¿ ÆĞÅÏÀ» ½±°Ô º¯°æÇÒ ¼ö ÀÖ½À´Ï´Ù.
+/// ëª¬ìŠ¤í„°ì˜ ëª¨ë“  ì„¤ì • ê°’ì„ ë‹´ëŠ” ScriptableObjectì…ë‹ˆë‹¤.
+/// ì´ íŒŒì¼ì„ ì—ì…‹ìœ¼ë¡œ ë§Œë“¤ì–´ë‘ë©´, ì½”ë“œë¥¼ ìˆ˜ì •í•˜ì§€ ì•Šê³ ë„ ëª¬ìŠ¤í„°ì˜ ëŠ¥ë ¥ì¹˜ì™€ í–‰ë™ íŒ¨í„´ì„ ì‰½ê²Œ ë³€ê²½í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
 /// </summary>
 [CreateAssetMenu(fileName = "NewZombieConfig", menuName = "Monster/Zombie Config")]
 public class ZombieConfig : ScriptableObject
 {
-    [Header("±âº» ´É·ÂÄ¡")]
+    [Header("ê¸°ë³¸ ëŠ¥ë ¥ì¹˜")]
     public float maxHP = 100f;
     public float attackDamage = 10f;
     public float defense = 0f;
 
-    [Header("AI Çàµ¿ ¹× °¨Áö")]
-    [Tooltip("ÇÃ·¹ÀÌ¾î¸¦ °¨ÁöÇÒ ¼ö ÀÖ´Â ÃÖ´ë °Å¸®")]
+    [Header("AI í–‰ë™ ë° ê°ì§€")]
+    [Tooltip("í”Œë ˆì´ì–´ë¥¼ ê°ì§€í•  ìˆ˜ ìˆëŠ” ìµœëŒ€ ê±°ë¦¬")]
     public float fovRange = 10f;
-    [Tooltip("Àü¹æÀ» ±âÁØÀ¸·Î ÇÑ ½Ã¾ß°¢ (µµ)")]
+    [Tooltip("ì „ë°©ì„ ê¸°ì¤€ìœ¼ë¡œ í•œ ì‹œì•¼ê° (ë„)")]
     [Range(0, 360)]
     public float fovAngle = 120f;
-    [Tooltip("°ø°İÀ» ½ÃÀÛÇÒ ¼ö ÀÖ´Â ÃÖ´ë °Å¸®")]
+    [Tooltip("ê³µê²©ì„ ì‹œì‘í•  ìˆ˜ ìˆëŠ” ìµœëŒ€ ê±°ë¦¬")]
     public float attackRange = 2f;
-    [Tooltip("¸ñÇ¥ ÁöÁ¡°ú ÀÌ °Å¸® ÀÌ³»·Î °¡±î¿öÁö¸é 'µµÂø'À¸·Î °£ÁÖ")]
+    [Tooltip("ëª©í‘œ ì§€ì ê³¼ ì´ ê±°ë¦¬ ì´ë‚´ë¡œ ê°€ê¹Œì›Œì§€ë©´ 'ë„ì°©'ìœ¼ë¡œ ê°„ì£¼")]
     public float stoppingDistance = 1.5f;
 
-    [Tooltip("¼Ò¸®¸¦ °¨ÁöÇÒ ¼ö ÀÖ´Â ÃÖ´ë °Å¸®")]
+    [Tooltip("ì†Œë¦¬ë¥¼ ê°ì§€í•  ìˆ˜ ìˆëŠ” ìµœëŒ€ ê±°ë¦¬")]
     public float soundRange = 15f;
 
-    [Header("¼øÂû (Patrol)")]
+    [Header("ìˆœì°° (Patrol)")]
     public float patrolRadiusMin = 5f;
     public float patrolRadiusMax = 10f;
 
-    [Header("´ë±â (Idle)")]
+    [Header("ëŒ€ê¸° (Idle)")]
     public float idleTimeMin = 2f;
     public float idleTimeMax = 4f;
 
-    [Header("ÁÖº¯ µÑ·¯º¸±â (LookAround)")]
+    [Header("ì£¼ë³€ ë‘˜ëŸ¬ë³´ê¸° (LookAround)")]
     public float lookAroundTime = 3f;
     public float lookAroundTurnInterval = 1.5f;
 
-    [Header("ÀÌµ¿ °ü·Ã")]
+    [Header("ì´ë™ ê´€ë ¨")]
     public float walkSpeed = 1.5f;
     public float runSpeed = 3f;
     public float turnSpeed = 5f;
 
-    [Header("°ø°İ ÆĞÅÏ")]
-    [Tooltip("°ø°İ ¾Ö´Ï¸ŞÀÌ¼Ç ½ÃÀÛ ÈÄ ½ÇÁ¦ µ¥¹ÌÁö°¡ µé¾î°¡±â±îÁöÀÇ ½Ã°£")]
+    [Header("ê³µê²© íŒ¨í„´")]
+    [Tooltip("ê³µê²© ì• ë‹ˆë©”ì´ì…˜ ì‹œì‘ í›„ ì‹¤ì œ ë°ë¯¸ì§€ê°€ ë“¤ì–´ê°€ê¸°ê¹Œì§€ì˜ ì‹œê°„")]
     public float attackDelay = 0.5f;
-    [Tooltip("ÇÑ ¹ø °ø°İÇÑ ÈÄ ´ÙÀ½ °ø°İ±îÁöÀÇ ÃÖ¼Ò ½Ã°£")]
+    [Tooltip("í•œ ë²ˆ ê³µê²©í•œ í›„ ë‹¤ìŒ ê³µê²©ê¹Œì§€ì˜ ìµœì†Œ ì‹œê°„")]
     public float attackCooldown = 2f;
 }

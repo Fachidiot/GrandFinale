@@ -1,10 +1,10 @@
 using UnityEngine;
-using SlimeStates; // <--- ³×ÀÓ½ºÆäÀÌ½º¸¸ º¯°æ
+using SlimeStates; // <--- ë„¤ìž„ìŠ¤íŽ˜ì´ìŠ¤ë§Œ ë³€ê²½
 
-// 1. MonsterFSM ¼³°èµµ¸¦ »ó¼Ó
+// 1. MonsterFSM ì„¤ê³„ë„ë¥¼ ìƒì†
 public class GellySphereFSM : MonsterFSM
 {
-    // 2. GellySphereStatesÀÇ »óÅÂ Å¬·¡½ºµéÀ» »ý¼º
+    // 2. GellySphereStatesì˜ ìƒíƒœ í´ëž˜ìŠ¤ë“¤ì„ ìƒì„±
     private readonly Idle _idleState = new Idle();
     private readonly Patrol _patrolState = new Patrol();
     private readonly Trace _traceState = new Trace();
@@ -15,7 +15,7 @@ public class GellySphereFSM : MonsterFSM
     private readonly DodgeState _dodgeState = new DodgeState();
 
 
-    // 3. FSM ½½·Ô¿¡ »óÅÂµéÀ» ¹ÝÈ¯
+    // 3. FSM ìŠ¬ë¡¯ì— ìƒíƒœë“¤ì„ ë°˜í™˜
     public override ZombieBaseState<MonsterAIController> IdleState => _idleState;
     public override ZombieBaseState<MonsterAIController> PatrolState => _patrolState;
     public override ZombieBaseState<MonsterAIController> TraceState => _traceState;

@@ -5,10 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// ÅøÆÁ Ç¥½Ã Àü´ã ÄÁÆ®·Ñ·¯
-/// - Small/Full Inventory ÅøÆÁ °ü¸®
-/// - Fade ¾Ö´Ï¸ŞÀÌ¼Ç Ã³¸®
-/// - ¾ÆÀÌÅÛ Á¤º¸ Ç¥½Ã
+/// íˆ´íŒ í‘œì‹œ ì „ë‹´ ì»¨íŠ¸ë¡¤ëŸ¬
+/// - Small/Full Inventory íˆ´íŒ ê´€ë¦¬
+/// - Fade ì• ë‹ˆë©”ì´ì…˜ ì²˜ë¦¬
+/// - ì•„ì´í…œ ì •ë³´ í‘œì‹œ
 /// </summary>
 public class TooltipController : MonoBehaviour
 {
@@ -78,7 +78,7 @@ public class TooltipController : MonoBehaviour
     #region Public API
 
     /// <summary>
-    /// ÅøÆÁ Ç¥½Ã
+    /// íˆ´íŒ í‘œì‹œ
     /// </summary>
     public void ShowTooltip(RelicData item, InventoryType inventoryType)
     {
@@ -92,7 +92,7 @@ public class TooltipController : MonoBehaviour
     }
 
     /// <summary>
-    /// ÅøÆÁ ¼û±â±â
+    /// íˆ´íŒ ìˆ¨ê¸°ê¸°
     /// </summary>
     public void HideTooltip()
     {
@@ -227,7 +227,7 @@ public class TooltipController : MonoBehaviour
         }
         else
         {
-            builder.AppendLine($"´É·Â: {ability.abilityName}");
+            builder.AppendLine($"ëŠ¥ë ¥: {ability.abilityName}");
         }
     }
 
@@ -239,14 +239,14 @@ public class TooltipController : MonoBehaviour
     {
         if (panel == null || canvasGroup == null) return;
 
-        // ÀÌ¹Ì Ç¥½Ã ÁßÀÌ¸é À§Ä¡¸¸ ¾÷µ¥ÀÌÆ®
+        // ì´ë¯¸ í‘œì‹œ ì¤‘ì´ë©´ ìœ„ì¹˜ë§Œ ì—…ë°ì´íŠ¸
         if (currentTargetAlpha == 1f && canvasGroup.alpha > 0f)
         {
             UpdateTooltipPosition(panel, rectTransform);
             return;
         }
 
-        // Fade In ¾Ö´Ï¸ŞÀÌ¼Ç
+        // Fade In ì• ë‹ˆë©”ì´ì…˜
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
 
         panel.SetActive(true);
@@ -333,7 +333,7 @@ public class TooltipController : MonoBehaviour
 #region Helper Classes
 
 /// <summary>
-/// µî±Şº° »ö»ó °ü¸® ÇïÆÛ
+/// ë“±ê¸‰ë³„ ìƒ‰ìƒ ê´€ë¦¬ í—¬í¼
 /// </summary>
 public static class GradeColorHelper
 {
@@ -355,7 +355,7 @@ public static class GradeColorHelper
 }
 
 /// <summary>
-/// ½ºÇÁ¶óÀÌÆ® Ä³½Ì ÇïÆÛ (¼º´É ÃÖÀûÈ­)
+/// ìŠ¤í”„ë¼ì´íŠ¸ ìºì‹± í—¬í¼ (ì„±ëŠ¥ ìµœì í™”)
 /// </summary>
 public class SpriteCache
 {
@@ -387,7 +387,7 @@ public class SpriteCache
 }
 
 /// <summary>
-/// ÀÎº¥Åä¸® Å¸ÀÔ ¿­°ÅÇü
+/// ì¸ë²¤í† ë¦¬ íƒ€ì… ì—´ê±°í˜•
 /// </summary>
 public enum InventoryType
 {

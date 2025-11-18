@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace SlimeStates
 {
-    // --- 1. Idle ���� ---
+    // --- 1. Idle 상태 ---
     // (Locomotion 0)
     public class Idle : ZombieBaseState<MonsterAIController>
     {
@@ -31,7 +31,7 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 2. Patrol ���� ---
+    // --- 2. Patrol 상태 ---
     // (Locomotion 1)
     public class Patrol : ZombieBaseState<MonsterAIController>
     {
@@ -64,7 +64,7 @@ namespace SlimeStates
         }
     }
 
-    // --- 3. Trace ���� ---
+    // --- 3. Trace 상태 ---
     // (Locomotion 2)
     public class Trace : ZombieBaseState<MonsterAIController>
     {
@@ -90,12 +90,12 @@ namespace SlimeStates
         }
         public override void ExitState(MonsterAIController monster)
         {
-            // (StopMoving�� Attack/LookAround ���°� �ϹǷ� ���⼭ �� ��)
+            // (StopMoving은 Attack/LookAround 상태가 하므로 여기서 안 함)
         }
     }
 
-    // --- 4. (����) ���� ���� ���� ---
-    // (attack1, 2, 3 �� ����)
+    // --- 4. (기존) 공격 상태 로직 ---
+    // (attack1, 2, 3 중 랜덤)
     public class Attack : ZombieBaseState<MonsterAIController>
     {
         private float timer;
@@ -109,7 +109,7 @@ namespace SlimeStates
             if (monster.player != null)
                 monster.LookAt(monster.player.transform.position);
 
-            // (��û) Attack 1~3 �� �ϳ��� �������� ����
+            // (요청) Attack 1~3 중 하나를 랜덤으로 실행
             int attackIndex = Random.Range(0, 3); // 0, 1, 2
 
             if (attackIndex == 0)
@@ -147,14 +147,14 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 5. LookAround ���� (���߱�) ---
+    // --- 5. LookAround 상태 (두리번) ---
     public class LookAround : ZombieBaseState<MonsterAIController>
     {
         private float timer;
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
-            // (��û) LookAround �ؽ�(idleBreak) �ߵ�
+            // (요청) LookAround 애니(idleBreak) 발동
             monster.SetAnimTrigger(monster.hashLookAround);
             timer = 0f;
         }
@@ -174,7 +174,7 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 6. Hit ���� ---
+    // --- 6. Hit 상태 ---
     public class Hit : ZombieBaseState<MonsterAIController>
     {
         private float hitStunDuration = 0.5f;
@@ -197,7 +197,7 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 7. Die ���� ---
+    // --- 7. Die 상태 ---
     public class Die : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)
@@ -217,23 +217,23 @@ namespace SlimeStates
         public override void ExitState(MonsterAIController m) { }
     }
 
-    // --- 8. (�ű�) ȸ�� ���� ---
+    // --- 8. (신규) 회피 상태 ---
     public class DodgeState : ZombieBaseState<MonsterAIController>
     {
         private float timer;
-        private float dodgeAnimTime = 1.2f; // (Dodge �ִϸ��̼� ���̿� �°� ����)
+        private float dodgeAnimTime = 1.2f; // (Dodge 애니메이션 길이에 따라 조절)
 
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
-            // (Taunt ���Կ� ����� 'dodge' Ʈ���� �ߵ�)
+            // (Taunt 상태에 해당하는 'dodge' 트리거 발동)
             monster.SetAnimTrigger(monster.hashTaunt);
             timer = 0f;
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
             timer += Time.deltaTime;
-            // �ִϸ��̼� �ð��� ������ ���� ���·� ����
+            // 애니메이션 시간만큼 지나면 추적 상태로 전환
             if (timer >= dodgeAnimTime)
             {
                 return monster.fsm.TraceState;

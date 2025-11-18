@@ -1,15 +1,15 @@
 using UnityEngine;
 
-// [CreateAssetMenu]¸¦ »ç¿ëÇØ, À¯´ÏÆ¼ ¿¡µğÅÍ¿¡¼­ "Create > Item > Stat Boost" ¸Ş´º¸¦ ¸¸µì´Ï´Ù.
+// [CreateAssetMenu]ë¥¼ ì‚¬ìš©í•´, ìœ ë‹ˆí‹° ì—ë””í„°ì—ì„œ "Create > Item > Stat Boost" ë©”ë‰´ë¥¼ ë§Œë“­ë‹ˆë‹¤.
 [CreateAssetMenu(fileName = "NewStatBoostItem", menuName = "Item/Stat Boost")]
 public class StatBoostItemData : ItemData
 {
-    [Header("½ºÅÈ »ó½ÂÄ¡")]
+    [Header("ìŠ¤íƒ¯ ìƒìŠ¹ì¹˜")]
     public float attackPowerIncrease;
     public float maxHealthIncrease;
     public float moveSpeedIncrease;
 
-    // ¹æ¾î·Â, Äğ´Ù¿î °¨¼Ò µî ¿øÇÏ´Â ½ºÅÈ Ãß°¡
+    // ë°©ì–´ë ¥, ì¿¨ë‹¤ìš´ ê°ì†Œ ë“± ì›í•˜ëŠ” ìŠ¤íƒ¯ ì¶”ê°€
 
 /*    public override ItemType GetItemType()
     {

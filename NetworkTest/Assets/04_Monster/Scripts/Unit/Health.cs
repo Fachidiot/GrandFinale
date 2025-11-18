@@ -1,22 +1,22 @@
 using System;
 using UnityEngine;
 
-// UnitStats(¼öÄ¡ µ¥ÀÌÅÍ)¸¦ º¸À¯ÇÑ À¯´ÖÀÇ "Ã¼·Â/ÇÇ°İ" ¾î´ğÅÍ.
-// °ø°İ/½ºÅ³Àº ¹«Á¶°Ç IDamageable¸¸ Å¸µµ·Ï ÇÏ°í, ³»ºÎ¿¡¼­ UnitStatsÀÇ HP¸¦ ±ğ´Â´Ù.
+// UnitStats(ìˆ˜ì¹˜ ë°ì´í„°)ë¥¼ ë³´ìœ í•œ ìœ ë‹›ì˜ "ì²´ë ¥/í”¼ê²©" ì–´ëŒ‘í„°.
+// ê³µê²©/ìŠ¤í‚¬ì€ ë¬´ì¡°ê±´ IDamageableë§Œ íƒ€ë„ë¡ í•˜ê³ , ë‚´ë¶€ì—ì„œ UnitStatsì˜ HPë¥¼ ê¹ëŠ”ë‹¤.
 [RequireComponent(typeof(UnitStats))]
 [DisallowMultipleComponent]
 public class Health : MonoBehaviour
 {
     [Header("Options")]
-    [Tooltip("¹«Àû (µğ¹ö±×/º¸È£¸· µî)")]
+    [Tooltip("ë¬´ì  (ë””ë²„ê·¸/ë³´í˜¸ë§‰ ë“±)")]
     [SerializeField] private bool invincible = false;
 
-    [Tooltip("ÇÇ°İ ½Ã, Ãß°¡ ÀÌÆåÆ®/»ç¿îµå µîÀ» ¿©±â¼­ È£ÃâÇØµµ µÊ")]
+    [Tooltip("í”¼ê²© ì‹œ, ì¶”ê°€ ì´í™íŠ¸/ì‚¬ìš´ë“œ ë“±ì„ ì—¬ê¸°ì„œ í˜¸ì¶œí•´ë„ ë¨")]
     [SerializeField] private bool debugLogOnHit = false;
 
-    public event Action<float> OnDamaged;     // ¹ŞÀº ÇÇÇØ·®
-    public event Action<float> OnHealed;      // È¸º¹·®
-    public event Action OnDied;               // »ç¸Á
+    public event Action<float> OnDamaged;     // ë°›ì€ í”¼í•´ëŸ‰
+    public event Action<float> OnHealed;      // íšŒë³µëŸ‰
+    public event Action OnDied;               // ì‚¬ë§
 
     private UnitStats stats;
 
@@ -24,20 +24,20 @@ public class Health : MonoBehaviour
     {
         stats = GetComponent<UnitStats>();
         if (stats == null)
-            Debug.LogError("[Health] UnitStats°¡ ÇÊ¿äÇÕ´Ï´Ù.");
+            Debug.LogError("[Health] UnitStatsê°€ í•„ìš”í•©ë‹ˆë‹¤.");
     }
 
     public bool IsDead => stats != null && stats.IsDead;
     public float CurrentHP => stats != null ? stats.CurrentHP : 0f;
     public float MaxHP => stats != null ? stats.MaxHP : 0f;
 
-    // === IDamageable ±¸Çö ===¸§/ÆÄ¶ó¹Ì
+    // === IDamageable êµ¬í˜„ ===ë¦„/íŒŒë¼ë¯¸
     public void ApplyDamage(float amount, Vector3 hitPoint, Vector3 hitNormal, GameObject instigator)
     {
         if (stats == null || invincible || stats.IsDead) return;
 
         float before = stats.CurrentHP;
-        stats.TakeDamage(amount); // ¡ç UnitStats ³»ºÎ HP °¨¼Ò
+        stats.TakeDamage(amount); // â† UnitStats ë‚´ë¶€ HP ê°ì†Œ
         float taken = Mathf.Clamp(before - stats.CurrentHP, 0f, amount);
 
         if (debugLogOnHit)
@@ -47,12 +47,12 @@ public class Health : MonoBehaviour
 
         if (stats.IsDead)
         {
-            // TODO: ¿©±â¼­ FSM DeathState ÀüÈ¯ Æ®¸®°Å ÇÏ°Å³ª, Ragdoll/Disable µî
+            // TODO: ì—¬ê¸°ì„œ FSM DeathState ì „í™˜ íŠ¸ë¦¬ê±° í•˜ê±°ë‚˜, Ragdoll/Disable ë“±
             OnDied?.Invoke();
         }
     }
 
-    // ÆíÀÇ ¸Ş¼­µå(¿ÜºÎ¿¡¼­ Á÷Á¢ Èú ÁÙ ¶§)
+    // í¸ì˜ ë©”ì„œë“œ(ì™¸ë¶€ì—ì„œ ì§ì ‘ í ì¤„ ë•Œ)
     public void Heal(float amount)
     {
         if (stats == null || stats.IsDead) return;

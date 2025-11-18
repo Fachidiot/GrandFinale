@@ -3,22 +3,22 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class UnitStats : MonoBehaviour, ICombatStats
 {
-    [Header("·¹º§ ¹× Ã¼·Â")]
+    [Header("ë ˆë²¨ ë° ì²´ë ¥")]
     [SerializeField] private int level = 1;
     [SerializeField] private float maxHP = 100f;
     [SerializeField] private float currentHP = 100f;
 
-    [Header("ÀüÅõ ½ºÅÈ")]
+    [Header("ì „íˆ¬ ìŠ¤íƒ¯")]
     [SerializeField] private float baseDamage = 10f;
     [SerializeField] private float attackSpeed = 1f;
 
-    [Header("´É·ÂÄ¡")]
+    [Header("ëŠ¥ë ¥ì¹˜")]
     [SerializeField] private int strength = 10;
     [SerializeField] private int dexterity = 10;
     [SerializeField] private int intelligence = 10;
 
    
-    // ICombatStats ±¸Çö
+    // ICombatStats êµ¬í˜„
     public float MaxHP => maxHP;
     public float CurrentHP => currentHP;
     public bool IsDead => currentHP <= 0f;
@@ -38,7 +38,7 @@ public class UnitStats : MonoBehaviour, ICombatStats
         currentHP = maxHP;
     }
 
-    // À¯´Ö ´É·ÂÄ¡ Á¢±Ù¿ë ÇÁ·ÎÆÛÆ¼
+    // ìœ ë‹› ëŠ¥ë ¥ì¹˜ ì ‘ê·¼ìš© í”„ë¡œí¼í‹°
     public int Level => level;
     public float BaseDamage => baseDamage;
     public float AttackSpeed => attackSpeed;

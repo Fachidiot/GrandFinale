@@ -1,5 +1,5 @@
 using UnityEngine;
-using PlantMonsterStates; // <--- ³×ÀÓ½ºÆäÀÌ½º È®ÀÎ
+using PlantMonsterStates; // <--- ë„¤ìž„ìŠ¤íŽ˜ì´ìŠ¤ í™•ì¸
 
 public class PlantMonsterFSM : MonsterFSM
 {
@@ -9,7 +9,7 @@ public class PlantMonsterFSM : MonsterFSM
 
     public void StartRangedCooldown(float duration) { rangedAttackCooldownTimer = duration; }
 
-    // (FSM ÄÄÆ÷³ÍÆ®°¡ ½º½º·Î ÄðÅ¸ÀÓÀ» ÁÙÀÌµµ·Ï ÇÔ)
+    // (FSM ì»´í¬ë„ŒíŠ¸ê°€ ìŠ¤ìŠ¤ë¡œ ì¿¨íƒ€ìž„ì„ ì¤„ì´ë„ë¡ í•¨)
     private void Update()
     {
         if (rangedAttackCooldownTimer > 0)

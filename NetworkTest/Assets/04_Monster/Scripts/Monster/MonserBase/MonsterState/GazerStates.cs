@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace GazerStates
 {
-    // Gazer Àü¿ë ºö ¾Ö´Ï¸ŞÀÌ¼Ç ÇØ½Ã
+    // Gazer ì „ìš© ë¹” ì• ë‹ˆë©”ì´ì…˜ í•´ì‹œ
     public static class GazerAnimHashes
     {
         public static readonly int Cast3Start = Animator.StringToHash("Cast3Start");
@@ -65,7 +65,7 @@ namespace GazerStates
         }
     }
 
-    // --- 3. Trace (µÎ³ú »óÅÂ, Locomotion 2) ---
+    // --- 3. Trace (ë‘ë‡Œ ìƒíƒœ, Locomotion 2) ---
     public class Trace : ZombieBaseState<MonsterAIController>
     {
         private GazerConfig gazerConfig;
@@ -85,19 +85,19 @@ namespace GazerStates
 
             float distance = monster.GetDistanceToPlayer();
 
-            // 1. (È¸ÇÇ) Äğ´Ù¿îÀÌ ¾Æ´Ï°í ÇÃ·¹ÀÌ¾î°¡ °¡±î¿ì¸é
+            // 1. (íšŒí”¼) ì¿¨ë‹¤ìš´ì´ ì•„ë‹ˆê³  í”Œë ˆì´ì–´ê°€ ê°€ê¹Œìš°ë©´
             if (!gazerFSM.IsStrafeOnCooldown && distance <= gazerConfig.strafeRange)
             {
                 return monster.fsm.TauntState; // -> EvasionState
             }
 
-            // 2. (ºö °ø°İ) Äğ´Ù¿îÀÌ ¾Æ´Ï°í ºö »ç°Å¸® ¾ÈÀÌ¸é
+            // 2. (ë¹” ê³µê²©) ì¿¨ë‹¤ìš´ì´ ì•„ë‹ˆê³  ë¹” ì‚¬ê±°ë¦¬ ì•ˆì´ë©´
             if (!gazerFSM.IsBeamOnCooldown && distance <= gazerConfig.beamRange)
             {
                 return monster.fsm.LookAroundState; // -> BeamAttackState
             }
 
-            // 3. (±ÙÁ¢ °ø°İ)
+            // 3. (ê·¼ì ‘ ê³µê²©)
             if (distance <= monster.config.attackRange)
             {
                 return monster.fsm.AttackState; // -> MeleeAttackState
@@ -108,14 +108,14 @@ namespace GazerStates
 
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
-                return monster.fsm.IdleState; // (LookAround ´ë½Å Idle·Î)
+                return monster.fsm.IdleState; // (LookAround ëŒ€ì‹  Idleë¡œ)
             }
             return this;
         }
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 4. ±ÙÁ¢ °ø°İ (Attack 1~4 ·£´ı) ---
+    // --- 4. ê·¼ì ‘ ê³µê²© (Attack 1~4 ëœë¤) ---
     public class MeleeAttack : ZombieBaseState<MonsterAIController>
     {
         private float timer;
@@ -154,7 +154,7 @@ namespace GazerStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 5. ºö °ø°İ (FSMÀÇ LookAround ½½·Ô) ---
+    // --- 5. ë¹” ê³µê²© (FSMì˜ LookAround ìŠ¬ë¡¯) ---
     public class BeamAttack : ZombieBaseState<MonsterAIController>
     {
         private GazerConfig gazerConfig;
@@ -164,7 +164,7 @@ namespace GazerStates
         private bool hasStoppedBeam;
         private GameObject currentBeamInstance;
 
-        // ¡Ú (Ãß°¡) ºöÀÌ ³¡³­ ÈÄ, »óÅÂ¸¦ Á¾·áÇÏ±â±îÁöÀÇ Ãß°¡ ´ë±â ½Ã°£ (¾Ö´Ï ÈÄµô·¹ÀÌ)
+        // â˜… (ì¶”ê°€) ë¹”ì´ ëë‚œ í›„, ìƒíƒœë¥¼ ì¢…ë£Œí•˜ê¸°ê¹Œì§€ì˜ ì¶”ê°€ ëŒ€ê¸° ì‹œê°„ (ì• ë‹ˆ í›„ë”œë ˆì´)
         private const float beamExitDelay = 0.5f;
 
         public override void EnterState(MonsterAIController monster)
@@ -194,14 +194,14 @@ namespace GazerStates
 
             timer += Time.deltaTime;
 
-            // 1. (º¯°æ ¾øÀ½) ºö ¹ß»ç (e.g., GazerConfigÀÇ beamFireDelay)
+            // 1. (ë³€ê²½ ì—†ìŒ) ë¹” ë°œì‚¬ (e.g., GazerConfigì˜ beamFireDelay)
             if (!hasFired && timer >= gazerConfig.beamFireDelay)
             {
                 hasFired = true;
                 InstantiateBeam(monster);
             }
 
-            // 2. (º¯°æ ¾øÀ½) ºö Á¤Áö (e.g., GazerConfigÀÇ beamCastTime)
+            // 2. (ë³€ê²½ ì—†ìŒ) ë¹” ì •ì§€ (e.g., GazerConfigì˜ beamCastTime)
             if (hasFired && !hasStoppedBeam && timer >= gazerConfig.beamCastTime)
             {
                 hasStoppedBeam = true;
@@ -209,47 +209,47 @@ namespace GazerStates
                 monster.SetAnimTrigger(GazerAnimHashes.Cast3End);
             }
 
-            // 'attackCooldown' ´ë½Å 'beamCastTime + beamExitDelay'¸¦ »ç¿ëÇÕ´Ï´Ù.
-            // (ºö ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ¿ÏÀüÈ÷ ³¡³ª°í Trace·Î º¹±ÍÇÏµµ·Ï)
+            // 'attackCooldown' ëŒ€ì‹  'beamCastTime + beamExitDelay'ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
+            // (ë¹” ì• ë‹ˆë©”ì´ì…˜ì´ ì™„ì „íˆ ëë‚˜ê³  Traceë¡œ ë³µê·€í•˜ë„ë¡)
             if (hasStoppedBeam && timer >= (gazerConfig.beamCastTime + beamExitDelay))
             {
-                gazerFSM.StartBeamCooldown(gazerConfig.beamCooldown); // ºö Äğ´Ù¿î ½ÃÀÛ
+                gazerFSM.StartBeamCooldown(gazerConfig.beamCooldown); // ë¹” ì¿¨ë‹¤ìš´ ì‹œì‘
                 return monster.fsm.TraceState;
             }
 
-            return this; // »óÅÂ À¯Áö
+            return this; // ìƒíƒœ ìœ ì§€
         }
 
         public override void ExitState(MonsterAIController monster)
         {
-            // »óÅÂ°¡ °­Á¦·Î Á¾·áµÉ °æ¿ì(e.g., ÇÇ°İ) ºö Áï½Ã Á¤Áö
+            // ìƒíƒœê°€ ê°•ì œë¡œ ì¢…ë£Œë  ê²½ìš°(e.g., í”¼ê²©) ë¹” ì¦‰ì‹œ ì •ì§€
             StopBeam();
         }
 
         /// <summary>
-        /// ºö ÇÁ¸®ÆÕÀ» »ı¼ºÇÏ°í firePoint¿¡ ºÎÂøÇÕ´Ï´Ù.
+        /// ë¹” í”„ë¦¬íŒ¹ì„ ìƒì„±í•˜ê³  firePointì— ë¶€ì°©í•©ë‹ˆë‹¤.
         /// </summary>
         private void InstantiateBeam(MonsterAIController monster)
         {
             if (gazerConfig.beamPrefab == null)
             {
-                Debug.LogError("GazerConfig¿¡ beamPrefabÀÌ ¾ø½À´Ï´Ù!");
+                Debug.LogError("GazerConfigì— beamPrefabì´ ì—†ìŠµë‹ˆë‹¤!");
                 return;
             }
             if (monster.firePoint == null)
             {
-                Debug.LogError("MonsterAIController¿¡ firePoint°¡ ¾ø½À´Ï´Ù!");
+                Debug.LogError("MonsterAIControllerì— firePointê°€ ì—†ìŠµë‹ˆë‹¤!");
                 return;
             }
 
             currentBeamInstance = Object.Instantiate(gazerConfig.beamPrefab, monster.firePoint.position, monster.firePoint.rotation);
             currentBeamInstance.transform.SetParent(monster.firePoint, true);
 
-            Debug.LogWarning($"¾×¼Çºö ¹ß»ç! (µô·¹ÀÌ: {gazerConfig.beamFireDelay}ÃÊ)");
+            Debug.LogWarning($"ì•¡ì…˜ë¹” ë°œì‚¬! (ë”œë ˆì´: {gazerConfig.beamFireDelay}ì´ˆ)");
         }
 
         /// <summary>
-        /// ÇöÀç ¹ß»ç ÁßÀÎ ºöÀÌ ÀÖ´Ù¸é ÆÄ±«ÇÕ´Ï´Ù.
+        /// í˜„ì¬ ë°œì‚¬ ì¤‘ì¸ ë¹”ì´ ìˆë‹¤ë©´ íŒŒê´´í•©ë‹ˆë‹¤.
         /// </summary>
         private void StopBeam()
         {
@@ -257,12 +257,12 @@ namespace GazerStates
             {
                 Object.Destroy(currentBeamInstance);
                 currentBeamInstance = null;
-                Debug.LogWarning($"¾×¼Çºö Á¤Áö! (½Ã°£: {gazerConfig.beamCastTime}ÃÊ)");
+                Debug.LogWarning($"ì•¡ì…˜ë¹” ì •ì§€! (ì‹œê°„: {gazerConfig.beamCastTime}ì´ˆ)");
             }
         }
     }
 
-    // --- 6. È¸ÇÇ (FSMÀÇ Taunt ½½·Ô) ---
+    // --- 6. íšŒí”¼ (FSMì˜ Taunt ìŠ¬ë¡¯) ---
     public class Evasion : ZombieBaseState<MonsterAIController>
     {
         private GazerConfig gazerConfig;
@@ -276,7 +276,7 @@ namespace GazerStates
 
             monster.StopMoving();
 
-            // 50% È®·ü·Î ÁÂ/¿ì È¸ÇÇ
+            // 50% í™•ë¥ ë¡œ ì¢Œ/ìš° íšŒí”¼
             if (Random.value > 0.5f)
                 monster.SetAnimTrigger(monster.hashLookAround); // (StrafeLeft)
             else
@@ -289,10 +289,10 @@ namespace GazerStates
             if (gazerConfig == null || gazerFSM == null) return this;
 
             timer += Time.deltaTime;
-            // È¸ÇÇ ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ³¡³ª¸é
+            // íšŒí”¼ ì• ë‹ˆë©”ì´ì…˜ì´ ëë‚˜ë©´
             if (timer >= gazerConfig.strafeDuration)
             {
-                gazerFSM.StartStrafeCooldown(gazerConfig.strafeCooldown); // 5ÃÊ Äğ´Ù¿î ½ÃÀÛ
+                gazerFSM.StartStrafeCooldown(gazerConfig.strafeCooldown); // 5ì´ˆ ì¿¨ë‹¤ìš´ ì‹œì‘
                 return monster.fsm.TraceState;
             }
             return this;
@@ -300,7 +300,7 @@ namespace GazerStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 7. ÇÇ°İ (GotHit 1/2 ·£´ı) ---
+    // --- 7. í”¼ê²© (GotHit 1/2 ëœë¤) ---
     public class Hit : ZombieBaseState<MonsterAIController>
     {
         private float hitStunDuration = 0.5f;
@@ -327,13 +327,13 @@ namespace GazerStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // --- 8. »ç¸Á ---
+    // --- 8. ì‚¬ë§ ---
     public class Die : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)
         {
-            // (»ç¸Á ¾Ö´Ï¸ŞÀÌ¼ÇÀº MonsterAIController°¡ Death1/2 ´ë½Å
-            //  ConfigÀÇ dieTrigger(Death)¸¸ È£ÃâÇÏµµ·Ï µÇ¾îÀÖÀ½)
+            // (ì‚¬ë§ ì• ë‹ˆë©”ì´ì…˜ì€ MonsterAIControllerê°€ Death1/2 ëŒ€ì‹ 
+            //  Configì˜ dieTrigger(Death)ë§Œ í˜¸ì¶œí•˜ë„ë¡ ë˜ì–´ìˆìŒ)
             monster.StopMoving();
             monster.StopAllCoroutines();
             if (monster.TryGetComponent<Collider>(out var c)) c.enabled = false;

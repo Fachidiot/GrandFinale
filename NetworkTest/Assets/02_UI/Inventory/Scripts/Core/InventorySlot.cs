@@ -7,13 +7,13 @@ public class InventorySlot
     public RelicData item;
     public int quantity;
 
-    // ¼ö·® Ãß°¡
+    // ìˆ˜ëŸ‰ ì¶”ê°€
     public void AddQuantity(int amount)
     {
         quantity += amount;
     }
 
-    // ¼ö·® Á¦°Å
+    // ìˆ˜ëŸ‰ ì œê±°
     public void RemoveQuantity(int amount)
     {
         quantity -= amount;
@@ -23,27 +23,27 @@ public class InventorySlot
         }
     }
 
-    // ½½·Ô ÃÊ±âÈ­
+    // ìŠ¬ë¡¯ ì´ˆê¸°í™”
     public void ClearSlot()
     {
         item = null;
         quantity = 0;
     }
 
-    // ½½·ÔÀÌ ºñ¾îÀÖ´ÂÁö È®ÀÎ
+    // ìŠ¬ë¡¯ì´ ë¹„ì–´ìˆëŠ”ì§€ í™•ì¸
     public bool IsEmpty()
     {
         return item == null || quantity <= 0;
     }
 
-    // ½½·ÔÀÌ °¡µæ Ã¡´ÂÁö È®ÀÎ
+    // ìŠ¬ë¡¯ì´ ê°€ë“ ì°¼ëŠ”ì§€ í™•ì¸
     public bool IsFull()
     {
         if (item == null) return false;
         return quantity >= item.maxStack;
     }
 
-    // Ãß°¡ °¡´ÉÇÑ ¼ö·® °è»ê
+    // ì¶”ê°€ ê°€ëŠ¥í•œ ìˆ˜ëŸ‰ ê³„ì‚°
     public int GetAvailableSpace()
     {
         if (item == null) return 0;

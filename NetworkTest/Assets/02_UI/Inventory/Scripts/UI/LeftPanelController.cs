@@ -5,10 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// ¿ŞÂÊ Á¤º¸ ÆĞ³Î Àü´ã ÄÁÆ®·Ñ·¯
-/// - Àåºñ Á¤º¸ / ÇÃ·¹ÀÌ¾î Á¤º¸ / ¾ÆÀÌÅÛ Á¤º¸ ÀüÈ¯
-/// - Fade + Scale ¾Ö´Ï¸ŞÀÌ¼Ç
-/// - ¾ÆÀÌÅÛ »ó¼¼ Á¤º¸ Ç¥½Ã
+/// ì™¼ìª½ ì •ë³´ íŒ¨ë„ ì „ë‹´ ì»¨íŠ¸ë¡¤ëŸ¬
+/// - ì¥ë¹„ ì •ë³´ / í”Œë ˆì´ì–´ ì •ë³´ / ì•„ì´í…œ ì •ë³´ ì „í™˜
+/// - Fade + Scale ì• ë‹ˆë©”ì´ì…˜
+/// - ì•„ì´í…œ ìƒì„¸ ì •ë³´ í‘œì‹œ
 /// </summary>
 public class LeftPanelController : MonoBehaviour
 {
@@ -64,12 +64,12 @@ public class LeftPanelController : MonoBehaviour
 
     private void InitializePanels()
     {
-        // ¸ğµç ÆĞ³Î È°¼ºÈ­ (CanvasGroupÀ¸·Î °¡½Ã¼º Á¦¾î)
+        // ëª¨ë“  íŒ¨ë„ í™œì„±í™” (CanvasGroupìœ¼ë¡œ ê°€ì‹œì„± ì œì–´)
         if (equipmentInfoPanel != null) equipmentInfoPanel.SetActive(true);
         if (statsInfoPanel != null) statsInfoPanel.SetActive(true);
         if (itemInfoPanel != null) itemInfoPanel.SetActive(true);
 
-        // CanvasGroup ÀÚµ¿ ÇÒ´ç
+        // CanvasGroup ìë™ í• ë‹¹
         if (equipmentCanvasGroup == null && equipmentInfoPanel != null)
         {
             equipmentCanvasGroup = equipmentInfoPanel.GetComponent<CanvasGroup>();
@@ -97,7 +97,7 @@ public class LeftPanelController : MonoBehaviour
             }
         }
 
-        // ÃÊ±â »óÅÂ: Stats¿Í Item ÆĞ³Î ¼û±è
+        // ì´ˆê¸° ìƒíƒœ: Statsì™€ Item íŒ¨ë„ ìˆ¨ê¹€
         if (statsCanvasGroup != null)
         {
             statsCanvasGroup.alpha = 0f;
@@ -110,7 +110,7 @@ public class LeftPanelController : MonoBehaviour
             itemCanvasGroup.blocksRaycasts = false;
         }
 
-        // Equipment ÆĞ³Î¸¸ Ç¥½Ã
+        // Equipment íŒ¨ë„ë§Œ í‘œì‹œ
         if (equipmentCanvasGroup != null)
         {
             equipmentCanvasGroup.alpha = 1f;
@@ -150,7 +150,7 @@ public class LeftPanelController : MonoBehaviour
     #region Public API - Panel Switching
 
     /// <summary>
-    /// Àåºñ Á¤º¸ ÆĞ³Î Ç¥½Ã
+    /// ì¥ë¹„ ì •ë³´ íŒ¨ë„ í‘œì‹œ
     /// </summary>
     public void ShowEquipmentPanel()
     {
@@ -159,7 +159,7 @@ public class LeftPanelController : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î ½ºÅÈ ÆĞ³Î Ç¥½Ã
+    /// í”Œë ˆì´ì–´ ìŠ¤íƒ¯ íŒ¨ë„ í‘œì‹œ
     /// </summary>
     public void ShowPlayerStatsPanel()
     {
@@ -168,7 +168,7 @@ public class LeftPanelController : MonoBehaviour
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ Á¤º¸ ÆĞ³Î Ç¥½Ã
+    /// ì•„ì´í…œ ì •ë³´ íŒ¨ë„ í‘œì‹œ
     /// </summary>
     public void ShowItemInfoPanel(RelicData item)
     {
@@ -179,23 +179,23 @@ public class LeftPanelController : MonoBehaviour
 
         if (panelChanged)
         {
-            // ´Ù¸¥ ÆĞ³Î¿¡¼­ ÀüÈ¯
+            // ë‹¤ë¥¸ íŒ¨ë„ì—ì„œ ì „í™˜
             SwitchPanel(itemCanvasGroup);
             UpdateItemContent(item);
         }
         else if (itemChanged)
         {
-            // °°Àº ÆĞ³Î ³»¿¡¼­ ¾ÆÀÌÅÛ¸¸ º¯°æ (Quick Fade)
+            // ê°™ì€ íŒ¨ë„ ë‚´ì—ì„œ ì•„ì´í…œë§Œ ë³€ê²½ (Quick Fade)
             AnimateContentChange(() => UpdateItemContent(item));
         }
-        // else: °°Àº ¾ÆÀÌÅÛÀÌ¸é ¾Æ¹«°Íµµ ÇÏÁö ¾ÊÀ½
+        // else: ê°™ì€ ì•„ì´í…œì´ë©´ ì•„ë¬´ê²ƒë„ í•˜ì§€ ì•ŠìŒ
 
         UpdateButtonStates(PanelType.ItemInfo);
         currentDisplayedItem = item;
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛ »ó¼¼ Á¤º¸ ¾÷µ¥ÀÌÆ® (¿ÜºÎ È£Ãâ¿ë)
+    /// ì•„ì´í…œ ìƒì„¸ ì •ë³´ ì—…ë°ì´íŠ¸ (ì™¸ë¶€ í˜¸ì¶œìš©)
     /// </summary>
     public void UpdateDetails(RelicData item)
     {
@@ -206,7 +206,7 @@ public class LeftPanelController : MonoBehaviour
     }
 
     /// <summary>
-    /// »ó¼¼ Á¤º¸ ÃÊ±âÈ­ (¿ÜºÎ È£Ãâ¿ë)
+    /// ìƒì„¸ ì •ë³´ ì´ˆê¸°í™” (ì™¸ë¶€ í˜¸ì¶œìš©)
     /// </summary>
     public void ClearDetails()
     {
@@ -240,7 +240,7 @@ public class LeftPanelController : MonoBehaviour
 
         CanvasGroup oldPanel = currentPanelCanvasGroup;
 
-        // Fade Out ÀÌÀü ÆĞ³Î
+        // Fade Out ì´ì „ íŒ¨ë„
         if (oldPanel != null)
         {
             oldPanel.blocksRaycasts = false;
@@ -248,7 +248,7 @@ public class LeftPanelController : MonoBehaviour
             oldPanel.transform.DOScale(0.8f, panelSwitchDuration).SetEase(Ease.InSine);
         }
 
-        // Fade In »õ ÆĞ³Î
+        // Fade In ìƒˆ íŒ¨ë„
         targetPanel.alpha = 0f;
         targetPanel.transform.localScale = Vector3.one * 0.8f;
         targetPanel.blocksRaycasts = true;
@@ -293,7 +293,7 @@ public class LeftPanelController : MonoBehaviour
     {
         if (itemInfoHeadText != null)
         {
-            itemInfoHeadText.text = "¾ÆÀÌÅÛ Á¤º¸";
+            itemInfoHeadText.text = "ì•„ì´í…œ ì •ë³´";
         }
     }
 
@@ -338,7 +338,7 @@ public class LeftPanelController : MonoBehaviour
         }
         else
         {
-            builder.AppendLine($"´É·Â: {ability.abilityName}");
+            builder.AppendLine($"ëŠ¥ë ¥: {ability.abilityName}");
         }
     }
 

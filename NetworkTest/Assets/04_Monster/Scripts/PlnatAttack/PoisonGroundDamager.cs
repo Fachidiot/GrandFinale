@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 public class PoisonGroundDamager : MonoBehaviour
 {
-    [Header("µ¶ ÇÇÇØ ¼³Á¤")]
-    [Tooltip("ÃÑ Áö¼Ó ½Ã°£ (ÀÌ ½Ã°£ÀÌ Áö³ª¸é ÀÚ½ÅÀ» ÆÄ±«ÇÕ´Ï´Ù)")]
+    [Header("ë… í”¼í•´ ì„¤ì •")]
+    [Tooltip("ì´ ì§€ì† ì‹œê°„ (ì´ ì‹œê°„ì´ ì§€ë‚˜ë©´ ìì‹ ì„ íŒŒê´´í•©ë‹ˆë‹¤)")]
     public float duration = 5.0f;
-    [Tooltip("µ¥¹ÌÁö°¡ Àû¿ëµÇ´Â ÁÖ±â")]
+    [Tooltip("ë°ë¯¸ì§€ê°€ ì ìš©ë˜ëŠ” ì£¼ê¸°")]
     public float damageTickRate = 0.3f;
-    [Tooltip("Æ½´ç ÀÔÈ÷´Â µ¥¹ÌÁö")]
+    [Tooltip("í‹±ë‹¹ ì…íˆëŠ” ë°ë¯¸ì§€")]
     public float damagePerTick = 5.0f;
 
-    // ÇÇÇØ¸¦ ÀÔÈù ÇÃ·¹ÀÌ¾î¿Í ´ÙÀ½ ÇÇÇØ ½Ã°£ ÀúÀå¿ë
+    // í”¼í•´ë¥¼ ì…íŒ í”Œë ˆì´ì–´ì™€ ë‹¤ìŒ í”¼í•´ ì‹œê°„ ì €ì¥ìš©
     private Dictionary<Collider, float> targetsHit =
         new Dictionary<Collider, float>();
 
@@ -22,20 +22,20 @@ public class PoisonGroundDamager : MonoBehaviour
         destroyTimer += Time.deltaTime;
         if (destroyTimer >= duration)
         {
-            // Áö¼Ó ½Ã°£ÀÌ ³¡³ª¸é µ¶ ¹Ù´Ú Á¦°Å
+            // ì§€ì† ì‹œê°„ì´ ëë‚˜ë©´ ë… ë°”ë‹¥ ì œê±°
             Destroy(gameObject);
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        // 1. ÇÃ·¹ÀÌ¾î ÅÂ±×ÀÎÁö È®ÀÎ
+        // 1. í”Œë ˆì´ì–´ íƒœê·¸ì¸ì§€ í™•ì¸
         if (!other.CompareTag("Player"))
         {
             return;
         }
 
-        // 2. Äğ´Ù¿î Ã¼Å©
+        // 2. ì¿¨ë‹¤ìš´ ì²´í¬
         if (targetsHit.ContainsKey(other))
         {
             if (Time.time < targetsHit[other])
@@ -44,19 +44,19 @@ public class PoisonGroundDamager : MonoBehaviour
             }
         }
 
-        if (other.TryGetComponent<PlayerStats>(out var playerStats)) // <-- PlayerStats.cs ÂüÁ¶
+        if (other.TryGetComponent<PlayerStats>(out var playerStats)) // <-- PlayerStats.cs ì°¸ì¡°
         {
-            // 4. µ¥¹ÌÁö Àû¿ë
+            // 4. ë°ë¯¸ì§€ ì ìš©
             playerStats.TakeDamage(damagePerTick);
 
-            // 5. ´ÙÀ½ µ¥¹ÌÁö ½Ã°£ ±â·Ï
+            // 5. ë‹¤ìŒ ë°ë¯¸ì§€ ì‹œê°„ ê¸°ë¡
             targetsHit[other] = Time.time + damageTickRate;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // 6. ÇÃ·¹ÀÌ¾î°¡ ³ª°¡¸é Äğ´Ù¿î ¸ñ·Ï¿¡¼­ Á¦°Å
+        // 6. í”Œë ˆì´ì–´ê°€ ë‚˜ê°€ë©´ ì¿¨ë‹¤ìš´ ëª©ë¡ì—ì„œ ì œê±°
         if (targetsHit.ContainsKey(other))
         {
             targetsHit.Remove(other);

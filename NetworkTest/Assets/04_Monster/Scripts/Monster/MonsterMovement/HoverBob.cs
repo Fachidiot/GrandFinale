@@ -1,29 +1,29 @@
 using UnityEngine;
 
 /// <summary>
-/// ÀÌ ½ºÅ©¸³Æ®°¡ ºÎÂøµÈ ¿ÀºêÁ§Æ®¸¦ À§¾Æ·¡·Î ºÎµå·´°Ô Èçµì´Ï´Ù.
+/// ì´ ìŠ¤í¬ë¦½íŠ¸ê°€ ë¶€ì°©ëœ ì˜¤ë¸Œì íŠ¸ë¥¼ ìœ„ì•„ë˜ë¡œ ë¶€ë“œëŸ½ê²Œ í”ë“­ë‹ˆë‹¤.
 /// </summary>
 public class HoverBob : MonoBehaviour
 {
-    [Tooltip("Èçµé¸®´Â ¼Óµµ")]
+    [Tooltip("í”ë“¤ë¦¬ëŠ” ì†ë„")]
     public float bobSpeed = 2f;
-    [Tooltip("Èçµé¸®´Â ÃÖ´ë ³ôÀÌ")]
+    [Tooltip("í”ë“¤ë¦¬ëŠ” ìµœëŒ€ ë†’ì´")]
     public float bobAmount = 0.1f;
 
-    private float startY; // ¿ÀºêÁ§Æ®ÀÇ ¿ø·¡ Y À§Ä¡
+    private float startY; // ì˜¤ë¸Œì íŠ¸ì˜ ì›ë˜ Y ìœ„ì¹˜
 
     void Start()
     {
-        // ÀÌ ¿ÀºêÁ§Æ®ÀÇ '·ÎÄÃ' Y À§Ä¡¸¦ ±â¾ï
+        // ì´ ì˜¤ë¸Œì íŠ¸ì˜ 'ë¡œì»¬' Y ìœ„ì¹˜ë¥¼ ê¸°ì–µ
         startY = transform.localPosition.y;
     }
 
     void Update()
     {
-        // Sin ÇÔ¼ö¸¦ ÀÌ¿ëÇØ -1 ~ +1 »çÀÌÀÇ °ªÀ» ¸¸µê
+        // Sin í•¨ìˆ˜ë¥¼ ì´ìš©í•´ -1 ~ +1 ì‚¬ì´ì˜ ê°’ì„ ë§Œë“¦
         float bobOffset = Mathf.Sin(Time.time * bobSpeed) * bobAmount;
 
-        // ¿ø·¡ Y À§Ä¡¿¡ Èçµé¸®´Â °ªÀ» ´õÇÔ
+        // ì›ë˜ Y ìœ„ì¹˜ì— í”ë“¤ë¦¬ëŠ” ê°’ì„ ë”í•¨
         transform.localPosition = new Vector3(
             transform.localPosition.x,
             startY + bobOffset,

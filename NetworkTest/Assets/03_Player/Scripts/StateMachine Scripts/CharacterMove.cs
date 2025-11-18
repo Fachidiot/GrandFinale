@@ -55,6 +55,7 @@ public class CharacterMove : MonoBehaviour
     public Vector3 velocity;
     public Vector3 rollVelocity;
     public Vector3 edgeSlipVelocity;
+    public Vector3 groundNormal;
 
     public StateMachineBase previousState;
     public StateMachineBase currentState;
@@ -132,6 +133,7 @@ public class CharacterMove : MonoBehaviour
         if (velocity.y <= 0 && Physics.SphereCast(transform.position + characterController.center, characterController.radius + characterController.skinWidth, Vector3.down, out hitInfo, grounCheckDistance, groundCheckMask, QueryTriggerInteraction.Ignore))
         {
             isGrounded = true;
+            groundNormal = hitInfo.normal;
             Vector3 relativeHitPoint = hitInfo.point - (transform.position + Vector3.right * characterController.center.x + Vector3.forward * characterController.center.z);
 
             Debug.DrawLine(transform.position + Vector3.up * 0.1f, transform.position + Vector3.up * 0.1f + Vector3.down * 0.3f, Color.red);
@@ -150,6 +152,7 @@ public class CharacterMove : MonoBehaviour
         else
         {
             isGrounded = false;
+            groundNormal = Vector3.up;
             edgeSlipVelocity = Vector3.zero;
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "REL_", menuName = "Data/Relic")]
 public class RelicData : ScriptableObject
 {
-    [Header("½ÃÆ® ¿øº» Á¤º¸")]
+    [Header("ì‹œíŠ¸ ì›ë³¸ ì •ë³´")]
     public string itemID;
     public string itemName;
     public ItemType itemTypeEnum;
@@ -18,9 +18,9 @@ public class RelicData : ScriptableObject
 
     public int price;
 
-    [Header("¸®¼Ò½º °æ·Î")]
+    [Header("ë¦¬ì†ŒìŠ¤ ê²½ë¡œ")]
     public string iconPath; // Icons/Relics/AuxHeart
 
-    [Header("¡ÚÇÙ½É ¿¬µ¿¡Ú")]
+    [Header("â˜…í•µì‹¬ ì—°ë™â˜…")]
     public AbilityData grantedAbility;
 }

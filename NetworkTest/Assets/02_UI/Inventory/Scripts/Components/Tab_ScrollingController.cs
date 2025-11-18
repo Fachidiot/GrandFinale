@@ -1,4 +1,4 @@
-// (¼±ÅÃ»çÇ×) Tab_ScrollingController.cs
+// (ì„ íƒì‚¬í•­) Tab_ScrollingController.cs
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,20 +8,20 @@ public class Tab_ScrollingController : MonoBehaviour
     [SerializeField] private RectTransform contentRect;
     [SerializeField] private float scrollSpeed = 0.5f;
 
-    // L1: ¿ŞÂÊÀ¸·Î ½ºÅ©·Ñ ¹öÆ°ÀÌ ´©¸¦ ¶§ È£ÃâµÉ ÇÔ¼ö
+    // L1: ì™¼ìª½ìœ¼ë¡œ ìŠ¤í¬ë¡¤ ë²„íŠ¼ì´ ëˆ„ë¥¼ ë•Œ í˜¸ì¶œë  í•¨ìˆ˜
     public void ScrollLeft()
     {
-        // ÇöÀç ½ºÅ©·Ñ À§Ä¡¿¡¼­ 1ÆäÀÌÁö(ºäÆ÷Æ® ³Êºñ)¸¸Å­ ¿ŞÂÊÀ¸·Î ÀÌµ¿
+        // í˜„ì¬ ìŠ¤í¬ë¡¤ ìœ„ì¹˜ì—ì„œ 1í˜ì´ì§€(ë·°í¬íŠ¸ ë„ˆë¹„)ë§Œí¼ ì™¼ìª½ìœ¼ë¡œ ì´ë™
         float target = scrollRect.horizontalNormalizedPosition - scrollSpeed;
         target = Mathf.Clamp01(target);
-        scrollRect.StopMovement(); // ¿òÁ÷ÀÓÀ» ¸ØÃß°í
-        scrollRect.horizontalNormalizedPosition = target; // Áï½Ã ÀÌµ¿ (SmoothDamp ´ë½Å)
+        scrollRect.StopMovement(); // ì›€ì§ì„ì„ ë©ˆì¶”ê³ 
+        scrollRect.horizontalNormalizedPosition = target; // ì¦‰ì‹œ ì´ë™ (SmoothDamp ëŒ€ì‹ )
     }
 
-    // L2: ¿À¸¥ÂÊÀ¸·Î ½ºÅ©·Ñ ¹öÆ°ÀÌ ´©¸¦ ¶§ È£ÃâµÉ ÇÔ¼ö
+    // L2: ì˜¤ë¥¸ìª½ìœ¼ë¡œ ìŠ¤í¬ë¡¤ ë²„íŠ¼ì´ ëˆ„ë¥¼ ë•Œ í˜¸ì¶œë  í•¨ìˆ˜
     public void ScrollRight()
     {
-        // ÇöÀç ½ºÅ©·Ñ À§Ä¡¿¡¼­ 1ÆäÀÌÁö(ºäÆ÷Æ® ³Êºñ)¸¸Å­ ¿À¸¥ÂÊÀ¸·Î ÀÌµ¿
+        // í˜„ì¬ ìŠ¤í¬ë¡¤ ìœ„ì¹˜ì—ì„œ 1í˜ì´ì§€(ë·°í¬íŠ¸ ë„ˆë¹„)ë§Œí¼ ì˜¤ë¥¸ìª½ìœ¼ë¡œ ì´ë™
         float target = scrollRect.horizontalNormalizedPosition + scrollSpeed;
         target = Mathf.Clamp01(target);
         scrollRect.StopMovement();

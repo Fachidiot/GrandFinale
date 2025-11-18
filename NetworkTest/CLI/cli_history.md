@@ -29,3 +29,10 @@
     - `TerminalManager.ToggleTerminal` 메소드 내부에 터미널이 활성화될 때 `UIEvents.InteractableFocusChanged("")`를 호출하여 상호작용 텍스트를 명시적으로 숨기도록 수정.
 - **채팅 시스템 리팩토링 및 오류 수정**:
     - `ChatManager.cs`를 대대적으로 리팩토링하여 Enter키로 메시지를 전송하고, 네트워크를 통해 메시지를 송수신하며, UI에 채팅 로그를 표시하는 전체 기능 구현.
+
+## 2025년 11월 18일 화요일
+
+- `LootOrbVisuals.cs`, `DynamicButtonEditor.cs`, `PlayerAbilityManager.cs`, `SlimeStates.cs` 파일의 깨진 한글 문자 인코딩 수정.
+- `CharacterMove.cs`에 `groundNormal` 속성을 추가하고 `GroundCheck` 메서드를 수정하여 지면 법선을 저장하도록 변경.
+- `MoveState.cs`의 `Tick` 메서드를 수정하여 경사로에서 캐릭터 이동을 올바르게 처리하도록 변경 (이동 방향을 지면에 투영하고 일관된 하향 힘 적용).
+- `CrouchState.cs`의 `Tick` 메서드를 수정하여 경사로에서 웅크린 상태의 캐릭터 이동을 올바르게 처리하도록 변경 (이동 방향을 지면에 투영하고 일관된 하향 힘 적용, 공중에 뜨는 문제 해결).

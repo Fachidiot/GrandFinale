@@ -14,17 +14,17 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
     public TextMeshProUGUI countText;
 
     [Header("Slot Visuals (Click Effect)")]
-    [Tooltip("½½·ÔÀÇ ¹è°æ/Å×µÎ¸® ÀÌ¹ÌÁö")]
+    [Tooltip("ìŠ¬ë¡¯ì˜ ë°°ê²½/í…Œë‘ë¦¬ ì´ë¯¸ì§€")]
     [SerializeField] private Image slotBorderImage;
-    [Tooltip("±âº» »óÅÂÀÇ ½½·Ô Å×µÎ¸® ½ºÇÁ¶óÀÌÆ®")]
+    [Tooltip("ê¸°ë³¸ ìƒíƒœì˜ ìŠ¬ë¡¯ í…Œë‘ë¦¬ ìŠ¤í”„ë¼ì´íŠ¸")]
     [SerializeField] private Sprite normalBorderSprite;
-    [Tooltip("¼±ÅÃµÆÀ» ¶§(´­·¶À» ¶§)ÀÇ ½½·Ô Å×µÎ¸® ½ºÇÁ¶óÀÌÆ®")]
+    [Tooltip("ì„ íƒëì„ ë•Œ(ëˆŒë €ì„ ë•Œ)ì˜ ìŠ¬ë¡¯ í…Œë‘ë¦¬ ìŠ¤í”„ë¼ì´íŠ¸")]
     [SerializeField] private Sprite selectedBorderSprite;
 
-    // [Âü°í] ÀÌ »ö»ó ·ÎÁ÷Àº UpdateSlotVisuals¿¡¼­ Ã³¸®µÇÁö¸¸,
-    // UIManagerÀÇ SetSelected°¡ slotBorderImage¸¦ Á¦¾îÇÏ¹Ç·Î
-    // µÑ Áß ÇÏ³ªÀÇ ¹æ½Ä(½ºÇÁ¶óÀÌÆ® ¶Ç´Â »ö»ó)À» ¼±ÅÃÇÏ´Â °ÍÀÌ ÁÁ½À´Ï´Ù.
-    [Tooltip("¼±ÅÃ ½Ã »ö»óÀÌ º¯°æµÉ ¹è°æ/Å×µÎ¸® ÀÌ¹ÌÁö")]
+    // [ì°¸ê³ ] ì´ ìƒ‰ìƒ ë¡œì§ì€ UpdateSlotVisualsì—ì„œ ì²˜ë¦¬ë˜ì§€ë§Œ,
+    // UIManagerì˜ SetSelectedê°€ slotBorderImageë¥¼ ì œì–´í•˜ë¯€ë¡œ
+    // ë‘˜ ì¤‘ í•˜ë‚˜ì˜ ë°©ì‹(ìŠ¤í”„ë¼ì´íŠ¸ ë˜ëŠ” ìƒ‰ìƒ)ì„ ì„ íƒí•˜ëŠ” ê²ƒì´ ì¢‹ìŠµë‹ˆë‹¤.
+    [Tooltip("ì„ íƒ ì‹œ ìƒ‰ìƒì´ ë³€ê²½ë  ë°°ê²½/í…Œë‘ë¦¬ ì´ë¯¸ì§€")]
     public Image slotBackground;
     public Color defaultColor = Color.white;
     public Color selectedColor = Color.yellow;
@@ -53,11 +53,11 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
     void Start()
     {
         parentScrollRect = GetComponentInParent<ScrollRect>();
-        SetSelected(false, false); // ÃÊ±â Å×µÎ¸® ¼³Á¤ (¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀÌ)
+        SetSelected(false, false); // ì´ˆê¸° í…Œë‘ë¦¬ ì„¤ì • (ì• ë‹ˆë©”ì´ì…˜ ì—†ì´)
     }
 
     /// <summary>
-    /// InventoryUIManager¿¡ ÀÇÇØ È£ÃâµÇ¾î ½½·ÔÀÇ ¼±ÅÃ »óÅÂ¸¦ ¼³Á¤ÇÕ´Ï´Ù.
+    /// InventoryUIManagerì— ì˜í•´ í˜¸ì¶œë˜ì–´ ìŠ¬ë¡¯ì˜ ì„ íƒ ìƒíƒœë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
     /// </summary>
     public void SetSelected(bool selected, bool playAnimation = true)
     {
@@ -69,7 +69,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             slotBorderImage.sprite = selectedBorderSprite;
             if (playAnimation)
             {
-                // Å¬¸¯ ½Ã ÆİÄ¡ È¿°ú
+                // í´ë¦­ ì‹œ í€ì¹˜ íš¨ê³¼
                 transform.DOPunchScale(new Vector3(-0.05f, -0.05f, 0), 0.15f, 1, 0.5f);
             }
         }
@@ -79,28 +79,28 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         }
     }
 
-    // ¡å¡å¡å [¼öÁ¤] OnPointerClick ±¸¹® ¿À·ù ¼öÁ¤ ¹× ·ÎÁ÷ Á¤¸® ¡å¡å¡å
+    // â–¼â–¼â–¼ [ìˆ˜ì •] OnPointerClick êµ¬ë¬¸ ì˜¤ë¥˜ ìˆ˜ì • ë° ë¡œì§ ì •ë¦¬ â–¼â–¼â–¼
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 1. ¿ìÅ¬¸¯ Ã³¸® (ÀåÂø ½Ãµµ)
+        // 1. ìš°í´ë¦­ ì²˜ë¦¬ (ì¥ì°© ì‹œë„)
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             if (HasValidItem())
             {
                 AttemptEquip();
             }
-            return; // ¿ìÅ¬¸¯ ½Ã ÁÂÅ¬¸¯ ·ÎÁ÷(¼±ÅÃ)Àº ½ÇÇàÇÏÁö ¾ÊÀ½
+            return; // ìš°í´ë¦­ ì‹œ ì¢Œí´ë¦­ ë¡œì§(ì„ íƒ)ì€ ì‹¤í–‰í•˜ì§€ ì•ŠìŒ
         }
 
-        // 2. ÁÂÅ¬¸¯ Ã³¸®
+        // 2. ì¢Œí´ë¦­ ì²˜ë¦¬
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            // ½ºÅ©·Ñ Áß¿¡´Â Å¬¸¯ ¹«½Ã
+            // ìŠ¤í¬ë¡¤ ì¤‘ì—ëŠ” í´ë¦­ ë¬´ì‹œ
             if (isScrolling) return;
 
             if (eventData.clickCount == 1)
             {
-                // ½Ì±Û Å¬¸¯ (ÄÚ·çÆ¾ ½ÃÀÛ)
+                // ì‹±ê¸€ í´ë¦­ (ì½”ë£¨í‹´ ì‹œì‘)
                 if (singleClickCoroutine != null)
                     StopCoroutine(singleClickCoroutine);
 
@@ -109,7 +109,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             }
             else if (eventData.clickCount == 2)
             {
-                // ´õºí Å¬¸¯ (ÀåÂø ½Ãµµ)
+                // ë”ë¸” í´ë¦­ (ì¥ì°© ì‹œë„)
                 if (singleClickCoroutine != null)
                 {
                     StopCoroutine(singleClickCoroutine);
@@ -123,25 +123,25 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             }
         }
     }
-    // ¡ã¡ã¡ã [¼öÁ¤ ¿Ï·á] ¡ã¡ã¡ã
+    // â–²â–²â–² [ìˆ˜ì • ì™„ë£Œ] â–²â–²â–²
 
-    // ¡å¡å¡å [¼öÁ¤] HandleSingleClickÀÌ UIManagerÀÇ »õ ÇÔ¼ö¸¦ È£ÃâÇÏµµ·Ï º¯°æ ¡å¡å¡å
+    // â–¼â–¼â–¼ [ìˆ˜ì •] HandleSingleClickì´ UIManagerì˜ ìƒˆ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ë„ë¡ ë³€ê²½ â–¼â–¼â–¼
     private IEnumerator HandleSingleClick()
     {
-        yield return new WaitForSeconds(0.2f); // 0.2ÃÊ ´ë±â (´õºíÅ¬¸¯ ±¸ºĞ)
+        yield return new WaitForSeconds(0.2f); // 0.2ì´ˆ ëŒ€ê¸° (ë”ë¸”í´ë¦­ êµ¬ë¶„)
 
         if (InventoryUIManager.Instance != null)
         {
-            // UIManagerÀÇ »õ Å¬¸¯ ÇÚµé·¯¸¦ È£Ãâ (¼±ÅÃ »óÅÂ¿Í Á¤º¸Ã¢À» ¸ğµÎ °ü¸®)
-            // ¾ÆÀÌÅÛÀÌ ¾øÀ¸¸é nullÀ» Àü´Ş
+            // UIManagerì˜ ìƒˆ í´ë¦­ í•¸ë“¤ëŸ¬ë¥¼ í˜¸ì¶œ (ì„ íƒ ìƒíƒœì™€ ì •ë³´ì°½ì„ ëª¨ë‘ ê´€ë¦¬)
+            // ì•„ì´í…œì´ ì—†ìœ¼ë©´ nullì„ ì „ë‹¬
             InventoryUIManager.Instance.HandleSlotClick(this, HasValidItem() ? currentSlot.item : null);
         }
 
         singleClickCoroutine = null;
     }
-    // ¡ã¡ã¡ã [¼öÁ¤ ¿Ï·á] ¡ã¡ã¡ã
+    // â–²â–²â–² [ìˆ˜ì • ì™„ë£Œ] â–²â–²â–²
 
-    // (Âü°í: OnPointerClick¿¡¼­ »ç¿ëÇÏ´ø HandleLeftClick, HandleDoubleClick µî ºÒÇÊ¿äÇÑ ¸Ş¼­µå Á¦°Å)
+    // (ì°¸ê³ : OnPointerClickì—ì„œ ì‚¬ìš©í•˜ë˜ HandleLeftClick, HandleDoubleClick ë“± ë¶ˆí•„ìš”í•œ ë©”ì„œë“œ ì œê±°)
 
     public void SetBoundItem(InventorySlot newSlot)
     {
@@ -163,21 +163,21 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             HideSlot();
         }
 
-        // UIManagerÀÇ SetSelected ·ÎÁ÷ÀÌ ½ºÇÁ¶óÀÌÆ®¸¦ Á¦¾îÇÏ¹Ç·Î
-        // ÀÌ ·ÎÁ÷Àº ÁÖ¼® Ã³¸®ÇÏ°Å³ª, UIManagerÀÇ ·ÎÁ÷°ú ÅëÀÏÇØ¾ß ÇÕ´Ï´Ù.
+        // UIManagerì˜ SetSelected ë¡œì§ì´ ìŠ¤í”„ë¼ì´íŠ¸ë¥¼ ì œì–´í•˜ë¯€ë¡œ
+        // ì´ ë¡œì§ì€ ì£¼ì„ ì²˜ë¦¬í•˜ê±°ë‚˜, UIManagerì˜ ë¡œì§ê³¼ í†µì¼í•´ì•¼ í•©ë‹ˆë‹¤.
         // if (!isSelected && slotBorderImage != null)
         // {
         //     slotBorderImage.sprite = normalBorderSprite;
         // }
 
-        // UIManagerÀÇ SetSelected¿Í ÀÌ »ö»ó ·ÎÁ÷ÀÌ Ãæµ¹ÇÒ ¼ö ÀÖ½À´Ï´Ù.
-        // UIManager°¡ °ü¸®ÇÏ´Â `currentSelectedSlot`À» »ç¿ëÇÏµµ·Ï º¯°æÇÕ´Ï´Ù.
+        // UIManagerì˜ SetSelectedì™€ ì´ ìƒ‰ìƒ ë¡œì§ì´ ì¶©ëŒí•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
+        // UIManagerê°€ ê´€ë¦¬í•˜ëŠ” `currentSelectedSlot`ì„ ì‚¬ìš©í•˜ë„ë¡ ë³€ê²½í•©ë‹ˆë‹¤.
         if (slotBackground != null && InventoryUIManager.Instance != null)
         {
-            // InventoryUIManager.Instance.GetSelectedSlotIndex() °°Àº ÇÔ¼ö°¡ ÇÊ¿äÇÏÁö¸¸,
-            // ÇöÀç UIManager¿¡´Â ¾øÀ¸¹Ç·Î, UIManagerÀÇ SetSelected°¡ ÀÌ ·ÎÁ÷À» ´ë½ÅÇØ¾ß ÇÕ´Ï´Ù.
-            // ¿©±â¼­´Â ÀÏ´Ü ±âÁ¸ ·ÎÁ÷À» À¯ÁöÇÏµÇ, UIManagerÀÇ SetSelected°¡
-            // slotBorderImage.sprite¿Í slotBackground.color¸¦ ¸ğµÎ Á¦¾îÇÏ´Â °ÍÀ» ±ÇÀåÇÕ´Ï´Ù.
+            // InventoryUIManager.Instance.GetSelectedSlotIndex() ê°™ì€ í•¨ìˆ˜ê°€ í•„ìš”í•˜ì§€ë§Œ,
+            // í˜„ì¬ UIManagerì—ëŠ” ì—†ìœ¼ë¯€ë¡œ, UIManagerì˜ SetSelectedê°€ ì´ ë¡œì§ì„ ëŒ€ì‹ í•´ì•¼ í•©ë‹ˆë‹¤.
+            // ì—¬ê¸°ì„œëŠ” ì¼ë‹¨ ê¸°ì¡´ ë¡œì§ì„ ìœ ì§€í•˜ë˜, UIManagerì˜ SetSelectedê°€
+            // slotBorderImage.spriteì™€ slotBackground.colorë¥¼ ëª¨ë‘ ì œì–´í•˜ëŠ” ê²ƒì„ ê¶Œì¥í•©ë‹ˆë‹¤.
 
             // bool isSelected = (currentSlot != null && ...);
             // slotBackground.color = isSelected ? selectedColor : defaultColor;
@@ -236,7 +236,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             return;
         }
 
-        // ¾ÆÀÌÅÛÀÌ ÀÖÀ¸¸é ¹«Á¶°Ç µå·¡±× (½ºÅ©·Ñ ±İÁö)
+        // ì•„ì´í…œì´ ìˆìœ¼ë©´ ë¬´ì¡°ê±´ ë“œë˜ê·¸ (ìŠ¤í¬ë¡¤ ê¸ˆì§€)
         isScrolling = false;
 
         if (InventoryUIManager.Instance == null) return;
@@ -251,7 +251,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             if (countText != null) countText.gameObject.SetActive(false);
         }
 
-        // µå·¡±× ½ÃÀÛ ½Ã ¼±ÅÃ ÇØÁ¦
+        // ë“œë˜ê·¸ ì‹œì‘ ì‹œ ì„ íƒ í•´ì œ
         if (InventoryUIManager.Instance != null)
         {
             InventoryUIManager.Instance.ClearDetails();
@@ -287,15 +287,15 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         sourceSlot.dropSuccessful = true;
         dropSuccessful = true;
 
-        // ¡å¡å¡å [Ãß°¡] ¾ÆÀÌÅÛÀÌ ³õ¿´À» ¶§ ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı (¿äÃ» »çÇ×) ¡å¡å¡å
+        // â–¼â–¼â–¼ [ì¶”ê°€] ì•„ì´í…œì´ ë†“ì˜€ì„ ë•Œ ì• ë‹ˆë©”ì´ì…˜ ì¬ìƒ (ìš”ì²­ ì‚¬í•­) â–¼â–¼â–¼
         StartCoroutine(PlayDropAnimationAfterFrame());
-        // ¡ã¡ã¡ã [Ãß°¡ ¿Ï·á] ¡ã¡ã¡ã
+        // â–²â–²â–² [ì¶”ê°€ ì™„ë£Œ] â–²â–²â–²
     }
 
-    // ¡å¡å¡å [Ãß°¡] ¾ÆÀÌÅÛ µå·Ó ¾Ö´Ï¸ŞÀÌ¼Ç °ü·Ã ÇÔ¼ö ¡å¡å¡å
+    // â–¼â–¼â–¼ [ì¶”ê°€] ì•„ì´í…œ ë“œë¡­ ì• ë‹ˆë©”ì´ì…˜ ê´€ë ¨ í•¨ìˆ˜ â–¼â–¼â–¼
     private IEnumerator PlayDropAnimationAfterFrame()
     {
-        // OnInventoryChanged ÀÌº¥Æ®°¡ UI¸¦ ¾÷µ¥ÀÌÆ®ÇÒ ¶§±îÁö ÇÑ ÇÁ·¹ÀÓ ´ë±â
+        // OnInventoryChanged ì´ë²¤íŠ¸ê°€ UIë¥¼ ì—…ë°ì´íŠ¸í•  ë•Œê¹Œì§€ í•œ í”„ë ˆì„ ëŒ€ê¸°
         yield return null;
 
         PlayDropAnimation();
@@ -303,15 +303,15 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
 
     private void PlayDropAnimation()
     {
-        // ¾ÆÀÌÄÜÀÌ È°¼ºÈ­µÇ¾î ÀÖÀ» ¶§(¾ÆÀÌÅÛÀÌ ÀÖÀ» ¶§)¸¸ Àç»ı
+        // ì•„ì´ì½˜ì´ í™œì„±í™”ë˜ì–´ ìˆì„ ë•Œ(ì•„ì´í…œì´ ìˆì„ ë•Œ)ë§Œ ì¬ìƒ
         if (slotIcon != null && slotIcon.enabled)
         {
-            slotIcon.transform.DOKill(); // ±âÁ¸ ¾Ö´Ï¸ŞÀÌ¼Ç ÁßÁö
-            slotIcon.transform.localScale = Vector3.one * 0.8f; // 80% Å©±â¿¡¼­ ½ÃÀÛ
-            slotIcon.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack); // ¿À¹ö½´Æ® È¿°ú
+            slotIcon.transform.DOKill(); // ê¸°ì¡´ ì• ë‹ˆë©”ì´ì…˜ ì¤‘ì§€
+            slotIcon.transform.localScale = Vector3.one * 0.8f; // 80% í¬ê¸°ì—ì„œ ì‹œì‘
+            slotIcon.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack); // ì˜¤ë²„ìŠˆíŠ¸ íš¨ê³¼
         }
     }
-    // ¡ã¡ã¡ã [Ãß°¡ ¿Ï·á] ¡ã¡ã¡ã
+    // â–²â–²â–² [ì¶”ê°€ ì™„ë£Œ] â–²â–²â–²
 
     private void HandleEquipmentSlotDrop(EquipmentSlot_UI sourceEquipSlot)
     {

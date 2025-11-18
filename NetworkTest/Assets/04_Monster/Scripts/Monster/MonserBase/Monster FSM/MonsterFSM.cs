@@ -1,11 +1,11 @@
 using UnityEngine;
 
-// ÀÌ ÄÄÆ÷³ÍÆ®´Â FSM »óÅÂµéÀ» '¼ÒÀ¯'ÇÏ°í ÄÁÆ®·Ñ·¯¿¡ 'Á¦°ø'ÇÏ´Â ¿ªÇÒ¸¸ ÇÕ´Ï´Ù.
-// MonsterAIController´Â ÀÌ ½ºÅ©¸³Æ®°¡ MinotaurFSMÀÎÁö ZombieFSMÀÎÁö ¸ğ¸¨´Ï´Ù.
+// ì´ ì»´í¬ë„ŒíŠ¸ëŠ” FSM ìƒíƒœë“¤ì„ 'ì†Œìœ 'í•˜ê³  ì»¨íŠ¸ë¡¤ëŸ¬ì— 'ì œê³µ'í•˜ëŠ” ì—­í• ë§Œ í•©ë‹ˆë‹¤.
+// MonsterAIControllerëŠ” ì´ ìŠ¤í¬ë¦½íŠ¸ê°€ MinotaurFSMì¸ì§€ ZombieFSMì¸ì§€ ëª¨ë¦…ë‹ˆë‹¤.
 public abstract class MonsterFSM : MonoBehaviour
 {
-    // MonsterAIController°¡ ÀÌ FSMÀÇ »óÅÂµé¿¡ Á¢±ÙÇÒ ¼ö ÀÖµµ·Ï
-    // public abstract ÇÁ·ÎÆÛÆ¼(get)·Î '½½·Ô'¸¸ ¸¸µé¾î µÓ´Ï´Ù.
+    // MonsterAIControllerê°€ ì´ FSMì˜ ìƒíƒœë“¤ì— ì ‘ê·¼í•  ìˆ˜ ìˆë„ë¡
+    // public abstract í”„ë¡œí¼í‹°(get)ë¡œ 'ìŠ¬ë¡¯'ë§Œ ë§Œë“¤ì–´ ë‘¡ë‹ˆë‹¤.
 
     public abstract ZombieBaseState<MonsterAIController> IdleState { get; }
     public abstract ZombieBaseState<MonsterAIController> PatrolState { get; }

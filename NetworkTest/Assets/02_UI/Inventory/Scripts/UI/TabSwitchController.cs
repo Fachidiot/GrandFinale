@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// ÅÇ ÀüÈ¯ Àü´ã ÄÁÆ®·Ñ·¯
-/// - Inventory/Artifacts ÅÇ ÀüÈ¯
-/// - Fade + Slide ¾Ö´Ï¸ŞÀÌ¼Ç
-/// - ÅÇ ¹öÆ° »óÅÂ °ü¸®
+/// íƒ­ ì „í™˜ ì „ë‹´ ì»¨íŠ¸ë¡¤ëŸ¬
+/// - Inventory/Artifacts íƒ­ ì „í™˜
+/// - Fade + Slide ì• ë‹ˆë©”ì´ì…˜
+/// - íƒ­ ë²„íŠ¼ ìƒíƒœ ê´€ë¦¬
 /// </summary>
 public class TabSwitchController : MonoBehaviour
 {
@@ -53,7 +53,7 @@ public class TabSwitchController : MonoBehaviour
 
     private void InitializeTabState()
     {
-        // Inventory ÅÇ ±âº» È°¼ºÈ­
+        // Inventory íƒ­ ê¸°ë³¸ í™œì„±í™”
         if (inventoryPanel != null) inventoryPanel.SetActive(true);
         if (artifactsPanel != null) artifactsPanel.SetActive(false);
 
@@ -103,7 +103,7 @@ public class TabSwitchController : MonoBehaviour
     #region Public API
 
     /// <summary>
-    /// Inventory ÅÇÀ¸·Î ÀüÈ¯
+    /// Inventory íƒ­ìœ¼ë¡œ ì „í™˜
     /// </summary>
     public void OnInventoryTabClick()
     {
@@ -113,7 +113,7 @@ public class TabSwitchController : MonoBehaviour
     }
 
     /// <summary>
-    /// Artifacts ÅÇÀ¸·Î ÀüÈ¯
+    /// Artifacts íƒ­ìœ¼ë¡œ ì „í™˜
     /// </summary>
     public void OnArtifactsTabClick()
     {
@@ -123,7 +123,7 @@ public class TabSwitchController : MonoBehaviour
     }
 
     /// <summary>
-    /// °­Á¦·Î ÅÇ ¼³Á¤ (¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀ½)
+    /// ê°•ì œë¡œ íƒ­ ì„¤ì • (ì• ë‹ˆë©”ì´ì…˜ ì—†ìŒ)
     /// </summary>
     public void SetTab(TabType tab, bool animated = false)
     {
@@ -250,10 +250,10 @@ public class TabSwitchController : MonoBehaviour
 
     private void AnimateTabTransition(TabTransitionData fadeOut, TabTransitionData fadeIn)
     {
-        // Phase 1: Fade Out ÇöÀç ÆĞ³Î
+        // Phase 1: Fade Out í˜„ì¬ íŒ¨ë„
         FadeOutPanel(fadeOut, () =>
         {
-            // Phase 2: Fade In »õ ÆĞ³Î
+            // Phase 2: Fade In ìƒˆ íŒ¨ë„
             FadeInPanel(fadeIn);
         });
     }
@@ -282,11 +282,11 @@ public class TabSwitchController : MonoBehaviour
         data.Panel.SetActive(true);
         data.CanvasGroup.alpha = 0f;
 
-        // ½ÃÀÛ À§Ä¡ ¼³Á¤
+        // ì‹œì‘ ìœ„ì¹˜ ì„¤ì •
         Vector2 startPos = data.RectTransform.anchoredPosition - new Vector2(data.SlideDirection, 0);
         data.RectTransform.anchoredPosition = startPos;
 
-        // Fade In ¾Ö´Ï¸ŞÀÌ¼Ç
+        // Fade In ì• ë‹ˆë©”ì´ì…˜
         data.CanvasGroup.DOFade(1f, tabSwitchDuration);
 
         Vector2 targetPos = startPos + new Vector2(data.SlideDirection, 0);
@@ -316,7 +316,7 @@ public class TabSwitchController : MonoBehaviour
 
         if (tabSelectText != null)
         {
-            tabSelectText.text = activeTab == TabType.Inventory ? "ÀÎº¥Åä¸®" : "À¯¹°";
+            tabSelectText.text = activeTab == TabType.Inventory ? "ì¸ë²¤í† ë¦¬" : "ìœ ë¬¼";
         }
     }
 
@@ -338,7 +338,7 @@ public class TabSwitchController : MonoBehaviour
 #region Enums
 
 /// <summary>
-/// ÅÇ Å¸ÀÔ ¿­°ÅÇü
+/// íƒ­ íƒ€ì… ì—´ê±°í˜•
 /// </summary>
 public enum TabType
 {

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(RectTransform))]
 public class ItemDeleteArea : MonoBehaviour, IDropHandler
 {
-    // µå·Ó ÀÌº¥Æ® Ã³¸®
+    // ë“œë¡­ ì´ë²¤íŠ¸ ì²˜ë¦¬
     public void OnDrop(PointerEventData eventData)
     {
         Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
@@ -15,7 +15,7 @@ public class ItemDeleteArea : MonoBehaviour, IDropHandler
         }
     }
 
-    // À¯È¿ÇÑ ½½·ÔÀÎÁö È®ÀÎ
+    // ìœ íš¨í•œ ìŠ¬ë¡¯ì¸ì§€ í™•ì¸
     private bool IsValidSlot(Slot_UI slot)
     {
         return slot != null &&
@@ -24,7 +24,7 @@ public class ItemDeleteArea : MonoBehaviour, IDropHandler
                slot.currentSlot.slotIndex != -1;
     }
 
-    // ¾ÆÀÌÅÛ »èÁ¦
+    // ì•„ì´í…œ ì‚­ì œ
     private void DeleteItem(Slot_UI sourceSlot)
     {
         bool success = InventoryManager.Instance.RemoveItem(sourceSlot.currentSlot.slotIndex);

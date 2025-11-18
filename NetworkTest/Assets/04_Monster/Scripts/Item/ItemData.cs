@@ -1,12 +1,12 @@
 using UnityEngine;
 public enum ItemType
 {
-    Weapon, //¹«±â
-    Artifact, //À¯¹°
-    Accessory, // Àå½Å±¸
-    Equipment, // Àåºñ
+    Weapon, //ë¬´ê¸°
+    Artifact, //ìœ ë¬¼
+    Accessory, // ì¥ì‹ êµ¬
+    Equipment, // ì¥ë¹„
 
-    // ´Ü¼ø ¼Ò¸ğÇ° ¶Ç´Â ±âÅ¸
+    // ë‹¨ìˆœ ì†Œëª¨í’ˆ ë˜ëŠ” ê¸°íƒ€
     StatBoost,
     Skill,
     Material,
@@ -15,17 +15,17 @@ public enum ItemType
 
 public enum InventoryFilterType
 {
-    All,        // ÀüÃ¼
-    Weapon,     // ¹«±â
-    Equipment,  // Àåºñ
-    Accessory,  // Àå½Å±¸
-    Relic,      // À¯¹°
-    Etc         // ±âÅ¸
+    All,        // ì „ì²´
+    Weapon,     // ë¬´ê¸°
+    Equipment,  // ì¥ë¹„
+    Accessory,  // ì¥ì‹ êµ¬
+    Relic,      // ìœ ë¬¼
+    Etc         // ê¸°íƒ€
 }
 
 public enum EquipmentSlot
 {
-    None,     // ÀåÂø ºÎÀ§ ¾øÀ½ (Àç·á, À¯¹°, ¹«±â µî)
+    None,     // ì¥ì°© ë¶€ìœ„ ì—†ìŒ (ì¬ë£Œ, ìœ ë¬¼, ë¬´ê¸° ë“±)
     Head,
     Face,
     Necklace,
@@ -38,16 +38,16 @@ public enum EquipmentSlot
 
 public class ItemData : ScriptableObject
 {
-    // ¸ğµç ¾ÆÀÌÅÛÀÌ °øÅëÀ¸·Î °¡Áú µ¥ÀÌÅÍ
-    public string itemID;       // ¾ÆÀÌÅÛ °íÀ¯ ID (¿¹: "WEP_001")
-    public string itemName;     // ¾ÆÀÌÅÛ ÀÌ¸§ (¿¹: "°­Ã¶ °Ë")
-    public Sprite itemIcon;     // ÀÎº¥Åä¸® µî¿¡¼­ º¸¿©ÁÙ ¾ÆÀÌÄÜ
+    // ëª¨ë“  ì•„ì´í…œì´ ê³µí†µìœ¼ë¡œ ê°€ì§ˆ ë°ì´í„°
+    public string itemID;       // ì•„ì´í…œ ê³ ìœ  ID (ì˜ˆ: "WEP_001")
+    public string itemName;     // ì•„ì´í…œ ì´ë¦„ (ì˜ˆ: "ê°•ì²  ê²€")
+    public Sprite itemIcon;     // ì¸ë²¤í† ë¦¬ ë“±ì—ì„œ ë³´ì—¬ì¤„ ì•„ì´ì½˜
 
-    [TextArea(3, 10)] // ÀÎ½ºÆåÅÍ¿¡¼­ ¿©·¯ ÁÙ·Î ÀÔ·Â °¡´ÉÇÏ°Ô ÇÔ
-    public string description;  // ¾ÆÀÌÅÛ ¼³¸í
+    [TextArea(3, 10)] // ì¸ìŠ¤í™í„°ì—ì„œ ì—¬ëŸ¬ ì¤„ë¡œ ì…ë ¥ ê°€ëŠ¥í•˜ê²Œ í•¨
+    public string description;  // ì•„ì´í…œ ì„¤ëª…
 
-    public int maxStack;        // ÃÖ´ë °ãÄ¡±â ¼ö (¿¹: Æ÷¼ÇÀº 99°³, ¹«±â´Â 1°³)
-    public int price;           // »óÁ¡ °¡°İ
+    public int maxStack;        // ìµœëŒ€ ê²¹ì¹˜ê¸° ìˆ˜ (ì˜ˆ: í¬ì…˜ì€ 99ê°œ, ë¬´ê¸°ëŠ” 1ê°œ)
+    public int price;           // ìƒì  ê°€ê²©
 
     [Header("Item Type")]
     public ItemType itemType;

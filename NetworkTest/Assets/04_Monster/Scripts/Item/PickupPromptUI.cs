@@ -1,18 +1,18 @@
 // PickupPromptUI.cs
 
 using UnityEngine;
-using TMPro; // TextMeshPro¸¦ »ç¿ëÇÏ·Á¸é ÇÊ¿ä
+using TMPro; // TextMeshProë¥¼ ì‚¬ìš©í•˜ë ¤ë©´ í•„ìš”
 
 public class PickupPromptUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI promptText; // "E : ¾ÆÀÌÅÛ Áİ±â" ÅØ½ºÆ®
-    [SerializeField] private GameObject promptPanel; // ÅØ½ºÆ®¸¦ °¨½Î´Â ÆĞ³Î (Prompt_Image)
+    [SerializeField] private TextMeshProUGUI promptText; // "E : ì•„ì´í…œ ì¤ê¸°" í…ìŠ¤íŠ¸
+    [SerializeField] private GameObject promptPanel; // í…ìŠ¤íŠ¸ë¥¼ ê°ì‹¸ëŠ” íŒ¨ë„ (Prompt_Image)
 
-    private ItemPickup currentNearbyItem; // ÇöÀç °¡±îÀÌ ÀÖ´Â ¾ÆÀÌÅÛ (ÀÌ¸§ Ç¥½Ã¿ë)
+    private ItemPickup currentNearbyItem; // í˜„ì¬ ê°€ê¹Œì´ ìˆëŠ” ì•„ì´í…œ (ì´ë¦„ í‘œì‹œìš©)
 
     void Awake()
     {
-        // Ã³À½¿¡´Â UI¸¦ ¼û±è
+        // ì²˜ìŒì—ëŠ” UIë¥¼ ìˆ¨ê¹€
         if (promptPanel != null)
         {
             promptPanel.SetActive(false);
@@ -21,17 +21,17 @@ public class PickupPromptUI : MonoBehaviour
 
     void OnEnable()
     {
-        // ItemPickup ½ºÅ©¸³Æ®¿¡¼­ ¹ß»ıÇÏ´Â ÀÌº¥Æ® ±¸µ¶
+        // ItemPickup ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ë°œìƒí•˜ëŠ” ì´ë²¤íŠ¸ êµ¬ë…
         ItemPickup.OnPlayerNearbyPickup += HandlePlayerNearbyPickup;
     }
 
     void OnDisable()
     {
-        // ½ºÅ©¸³Æ®°¡ ºñÈ°¼ºÈ­µÉ ¶§ ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦ (¸Ş¸ğ¸® ´©¼ö ¹æÁö)
+        // ìŠ¤í¬ë¦½íŠ¸ê°€ ë¹„í™œì„±í™”ë  ë•Œ ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ (ë©”ëª¨ë¦¬ ëˆ„ìˆ˜ ë°©ì§€)
         ItemPickup.OnPlayerNearbyPickup -= HandlePlayerNearbyPickup;
     }
 
-    // ItemPickup¿¡¼­ È£ÃâµÇ´Â ÀÌº¥Æ® ÇÚµé·¯
+    // ItemPickupì—ì„œ í˜¸ì¶œë˜ëŠ” ì´ë²¤íŠ¸ í•¸ë“¤ëŸ¬
     private void HandlePlayerNearbyPickup(bool show, ItemPickup item)
     {
         if (promptPanel == null || promptText == null) return;
@@ -39,14 +39,14 @@ public class PickupPromptUI : MonoBehaviour
         if (show && item != null && item.itemData != null)
         {
             currentNearbyItem = item;
-            //promptText.text = $"E : {item.itemData.itemName} Áİ±â"; // ¾ÆÀÌÅÛ ÀÌ¸§ Ç¥½Ã
-            promptText.text = "E : ¾ÆÀÌÅÛÀ» Áİ´Â´Ù";
-            promptPanel.SetActive(true); // UI ÆĞ³Î È°¼ºÈ­
+            //promptText.text = $"E : {item.itemData.itemName} ì¤ê¸°"; // ì•„ì´í…œ ì´ë¦„ í‘œì‹œ
+            promptText.text = "E : ì•„ì´í…œì„ ì¤ëŠ”ë‹¤";
+            promptPanel.SetActive(true); // UI íŒ¨ë„ í™œì„±í™”
         }
         else
         {
             currentNearbyItem = null;
-            promptPanel.SetActive(false); // UI ÆĞ³Î ºñÈ°¼ºÈ­
+            promptPanel.SetActive(false); // UI íŒ¨ë„ ë¹„í™œì„±í™”
         }
     }
 }

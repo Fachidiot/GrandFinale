@@ -1,5 +1,5 @@
 using UnityEngine;
-using Raycasting; // Spider ÇÁ·ÎÁ§Æ®ÀÇ Raycasting ³×ÀÓ½ºÆäÀÌ½º »ç¿ë
+using Raycasting; // Spider í”„ë¡œì íŠ¸ì˜ Raycasting ë„¤ì„ìŠ¤í˜ì´ìŠ¤ ì‚¬ìš©
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class SurfaceAligner : MonoBehaviour
@@ -7,15 +7,15 @@ public class SurfaceAligner : MonoBehaviour
     private Rigidbody rb;
     private CapsuleCollider capsuleCollider;
 
-    [Header("ÀÚ¼¼ Á¦¾î ¼³Á¤")]
-    [Tooltip("Ã¼Å© ÇØÁ¦ ½Ã, Àü¹æ ·¹ÀÌ¸¦ »ç¿ëÇÏÁö ¾Ê¾Æ º®¿¡ ºÙÁö ¾Ê½À´Ï´Ù.")]
+    [Header("ìì„¸ ì œì–´ ì„¤ì •")]
+    [Tooltip("ì²´í¬ í•´ì œ ì‹œ, ì „ë°© ë ˆì´ë¥¼ ì‚¬ìš©í•˜ì§€ ì•Šì•„ ë²½ì— ë¶™ì§€ ì•ŠìŠµë‹ˆë‹¤.")]
     public bool allowWallClimbing = true;
     [Range(1, 15)]
     public float alignmentSpeed = 5f;
     [Range(1, 15)]
     public float gravityMultiplier = 5f;
 
-    [Header("·¹ÀÌÄ³½ºÆ® ¼³Á¤")]
+    [Header("ë ˆì´ìºìŠ¤íŠ¸ ì„¤ì •")]
     public LayerMask walkableLayer;
     private SphereCast downRay, forwardRay;
 
@@ -27,7 +27,7 @@ public class SurfaceAligner : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
 
-        // ·¹ÀÌÄ³½ºÆ® ÃÊ±âÈ­ (±âÁ¸ Spider.cs¿¡¼­ °¡Á®¿È)
+        // ë ˆì´ìºìŠ¤íŠ¸ ì´ˆê¸°í™” (ê¸°ì¡´ Spider.csì—ì„œ ê°€ì ¸ì˜´)
         float scale = transform.lossyScale.y;
         float radius = capsuleCollider.radius * scale;
         float length = capsuleCollider.height * scale;
@@ -67,7 +67,7 @@ public class SurfaceAligner : MonoBehaviour
 
     private void ApplyGravity()
     {
-        // IsGrounded°¡ falseÀÏ ¶§¸¸ (Áï, °øÁß¿¡ ¶¹À» ¶§¸¸) Áß·ÂÀ» Àû¿ëÇÕ´Ï´Ù.
+        // IsGroundedê°€ falseì¼ ë•Œë§Œ (ì¦‰, ê³µì¤‘ì— ë–´ì„ ë•Œë§Œ) ì¤‘ë ¥ì„ ì ìš©í•©ë‹ˆë‹¤.
         if (!IsGrounded)
         {
             rb.AddForce(-SurfaceNormal * gravityMultiplier * 9.81f * rb.mass);

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 public class InventorySlotUIController : MonoBehaviour
 {
-    [Header("ÀÎº¥Åä¸® ½½·Ô UI")]
+    [Header("ì¸ë²¤í† ë¦¬ ìŠ¬ë¡¯ UI")]
     [SerializeField] private List<Slot_UI> allInventorySlots;
 
-    [Header("ÀÚµ¿ ¼³Á¤")]
+    [Header("ìë™ ì„¤ì •")]
     [SerializeField] private bool autoFindSlots = false;
 
     void Start()
@@ -21,7 +21,7 @@ public class InventorySlotUIController : MonoBehaviour
         UnsubscribeFromEvents();
     }
 
-    // ½½·Ô ÃÊ±âÈ­
+    // ìŠ¬ë¡¯ ì´ˆê¸°í™”
     private void InitializeSlots()
     {
         if (autoFindSlots || allInventorySlots == null || allInventorySlots.Count == 0)
@@ -30,7 +30,7 @@ public class InventorySlotUIController : MonoBehaviour
         }
     }
 
-    // ÀÌº¥Æ® ±¸µ¶
+    // ì´ë²¤íŠ¸ êµ¬ë…
     private void SubscribeToEvents()
     {
         if (InventoryManager.Instance != null)
@@ -39,7 +39,7 @@ public class InventorySlotUIController : MonoBehaviour
         }
     }
 
-    // ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦
+    // ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ
     private void UnsubscribeFromEvents()
     {
         if (InventoryManager.Instance != null)
@@ -48,14 +48,14 @@ public class InventorySlotUIController : MonoBehaviour
         }
     }
 
-    // ÀÚµ¿À¸·Î ½½·Ô Ã£±â
+    // ìë™ìœ¼ë¡œ ìŠ¬ë¡¯ ì°¾ê¸°
     private void AutoFindSlots()
     {
         Slot_UI[] foundSlots = GetComponentsInChildren<Slot_UI>(true);
         allInventorySlots = new List<Slot_UI>(foundSlots);
     }
 
-    // ½½·Ô UI ¹ÙÀÎµù ¾÷µ¥ÀÌÆ®
+    // ìŠ¬ë¡¯ UI ë°”ì¸ë”© ì—…ë°ì´íŠ¸
     private void UpdateSlotUIBindings()
     {
         if (!IsValidState()) return;
@@ -74,7 +74,7 @@ public class InventorySlotUIController : MonoBehaviour
         }
     }
 
-    // À¯È¿ÇÑ »óÅÂÀÎÁö È®ÀÎ
+    // ìœ íš¨í•œ ìƒíƒœì¸ì§€ í™•ì¸
     private bool IsValidState()
     {
         return InventoryManager.Instance != null &&
@@ -82,7 +82,7 @@ public class InventorySlotUIController : MonoBehaviour
                allInventorySlots.Count > 0;
     }
 
-    // ½½·Ô µ¥ÀÌÅÍ °¡Á®¿À±â
+    // ìŠ¬ë¡¯ ë°ì´í„° ê°€ì ¸ì˜¤ê¸°
     private InventorySlot GetSlotData(int index, List<InventorySlot> filteredSlots, List<InventorySlot> originalSlots)
     {
         if (index < filteredSlots.Count)

@@ -3342,12 +3342,13 @@ MonoBehaviour:
   walkSpeed: 2
   runSpeed: 4
   sprintSpeed: 7
-  crouchSpeed: 1
+  crouchSpeed: 2
   jumpHeight: 1
   moveVelocity: {x: 0, y: 0, z: 0}
   velocity: {x: 0, y: 0, z: 0}
   rollVelocity: {x: 0, y: 0, z: 0}
   edgeSlipVelocity: {x: 0, y: 0, z: 0}
+  groundNormal: {x: 0, y: 0, z: 0}
 --- !u!114 &2994192107694521990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3406,7 +3407,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3125512638087466591}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05d3956e29193184cad0acb56f5e0a5c, type: 3}
+  m_Script: {fileID: 11500000, guid: d32681d723493894d9f28364548b5dd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   baseWalkSpeed: 2
@@ -3415,6 +3416,10 @@ MonoBehaviour:
   baseCooldownReduction: 0
   baseMaxHealth: 100
   baseDamageModifier: 1
+  baseDefense: 10
+  basePower: 10
+  baseLevel: 1
+  baseCurrency: 22222
   currentHealth: 0
   currentMaxHealth: 0
   currentShield: 0
@@ -3423,6 +3428,10 @@ MonoBehaviour:
   currentSprintSpeed: 0
   currentDamageModifier: 0
   currentCooldownReduction: 0
+  currentDefense: 0
+  currentPower: 0
+  currentLevel: 0
+  currentCurrency: 0
 --- !u!1 &3154526535571121985
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,7 +17,7 @@ public class EquipmentManager : MonoBehaviour
         InitializeEquipmentSlots();
     }
 
-    // ½Ì±ÛÅæ ÃÊ±âÈ­
+    // ì‹±ê¸€í†¤ ì´ˆê¸°í™”
     private void InitializeSingleton()
     {
         if (Instance == null)
@@ -30,7 +30,7 @@ public class EquipmentManager : MonoBehaviour
         }
     }
 
-    // Àåºñ ½½·Ô ÃÊ±âÈ­
+    // ì¥ë¹„ ìŠ¬ë¡¯ ì´ˆê¸°í™”
     private void InitializeEquipmentSlots()
     {
         equipmentSlots = new List<RelicData>();
@@ -40,14 +40,14 @@ public class EquipmentManager : MonoBehaviour
         }
     }
 
-    // Àåºñ Âø¿ë
+    // ì¥ë¹„ ì°©ìš©
     public bool EquipItem(RelicData itemToEquip, int inventorySlotIndex, int targetEquipSlotIndex)
     {
         InventoryManager.Instance.RemoveItemFromSlot(inventorySlotIndex, 1);
 
         RelicData oldItem = equipmentSlots[targetEquipSlotIndex];
 
-        // ±âÁ¸ Àåºñ°¡ ÀÖÀ¸¸é ±³Ã¼
+        // ê¸°ì¡´ ì¥ë¹„ê°€ ìˆìœ¼ë©´ êµì²´
         if (oldItem != null)
         {
             if (!TrySwapEquipment(itemToEquip, oldItem))
@@ -57,7 +57,7 @@ public class EquipmentManager : MonoBehaviour
             }
         }
 
-        // »õ Àåºñ Âø¿ë
+        // ìƒˆ ì¥ë¹„ ì°©ìš©
         equipmentSlots[targetEquipSlotIndex] = itemToEquip;
         ApplyItemAbility(itemToEquip, true);
 
@@ -65,7 +65,7 @@ public class EquipmentManager : MonoBehaviour
         return true;
     }
 
-    // Àåºñ ±³Ã¼ ½Ãµµ
+    // ì¥ë¹„ êµì²´ ì‹œë„
     private bool TrySwapEquipment(RelicData newItem, RelicData oldItem)
     {
         bool addBackSuccess = InventoryManager.Instance.AddItem(oldItem);
@@ -79,14 +79,14 @@ public class EquipmentManager : MonoBehaviour
         return true;
     }
 
-    // ÀÎº¥Åä¸®¿¡ ¾ÆÀÌÅÛ º¹±¸
+    // ì¸ë²¤í† ë¦¬ì— ì•„ì´í…œ ë³µêµ¬
     private void RestoreItemToInventory(RelicData item)
     {
         InventoryManager.Instance.AddItem(item);
         InventoryManager.Instance.NotifyInventoryChanged();
     }
 
-    // »ç¿ë °¡´ÉÇÑ Ã¹ ½½·Ô¿¡ Àåºñ Âø¿ë
+    // ì‚¬ìš© ê°€ëŠ¥í•œ ì²« ìŠ¬ë¡¯ì— ì¥ë¹„ ì°©ìš©
     public bool EquipItemToFirstAvailableSlot(RelicData itemToEquip, int inventorySlotIndex)
     {
         EquipmentSlot_UI[] allEquipSlots = FindObjectsOfType<EquipmentSlot_UI>(true);
@@ -94,7 +94,7 @@ public class EquipmentManager : MonoBehaviour
         int targetEmptySlotIndex = -1;
         int targetFilledSlotIndex = -1;
 
-        // ºó ½½·Ô ¶Ç´Â Ã¤¿öÁø ½½·Ô Ã£±â
+        // ë¹ˆ ìŠ¬ë¡¯ ë˜ëŠ” ì±„ì›Œì§„ ìŠ¬ë¡¯ ì°¾ê¸°
         foreach (EquipmentSlot_UI slotUI in allEquipSlots)
         {
             if (slotUI.CanEquipItem(itemToEquip))
@@ -111,7 +111,7 @@ public class EquipmentManager : MonoBehaviour
             }
         }
 
-        // ºó ½½·Ô ¿ì¼±, ¾øÀ¸¸é Ã¤¿öÁø ½½·Ô¿¡ ±³Ã¼
+        // ë¹ˆ ìŠ¬ë¡¯ ìš°ì„ , ì—†ìœ¼ë©´ ì±„ì›Œì§„ ìŠ¬ë¡¯ì— êµì²´
         if (targetEmptySlotIndex != -1)
         {
             return EquipItem(itemToEquip, inventorySlotIndex, targetEmptySlotIndex);
@@ -125,7 +125,7 @@ public class EquipmentManager : MonoBehaviour
         return false;
     }
 
-    // Àåºñ ÇØÁ¦
+    // ì¥ë¹„ í•´ì œ
     public bool UnequipItem(RelicData itemToUnequip, int equipSlotIndex)
     {
         bool success = InventoryManager.Instance.AddItem(itemToUnequip);
@@ -142,7 +142,7 @@ public class EquipmentManager : MonoBehaviour
         return true;
     }
 
-    // Àåºñ ½½·Ô ±³Ã¼
+    // ì¥ë¹„ ìŠ¬ë¡¯ êµì²´
     public bool SwapEquipmentSlots(int slotIndexA, int slotIndexB)
     {
         if (!IsValidSlotIndex(slotIndexA) || !IsValidSlotIndex(slotIndexB))
@@ -158,13 +158,13 @@ public class EquipmentManager : MonoBehaviour
         return true;
     }
 
-    // ½½·Ô ÀÎµ¦½º À¯È¿¼º °Ë»ç
+    // ìŠ¬ë¡¯ ì¸ë±ìŠ¤ ìœ íš¨ì„± ê²€ì‚¬
     private bool IsValidSlotIndex(int index)
     {
         return index >= 0 && index < equipmentSlots.Count;
     }
 
-    // ¾ÆÀÌÅÛ ´É·Â Àû¿ë/Á¦°Å
+    // ì•„ì´í…œ ëŠ¥ë ¥ ì ìš©/ì œê±°
     private void ApplyItemAbility(RelicData item, bool isEquipping)
     {
         if (item.grantedAbility == null) return;

@@ -1,34 +1,34 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.AI; // ¡Ú¡Ú¡Ú¡Ú¡Ú 1. NavMesh »ç¿ëÀ» À§ÇØ Ãß°¡ ¡Ú¡Ú¡Ú¡Ú¡Ú
+using UnityEngine.AI; // â˜…â˜…â˜…â˜…â˜… 1. NavMesh ì‚¬ìš©ì„ ìœ„í•´ ì¶”ê°€ â˜…â˜…â˜…â˜…â˜…
 
 /// <summary>
-/// ÇÃ·¹ÀÌ¾î°¡ ±ÙÁ¢ÇÏ¸é ¸ó½ºÅÍ¸¦ '¾ÈÀüÇÑ À§Ä¡'¿¡ ½ºÆùÇÕ´Ï´Ù.
-/// ¸ó½ºÅÍ´Â '¸ñÁÙ' ¾øÀÌ ÇÃ·¹ÀÌ¾î¸¦ ³¡±îÁö ÂÑ¾Æ°©´Ï´Ù.
+/// í”Œë ˆì´ì–´ê°€ ê·¼ì ‘í•˜ë©´ ëª¬ìŠ¤í„°ë¥¼ 'ì•ˆì „í•œ ìœ„ì¹˜'ì— ìŠ¤í°í•©ë‹ˆë‹¤.
+/// ëª¬ìŠ¤í„°ëŠ” 'ëª©ì¤„' ì—†ì´ í”Œë ˆì´ì–´ë¥¼ ëê¹Œì§€ ì«“ì•„ê°‘ë‹ˆë‹¤.
 /// </summary>
 public class MonsterSpawner : MonoBehaviour
 {
-    [Header("1. ±âº» ¼³Á¤")]
+    [Header("1. ê¸°ë³¸ ì„¤ì •")]
     public GameObject monsterPrefab;
     private Transform playerTransform;
 
-    [Header("2. ½ºÆù Á¶°Ç (Trigger)")]
+    [Header("2. ìŠ¤í° ì¡°ê±´ (Trigger)")]
     public float triggerRadius = 20f;
     public bool disableSpawn = false;
 
-    [Header("3. ½ºÆù ¹æ½Ä (Burst)")]
+    [Header("3. ìŠ¤í° ë°©ì‹ (Burst)")]
     public int spawnBurstCount = 3;
     public int maxAliveMonsters = 3;
     public float spawnCooldown = 15f;
 
-    [Header("4. ½ºÆù À§Ä¡")]
+    [Header("4. ìŠ¤í° ìœ„ì¹˜")]
     public float spawnRadius = 2f;
-    [Tooltip("¸ó½ºÅÍ°¡ ¼­·Î °ãÄ¡Áö ¾Êµµ·Ï º¸ÀåÇÏ´Â ÃÖ¼Ò ¹İ°æ")]
-    public float spawnOverlapRadius = 1.0f; // ¸ó½ºÅÍ Ä¸½¶ÀÇ ¹İÁö¸§º¸´Ù ¾à°£ Å©°Ô
-    private LayerMask monsterLayerMask; // "Monster" ·¹ÀÌ¾î
+    [Tooltip("ëª¬ìŠ¤í„°ê°€ ì„œë¡œ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ë³´ì¥í•˜ëŠ” ìµœì†Œ ë°˜ê²½")]
+    public float spawnOverlapRadius = 1.0f; // ëª¬ìŠ¤í„° ìº¡ìŠì˜ ë°˜ì§€ë¦„ë³´ë‹¤ ì•½ê°„ í¬ê²Œ
+    private LayerMask monsterLayerMask; // "Monster" ë ˆì´ì–´
 
-    // --- ³»ºÎ º¯¼ö ---
+    // --- ë‚´ë¶€ ë³€ìˆ˜ ---
     private List<GameObject> spawnedMonsters = new List<GameObject>();
     private bool isSpawning = false;
     private bool playerInTriggerZone = false;
@@ -37,7 +37,7 @@ public class MonsterSpawner : MonoBehaviour
     {
         if (monsterPrefab == null)
         {
-            Debug.LogError("Monster PrefabÀÌ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!", this);
+            Debug.LogError("Monster Prefabì´ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!", this);
             disableSpawn = true;
             return;
         }
@@ -48,7 +48,7 @@ public class MonsterSpawner : MonoBehaviour
             playerTransform = player.transform;
         }
 
-        // "Monster" ·¹ÀÌ¾î ¸¶½ºÅ©¸¦ °¡Á®¿É´Ï´Ù. (³¢ÀÓ ¹æÁö¿ë)
+        // "Monster" ë ˆì´ì–´ ë§ˆìŠ¤í¬ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤. (ë¼ì„ ë°©ì§€ìš©)
         monsterLayerMask = LayerMask.GetMask("Monster");
 
         StartCoroutine(SpawnCheckRoutine());
@@ -70,7 +70,7 @@ public class MonsterSpawner : MonoBehaviour
             {
                 if (MonsterManager.Instance != null && !MonsterManager.Instance.CanSpawnMonster())
                 {
-                    Debug.Log($"[{name}] ±Û·Î¹ú ¸ó½ºÅÍ ÇÑµµ µµ´Ş. ½ºÆù ´ë±â.");
+                    Debug.Log($"[{name}] ê¸€ë¡œë²Œ ëª¬ìŠ¤í„° í•œë„ ë„ë‹¬. ìŠ¤í° ëŒ€ê¸°.");
                     continue;
                 }
                 StartCoroutine(SpawnBurst());
@@ -81,64 +81,64 @@ public class MonsterSpawner : MonoBehaviour
     private IEnumerator SpawnBurst()
     {
         isSpawning = true;
-        Debug.Log($"[{name}] ÇÃ·¹ÀÌ¾î °¨Áö! ¸ó½ºÅÍ ½ºÆùÀ» ½ÃÀÛÇÕ´Ï´Ù.");
+        Debug.Log($"[{name}] í”Œë ˆì´ì–´ ê°ì§€! ëª¬ìŠ¤í„° ìŠ¤í°ì„ ì‹œì‘í•©ë‹ˆë‹¤.");
 
         int spawnedCount = 0;
-        int attemptCount = 0; // ¹«ÇÑ ·çÇÁ ¹æÁö
+        int attemptCount = 0; // ë¬´í•œ ë£¨í”„ ë°©ì§€
 
         while (spawnedCount < spawnBurstCount &&
                spawnedMonsters.Count < maxAliveMonsters &&
-               attemptCount < 20) // ÃÖ´ë 20¹ø¸¸ ½Ãµµ
+               attemptCount < 20) // ìµœëŒ€ 20ë²ˆë§Œ ì‹œë„
         {
-            attemptCount++; // ½Ãµµ È½¼ö Áõ°¡
+            attemptCount++; // ì‹œë„ íšŸìˆ˜ ì¦ê°€
 
             if (MonsterManager.Instance != null && !MonsterManager.Instance.CanSpawnMonster())
             {
-                Debug.Log($"[{name}] ½ºÆù Áß ±Û·Î¹ú ÇÑµµ µµ´Ş. ÁßÁö.");
+                Debug.Log($"[{name}] ìŠ¤í° ì¤‘ ê¸€ë¡œë²Œ í•œë„ ë„ë‹¬. ì¤‘ì§€.");
                 break;
             }
 
-            // SpawnMonster() ´ë½Å TrySpawnMonster() È£Ãâ
+            // SpawnMonster() ëŒ€ì‹  TrySpawnMonster() í˜¸ì¶œ
             bool success = TrySpawnMonster();
 
             if (success)
             {
-                spawnedCount++; // ¼º°øÇÑ °æ¿ì¿¡¸¸ Ä«¿îÆ® Áõ°¡
+                spawnedCount++; // ì„±ê³µí•œ ê²½ìš°ì—ë§Œ ì¹´ìš´íŠ¸ ì¦ê°€
             }
 
-            yield return null; // 1ÇÁ·¹ÀÓ ´ë±â (¼º°øÇÏµç ½ÇÆĞÇÏµç)
+            yield return null; // 1í”„ë ˆì„ ëŒ€ê¸° (ì„±ê³µí•˜ë“  ì‹¤íŒ¨í•˜ë“ )
         }
 
-        Debug.Log($"[{name}] ½ºÆù ¿Ï·á. Äğ´Ù¿î ({spawnCooldown}ÃÊ) ½ÃÀÛ.");
+        Debug.Log($"[{name}] ìŠ¤í° ì™„ë£Œ. ì¿¨ë‹¤ìš´ ({spawnCooldown}ì´ˆ) ì‹œì‘.");
         yield return new WaitForSeconds(spawnCooldown);
         isSpawning = false;
     }
     /// <summary>
-    /// ¾ÈÀüÇÑ NavMesh À§Ä¡¿¡ ¸ó½ºÅÍ ½ºÆùÀ» '½Ãµµ'ÇÏ°í ¼º°ø ¿©ºÎ¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
+    /// ì•ˆì „í•œ NavMesh ìœ„ì¹˜ì— ëª¬ìŠ¤í„° ìŠ¤í°ì„ 'ì‹œë„'í•˜ê³  ì„±ê³µ ì—¬ë¶€ë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
     /// </summary>
-    /// <returns>½ºÆù ¼º°ø ½Ã true, ½ÇÆĞ ½Ã false</returns>
+    /// <returns>ìŠ¤í° ì„±ê³µ ì‹œ true, ì‹¤íŒ¨ ì‹œ false</returns>
     private bool TrySpawnMonster()
     {
-        // 1. ½ºÆ÷³Ê ÁÖº¯ÀÇ ¹«ÀÛÀ§ 2D À§Ä¡ ¼±Á¤
+        // 1. ìŠ¤í¬ë„ˆ ì£¼ë³€ì˜ ë¬´ì‘ìœ„ 2D ìœ„ì¹˜ ì„ ì •
         Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
         Vector3 randomPosition = transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);
 
-        // 2. (º®/ÇÏ´Ã ¹æÁö) NavMesh À§¿¡¼­ °¡Àå °¡±î¿î À¯È¿ÇÑ ÁöÁ¡ Ã£±â
-        // (spawnRadiusÀÇ Àı¹İ Á¤µµ±îÁö¸¸ Å½»ö)
+        // 2. (ë²½/í•˜ëŠ˜ ë°©ì§€) NavMesh ìœ„ì—ì„œ ê°€ì¥ ê°€ê¹Œìš´ ìœ íš¨í•œ ì§€ì  ì°¾ê¸°
+        // (spawnRadiusì˜ ì ˆë°˜ ì •ë„ê¹Œì§€ë§Œ íƒìƒ‰)
         if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, spawnRadius * 0.5f, NavMesh.AllAreas))
         {
             Vector3 spawnPosition = hit.position;
 
-            // 3. (³¢ÀÓ ¹æÁö) ÇØ´ç À§Ä¡¿¡ ÀÌ¹Ì ´Ù¸¥ ¸ó½ºÅÍ°¡ ÀÖ´ÂÁö È®ÀÎ
-            // (spawnOverlapRadius´Â ¸ó½ºÅÍ Ä¸½¶ÀÇ ¹İÁö¸§º¸´Ù ¾à°£ Å©°Ô ¼³Á¤)
+            // 3. (ë¼ì„ ë°©ì§€) í•´ë‹¹ ìœ„ì¹˜ì— ì´ë¯¸ ë‹¤ë¥¸ ëª¬ìŠ¤í„°ê°€ ìˆëŠ”ì§€ í™•ì¸
+            // (spawnOverlapRadiusëŠ” ëª¬ìŠ¤í„° ìº¡ìŠì˜ ë°˜ì§€ë¦„ë³´ë‹¤ ì•½ê°„ í¬ê²Œ ì„¤ì •)
             if (Physics.CheckSphere(spawnPosition, spawnOverlapRadius, monsterLayerMask))
             {
-                // ÀÌ¹Ì ¸ó½ºÅÍ°¡ ÀÖÀ½ -> ³¢ÀÓ ¹æÁö¸¦ À§ÇØ ½ºÆù ½ÇÆĞ
-                Debug.LogWarning($"[{name}] ½ºÆù À§Ä¡ ({spawnPosition})¿¡ ÀÌ¹Ì ´Ù¸¥ ¸ó½ºÅÍ°¡ ÀÖ¾î ½ºÆùÀ» Ãë¼ÒÇÕ´Ï´Ù.");
+                // ì´ë¯¸ ëª¬ìŠ¤í„°ê°€ ìˆìŒ -> ë¼ì„ ë°©ì§€ë¥¼ ìœ„í•´ ìŠ¤í° ì‹¤íŒ¨
+                Debug.LogWarning($"[{name}] ìŠ¤í° ìœ„ì¹˜ ({spawnPosition})ì— ì´ë¯¸ ë‹¤ë¥¸ ëª¬ìŠ¤í„°ê°€ ìˆì–´ ìŠ¤í°ì„ ì·¨ì†Œí•©ë‹ˆë‹¤.");
                 return false;
             }
 
-            // --- ¸ó½ºÅÍ ½ºÆù ---
+            // --- ëª¬ìŠ¤í„° ìŠ¤í° ---
             GameObject spawnedMonster = Instantiate(monsterPrefab, spawnPosition, transform.rotation);
             spawnedMonsters.Add(spawnedMonster);
 
@@ -146,13 +146,13 @@ public class MonsterSpawner : MonoBehaviour
             {
                 MonsterManager.Instance.RegisterMonsterSpawned();
             }
-            return true; // ½ºÆù ¼º°ø
+            return true; // ìŠ¤í° ì„±ê³µ
         }
         else
         {
-            // NavMesh.SamplePositionÀÌ À¯È¿ÇÑ À§Ä¡¸¦ Ã£Áö ¸øÇÔ (¿¹: º® ¼Ó)
-            Debug.LogWarning($"[{name}] ·£´ı À§Ä¡ ({randomPosition}) ±ÙÃ³¿¡ À¯È¿ÇÑ NavMesh°¡ ¾ø¾î ½ºÆù¿¡ ½ÇÆĞÇß½À´Ï´Ù.");
-            return false; // ½ºÆù ½ÇÆĞ
+            // NavMesh.SamplePositionì´ ìœ íš¨í•œ ìœ„ì¹˜ë¥¼ ì°¾ì§€ ëª»í•¨ (ì˜ˆ: ë²½ ì†)
+            Debug.LogWarning($"[{name}] ëœë¤ ìœ„ì¹˜ ({randomPosition}) ê·¼ì²˜ì— ìœ íš¨í•œ NavMeshê°€ ì—†ì–´ ìŠ¤í°ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
+            return false; // ìŠ¤í° ì‹¤íŒ¨
         }
     }
 
@@ -169,9 +169,9 @@ public class MonsterSpawner : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = new Color(1, 1, 0, 0.75f); // Æ®¸®°Å (³ë¶û)
+        Gizmos.color = new Color(1, 1, 0, 0.75f); // íŠ¸ë¦¬ê±° (ë…¸ë‘)
         Gizmos.DrawWireSphere(transform.position, triggerRadius);
-        Gizmos.color = new Color(0, 0, 1, 0.5f); // ½ºÆù (ÆÄ¶û)
+        Gizmos.color = new Color(0, 0, 1, 0.5f); // ìŠ¤í° (íŒŒë‘)
         Gizmos.DrawWireSphere(transform.position, spawnRadius);
     }
 }

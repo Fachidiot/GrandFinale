@@ -11,18 +11,34 @@ public class CrouchState : StateMachineBase
 
     public override void Tick()
     {
-        // var horizontalInput = Input.GetAxis("Horizontal");
         var horizontalInput = characterMove.Inputs.GetAxisHorizontal();
-        // var verticalInput = Input.GetAxis("Vertical");
         var verticalInput = characterMove.Inputs.GetAxisVertical();
 
+        // 1. 이동 방향 벡터 계산
         Quaternion moveForward = Quaternion.Euler(0, characterMove.directionOrienter.rotation.eulerAngles.y, 0);
+        Vector3 rawMoveDirection = (moveForward * Vector3.forward * verticalInput) + (moveForward * Vector3.right * horizontalInput);
 
-        characterMove.moveVelocity = Vector3.ClampMagnitude(moveForward * Vector3.forward * verticalInput + moveForward * Vector3.right * horizontalInput, 1) * characterMove.crouchSpeed;
+        // 2. 경사면을 고려하여 이동 방향을 지면에 투영
+        Vector3 projectedMoveDirection = Vector3.ProjectOnPlane(rawMoveDirection, characterMove.groundNormal).normalized;
 
-        // if (Input.GetKeyDown(KeyCode.C))
+        // 3. 최종 수평 이동 속도 계산
+        Vector3 horizontalVelocity = projectedMoveDirection * characterMove.crouchSpeed * rawMoveDirection.magnitude;
+
+        // 4. 수직 속도(중력) 계산
+        Vector3 verticalVelocity = new Vector3(0, characterMove.velocity.y, 0);
+        if (characterMove.isGrounded && verticalVelocity.y > characterMove.gravity * Time.deltaTime)
+        {
+            verticalVelocity.y = -2f; // 땅에 붙어있도록 약한 중력 유지
+        }
+
+        // 5. 최종 속도 결합 및 적용
+        characterMove.moveVelocity = horizontalVelocity + verticalVelocity;
+        characterController.Move(characterMove.moveVelocity * Time.deltaTime);
+
+        // --- 상태 변경 로직 ---
         if (characterMove.Inputs.GetCrouch())
         {
+            // 일어서도 되는지 천장 체크
             if (Physics.SphereCast(characterMove.transform.position, characterMove.characterController.radius, Vector3.up, out RaycastHit hit2, characterMove.normalColliderHeight - characterMove.characterController.radius + characterMove.characterController.skinWidth, characterMove.groundCheckMask))
             {
                 Debug.Log("Can't get up");
@@ -39,10 +55,8 @@ public class CrouchState : StateMachineBase
             characterMove.SetState(characterMove.moveState);
         }
 
-        characterController.Move(characterMove.moveVelocity * Time.deltaTime);
-
-        characterMove.bodyTurnHandler.momentaryTurn = horizontalInput + verticalInput > 0;
-
+        // --- 애니메이션 및 회전 로직 ---
+        characterMove.bodyTurnHandler.momentaryTurn = rawMoveDirection.magnitude > 0;
         characterMove.animator.SetFloat(characterMove.horizontalInputID, horizontalInput);
         characterMove.animator.SetFloat(characterMove.verticalInputID, verticalInput);
     }

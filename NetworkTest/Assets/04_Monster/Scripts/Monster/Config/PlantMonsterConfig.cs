@@ -1,41 +1,41 @@
 using UnityEngine;
 
-// 1. MonsterConfig¸¦ »ó¼Ó¹Ş½À´Ï´Ù.
+// 1. MonsterConfigë¥¼ ìƒì†ë°›ìŠµë‹ˆë‹¤.
 [CreateAssetMenu(fileName = "NewPlantConfig", menuName = "Monster/Plant Monster Config")]
 public class PlantMonsterConfig : MonsterConfig
 {
-    // 2. PlantMonster¸¸ »ç¿ëÇÏ´Â °íÀ¯ º¯¼öµéÀ» ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+    // 2. PlantMonsterë§Œ ì‚¬ìš©í•˜ëŠ” ê³ ìœ  ë³€ìˆ˜ë“¤ì„ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
     [Header("Plant Monster (Hide)")]
-    [Tooltip("ÀÌ ¹üÀ§ ¾ÈÀ¸·Î ÇÃ·¹ÀÌ¾î°¡ µé¾î¿À¸é È°¼ºÈ­(goAlive)µË´Ï´Ù.")]
+    [Tooltip("ì´ ë²”ìœ„ ì•ˆìœ¼ë¡œ í”Œë ˆì´ì–´ê°€ ë“¤ì–´ì˜¤ë©´ í™œì„±í™”(goAlive)ë©ë‹ˆë‹¤.")]
     public float activationRange = 15f;
 
     [Header("Plant Monster (Attack)")]
-    [Tooltip("ÀÌ °Å¸®º¸´Ù ¸Ö¸é LeapState(µ¹Áø)¸¦ ½ÃµµÇÕ´Ï´Ù.")]
+    [Tooltip("ì´ ê±°ë¦¬ë³´ë‹¤ ë©€ë©´ LeapState(ëŒì§„)ë¥¼ ì‹œë„í•©ë‹ˆë‹¤.")]
     public float jumpRange = 10f;
-    [Tooltip("ÀÌ °Å¸® ¾ÈÀÌ¸é RangedAttackState(¿ø°Å¸®)¸¦ ½ÃµµÇÕ´Ï´Ù.")]
+    [Tooltip("ì´ ê±°ë¦¬ ì•ˆì´ë©´ RangedAttackState(ì›ê±°ë¦¬)ë¥¼ ì‹œë„í•©ë‹ˆë‹¤.")]
     public float rangedAttackRange = 8f;
-    [Tooltip("¿ø°Å¸® °ø°İ ½Ã ±â¸¦ ¸ğÀ¸´Â ½Ã°£ (castStart)")]
+    [Tooltip("ì›ê±°ë¦¬ ê³µê²© ì‹œ ê¸°ë¥¼ ëª¨ìœ¼ëŠ” ì‹œê°„ (castStart)")]
     public float castTime = 2.0f;
-   [Tooltip("´ÙÁß ¹ß»ç ½Ã, °¢ ¹ß»ç »çÀÌÀÇ ½Ã°£ °£°İ")]
+   [Tooltip("ë‹¤ì¤‘ ë°œì‚¬ ì‹œ, ê° ë°œì‚¬ ì‚¬ì´ì˜ ì‹œê°„ ê°„ê²©")]
     public float timeBetweenShots = 1.2f;
     [Header("Projectile")]
-    [Tooltip("¿ø°Å¸® °ø°İ ½Ã ¹ß»çÇÒ Åõ»çÃ¼ ÇÁ¸®ÆÕ")]
+    [Tooltip("ì›ê±°ë¦¬ ê³µê²© ì‹œ ë°œì‚¬í•  íˆ¬ì‚¬ì²´ í”„ë¦¬íŒ¹")]
     public GameObject projectilePrefab;
-    [Header("Poison Attack (Åõ»çÃ¼ µ¶ °ø°İ)")]
-    [Tooltip("Åõ»çÃ¼ ¶Ç´Â Ãæµ¹ ÀÌÆåÆ®(Impact Effect)¿¡ ÀÇÇÑ ´Ü¹ß ÇÇÇØ·®")]
+    [Header("Poison Attack (íˆ¬ì‚¬ì²´ ë… ê³µê²©)")]
+    [Tooltip("íˆ¬ì‚¬ì²´ ë˜ëŠ” ì¶©ëŒ ì´í™íŠ¸(Impact Effect)ì— ì˜í•œ ë‹¨ë°œ í”¼í•´ëŸ‰")]
     public float impactDamage = 20f;
-    [Tooltip("¹Ù´Ú¿¡ ÀºÀºÇÏ°Ô ±ò¸®´Â µ¶ ÀåÆÇ ÇÁ¸®ÆÕ (PoisonArea.cs ½ºÅ©¸³Æ® Æ÷ÇÔ)")]
+    [Tooltip("ë°”ë‹¥ì— ì€ì€í•˜ê²Œ ê¹”ë¦¬ëŠ” ë… ì¥íŒ í”„ë¦¬íŒ¹ (PoisonArea.cs ìŠ¤í¬ë¦½íŠ¸ í¬í•¨)")]
     public GameObject poisonAreaPrefab;
-    [Tooltip("µ¶ ÀåÆÇ¿¡ ÀÇÇÑ Æ½ ÇÇÇØ·®")]
+    [Tooltip("ë… ì¥íŒì— ì˜í•œ í‹± í”¼í•´ëŸ‰")]
     public float tickDamage = 5f;
-    [Tooltip("µ¶ ÀåÆÇÀÇ Áö¼Ó ½Ã°£ (ÃÊ)")]
+    [Tooltip("ë… ì¥íŒì˜ ì§€ì† ì‹œê°„ (ì´ˆ)")]
     public float poisonDuration = 5.0f;
-    [Tooltip("µ¶ ÀåÆÇ Æ½ ÇÇÇØ Àû¿ë °£°İ (ÃÊ)")]
-    public float poisonTickRate = 1.0f; // 1ÃÊ¸¶´Ù ÇÇÇØ¸¦ ÁØ´Ù°í °¡Á¤
+    [Tooltip("ë… ì¥íŒ í‹± í”¼í•´ ì ìš© ê°„ê²© (ì´ˆ)")]
+    public float poisonTickRate = 1.0f; // 1ì´ˆë§ˆë‹¤ í”¼í•´ë¥¼ ì¤€ë‹¤ê³  ê°€ì •
     [Header("Projectile Arc")]
-    [Tooltip("Æ÷¹°¼±ÀÇ ÃÖ´ë ³ôÀÌ")]
+    [Tooltip("í¬ë¬¼ì„ ì˜ ìµœëŒ€ ë†’ì´")]
     public float projectileArcHeight = 5.0f;
-    [Tooltip("Æ÷¹°¼± Åõ»çÃ¼ÀÇ ¼Óµµ")]
+    [Tooltip("í¬ë¬¼ì„  íˆ¬ì‚¬ì²´ì˜ ì†ë„")]
     public float projectileSpeed = 6.0f;
 
 }

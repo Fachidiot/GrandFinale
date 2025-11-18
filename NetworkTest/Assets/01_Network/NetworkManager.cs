@@ -1,17 +1,12 @@
 using UnityEngine;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 using Steamworks;
 using UnityEngine.SceneManagement;
 using System.Text;
 
-/// <summary>
-/// Defines the role of the current machine in the network.
-/// </summary>
 public enum NetworkMode
 {
     None,
@@ -19,10 +14,6 @@ public enum NetworkMode
     Host
 }
 
-/// <summary>
-/// Core class for managing the network session, including lobby management and P2P data transfer.
-/// This class is a singleton and persists across scenes.
-/// </summary>
 public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance { get; private set; }

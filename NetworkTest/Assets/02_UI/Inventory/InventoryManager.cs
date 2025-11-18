@@ -17,7 +17,7 @@ public class InventoryManager : MonoBehaviour
 
     //private PlayerInputs playerInputs;
     public List<InventorySlot> inventorySlots;
-    
+
 
     public static event Action OnInventoryChanged;
     public static event Action<bool> OnInventoryToggle;
@@ -63,7 +63,7 @@ public class InventoryManager : MonoBehaviour
             inventorySlots.Add(new InventorySlot() { slotIndex = i });
         }
 
-        // ÇÃ·¹ÀÌ¾î ¾Ö´Ï¸ŞÀÌÅÍ Ã£±â
+        // í”Œë ˆì´ì–´ ì• ë‹ˆë©”ì´í„° ì°¾ê¸°
         if (characterMove != null)
         {
             playerAnimator = characterMove.GetComponent<Animator>();
@@ -94,36 +94,36 @@ public class InventoryManager : MonoBehaviour
     {
         /*if (playerInput != null && playerInput.GetInventory())
         {
-            Debug.Log("ÀÎº¥Åä¸® Å° ÀÔ·Â °¨Áö (by PlayerInputs)!");
-            // ToggleSmallInventory(); // (ÀÌÀü¿¡ 'O'Å°¿¡ ¿¬°áµÈ ToggleInventory() ´ë½Å)
+            Debug.Log("ì¸ë²¤í† ë¦¬ í‚¤ ì…ë ¥ ê°ì§€ (by PlayerInputs)!");
+            // ToggleSmallInventory(); // (ì´ì „ì— 'O'í‚¤ì— ì—°ê²°ëœ ToggleInventory() ëŒ€ì‹ )
         }
 
         if (playerInput != null && playerInput.GetFullInventoryToggle())
         {
-            Debug.Log("Full ÀÎº¥Åä¸® Å° ÀÔ·Â °¨Áö (by PlayerInputs)!");
-            ToggleInventory(); // (±âÁ¸ 'O'Å°¿¡ ¿¬°áµÈ ÇÔ¼ö)
+            Debug.Log("Full ì¸ë²¤í† ë¦¬ í‚¤ ì…ë ¥ ê°ì§€ (by PlayerInputs)!");
+            ToggleInventory(); // (ê¸°ì¡´ 'O'í‚¤ì— ì—°ê²°ëœ í•¨ìˆ˜)
         }*/
 
 
-        // Tab Å°: Small ÀÎº¥Åä¸® Åä±Û
+        // Tab í‚¤: Small ì¸ë²¤í† ë¦¬ í† ê¸€
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             ToggleSmallInventory();
         }
 
-        // O Å°: Full ÀÎº¥Åä¸® Åä±Û
+        // O í‚¤: Full ì¸ë²¤í† ë¦¬ í† ê¸€
         if (Input.GetKeyDown(KeyCode.O))
         {
             ToggleFullInventory();
         }
 
-        // ESC Å°: ÀÎº¥Åä¸®°¡ ¿­·ÁÀÖÀ¸¸é ´İ±â
+        // ESC í‚¤: ì¸ë²¤í† ë¦¬ê°€ ì—´ë ¤ìˆìœ¼ë©´ ë‹«ê¸°
         if (IsFocused && Input.GetKeyDown(KeyCode.Escape))
         {
             CloseAllInventories();
         }
 
-        // UI ¿ÜºÎ Å¬¸¯ ½Ã Æ÷Ä¿½º ÇØÁ¦
+        // UI ì™¸ë¶€ í´ë¦­ ì‹œ í¬ì»¤ìŠ¤ í•´ì œ
         if (IsFocused && Input.GetMouseButtonDown(0))
         {
             bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
@@ -139,7 +139,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (smallInventoryUI == null) return;
 
-        // ÀüÃ¼ Ã¢ÀÌ ÄÑÁ® ÀÖÀ¸¸é ²ô±â
+        // ì „ì²´ ì°½ì´ ì¼œì ¸ ìˆìœ¼ë©´ ë„ê¸°
         if (fullInventoryUI != null && fullInventoryUI.activeSelf)
         {
             fullInventoryUI.SetActive(false);
@@ -219,7 +219,7 @@ public class InventoryManager : MonoBehaviour
 
         this.IsFocused = isFocused;
 
-        // Ä¿¼­ Á¦¾î
+        // ì»¤ì„œ ì œì–´
         if (isFocused)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -231,7 +231,7 @@ public class InventoryManager : MonoBehaviour
             Cursor.visible = false;
         }
 
-        // ¾Ö´Ï¸ŞÀÌ¼Ç Á¦¾î
+        // ì• ë‹ˆë©”ì´ì…˜ ì œì–´
         if (isFocused)
         {
             StopPlayerAnimation();
@@ -256,7 +256,7 @@ public class InventoryManager : MonoBehaviour
             characterMove.StopAllActions();
         }
 
-        // Á¶ÁØ ÁßÀÌ¸é °­Á¦·Î ÇØÁ¦
+        // ì¡°ì¤€ ì¤‘ì´ë©´ ê°•ì œë¡œ í•´ì œ
         if (cameraSwitcher != null)
         {
             cameraSwitcher.StopAiming();
@@ -273,10 +273,10 @@ public class InventoryManager : MonoBehaviour
 
     public bool AddItem(RelicData itemToAdd)
     {
-        // 1. ½ºÅÃ °¡´ÉÇÑ ¾ÆÀÌÅÛÀÎÁö È®ÀÎ (maxStack > 1)
+        // 1. ìŠ¤íƒ ê°€ëŠ¥í•œ ì•„ì´í…œì¸ì§€ í™•ì¸ (maxStack > 1)
         if (itemToAdd.maxStack > 1)
         {
-            // 2. ÀÎº¥Åä¸®¸¦ ¼øÈ¸ÇÏ¸ç °°Àº ¾ÆÀÌÅÛÀÌ ÀÖ°í, ½ºÅÃÀÌ °¡µæ Â÷Áö ¾Ê¾Ò´ÂÁö È®ÀÎ
+            // 2. ì¸ë²¤í† ë¦¬ë¥¼ ìˆœíšŒí•˜ë©° ê°™ì€ ì•„ì´í…œì´ ìˆê³ , ìŠ¤íƒì´ ê°€ë“ ì°¨ì§€ ì•Šì•˜ëŠ”ì§€ í™•ì¸
             for (int i = 0; i < slotCapacity; i++)
             {
                 InventorySlot slot = inventorySlots[i];
@@ -284,25 +284,25 @@ public class InventoryManager : MonoBehaviour
                     slot.item.itemID == itemToAdd.itemID &&
                     slot.quantity < slot.item.maxStack)
                 {
-                    // 3. (½ºÅÃ ¼º°ø) ¼ö·®À» 1 Áõ°¡½ÃÅ°°í ¾Ë¸²
+                    // 3. (ìŠ¤íƒ ì„±ê³µ) ìˆ˜ëŸ‰ì„ 1 ì¦ê°€ì‹œí‚¤ê³  ì•Œë¦¼
                     slot.AddQuantity(1);
                     OnInventoryChanged?.Invoke();
                     return true;
                 }
             }
-            // 4. (½ÇÆĞ) °°Àº ¾ÆÀÌÅÛÀ» Ã£Áö ¸øÇß°Å³ª ¸ğµÎ °¡µæ Ã¡À½. -> ´ÙÀ½ ´Ü°è(ºó ½½·Ô Ã£±â)·Î ÀÌµ¿
+            // 4. (ì‹¤íŒ¨) ê°™ì€ ì•„ì´í…œì„ ì°¾ì§€ ëª»í–ˆê±°ë‚˜ ëª¨ë‘ ê°€ë“ ì°¼ìŒ. -> ë‹¤ìŒ ë‹¨ê³„(ë¹ˆ ìŠ¬ë¡¯ ì°¾ê¸°)ë¡œ ì´ë™
         }
 
-        // 5. (½ºÅÃ ºÒ°¡ ¶Ç´Â ½ºÅÃ ½ÇÆĞ) ºó ½½·ÔÀ» Ã£½À´Ï´Ù.
+        // 5. (ìŠ¤íƒ ë¶ˆê°€ ë˜ëŠ” ìŠ¤íƒ ì‹¤íŒ¨) ë¹ˆ ìŠ¬ë¡¯ì„ ì°¾ìŠµë‹ˆë‹¤.
         int emptySlotIndex = FindNextEmptySlot();
 
         if (emptySlotIndex == -1)
         {
-            Debug.Log("ÀÎº¥Åä¸®°¡ ²Ë Ã¡½À´Ï´Ù.");
+            Debug.Log("ì¸ë²¤í† ë¦¬ê°€ ê½‰ ì°¼ìŠµë‹ˆë‹¤.");
             return false;
         }
 
-        // 6. ºó ½½·Ô¿¡ ¾ÆÀÌÅÛ Á¤º¸¿Í ¼ö·® 1À» ¼³Á¤ÇÕ´Ï´Ù.
+        // 6. ë¹ˆ ìŠ¬ë¡¯ì— ì•„ì´í…œ ì •ë³´ì™€ ìˆ˜ëŸ‰ 1ì„ ì„¤ì •í•©ë‹ˆë‹¤.
         inventorySlots[emptySlotIndex].item = itemToAdd;
         inventorySlots[emptySlotIndex].quantity = 1;
 
@@ -356,7 +356,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (slotIndex < 0 || slotIndex >= slotCapacity)
         {
-            Debug.LogError($"[InventoryManager] Àß¸øµÈ ½½·Ô ÀÎµ¦½º: {slotIndex}");
+            Debug.LogError($"[InventoryManager] ì˜ëª»ëœ ìŠ¬ë¡¯ ì¸ë±ìŠ¤: {slotIndex}");
             return false;
         }
         inventorySlots[slotIndex].ClearSlot();
@@ -400,11 +400,11 @@ public class InventoryManager : MonoBehaviour
 
             RemoveItemFromSlot(slotIndex, 1);
 
-            Debug.Log($"{itemToDrop.itemName}À»(¸¦) ¹Ù´Ú¿¡ 1°³ ¹ö·È½À´Ï´Ù. (³²Àº ¼ö·®: {slotToDrop.quantity})");
+            Debug.Log($"{itemToDrop.itemName}ì„(ë¥¼) ë°”ë‹¥ì— 1ê°œ ë²„ë ¸ìŠµë‹ˆë‹¤. (ë‚¨ì€ ìˆ˜ëŸ‰: {slotToDrop.quantity})");
         }
         else
         {
-            Debug.LogWarning("InventoryManager¿¡ genericLootPrefabÀÌ ¼³Á¤µÇÁö ¾Ê¾Æ ¾ÆÀÌÅÛÀ» ¹ö¸± ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("InventoryManagerì— genericLootPrefabì´ ì„¤ì •ë˜ì§€ ì•Šì•„ ì•„ì´í…œì„ ë²„ë¦´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
 
@@ -418,7 +418,7 @@ public class InventoryManager : MonoBehaviour
         if (currentFilter != newFilter)
         {
             currentFilter = newFilter;
-            Debug.Log($"[InventoryManager] ÇÊÅÍ º¯°æ: {currentFilter}");
+            Debug.Log($"[InventoryManager] í•„í„° ë³€ê²½: {currentFilter}");
             OnInventoryChanged?.Invoke();
         }
     }
@@ -430,7 +430,7 @@ public class InventoryManager : MonoBehaviour
 
     public void SortInventory()
     {
-        // 1. ¾ÆÀÌÅÛÀÌ ÀÖ´Â ½½·Ô°ú ºñ¾îÀÖ´Â ½½·ÔÀ» ºĞ¸®
+        // 1. ì•„ì´í…œì´ ìˆëŠ” ìŠ¬ë¡¯ê³¼ ë¹„ì–´ìˆëŠ” ìŠ¬ë¡¯ì„ ë¶„ë¦¬
         List<InventorySlot> filledSlots = inventorySlots
             .Where(slot => slot.item != null)
             .ToList();
@@ -439,59 +439,59 @@ public class InventoryManager : MonoBehaviour
             .Where(slot => slot.item == null)
             .ToList();
 
-        // 2. ¾ÆÀÌÅÛÀÌ ÀÖ´Â ½½·ÔÀ» Á¤·Ä
+        // 2. ì•„ì´í…œì´ ìˆëŠ” ìŠ¬ë¡¯ì„ ì •ë ¬
         filledSlots = filledSlots
             .OrderBy(slot => slot.item.itemName)
             .ThenByDescending(slot => slot.quantity)
             .ToList();
 
-        // 3. Á¤·ÄµÈ ½½·Ô°ú ºó ½½·ÔÀ» ´Ù½Ã ÇÕÄ¡±â
+        // 3. ì •ë ¬ëœ ìŠ¬ë¡¯ê³¼ ë¹ˆ ìŠ¬ë¡¯ì„ ë‹¤ì‹œ í•©ì¹˜ê¸°
         inventorySlots.Clear();
         inventorySlots.AddRange(filledSlots);
         inventorySlots.AddRange(emptySlots);
 
-        // 4. ½½·Ô ÀÎµ¦½º Àç¼³Á¤
+        // 4. ìŠ¬ë¡¯ ì¸ë±ìŠ¤ ì¬ì„¤ì •
         for (int i = 0; i < slotCapacity; i++)
         {
             inventorySlots[i].slotIndex = i;
         }
 
-        // 5. UI ¾÷µ¥ÀÌÆ® ÀÌº¥Æ® È£Ãâ
+        // 5. UI ì—…ë°ì´íŠ¸ ì´ë²¤íŠ¸ í˜¸ì¶œ
         OnInventoryChanged?.Invoke();
-        Debug.Log("[InventoryManager] ÀÎº¥Åä¸® Á¤·Ä ¿Ï·á.");
+        Debug.Log("[InventoryManager] ì¸ë²¤í† ë¦¬ ì •ë ¬ ì™„ë£Œ.");
     }
 
     public void SetSearchQuery(string query)
     {
-        // ¼Ò¹®ÀÚ·Î º¯È¯ÇÏ¿© ÀúÀå (´ë¼Ò¹®ÀÚ ±¸ºĞ ¾øÀÌ °Ë»öÇÏ±â À§ÇÔ)
+        // ì†Œë¬¸ìë¡œ ë³€í™˜í•˜ì—¬ ì €ì¥ (ëŒ€ì†Œë¬¸ì êµ¬ë¶„ ì—†ì´ ê²€ìƒ‰í•˜ê¸° ìœ„í•¨)
         string newQuery = query.Trim().ToLower();
 
         if (currentSearchQuery != newQuery)
         {
             currentSearchQuery = newQuery;
-            Debug.Log($"[InventoryManager] °Ë»ö¾î º¯°æ: {currentSearchQuery}");
-            // °Ë»ö¾î°¡ º¯°æµÇ¸é UI¸¦ ¾÷µ¥ÀÌÆ®ÇØ¾ß ÇÔ
+            Debug.Log($"[InventoryManager] ê²€ìƒ‰ì–´ ë³€ê²½: {currentSearchQuery}");
+            // ê²€ìƒ‰ì–´ê°€ ë³€ê²½ë˜ë©´ UIë¥¼ ì—…ë°ì´íŠ¸í•´ì•¼ í•¨
             OnInventoryChanged?.Invoke();
         }
     }
 
 
     /// <summary>
-    /// Full Inventory UI¸¦ ¿­ ¶§ÀÇ ¾Ö´Ï¸ŞÀÌ¼Ç (ÆäÀÌµå ÀÎ)
+    /// Full Inventory UIë¥¼ ì—´ ë•Œì˜ ì• ë‹ˆë©”ì´ì…˜ (í˜ì´ë“œ ì¸)
     /// </summary>
     private void InventoryAnimation_Open()
     {
         if (fullCanvasGroup == null || fullInventoryUI == null) return;
 
-        // 1. ÃÊ±â ¼³Á¤
+        // 1. ì´ˆê¸° ì„¤ì •
         fullInventoryUI.SetActive(true);
         fullCanvasGroup.alpha = 0f;
         fullCanvasGroup.blocksRaycasts = true;
 
-        // 2. DOTween ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà (ÆäÀÌµå ÀÎ)
+        // 2. DOTween ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ (í˜ì´ë“œ ì¸)
         fullCanvasGroup.DOFade(1f, fadeDuration).SetEase(Ease.OutSine);
 
-        // (Å×½ºÆ®¿ë ´Ù¸¥ ¾Ö´Ï¸ŞÀÌ¼Ç ¹öÀü: ½ºÄÉÀÏ È®´ë)
+        // (í…ŒìŠ¤íŠ¸ìš© ë‹¤ë¥¸ ì• ë‹ˆë©”ì´ì…˜ ë²„ì „: ìŠ¤ì¼€ì¼ í™•ëŒ€)
         /*
         fullInventoryUI.transform.localScale = Vector3.one * 0.8f;
         fullInventoryUI.transform.DOScale(1f, fadeDuration).SetEase(Ease.OutBack);
@@ -499,20 +499,20 @@ public class InventoryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Full Inventory UI¸¦ ´İÀ» ¶§ÀÇ ¾Ö´Ï¸ŞÀÌ¼Ç (ÆäÀÌµå ¾Æ¿ô)
+    /// Full Inventory UIë¥¼ ë‹«ì„ ë•Œì˜ ì• ë‹ˆë©”ì´ì…˜ (í˜ì´ë“œ ì•„ì›ƒ)
     /// </summary>
     private void InventoryAnimation_Close()
     {
         if (fullCanvasGroup == null || fullInventoryUI == null) return;
 
-        // 1. DOTween ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà (ÆäÀÌµå ¾Æ¿ô)
+        // 1. DOTween ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ (í˜ì´ë“œ ì•„ì›ƒ)
         fullCanvasGroup.blocksRaycasts = false;
 
         fullCanvasGroup.DOFade(0f, fadeDuration)
             .SetEase(Ease.InSine)
             .OnComplete(() =>
             {
-                // 2. ¾Ö´Ï¸ŞÀÌ¼Ç ¿Ï·á ÈÄ ºñÈ°¼ºÈ­ ¹× Æ÷Ä¿½º ÇØÁ¦
+                // 2. ì• ë‹ˆë©”ì´ì…˜ ì™„ë£Œ í›„ ë¹„í™œì„±í™” ë° í¬ì»¤ìŠ¤ í•´ì œ
                 fullInventoryUI.SetActive(false);
                 SetFocusState(false);
             });

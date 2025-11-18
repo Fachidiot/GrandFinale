@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IMonsterMovement
 {
-    // ¹æÇâÀÌ ¾Æ´Ñ ÃÖÁ¾ ¸ñÀûÁö¸¦ ¸í·ÉÇÏµµ·Ï º¯°æ
+    // ë°©í–¥ì´ ì•„ë‹Œ ìµœì¢… ëª©ì ì§€ë¥¼ ëª…ë ¹í•˜ë„ë¡ ë³€ê²½
     void Move(Vector3 destination, float speed);
     void TurnTowards(Vector3 worldTargetPosition, float turnSpeed);
     void Stop();
