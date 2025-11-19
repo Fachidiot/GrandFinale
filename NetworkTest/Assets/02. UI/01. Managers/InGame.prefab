@@ -28053,6 +28053,10 @@ GameObject:
   - component: {fileID: 8914851074037716769}
   - component: {fileID: 6074001848964306922}
   - component: {fileID: 5558585982836540839}
+  - component: {fileID: 2361376903991886679}
+  - component: {fileID: 1085970720115032967}
+  - component: {fileID: 8345936091942560525}
+  - component: {fileID: 8647201090218539349}
   m_Layer: 5
   m_Name: InventoryUI_Root
   m_TagString: Untagged
@@ -28119,6 +28123,100 @@ MonoBehaviour:
   fullInventoryPanel: {fileID: 2536849806093664916}
   smallPanelRect: {fileID: 6361620288681358614}
   smallHeaderBarRect: {fileID: 9165581444323809668}
+--- !u!114 &2361376903991886679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4182004154494532504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3175286ea38ab374ebafca3d4c2c1c8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statsTextMidLeft: {fileID: 0}
+  statsTextMidRight: {fileID: 0}
+  statsTextMidBottom: {fileID: 0}
+  cashText: {fileID: 0}
+  statsInfoLeftText: {fileID: 0}
+  statsInfoRightText: {fileID: 0}
+--- !u!114 &1085970720115032967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4182004154494532504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d6af1af3e7096a4d96c458c6f7d871f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipmentInfoButton: {fileID: 0}
+  playerInfoButton: {fileID: 0}
+  equipmentInfoPanel: {fileID: 0}
+  statsInfoPanel: {fileID: 0}
+  itemInfoPanel: {fileID: 0}
+  equipmentCanvasGroup: {fileID: 0}
+  statsCanvasGroup: {fileID: 0}
+  itemCanvasGroup: {fileID: 0}
+  itemInfoImage: {fileID: 0}
+  itemInfoNameText: {fileID: 0}
+  itemInfoDescriptionText: {fileID: 0}
+  itemInfoHeadText: {fileID: 0}
+  panelSwitchDuration: 0.2
+  contentFadeDuration: 0.1
+--- !u!114 &8345936091942560525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4182004154494532504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da8d47dc310b20148b1d8578f125d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryPanel: {fileID: 0}
+  artifactsPanel: {fileID: 0}
+  inventoryCanvasGroup: {fileID: 0}
+  artifactsCanvasGroup: {fileID: 0}
+  inventoryButton: {fileID: 0}
+  artifactsButton: {fileID: 0}
+  tabSelectText: {fileID: 0}
+  tabSwitchDuration: 0.5
+  slideDistance: 10
+--- !u!114 &8647201090218539349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4182004154494532504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5ead95cf2c9e7e4fa453e49964c5b76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  smallTooltipPanel: {fileID: 0}
+  fullTooltipPanel: {fileID: 0}
+  smallTooltipRect: {fileID: 0}
+  smallTooltipTitleText: {fileID: 0}
+  smallTooltipItemKindText: {fileID: 0}
+  smallTooltipItemImage: {fileID: 0}
+  smallTooltipGradeText: {fileID: 0}
+  smallTooltipDescriptionText: {fileID: 0}
+  fullTooltipRect: {fileID: 0}
+  fullTooltipTitleText: {fileID: 0}
+  fullTooltipItemKindText: {fileID: 0}
+  fullTooltipItemImage: {fileID: 0}
+  fullTooltipGradeImage: {fileID: 0}
+  fullTooltipGradeText: {fileID: 0}
+  fullTooltipDescriptionText: {fileID: 0}
+  tooltipOffset: {x: 20, y: -50}
+  fadeDuration: 0.2
 --- !u!1 &4202218639381087663
 GameObject:
   m_ObjectHideFlags: 0
@@ -33150,7 +33248,7 @@ GameObject:
   - component: {fileID: 5513055864493503114}
   - component: {fileID: 5073788299683399254}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Item_Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

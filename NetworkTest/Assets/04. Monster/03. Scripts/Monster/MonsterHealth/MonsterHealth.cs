@@ -1,4 +1,4 @@
-// MonsterHealth.cs
+﻿// MonsterHealth.cs
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -53,17 +53,15 @@ public class MonsterHealth : MonoBehaviour
 
     private void Awake()
     {
-        // 골렘 2. (수정) AI 컨트롤러 참조 가져오기
         ai = GetComponent<MonsterAIController>();
     }
 
     private void Update()
     {
-        // ... (Debug 기능은 그대로) ...
-        if (_DEBUG_ForceDie) { /* ... */ }
-        else if (_DEBUG_ForceHit) { /* ... */ }
 
-        // (Block 타이머 로직은 그대로)
+        if (_DEBUG_ForceDie) { }
+        else if (_DEBUG_ForceHit) { }
+
         if (hitTimer > 0)
         {
             hitTimer -= Time.deltaTime;
@@ -104,10 +102,9 @@ public class MonsterHealth : MonoBehaviour
                 currentDefense = _defense;
                 Debug.Log("GOLEM BLOCK: 방어 성공! 데미지 " + currentDefense + " 감소.");
             }
-            // (else: VulnerableCheck 상태이거나 CounterRush 상태일때는 방어력 0)
+
         }
-        // --- (Gazer나 다른 몬스터는 항상 방어력 0, 또는 기본 _defense를 사용하려면
-        //    else { currentDefense = _defense; } 를 추가하세요) ---
+
 
 
         // 2. 최종 데미지 계산 (방어력 적용)
@@ -168,12 +165,10 @@ public class MonsterHealth : MonoBehaviour
             return;
         }
 
-        // 1. [바닥체크] 현재 위치 (X, Z)를 기준으로 바닥의 Y 좌표를 찾습니다.
         float groundY = transform.position.y; // 기본값은 현재 몬스터의 Y
         RaycastHit hit;
 
-        // 몬스터 위치에서 아래로 100m 레이캐스트를 쏴서 바닥을 찾습니다.
-        // LayerMask를 사용하면 더 정확합니다. (예: LayerMask.GetMask("Ground"))
+
         if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out hit, 100f))
         {
             // 레이가 충돌한 지점의 Y 좌표를 사용합니다.
@@ -205,7 +200,6 @@ public class MonsterHealth : MonoBehaviour
                 spawnPos.z += randomCircle.y;
 
                 // [바닥체크] Y 좌표를 찾은 바닥 + 오브젝트의 절반높이(0.5f)만큼 띄웁니다.
-                // 콜라이더 중심이 Y=0.5이므로, 오브젝트 바닥이 groundY에 닿게 됩니다.
                 spawnPos.y = groundY + 0.5f;
 
                 Debug.Log($"<color=cyan>[LootSpawn] 아이템 생성: {entry.item.itemName}, Grade: {entry.item.grade}</color>");

@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,6 +42,11 @@ public class TabSwitchController : MonoBehaviour
 
     void Start()
     {
+        BindUI();
+
+        //if (inventoryButton != null) inventoryButton.onClick.AddListener(() => OnTabClicked(0));
+        //if (artifactsButton != null) artifactsButton.onClick.AddListener(() => OnTabClicked(1));
+
         InitializeTabState();
         RegisterButtonEvents();
     }
@@ -51,6 +56,18 @@ public class TabSwitchController : MonoBehaviour
         UnregisterButtonEvents();
     }
 
+    private void BindUI()
+    {
+        inventoryPanel = UIHelper.FindObject(transform, "Mid_Inventory_Info");
+        artifactsPanel = UIHelper.FindObject(transform, "Artifacts_Info");
+
+        if (inventoryPanel) inventoryCanvasGroup = inventoryPanel.GetComponent<CanvasGroup>();
+        if (artifactsPanel) artifactsCanvasGroup = artifactsPanel.GetComponent<CanvasGroup>();
+
+        inventoryButton = UIHelper.FindChild<Button>(transform, "Inventory_Button");
+        artifactsButton = UIHelper.FindChild<Button>(transform, "Artifacts_Button");
+        tabSelectText = UIHelper.FindChild<TMP_Text>(transform, "Button_Sellect_Text");
+    }
     private void InitializeTabState()
     {
         // Inventory 탭 기본 활성화

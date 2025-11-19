@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -33,6 +33,7 @@ public class InventoryStatsUI : MonoBehaviour
 
     void Start()
     {
+        BindUI();
         FindAndSubscribePlayerStats();
     }
 
@@ -41,6 +42,18 @@ public class InventoryStatsUI : MonoBehaviour
         UnsubscribePlayerStats();
     }
 
+    private void BindUI()
+    {
+        statsTextMidLeft = UIHelper.FindChild<TMP_Text>(transform, "Stats_Text_Mid_Left");
+        statsTextMidRight = UIHelper.FindChild<TMP_Text>(transform, "Stats_Text_Mid_Right");
+        statsTextMidBottom = UIHelper.FindChild<TMP_Text>(transform, "Stats_Text_Mid_Bottom");
+        cashText = UIHelper.FindChild<TMP_Text>(transform, "Cash_Text");
+
+        // 사진 매핑 유지 (Left 변수 <- Right 오브젝트)
+        statsInfoLeftText = UIHelper.FindChild<TMP_Text>(transform, "Stats_Right_Text");
+        statsInfoRightText = UIHelper.FindChild<TMP_Text>(transform, "Stats_Left_Text");
+
+    }
     private void FindAndSubscribePlayerStats()
     {
         playerStats = FindObjectOfType<PlayerStats>();

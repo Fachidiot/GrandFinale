@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -52,9 +52,29 @@ public class LeftPanelController : MonoBehaviour
 
     void Start()
     {
+        BindUI();
+
         InitializePanels();
         RegisterButtonEvents();
         ShowEquipmentPanel();
+    }
+
+    private void BindUI()
+    {
+        equipmentInfoButton = UIHelper.FindChild<Button>(transform, "Equipment_Change_Button");
+        playerInfoButton = UIHelper.FindChild<Button>(transform, "State_Change_Button");
+
+        equipmentInfoPanel = UIHelper.FindObject(transform, "Equipment_Info");
+        statsInfoPanel = UIHelper.FindObject(transform, "Stats_Info");
+        itemInfoPanel = UIHelper.FindObject(transform, "Item_Info");
+
+        if (itemInfoPanel != null)
+        {
+            itemInfoImage = UIHelper.FindChild<Image>(itemInfoPanel.transform, "Item_Image");
+            itemInfoNameText = UIHelper.FindChild<TMP_Text>(itemInfoPanel.transform, "Item_Name_Text");
+            itemInfoDescriptionText = UIHelper.FindChild<TMP_Text>(itemInfoPanel.transform, "Item_Text");
+            itemInfoHeadText = UIHelper.FindChild<TMP_Text>(itemInfoPanel.transform, "Head_Item_Info_Text");
+        }
     }
 
     void OnDestroy()

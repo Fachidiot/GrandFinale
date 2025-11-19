@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -6,9 +6,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 툴팁 표시 전담 컨트롤러
-/// - Small/Full Inventory 툴팁 관리
-/// - Fade 애니메이션 처리
-/// - 아이템 정보 표시
+/// - UIHelper를 통해 자동 바인딩 구현 (수정 완료)
+/// - 헬퍼 클래스 포함 버전
 /// </summary>
 public class TooltipController : MonoBehaviour
 {
@@ -54,8 +53,50 @@ public class TooltipController : MonoBehaviour
 
     void Awake()
     {
+        BindUI(); // 자동 연결 실행
         InitializeTooltipPanel(smallTooltipPanel);
         InitializeTooltipPanel(fullTooltipPanel);
+    }
+
+    private void BindUI()
+    {
+        // 1. 패널 찾기 (Inspector 사진 기준 이름)
+        smallTooltipPanel = UIHelper.FindObject(transform, "Small_Tooltip_Bar");
+        fullTooltipPanel = UIHelper.FindObject(transform, "fulll_Tooltip_Bar"); // 오타(fulll) 반영
+
+        // 2. Small 컴포넌트 연결
+        if (smallTooltipPanel != null)
+        {
+            smallTooltipRect = smallTooltipPanel.GetComponent<RectTransform>();
+
+            // 변수명 = UIHelper.FindChild<타입>(부모, "하이어라키 이름");
+            smallTooltipTitleText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Title Text");
+            smallTooltipItemKindText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item Kind Text");
+            smallTooltipItemImage = UIHelper.FindChild<Image>(smallTooltipPanel.transform, "Small_Item _Image"); // 띄어쓰기 주의
+            smallTooltipGradeText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item_Grade_Text");
+            smallTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Smalll_Detail_Text"); // 오타(Smalll) 반영
+        }
+        else
+        {
+            Debug.LogError("[TooltipController] Small_Tooltip_Bar를 찾을 수 없습니다.");
+        }
+
+        // 3. Full 컴포넌트 연결
+        if (fullTooltipPanel != null)
+        {
+            fullTooltipRect = fullTooltipPanel.GetComponent<RectTransform>();
+
+            fullTooltipTitleText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Title Text");
+            fullTooltipItemKindText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item Kind Text");
+            fullTooltipItemImage = UIHelper.FindChild<Image>(fullTooltipPanel.transform, "Item Image Info");
+            fullTooltipGradeImage = UIHelper.FindChild<Image>(fullTooltipPanel.transform, "Item Grade Info");
+            fullTooltipGradeText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item Class Text");
+            fullTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Detail_Text");
+        }
+        else
+        {
+            Debug.LogError("[TooltipController] fulll_Tooltip_Bar를 찾을 수 없습니다.");
+        }
     }
 
     private void InitializeTooltipPanel(GameObject panel)
@@ -77,9 +118,6 @@ public class TooltipController : MonoBehaviour
 
     #region Public API
 
-    /// <summary>
-    /// 툴팁 표시
-    /// </summary>
     public void ShowTooltip(RelicData item, InventoryType inventoryType)
     {
         if (item == null) return;
@@ -91,9 +129,6 @@ public class TooltipController : MonoBehaviour
         ShowTooltipPanel(tooltipData.Panel, tooltipData.CanvasGroup, tooltipData.RectTransform);
     }
 
-    /// <summary>
-    /// 툴팁 숨기기
-    /// </summary>
     public void HideTooltip()
     {
         HideTooltipPanel(smallTooltipPanel);
@@ -239,14 +274,12 @@ public class TooltipController : MonoBehaviour
     {
         if (panel == null || canvasGroup == null) return;
 
-        // 이미 표시 중이면 위치만 업데이트
         if (currentTargetAlpha == 1f && canvasGroup.alpha > 0f)
         {
             UpdateTooltipPosition(panel, rectTransform);
             return;
         }
 
-        // Fade In 애니메이션
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
 
         panel.SetActive(true);
@@ -330,7 +363,7 @@ public class TooltipController : MonoBehaviour
     #endregion
 }
 
-#region Helper Classes
+#region Helper Classes & Enums
 
 /// <summary>
 /// 등급별 색상 관리 헬퍼
@@ -344,6 +377,8 @@ public static class GradeColorHelper
 
     public static string GetColor(string grade)
     {
+        if (string.IsNullOrEmpty(grade)) return COLOR_DEFAULT;
+
         return grade.ToLower() switch
         {
             "common" => COLOR_COMMON,

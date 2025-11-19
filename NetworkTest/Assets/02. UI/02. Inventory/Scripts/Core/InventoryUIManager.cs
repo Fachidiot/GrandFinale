@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 인벤토리 UI 총괄 매니저 (슬림화 버전)
@@ -39,12 +39,27 @@ public class InventoryUIManager : MonoBehaviour
 
     void Awake()
     {
+        BindUI();
         InitializeSingleton();
     }
 
     void Start()
     {
         ValidateControllers();
+    }
+    private void BindUI()
+    {
+        smallInventoryPanel = UIHelper.FindObject(transform, "Small_Inventory_UI");
+        fullInventoryPanel = UIHelper.FindObject(transform, "FullInventory_Inventory_UI");
+
+        tooltipController = GetComponentInChildren<TooltipController>();
+        dragDropHandler = GetComponentInChildren<DragDropHandler>();
+        tabSwitchController = GetComponentInChildren<TabSwitchController>();
+        leftPanelController = GetComponentInChildren<LeftPanelController>();
+        inventoryStatsUI = GetComponentInChildren<InventoryStatsUI>();
+
+        if (smallInventoryPanel == null) Debug.LogError("[InventoryUIManager] Small 패널 못 찾음!");
+        if (fullInventoryPanel == null) Debug.LogError("[InventoryUIManager] Full 패널 못 찾음!");
     }
 
     private void InitializeSingleton()
