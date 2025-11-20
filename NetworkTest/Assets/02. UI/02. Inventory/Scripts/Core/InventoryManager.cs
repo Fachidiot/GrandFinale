@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -92,17 +91,17 @@ public class InventoryManager : MonoBehaviour
 
     void Update()
     {
-        /*if (playerInput != null && playerInput.GetInventory())
-        {
-            Debug.Log("인벤토리 키 입력 감지 (by PlayerInputs)!");
-            // ToggleSmallInventory(); // (이전에 'O'키에 연결된 ToggleInventory() 대신)
-        }
+        // if (playerInput != null && playerInput.GetInventory())
+        // {
+        //     Debug.Log("인벤토리 키 입력 감지 (by PlayerInputs)!");
+        //     // ToggleSmallInventory(); // (이전에 'O'키에 연결된 ToggleInventory() 대신)
+        // }
 
-        if (playerInput != null && playerInput.GetFullInventoryToggle())
-        {
-            Debug.Log("Full 인벤토리 키 입력 감지 (by PlayerInputs)!");
-            ToggleInventory(); // (기존 'O'키에 연결된 함수)
-        }*/
+        // if (playerInput != null && playerInput.GetFullInventoryToggle())
+        // {
+        //     Debug.Log("Full 인벤토리 키 입력 감지 (by PlayerInputs)!");
+        //     ToggleInventory(); // (기존 'O'키에 연결된 함수)
+        // }
 
 
         // Tab 키: Small 인벤토리 토글
