@@ -519,7 +519,7 @@ GameObject:
   - component: {fileID: 1248173777219007728}
   - component: {fileID: 3992868522012052895}
   - component: {fileID: 267255837716570230}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -791,7 +791,7 @@ GameObject:
   - component: {fileID: 7070001621370394221}
   - component: {fileID: 4625097060958680638}
   - component: {fileID: 2683907813476276635}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1088,7 +1088,7 @@ GameObject:
   - component: {fileID: 6435493986392239521}
   - component: {fileID: 6127751749849809162}
   - component: {fileID: 3729964108586054180}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1242,7 +1242,7 @@ GameObject:
   - component: {fileID: 5525618076015489009}
   - component: {fileID: 6852430975021480966}
   - component: {fileID: 4151993409779934759}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1537,7 +1537,7 @@ GameObject:
   - component: {fileID: 8237503612298255880}
   - component: {fileID: 7279235060368737410}
   - component: {fileID: 1197651840691838597}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1676,7 +1676,7 @@ GameObject:
   - component: {fileID: 6184220350639355697}
   - component: {fileID: 4730342397924737823}
   - component: {fileID: 8451613351382558775}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1874,7 +1874,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 2220212949343643875, guid: 69d1a00faf1e5449c8d08a030865e1ea, type: 3}
+  m_Mesh: {fileID: 2220212949343643875, guid: 543a4dcd418594517886493cc274eb66, type: 3}
 --- !u!1 &3202750293885039190
 GameObject:
   m_ObjectHideFlags: 0
@@ -2280,7 +2280,7 @@ GameObject:
   - component: {fileID: 5999406591064130303}
   - component: {fileID: 9151146038520365937}
   - component: {fileID: 1431814794435329862}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2385,7 +2385,7 @@ GameObject:
   - component: {fileID: 3479625812326175181}
   - component: {fileID: 1694326438140110100}
   - component: {fileID: 5091239116851831584}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Top2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2710,7 +2710,7 @@ GameObject:
   - component: {fileID: 4889324390206694234}
   - component: {fileID: 6319906228995522198}
   - component: {fileID: 3508316518400678070}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Triple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2815,7 +2815,7 @@ GameObject:
   - component: {fileID: 3432036986433276265}
   - component: {fileID: 1855167431744253720}
   - component: {fileID: 1161990518447860628}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2919,6 +2919,7 @@ GameObject:
   - component: {fileID: 4757609171973481875}
   - component: {fileID: 8478509811004189238}
   - component: {fileID: 5930467243342257916}
+  - component: {fileID: 7682192668834685051}
   m_Layer: 0
   m_Name: starship005
   m_TagString: Untagged
@@ -2992,6 +2993,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &7682192668834685051
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5282085717104590633}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -9216646266719449548, guid: 543a4dcd418594517886493cc274eb66, type: 3}
 --- !u!1 &5343365982249563987
 GameObject:
   m_ObjectHideFlags: 0
@@ -3522,7 +3545,7 @@ GameObject:
   - component: {fileID: 3045751945226521923}
   - component: {fileID: 2073425427488244335}
   - component: {fileID: 6233686393997183929}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Triple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3817,7 +3840,7 @@ GameObject:
   - component: {fileID: 757942951489857667}
   - component: {fileID: 7247641894829728144}
   - component: {fileID: 8408272809634600439}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4199,7 +4222,7 @@ GameObject:
   - component: {fileID: 7714253854322415849}
   - component: {fileID: 3786469835833012758}
   - component: {fileID: 1357602452084353695}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4364,7 +4387,7 @@ GameObject:
   - component: {fileID: 651331946405527716}
   - component: {fileID: 7538530151747684597}
   - component: {fileID: 3010275578778638476}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4622,7 +4645,7 @@ GameObject:
   - component: {fileID: 2591235588193119135}
   - component: {fileID: 7664983892726347487}
   - component: {fileID: 6605217784806485869}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Triple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4727,7 +4750,7 @@ GameObject:
   - component: {fileID: 3852377914515470325}
   - component: {fileID: 8975134604381634795}
   - component: {fileID: 6278452757564878858}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5007,7 +5030,7 @@ GameObject:
   - component: {fileID: 7676264871396588091}
   - component: {fileID: 447785869639885903}
   - component: {fileID: 7607555986861145654}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Top1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5266,7 +5289,7 @@ GameObject:
   - component: {fileID: 609816824459001023}
   - component: {fileID: 4883116403733005374}
   - component: {fileID: 7899358689640758127}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Front_Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
