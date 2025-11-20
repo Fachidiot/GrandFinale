@@ -9,7 +9,17 @@ public class WeaponController : MonoBehaviour
     public Animator animator;
     public EventsCenter eventsCenter;
     public SlotController[] slots;
-    public SlotController GETCurrentSlot => slots[activeID - 1];
+        public SlotController GETCurrentSlot
+    {
+        get
+        {
+            if (activeID <= 0 || activeID > slots.Length)
+            {
+                return null;
+            }
+            return slots[activeID - 1];
+        }
+    }
     public Weapon GETCurrentWeapon => _weaponCache.TryGetValue(activeID, out var weapon) ? weapon : null;
     private readonly Dictionary<int, Weapon> _weaponCache = new Dictionary<int, Weapon>();
 
@@ -147,7 +157,12 @@ public class WeaponController : MonoBehaviour
             aimPointEffector.getFromTransform = currentWeapon.AimPoint.transform;
     }
 
-    void ApplyGunOffsetRelativeToParent(int handId, int applyOffset) => GETCurrentSlot.ApplyHandOffset(handId, applyOffset == 1);
+    void ApplyGunOffsetRelativeToParent(int handId, int applyOffset)
+    {
+        var currentSlot = GETCurrentSlot;
+        if (currentSlot != null)
+            currentSlot.ApplyHandOffset(handId, applyOffset == 1);
+    }
 
     void ApplyGunPositionOffsetInHands(float active)
     {
@@ -160,9 +175,19 @@ public class WeaponController : MonoBehaviour
 
     void ApplyLeftHandIkWeight(float weight) => leftHandIK.weight = weight;
 
-    void ApplyGunParent(float handActive) => GETCurrentSlot.HandActive = handActive;
+    void ApplyGunParent(float handActive)
+    {
+        var currentSlot = GETCurrentSlot;
+        if (currentSlot != null)
+            currentSlot.HandActive = handActive;
+    }
 
-    void ApplyGunActiveWeight(float weight) => GETCurrentSlot.weight = weight;
+    void ApplyGunActiveWeight(float weight)
+    {
+        var currentSlot = GETCurrentSlot;
+        if (currentSlot != null)
+            currentSlot.weight = weight;
+    }
 
     void ApplyHandsIKTarget(int handId, string pointName)
     {

@@ -87,6 +87,8 @@ public struct MonsterState
     public MonsterType monsterType; // Added monster type
     public Vector3 position;
     public Quaternion rotation;
+    public float currentHP;
+    public float maxHP;
     public byte[] animationData;
 
     public byte[] ToByteArray()
@@ -103,6 +105,8 @@ public struct MonsterState
             writer.Write(rotation.y);
             writer.Write(rotation.z);
             writer.Write(rotation.w);
+            writer.Write(currentHP);
+            writer.Write(maxHP);
 
             byte dataLength = (byte)(animationData?.Length ?? 0);
             writer.Write(dataLength);
@@ -124,6 +128,8 @@ public struct MonsterState
             state.monsterType = (MonsterType)reader.ReadByte();
             state.position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             state.rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            state.currentHP = reader.ReadSingle();
+            state.maxHP = reader.ReadSingle();
             
             byte dataLength = reader.ReadByte();
             if (dataLength > 0)
@@ -233,6 +239,8 @@ public class NetworkMonsterUpdateState
                 writer.Write(m.rotation.y);
                 writer.Write(m.rotation.z);
                 writer.Write(m.rotation.w);
+                writer.Write(m.currentHP);
+                writer.Write(m.maxHP);
 
                 byte dataLength = (byte)(m.animationData?.Length ?? 0);
                 writer.Write(dataLength);
@@ -259,7 +267,9 @@ public class NetworkMonsterUpdateState
                     monsterId = reader.ReadUInt16(),
                     monsterType = (MonsterType)reader.ReadByte(),
                     position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle())
+                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                    currentHP = reader.ReadSingle(),
+                    maxHP = reader.ReadSingle()
                 };
 
                 byte dataLength = reader.ReadByte();

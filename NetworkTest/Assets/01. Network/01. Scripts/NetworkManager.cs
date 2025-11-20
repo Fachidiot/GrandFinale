@@ -210,6 +210,20 @@ public class NetworkManager : MonoBehaviour
             var networkMonster = monsterGo.GetComponent<NetworkMonster>();
             if (networkMonster == null) continue;
 
+            // Get Health
+            var monsterHealth = monsterGo.GetComponent<MonsterHealth>();
+            float currentHp = 0;
+            float maxHp = 0;
+            if (monsterHealth != null)
+            {
+                currentHp = monsterHealth.CurrentHP;
+                maxHp = monsterHealth._maxHP;
+            }
+            else
+            {
+                Debug.LogWarning($"[NetworkManager] Monster {networkMonster.MonsterId} is missing MonsterHealth component!");
+            }
+
             var monsterAnimSync = monsterGo.GetComponent<NetworkMonsterAnimatorSync>();
             byte[] animDataBytes = null;
             if (monsterAnimSync != null)
@@ -224,6 +238,8 @@ public class NetworkManager : MonoBehaviour
                 monsterType = networkMonster.MonsterType,
                 position = monsterGo.transform.position,
                 rotation = monsterGo.transform.rotation,
+                currentHP = currentHp,
+                maxHP = maxHp,
                 animationData = animDataBytes
             };
             monsterStates.Add(monsterState);

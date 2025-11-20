@@ -218,6 +218,12 @@ public class InventoryManager : MonoBehaviour
 
         this.IsFocused = isFocused;
 
+        // Use the centralized pause system
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetPause(isFocused);
+        }
+
         // 커서 제어
         if (isFocused)
         {

@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 public class BulletNetwork : BulletBehaviour
@@ -103,11 +104,30 @@ public class BulletNetwork : BulletBehaviour
                     }
                     else
                     {// 몬스터 공격시.
-                        var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
-                        if (monsterHealth != null)
+                        var networkMonster = hit.transform.root.GetComponent<NetworkMonster>();
+                        if (networkMonster != null)
                         {
-                            float damage = PlayerDamage * (hit.collider.name == "Head" ? 2 : 1);
-                            monsterHealth.TakeDamage(damage);
+                            float damage = PlayerDamage * (hit.collider.name == "Head" ? 2f : 1f);
+
+                            // 클라이언트는 직접 데미지를 주지 않고, 서버에 데미지 요청을 보냅니다.
+                            if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Client)
+                            {
+                                JObject damageData = new JObject();
+                                damageData["type"] = "player_dealt_damage";
+                                damageData["monsterId"] = networkMonster.MonsterId;
+                                damageData["damage"] = damage;
+
+                                NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, damageData);
+                            }
+                            else if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host)
+                            {
+                                // 호스트는 직접 데미지를 처리합니다.
+                                var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                                if (monsterHealth != null)
+                                {
+                                    monsterHealth.TakeDamage(damage);
+                                }
+                            }
                         }
                     }
                 }

@@ -7206,8 +7206,8 @@ GameObject:
   - component: {fileID: 2069173564584709051}
   - component: {fileID: 4506929974751079687}
   - component: {fileID: 5330286128028421865}
-  - component: {fileID: 7826982553445465768}
   - component: {fileID: 729731253929241830}
+  - component: {fileID: -7306960511608734812}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -7329,18 +7329,6 @@ MonoBehaviour:
   pickUpInputLong: 3
   changed: 0
   canShoot: 1
---- !u!114 &7826982553445465768
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6428601940145922536}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 622112187f5274d3985e9b13d15aa895, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &729731253929241830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7375,6 +7363,22 @@ MonoBehaviour:
   currentPower: 0
   currentLevel: 0
   currentCurrency: 0
+--- !u!114 &-7306960511608734812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f063d15898674c4d92692f1680db530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerAnimator: {fileID: 7922187604343870686}
+  playerInputs: {fileID: 0}
+  currentMeleeWeapon: {fileID: 0}
+  attackCooldown: 0.8
 --- !u!1 &6572041794920199261
 GameObject:
   m_ObjectHideFlags: 0

@@ -105,6 +105,61 @@ public class ServerRoomManager : MonoBehaviour
             case "propose_planet":
                 HandlePlanetProposal(sender, msg);
                 break;
+            case "player_dealt_damage":
+                HandlePlayerDealtDamage(msg);
+                break;
+            case "picked_up_loot":
+                HandleLootPickup(msg);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// (Host-only) Handles a client's report that they have picked up a loot item.
+    /// </summary>
+    private void HandleLootPickup(JObject data)
+    {
+        if (LootManager.Instance == null) return;
+
+        ushort lootNetId = data["lootNetId"]?.ToObject<ushort>() ?? 0;
+        if (lootNetId == 0) return;
+        
+        // Create the destroy message
+        JObject destroyMsg = new JObject
+        {
+            ["type"] = "destroy_loot",
+            ["lootNetId"] = lootNetId
+        };
+
+        // Broadcast to all clients (and run on host)
+        NetworkManager.Instance.BroadcastJsonMessage(destroyMsg);
+    }
+
+    /// <summary>
+    /// (Host-only) Handles a client's report that they have dealt damage to a monster.
+    /// </summary>
+    private void HandlePlayerDealtDamage(JObject data)
+    {
+        if (SpawnManager.Instance == null) return;
+
+        ushort monsterId = data["monsterId"]?.ToObject<ushort>() ?? 0;
+        float damage = data["damage"]?.ToObject<float>() ?? 0f;
+
+        if (monsterId == 0 || damage == 0f) return;
+
+        foreach (var monsterGO in SpawnManager.Instance.SpawnedMonsters)
+        {
+            var networkMonster = monsterGO.GetComponent<NetworkMonster>();
+            if (networkMonster != null && networkMonster.MonsterId == monsterId)
+            {
+                var monsterHealth = monsterGO.GetComponent<MonsterHealth>();
+                if (monsterHealth != null)
+                {
+                    monsterHealth.TakeDamage(damage);
+                    // No need to broadcast, the health change will be sent in the next MonsterUpdate
+                }
+                return; // Found the monster, no need to loop further
+            }
         }
     }
 

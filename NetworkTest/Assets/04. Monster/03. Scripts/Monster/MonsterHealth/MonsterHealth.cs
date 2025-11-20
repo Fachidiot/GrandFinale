@@ -5,11 +5,9 @@ using UnityEngine.Events;
 public class MonsterHealth : MonoBehaviour
 {
     #region 필드
-    [Header("아이템 드랍 관련")]
-    [Tooltip("몬스터가 사망했을 때 생성할 'GenericLootDrop' 프리팹")]
-    [SerializeField] private GameObject genericLootPrefab;
-
-
+    // [Header("아이템 드랍 관련")]
+    // [Tooltip("몬스터가 사망했을 때 참조할 LootTable")]
+    // [SerializeField] private LootTable lootTable; // 이 필드는 OnDeath 이벤트에서 직접 파라미터로 받는 것이 더 유연합니다.
 
     public float _maxHP { get; private set; }
     private float _defense;
@@ -79,6 +77,36 @@ public class MonsterHealth : MonoBehaviour
         currentHP = _maxHP;
         IsDead = false;
         Debug.Log($"[{gameObject.name}] Health 초기화 완료: HP={_maxHP}, DEF={_defense}");
+    }
+
+    /// <summary>
+    /// (네트워크용) 호스트로부터 받은 데이터로 체력 상태를 강제 설정합니다.
+    /// 이벤트는 발생시키지 않고, UI 업데이트 등을 위해 값만 동기화합니다.
+    /// </summary>
+    public void SetHealthFromNetwork(float newCurrentHP, float newMaxHP)
+    {
+        // 첫 초기화 이후 maxHP는 변하지 않는다고 가정
+        if (_maxHP != newMaxHP)
+        {
+            _maxHP = newMaxHP;
+        }
+
+        // 값 변경이 있을 때만 업데이트
+        if (currentHP != newCurrentHP)
+        {
+            currentHP = newCurrentHP;
+        }
+
+        // 사망 상태 동기화
+        bool wasDead = IsDead;
+        IsDead = currentHP <= 0;
+
+        // 클라이언트에서 사망 상태가 처음 true가 되는 시점에 OnDeath 이벤트를 호출
+        if (!wasDead && IsDead)
+        {
+            OnDeath?.Invoke();
+            Debug.Log($"<color=cyan>[Network Sync] {gameObject.name} 사망 처리.</color>");
+        }
     }
 
     /// <summary>
@@ -154,34 +182,27 @@ public class MonsterHealth : MonoBehaviour
 
     public void SpawnLoot(LootTable lootTable)
     {
+        // 호스트가 아니면 아이템 드랍 로직을 실행하지 않음
+        if (NetworkManager.Instance == null || NetworkManager.Instance.Mode != NetworkMode.Host) return;
+        if (LootManager.Instance == null)
+        {
+            Debug.LogError("[MonsterHealth] LootManager 인스턴스가 없습니다!");
+            return;
+        }
         if (lootTable == null || lootTable.items == null)
         {
             Debug.LogWarning("LootTable이 비어있습니다.", this);
             return;
         }
-        if (genericLootPrefab == null)
+
+        // 바닥 찾기
+        float groundY = transform.position.y;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 100f))
         {
-            Debug.LogError($"[아이템 드랍] {gameObject.name}의 genericLootPrefab이 설정되지 않았습니다!", this);
-            return;
-        }
-
-        float groundY = transform.position.y; // 기본값은 현재 몬스터의 Y
-        RaycastHit hit;
-
-
-        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out hit, 100f))
-        {
-            // 레이가 충돌한 지점의 Y 좌표를 사용합니다.
             groundY = hit.point.y;
-            Debug.Log($"[Raycast] 바닥 찾음: Y = {groundY}");
-        }
-        else
-        {
-            Debug.LogWarning("바닥을 찾지 못했습니다. 아이템이 공중에 뜰 수 있습니다.");
         }
 
-
-        float scatterDistance = 1.0f; // 아이템이 흩뿌려질 반경
+        float scatterDistance = 1.0f;
 
         foreach (var entry in lootTable.items)
         {
@@ -189,45 +210,15 @@ public class MonsterHealth : MonoBehaviour
 
             if (Random.Range(0f, 100f) <= entry.dropChance)
             {
-                GameObject prefabToSpawn = genericLootPrefab;
-
-                // 2. 생성 위치를 랜덤하게 설정 (흩뿌리기)
+                // 생성 위치 계산
                 Vector2 randomCircle = Random.insideUnitCircle * scatterDistance;
-
-                // 3. 생성 위치의 Y를 레이캐스트로 찾은 바닥(groundY)으로 설정합니다.
                 Vector3 spawnPos = transform.position;
                 spawnPos.x += randomCircle.x;
                 spawnPos.z += randomCircle.y;
-
-                // [바닥체크] Y 좌표를 찾은 바닥 + 오브젝트의 절반높이(0.5f)만큼 띄웁니다.
                 spawnPos.y = groundY + 0.5f;
 
-                Debug.Log($"<color=cyan>[LootSpawn] 아이템 생성: {entry.item.itemName}, Grade: {entry.item.grade}</color>");
-
-                GameObject spawnedItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
-                Debug.Log($"<color=cyan>[LootSpawn] {entry.item.itemName} 생성! (생성 Y: {spawnPos.y}, 이름: {spawnedItem.name})</color>");
-
-
-                // 4. 생성된 오브젝트에 아이템 데이터 설정
-                ItemPickup pickupScript = spawnedItem.GetComponent<ItemPickup>();
-                if (pickupScript != null)
-                {
-                    pickupScript.itemData = entry.item;
-                    pickupScript.addToInventoryInstead = true;
-                    Debug.Log($"<color=cyan>[LootSpawn] ItemPickup 데이터 설정 완료.</color>");
-                }
-
-                // 5. VFX 스크립트에 등급 전달 (VFX 색상 결정은 LootOrbVisuals가 담당)
-                LootOrbVisuals visualScript = spawnedItem.GetComponent<LootOrbVisuals>();
-                if (visualScript != null)
-                {
-                    visualScript.Initialize(entry.item.grade);
-                    Debug.Log($"<color=cyan>[LootSpawn] LootOrbVisuals.Initialize('{entry.item.grade}') 호출 완료.</color>");
-                }
-                else
-                {
-                    Debug.LogError("[LootSpawn ERROR] GenericLootDrop 프리팹에 LootOrbVisuals.cs가 없습니다!");
-                }
+                // LootManager를 통해 아이템 생성 요청
+                LootManager.Instance.SpawnLoot(entry.item.itemID, spawnPos);
             }
         }
     }

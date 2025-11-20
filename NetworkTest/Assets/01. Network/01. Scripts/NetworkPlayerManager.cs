@@ -333,6 +333,13 @@ public class NetworkPlayerManager : MonoBehaviour
                 monsterGO.transform.position = monsterState.position;
                 monsterGO.transform.rotation = monsterState.rotation;
 
+                // Sync Health
+                var monsterHealth = monsterGO.GetComponent<MonsterHealth>();
+                if (monsterHealth != null)
+                {
+                    monsterHealth.SetHealthFromNetwork(monsterState.currentHP, monsterState.maxHP);
+                }
+
                 var monsterAnimSync = monsterGO.GetComponent<NetworkMonsterAnimatorSync>();
                 if (monsterAnimSync != null)
                 {

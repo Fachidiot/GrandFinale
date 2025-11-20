@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(SphereCollider))]
@@ -81,17 +82,13 @@ public class ItemPickup : MonoBehaviour
             return;
         }
 
+        // 아이템 획득 시도 (이 부분은 플레이어별로 로컬에서 처리)
+        bool success = false;
         if (addToInventoryInstead)
         {
-            bool success = InventoryManager.Instance.AddItem(itemData);
-            if (success)
+            if (InventoryManager.Instance != null)
             {
-                OnPlayerNearbyPickup?.Invoke(false, this);
-                Destroy(gameObject);
-            }
-            else
-            {
-                Debug.Log("인벤토리가 꽉 찼습니다!");
+                success = InventoryManager.Instance.AddItem(itemData);
             }
         }
         else
@@ -100,12 +97,42 @@ public class ItemPickup : MonoBehaviour
             if (manager != null)
             {
                 manager.AddRelic(itemData.itemID);
-                OnPlayerNearbyPickup?.Invoke(false, this);
-                Destroy(gameObject);
+                success = true;
             }
             else
             {
                 Debug.LogWarning($"플레이어에게 {itemData.itemName}를 획득할 PlayerAbilityManager가 없습니다.", nearbyPlayer);
+            }
+        }
+
+        // 아이템 획득에 성공했다면, 네트워크에 알림
+        if (success)
+        {
+            // UI 숨기기
+            OnPlayerNearbyPickup?.Invoke(false, this);
+
+            // 네트워크 동기화된 아이템이라면, 파괴 요청을 호스트에게 보냄
+            var networkLoot = GetComponent<NetworkLoot>();
+            if (networkLoot != null && NetworkManager.Instance != null)
+            {
+                JObject pickupMsg = new JObject
+                {
+                    ["type"] = "picked_up_loot",
+                    ["lootNetId"] = networkLoot.lootNetId
+                };
+                NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, pickupMsg);
+            }
+            else
+            {
+                // 네트워크 아이템이 아니라면 로컬에서 즉시 파괴
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            if (addToInventoryInstead)
+            {
+                Debug.Log("인벤토리가 꽉 찼습니다!");
             }
         }
     }
