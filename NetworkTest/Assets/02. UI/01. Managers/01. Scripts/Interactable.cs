@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class Interactable : MonoBehaviour
+public class NPC_Interactable : MonoBehaviour
 {
     [Header("Settings")]
     public string interactionText = "Interact";
