@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using SlimeStates; // <--- 네임스페이스만 변경
 
 // 1. MonsterFSM 설계도를 상속

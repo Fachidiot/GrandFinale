@@ -1,4 +1,4 @@
-// MonsterAnimationConfig.cs
+﻿// MonsterAnimationConfig.cs
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MonsterAnimConfig", menuName = "Monster/Animation Config")]

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 // 이 컴포넌트는 FSM 상태들을 '소유'하고 컨트롤러에 '제공'하는 역할만 합니다.
 // MonsterAIController는 이 스크립트가 MinotaurFSM인지 ZombieFSM인지 모릅니다.

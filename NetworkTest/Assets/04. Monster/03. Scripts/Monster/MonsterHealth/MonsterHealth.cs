@@ -9,7 +9,7 @@ public class MonsterHealth : MonoBehaviour
     [Tooltip("몬스터가 사망했을 때 생성할 'GenericLootDrop' 프리팹")]
     [SerializeField] private GameObject genericLootPrefab;
 
-
+    private MonsterConfig _config;
 
     public float _maxHP { get; private set; }
     private float _defense;
@@ -42,7 +42,6 @@ public class MonsterHealth : MonoBehaviour
     public UnityEvent OnHit;
     public UnityEvent OnDeath;
 
-    // 골렘 1. (추가) AI 컨트롤러 참조
     private MonsterAIController ai;
 
     [Space(10)]
@@ -74,11 +73,11 @@ public class MonsterHealth : MonoBehaviour
 
     public void Initialize(MonsterConfig config)
     {
+        _config = config;
         _maxHP = config.maxHP;
         _defense = config.defense;
         currentHP = _maxHP;
         IsDead = false;
-        Debug.Log($"[{gameObject.name}] Health 초기화 완료: HP={_maxHP}, DEF={_defense}");
     }
 
     /// <summary>
@@ -105,8 +104,6 @@ public class MonsterHealth : MonoBehaviour
 
         }
 
-
-
         // 2. 최종 데미지 계산 (방어력 적용)
         actualDamage = Mathf.Max(damage - currentDefense, 0f);
         currentHP -= actualDamage;
@@ -119,6 +116,9 @@ public class MonsterHealth : MonoBehaviour
             currentHP = 0;
             IsDead = true;
             OnDeath?.Invoke();
+
+            GiveExpToPlayer();
+
             Debug.Log("<color=red>사망 신호 발생!</color>");
         }
         else
@@ -149,6 +149,17 @@ public class MonsterHealth : MonoBehaviour
                     return;
                 }
             }
+        }
+    }
+
+    private void GiveExpToPlayer()
+    {
+        if (_config == null) return;
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null && player.TryGetComponent<PlayerStats>(out var playerStats))
+        {
+            playerStats.GainExp(_config.experienceReward);
         }
     }
 

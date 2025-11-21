@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System; // 'Action' 이벤트를 사용하기 위함
@@ -15,10 +15,14 @@ public class PlayerStats : MonoBehaviour
     public float baseCooldownReduction = 0f;
     public float baseMaxHealth = 100f;
     public float baseDamageModifier = 1.0f;
-    public float baseDefense = 10f;  // [★신규★] 기본 방어력
-    public float basePower = 10f;    // [★신규★] 기본 파워
-    public int baseLevel = 1;        // [★신규★] 기본 레벨
-    public int baseCurrency = 22222; // [★신규★] 기본 재화
+    public float baseDefense = 10f;  
+    public float basePower = 10f;    
+    public int baseLevel = 1;        
+    public int baseCurrency = 22222;
+
+    [Header("경험치 및 성장 (XP System)")]
+    [SerializeField] private int currentExp = 0;
+    [SerializeField] private int requiredExpToLevelUp = 100;
 
     [Header("현재 상태 (실시간 디버그용)")]
     [SerializeField] private float currentHealth;
@@ -29,10 +33,10 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float currentSprintSpeed;
     [SerializeField] private float currentDamageModifier;
     [SerializeField] private float currentCooldownReduction;
-    [SerializeField] private float currentDefense; // [★신규★]
-    [SerializeField] private float currentPower;   // [★신규★]
-    [SerializeField] private int currentLevel;     // [★신규★]
-    [SerializeField] private int currentCurrency;  // [★신규★]
+    [SerializeField] private float currentDefense;
+    [SerializeField] private float currentPower;  
+    [SerializeField] private int currentLevel;    
+    [SerializeField] private int currentCurrency; 
 
     // Public Properties (UI 및 다른 스크립트가 접근용)
     public float CurrentHealth { get { return currentHealth; } private set { currentHealth = value; } }
@@ -43,22 +47,20 @@ public class PlayerStats : MonoBehaviour
     public float CurrentSprintSpeed { get { return currentSprintSpeed; } private set { currentSprintSpeed = value; } }
     public float CurrentDamageModifier { get { return currentDamageModifier; } private set { currentDamageModifier = value; } }
     public float CurrentCooldownReduction { get { return currentCooldownReduction; } private set { currentCooldownReduction = value; } }
-    public float CurrentDefense { get { return currentDefense; } private set { currentDefense = value; } } // [★신규★]
-    public float CurrentPower { get { return currentPower; } private set { currentPower = value; } }     // [★신규★]
-    public int CurrentLevel { get { return currentLevel; } private set { currentLevel = value; } }     // [★신규★]
-    public int CurrentCurrency { get { return currentCurrency; } private set { currentCurrency = value; } } // [★신규★]
+    public float CurrentDefense { get { return currentDefense; } private set { currentDefense = value; } } 
+    public float CurrentPower { get { return currentPower; } private set { currentPower = value; } }  
+    public int CurrentLevel { get { return currentLevel; } private set { currentLevel = value; } }    
+    public int CurrentCurrency { get { return currentCurrency; } private set { currentCurrency = value; } }
+    public int CurrentExp => currentExp;
+    public int RequiredExp => requiredExpToLevelUp;
 
 
     void Awake()
     {
         ResetToBaseStats();
         CurrentHealth = CurrentMaxHealth;
-        currentCurrency = baseCurrency; // [★신규★] 기본 재화로 시작
+        currentCurrency = baseCurrency;
     }
-
-    // ====================================================================
-    // 1. 데미지 및 회복 처리
-    // ====================================================================
 
     public void TakeDamage(float damage)
     {
@@ -89,7 +91,6 @@ public class PlayerStats : MonoBehaviour
             Die();
         }
 
-        // [★수정★] UI 업데이트 신호 보내기
         OnStatsChanged?.Invoke();
     }
 
@@ -100,7 +101,6 @@ public class PlayerStats : MonoBehaviour
         {
             CurrentHealth = CurrentMaxHealth;
         }
-        // [★수정★] UI 업데이트 신호 보내기
         OnStatsChanged?.Invoke();
     }
 
@@ -108,10 +108,6 @@ public class PlayerStats : MonoBehaviour
     {
         Debug.Log("플레이어가 사망했습니다.");
     }
-
-    // ====================================================================
-    // 2. [★신규★] 재화 관리
-    // ====================================================================
 
     public void AddCurrency(int amount)
     {
@@ -130,10 +126,32 @@ public class PlayerStats : MonoBehaviour
         return false;
     }
 
+    public void GainExp(int amount)
+    {
+        currentExp += amount;
+        Debug.Log($"[PlayerStats] 경험치 획득! +{amount} (현재: {currentExp}/{requiredExpToLevelUp})");
 
-    // ====================================================================
-    // 3. 스탯 적용 (AbilityManager가 호출)
-    // ====================================================================
+        while (currentExp >= requiredExpToLevelUp)
+        {
+            LevelUp();
+        }
+        OnStatsChanged?.Invoke();
+    }
+
+    private void LevelUp()
+    {
+        currentExp -= requiredExpToLevelUp;
+
+        requiredExpToLevelUp = Mathf.RoundToInt(requiredExpToLevelUp * 1.2f);
+
+        AddStat("Level", 1);
+
+        Heal(CurrentMaxHealth); // 체력 풀 회복
+        AddStat("Power", 2f);   // 공격력 2 증가
+
+        Debug.Log($"레벨 업 현재 레벨: {CurrentLevel}");
+    }
+
 
     public void ResetToBaseStats()
     {
@@ -147,7 +165,6 @@ public class PlayerStats : MonoBehaviour
         currentPower = basePower;    
         currentLevel = baseLevel;    
 
-        // [★수정★] UI 업데이트 신호 보내기
         OnStatsChanged?.Invoke();
     }
 
@@ -157,7 +174,6 @@ public class PlayerStats : MonoBehaviour
         {
             CurrentHealth = CurrentMaxHealth;
         }
-        // [★수정★] UI 업데이트 신호 보내기
         OnStatsChanged?.Invoke();
     }
 
@@ -170,13 +186,12 @@ public class PlayerStats : MonoBehaviour
                 CurrentHealth += value;
                 break;
             case "Defense":
-                CurrentDefense += value; // [★신규★]
+                CurrentDefense += value; 
                 break;
             case "Power":
-                CurrentPower += value;   // [★신규★]
+                CurrentPower += value;   
                 break;
         }
-        // [★수정★] UI 업데이트 신호 보내기
         OnStatsChanged?.Invoke();
     }
 

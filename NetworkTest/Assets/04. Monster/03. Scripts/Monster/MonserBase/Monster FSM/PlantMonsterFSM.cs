@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using PlantMonsterStates; // <--- 네임스페이스 확인
 
 public class PlantMonsterFSM : MonsterFSM
