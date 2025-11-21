@@ -123,7 +123,7 @@ public class ServerRoomManager : MonoBehaviour
 
         ushort lootNetId = data["lootNetId"]?.ToObject<ushort>() ?? 0;
         if (lootNetId == 0) return;
-        
+
         // Create the destroy message
         JObject destroyMsg = new JObject
         {
@@ -170,7 +170,7 @@ public class ServerRoomManager : MonoBehaviour
     {
         string nickname = data["nickname"]?.ToString();
         if (string.IsNullOrEmpty(nickname) || playersInRoom.ContainsKey(sender)) return;
-        
+
         AddPlayer(sender, nickname);
     }
 
@@ -344,9 +344,9 @@ public class ServerRoomManager : MonoBehaviour
             PlayerList = players.ToObject<List<PlayerInfo>>();
 
             // Trigger the NetworkPlayerManager to sync player GameObjects with this new list.
-            if (NetworkPlayerManager.Instance != null)
+            if (PlayerManager.Instance != null)
             {
-                NetworkPlayerManager.Instance.UpdatePlayerList(players);
+                PlayerManager.Instance.UpdatePlayerList(players);
             }
         }
 

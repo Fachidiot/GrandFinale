@@ -24,7 +24,7 @@ public class TerminalManager : MonoBehaviour
     private bool isTerminalActive = false;
     public bool IsTerminalActive { get { return isTerminalActive; } }
 
-    private GameObject activePlayer;
+    private IPlayerControllable activePlayer;
     private CameraSwitcher activeCameraSwitcher;
 
     // --- Lazy-Loading Implementation ---
@@ -68,8 +68,8 @@ public class TerminalManager : MonoBehaviour
             // Clear the interact text when the terminal is activated
             UIEvents.InteractableFocusChanged("");
 
-            activePlayer = NetworkPlayerManager.Instance.LocalPlayer;
-            if (activePlayer == null)
+            activePlayer = PlayerManager.Instance.LocalPlayer;
+            if (activePlayer == null || activePlayer.gameObject == null)
             {
                 Debug.LogError("Terminal cannot be activated: Local player not found.");
                 isTerminalActive = false; // Revert state

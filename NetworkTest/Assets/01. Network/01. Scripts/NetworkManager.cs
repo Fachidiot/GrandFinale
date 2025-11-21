@@ -11,7 +11,8 @@ public enum NetworkMode
 {
     None,
     Client,
-    Host
+    Host,
+    SinglePlayer
 }
 
 public class NetworkManager : MonoBehaviour
@@ -21,6 +22,11 @@ public class NetworkManager : MonoBehaviour
     public const byte INVALID_PLAYER_ID = 255;
 
     public NetworkMode Mode { get; private set; } = NetworkMode.None;
+
+    public void SetMode(NetworkMode mode)
+    {
+        Mode = mode;
+    }
     public byte MyPlayerId { get; private set; } = INVALID_PLAYER_ID;
     public bool IsConnected { get; private set; }
     public string PlayerId { get; private set; } // SteamID as a string
@@ -117,8 +123,8 @@ public class NetworkManager : MonoBehaviour
     private void FixedUpdate()
     {
         // Guard clauses to prevent sending updates when not in a valid state
-        if (!IsConnected || MyPlayerId == INVALID_PLAYER_ID || NetworkPlayerManager.Instance == null) return;
-        if (!NetworkPlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
+        if (!IsConnected || MyPlayerId == INVALID_PLAYER_ID || PlayerManager.Instance == null) return;
+        if (!PlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
 
         if (Mode == NetworkMode.Host)
         {
@@ -158,9 +164,9 @@ public class NetworkManager : MonoBehaviour
         BroadcastP2PMessage(monsterMessage, EP2PSend.k_EP2PSendUnreliable);
         // The host is the authority, but it still needs to update its local representation
         // of other players based on the state it has received and is broadcasting.
-        if (NetworkPlayerManager.Instance != null)
+        if (PlayerManager.Instance != null)
         {
-            NetworkPlayerManager.Instance.UpdateFromGameState(authoritativeState);
+            PlayerManager.Instance.UpdateFromGameState(authoritativeState);
         }
     }
 
@@ -170,7 +176,7 @@ public class NetworkManager : MonoBehaviour
     private List<PlayerState> GatherPlayerStates()
     {
         var playerStates = new List<PlayerState>();
-        foreach (var playerEntry in NetworkPlayerManager.Instance.Players)
+        foreach (var playerEntry in PlayerManager.Instance.Players)
         {
             string steamIdStr = playerEntry.Key;
             CSteamID steamId = new CSteamID(ulong.Parse(steamIdStr));
@@ -327,7 +333,7 @@ public class NetworkManager : MonoBehaviour
         }
 
         // Clean up persistent managers
-        if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.ClearAllNetworkEntities();
+        if (PlayerManager.Instance != null) PlayerManager.Instance.ClearAllNetworkEntities();
         if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.ClearRoom();
 
         lobbyMembers.Clear();
@@ -421,7 +427,7 @@ public class NetworkManager : MonoBehaviour
             {
                 // Host cleans up the disconnected player's data
                 if (ServerRoomManager.Instance != null) ServerRoomManager.Instance.RemovePlayer(userChanged);
-                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.RemovePlayer(userChanged.ToString());
+                if (PlayerManager.Instance != null) PlayerManager.Instance.RemovePlayer(userChanged.ToString());
             }
             else if (Mode == NetworkMode.Client && userChanged == lobbyHostID)
             {
@@ -514,19 +520,19 @@ public class NetworkManager : MonoBehaviour
         {
             case NetworkMessageType.GameState:
                 var gameState = NetworkGameState.FromBytes(content);
-                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.UpdateFromGameState(gameState);
+                if (PlayerManager.Instance != null) PlayerManager.Instance.UpdateFromGameState(gameState);
                 break;
             case NetworkMessageType.MonsterSpawn:
                 var monsterState = MonsterState.FromBytes(content);
-                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.SpawnMonsterFromState(monsterState);
+                if (PlayerManager.Instance != null) PlayerManager.Instance.SpawnMonsterFromState(monsterState);
                 break;
             case NetworkMessageType.MonsterUpdate:
                 var monsterUpdateState = NetworkMonsterUpdateState.FromBytes(content);
-                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.OnMonsterUpdateReceived(monsterUpdateState);
+                if (PlayerManager.Instance != null) PlayerManager.Instance.OnMonsterUpdateReceived(monsterUpdateState);
                 break;
             case NetworkMessageType.MonsterDespawn:
                 ushort monsterId = BitConverter.ToUInt16(content, 0);
-                if (NetworkPlayerManager.Instance != null) NetworkPlayerManager.Instance.DespawnMonster(monsterId);
+                if (PlayerManager.Instance != null) PlayerManager.Instance.DespawnMonster(monsterId);
                 break;
             case NetworkMessageType.JsonMessage:
                 string jsonMsg = Encoding.UTF8.GetString(content);

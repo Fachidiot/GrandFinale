@@ -372,7 +372,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5139351234107208885
 Transform:
   m_ObjectHideFlags: 0
@@ -7208,6 +7208,7 @@ GameObject:
   - component: {fileID: 5330286128028421865}
   - component: {fileID: 729731253929241830}
   - component: {fileID: -7306960511608734812}
+  - component: {fileID: 5019025222216074575}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -7376,9 +7377,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAnimator: {fileID: 7922187604343870686}
-  playerInputs: {fileID: 0}
   currentMeleeWeapon: {fileID: 0}
   attackCooldown: 0.8
+--- !u!114 &5019025222216074575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7710789deba60840b36958d19ad7249, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6572041794920199261
 GameObject:
   m_ObjectHideFlags: 0
@@ -7894,7 +7906,7 @@ Transform:
   m_GameObject: {fileID: 7121807643687313995}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: -3.5}
+  m_LocalPosition: {x: -66.301, y: -5.475, z: -115.126}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

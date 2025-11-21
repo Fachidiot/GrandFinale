@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Linq;
 
-public class NetworkPlayer : MonoBehaviour
+public class NetworkPlayer : MonoBehaviour, IPlayerControllable
 {
     [Header("Component References")]
     public NetworkTransformSync BodyTransformSync;

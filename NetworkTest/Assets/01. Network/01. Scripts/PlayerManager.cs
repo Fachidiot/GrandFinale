@@ -1,0 +1,300 @@
+using UnityEngine;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using Steamworks;
+
+public class PlayerManager : MonoBehaviour
+{
+    public static PlayerManager Instance { get; private set; }
+
+    [Header("Prefabs")]
+    [SerializeField] private GameObject networkPlayerPrefab;
+    [SerializeField] private GameObject singlePlayerPrefab; // Placeholder for a single-player variant
+
+    private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
+    private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
+    private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
+
+    public IReadOnlyDictionary<string, GameObject> Players => players;
+    public IReadOnlyDictionary<ushort, GameObject> Monsters => monsters;
+    public IPlayerControllable LocalPlayer { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
+        NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
+    }
+
+    private void OnDestroy()
+    {
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
+        }
+    }
+
+    public void SpawnInitialPlayer()
+    {
+        if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
+        {
+            SpawnSinglePlayer();
+        }
+        // In network modes, player spawning is handled by UpdatePlayerList
+    }
+
+    private void SpawnSinglePlayer()
+    {
+        if (singlePlayerPrefab == null)
+        {
+            Debug.LogError("[PlayerManager] Single Player Prefab is not assigned!");
+            return;
+        }
+        if (LocalPlayer != null && LocalPlayer.gameObject != null)
+        {
+            Destroy(LocalPlayer.gameObject);
+        }
+
+        GameObject playerObject = Instantiate(singlePlayerPrefab, GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
+        playerObject.name = "SinglePlayer";
+
+        var singlePlayer = playerObject.AddComponent<SinglePlayer>();
+        LocalPlayer = singlePlayer;
+        DontDestroyOnLoad(playerObject);
+    }
+
+    private void HandleServerJsonMessage(CSteamID sender, string jsonMsg)
+    {
+        JObject msg = JObject.Parse(jsonMsg);
+        string type = msg["type"]?.ToString();
+
+        if (type == "player_action")
+        {
+            RoutePlayerEvent(sender, msg);
+        }
+    }
+
+    public void ClearAllNetworkEntities()
+    {
+        // Destroy all remote player objects
+        foreach (var player in players.Values)
+        {
+            if (player != null) Destroy(player);
+        }
+        players.Clear();
+        byteIdToSteamId.Clear();
+
+        // Destroy the local player object (which could be a SinglePlayer or a NetworkPlayer)
+        if (LocalPlayer != null && LocalPlayer.gameObject != null)
+        {
+            Destroy(LocalPlayer.gameObject);
+            LocalPlayer = null;
+        }
+
+        // Destroy all monster objects
+        foreach (var monster in monsters.Values)
+        {
+            if (monster != null) Destroy(monster);
+        }
+        monsters.Clear();
+    }
+
+    public void UpdatePlayerList(JArray playerList)
+    {
+        byteIdToSteamId.Clear();
+        List<string> steamIdsInMessage = new List<string>();
+
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            steamIdsInMessage.Add(playerInfo.steam_id);
+
+            if (byte.TryParse(playerInfo.player_id, out byte byteId))
+            {
+                byteIdToSteamId[byteId] = playerInfo.steam_id;
+            }
+        }
+
+        List<string> currentPlayers = new List<string>(players.Keys);
+        foreach (string steamId in currentPlayers)
+        {
+            if (!steamIdsInMessage.Contains(steamId))
+            {
+                RemovePlayer(steamId);
+            }
+        }
+
+        byte myId = FindMyPlayerId();
+        if (myId != NetworkManager.INVALID_PLAYER_ID)
+        {
+            NetworkManager.Instance.SetMyPlayerId(myId);
+        }
+
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            if (!players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) || playerGO == null)
+            {
+                SpawnNetworkPlayer(playerInfo);
+            }
+        }
+    }
+
+    private GameObject SpawnNetworkPlayer(PlayerInfo playerInfo)
+    {
+        if (networkPlayerPrefab == null)
+        {
+            Debug.LogError("[PlayerManager] Player Prefab is not assigned!");
+            return null;
+        }
+
+        if (players.ContainsKey(playerInfo.steam_id))
+        {
+            players.Remove(playerInfo.steam_id);
+        }
+
+        GameObject playerObject = Instantiate(networkPlayerPrefab, GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
+        playerObject.name = $"Player_{playerInfo.nickname}";
+        players.Add(playerInfo.steam_id, playerObject);
+
+        var networkPlayer = playerObject.AddComponent<NetworkPlayer>();
+        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
+        networkPlayer.Initialize(playerInfo.steam_id, isMine);
+
+        if (isMine)
+        {
+            LocalPlayer = networkPlayer;
+        }
+
+        if (networkPlayer.NicknameUI != null)
+        {
+            networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
+        }
+
+        DontDestroyOnLoad(playerObject);
+        return playerObject;
+    }
+
+    public void RemovePlayer(string steamId)
+    {
+        if (players.TryGetValue(steamId, out GameObject playerToDestroy))
+        {
+            if (LocalPlayer != null && playerToDestroy == LocalPlayer.gameObject)
+            {
+                LocalPlayer = null;
+            }
+            Debug.Log($"[PlayerManager] Removing player {steamId}.");
+            Destroy(playerToDestroy);
+            players.Remove(steamId);
+        }
+    }
+
+    public byte FindMyPlayerId()
+    {
+        foreach (var entry in byteIdToSteamId)
+        {
+            if (ulong.TryParse(entry.Value, out ulong steamIdUlong))
+            {
+                if (new CSteamID(steamIdUlong) == NetworkManager.Instance.selfSteamId)
+                {
+                    return entry.Key;
+                }
+            }
+        }
+        return NetworkManager.INVALID_PLAYER_ID;
+    }
+
+    // Monster Management and State Updates remain largely the same
+    #region Monster Management
+
+    public void SpawnMonsterFromState(MonsterState state)
+    {
+        if (monsters.ContainsKey(state.monsterId)) return;
+        GameObject prefab = SpawnManager.Instance.GetPrefab(state.monsterType);
+        if (prefab == null) return;
+        GameObject newMonsterGO = Instantiate(prefab, state.position, state.rotation);
+        NetworkMonster networkMonster = newMonsterGO.GetComponent<NetworkMonster>();
+        if (networkMonster == null) { Destroy(newMonsterGO); return; }
+        networkMonster.Initialize(state.monsterId, state.monsterType);
+        newMonsterGO.name = $"{prefab.name}_{state.monsterId}";
+        monsters.Add(state.monsterId, newMonsterGO);
+        var monsterMovement = newMonsterGO.GetComponent<IMonsterMovement>();
+        if (monsterMovement is MonoBehaviour) (monsterMovement as MonoBehaviour).enabled = false;
+        var monsterAI = newMonsterGO.GetComponent<MonsterAIController>();
+        if (monsterAI != null) monsterAI.enabled = false;
+    }
+
+    public void DespawnMonster(ushort monsterId)
+    {
+        if (monsters.TryGetValue(monsterId, out GameObject monsterToDestroy))
+        {
+            SpawnManager.Instance.ReturnMonsterToPool(monsterToDestroy);
+            monsters.Remove(monsterId);
+        }
+    }
+
+    #endregion
+
+    #region State Update Handlers
+
+    public void UpdateFromGameState(NetworkGameState state)
+    {
+        foreach (var playerState in state.players)
+        {
+            if (!byteIdToSteamId.TryGetValue(playerState.playerId, out string steamId)) continue;
+            if (players.TryGetValue(steamId, out GameObject playerObject))
+            {
+                if (steamId == NetworkManager.Instance.PlayerId) continue;
+                var networkPlayer = playerObject.GetComponent<NetworkPlayer>();
+                if (networkPlayer == null) continue;
+                if (networkPlayer.BodyTransformSync != null) networkPlayer.BodyTransformSync.OnTransformReceived(playerState.position, playerState.rotation);
+                if (networkPlayer.CameraTransformSync != null) networkPlayer.CameraTransformSync.OnTransformReceived(networkPlayer.CameraTransformSync.transform.position, playerState.cameraRotation);
+                if (networkPlayer.AnimatorSync != null) networkPlayer.AnimatorSync.OnAnimationDataReceived(playerState.moveX, playerState.moveY, AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sprint), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Roll), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Crouch));
+                if (networkPlayer.WeaponController != null && networkPlayer.WeaponController.activeID != playerState.weaponId) networkPlayer.WeaponController.ToChange(playerState.weaponId);
+            }
+        }
+    }
+
+    public void OnMonsterUpdateReceived(NetworkMonsterUpdateState state)
+    {
+        if (NetworkManager.Instance.Mode == NetworkMode.Host) return;
+        foreach (var monsterState in state.monsters)
+        {
+            if (monsters.TryGetValue(monsterState.monsterId, out GameObject monsterGO))
+            {
+                monsterGO.transform.position = monsterState.position;
+                monsterGO.transform.rotation = monsterState.rotation;
+                var monsterHealth = monsterGO.GetComponent<MonsterHealth>();
+                if (monsterHealth != null) monsterHealth.SetHealthFromNetwork(monsterState.currentHP, monsterState.maxHP);
+                var monsterAnimSync = monsterGO.GetComponent<NetworkMonsterAnimatorSync>();
+                if (monsterAnimSync != null)
+                {
+                    var animData = NetworkMonsterAnimatorSync.Deserialize(monsterState.animationData);
+                    monsterAnimSync.OnAnimationDataReceived(animData);
+                }
+            }
+        }
+    }
+
+    public void RoutePlayerEvent(CSteamID sender, JObject eventData)
+    {
+        string senderSteamId = sender.ToString();
+        if (players.TryGetValue(senderSteamId, out GameObject playerObject))
+        {
+            var nsm = playerObject.GetComponentInChildren<NetworkStateMachine>();
+            if (nsm != null) nsm.OnNetworkEvent(eventData);
+        }
+    }
+
+    #endregion
+}

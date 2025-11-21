@@ -12,4 +12,7 @@ public class GameSettings : ScriptableObject
 
     [Header("Control")]
     public string interactableLayer = "Interactable";
+
+    [Header("SpawnPoint")]
+    public Transform spacestationSpawnPoint;
 }

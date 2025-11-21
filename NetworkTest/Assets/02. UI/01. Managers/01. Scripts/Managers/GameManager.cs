@@ -41,6 +41,29 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
 
         playerInputs = GetComponent<PlayerInputs>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Spawns the player object only when entering the game scene in single-player mode.
+        // In multiplayer, player spawning is handled by NetworkPlayerManager based on lobby events.
+        if (scene.name == gameSettings.spaceroomScene && NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
+        {
+            if (PlayerManager.Instance != null)
+            {
+                PlayerManager.Instance.SpawnInitialPlayer();
+            }
+            else
+            {
+                Debug.LogError("PlayerManager instance not found! Cannot spawn single player.");
+            }
+        }
     }
 
     private void Update()
@@ -77,7 +100,17 @@ public class GameManager : MonoBehaviour
     // Button Methods.
     public void StartOffline()
     {
-        SceneManager.LoadScene("OfflineScene");
+        if (NetworkManager.Instance != null)
+        {
+            NetworkManager.Instance.SetMode(NetworkMode.SinglePlayer);
+        }
+        else
+        {
+            Debug.LogError("NetworkManager instance not found!");
+            return;
+        }
+
+        SceneManager.LoadScene(gameSettings.spaceroomScene);
     }
 
     public void PauseGame(bool _value)
