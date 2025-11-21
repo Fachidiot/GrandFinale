@@ -113,11 +113,6 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(gameSettings.spaceroomScene);
     }
 
-    public void PauseGame(bool _value)
-    {
-        Time.timeScale = _value ? 0 : 1;
-    }
-
     public void StartGame()
     {
         gameState = GameState.Game;

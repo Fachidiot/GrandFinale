@@ -58,3 +58,18 @@
 - **사용자 피드백 반영**:
     - `CombatManager.cs` 파일과 클래스 이름을 `CombatController.cs`로 변경했습니다.
     - `CombatController.cs`에서 `PlayerInputs` 참조를 `GameManager.Instance`에서 가져오도록 수정했습니다.
+
+## 2025년 11월 22일 토요일
+
+- **SinglePlayer 모드 지원 추가 및 플레이어 관리 시스템 리팩토링**:
+    - `NetworkPlayerManager.cs`를 `PlayerManager.cs`로 이름을 변경하고, `NetworkPlayer`와 `SinglePlayer`를 모두 추상화하는 `IPlayerControllable` 인터페이스를 도입하여 통합 관리 시스템을 구축.
+    - `TerminalManager.cs`를 리팩토링하여 특정 플레이어 구현에 의존하지 않고 `IPlayerControllable` 인터페이스를 통해 상호작용하도록 수정.
+    - `NetworkPlayer.cs`에 `IPlayerControllable` 인터페이스를 구현하고, `SinglePlayer.cs` 클래스를 새로 생성하여 `IPlayerControllable`을 구현.
+    - `NetworkManager.cs`에 `SinglePlayer` 모드를 추가하고, `GameManager.cs`의 `StartOffline` 메서드를 수정하여 `NetworkManager`의 모드를 `SinglePlayer`로 설정하고 게임 씬을 로드하도록 변경.
+    - `GameManager.cs`의 씬 로드 이벤트(`SceneManager.sceneLoaded`) 핸들러를 수정하여, `spaceroomScene`이 로드되고 `SinglePlayer` 모드일 때만 `PlayerManager.Instance.SpawnInitialPlayer()`를 호출하여 플레이어를 생성하도록 변경.
+    - `PlayerManager.cs`의 플레이어 생성 로직을 업데이트하여 `GameManager.Instance.GameSettings.spacestationSpawnPoint.position`을 사용하여 플레이어의 초기 위치를 설정하도록 수정.
+- **SinglePlayer 객체 삭제 문제 해결**:
+    - `PlayerManager.ClearAllNetworkEntities()` 메서드의 로직을 수정하여 `LocalPlayer` (싱글 플레이어 또는 로컬 네트워크 플레이어)의 `GameObject`가 게임 세션 종료 시 올바르게 파괴되도록 보장.
+- **게임 일시정지 상태 유지 버그 수정**:
+    - `GameManager.cs`에서 `PauseGame(bool)` 메서드를 `OnPauseStateChanged` 이벤트에 구독하도록 하여, `SetPause(bool)`가 호출될 때 `Time.timeScale`이 항상 올바르게 업데이트되도록 함.
+    - `MainMenuUIManager.cs`의 `OnMultiplayerButtonClicked` 및 `OnSingleplayerButtonClicked` 메서드 시작 부분에 `GameManager.Instance.SetPause(false)`를 추가하여, 새 게임 세션 시작 시 게임의 일시정지 상태가 명시적으로 재설정되도록 보장.

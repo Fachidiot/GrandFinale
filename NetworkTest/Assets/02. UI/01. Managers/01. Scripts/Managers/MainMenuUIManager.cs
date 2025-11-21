@@ -10,6 +10,7 @@ public class MainMenuUIManager : MonoBehaviour
 
     public void OnMultiplayerButtonClicked()
     {
+        if (GameManager.Instance != null) GameManager.Instance.SetPause(false);
         // The new flow is to create a Steam lobby, which then handles connection and scene loading.
         NetworkManager.Instance.CreateSteamLobby();
     }
@@ -18,6 +19,7 @@ public class MainMenuUIManager : MonoBehaviour
     {
         if (GameManager.Instance != null)
         {
+            GameManager.Instance.SetPause(false);
             GameManager.Instance.StartOffline();
         }
         else
