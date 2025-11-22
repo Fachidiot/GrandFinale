@@ -74,4 +74,9 @@ public class MaterialSlotUI : MonoBehaviour, IDropHandler
             iconImage.color = new Color(1, 1, 1, 0);
         }
     }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log($"[MaterialSlotUI] 마우스 감지됨! : {gameObject.name}");
+    }
 }
