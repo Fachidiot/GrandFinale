@@ -13,6 +13,7 @@ public class PlayerInputs : MonoBehaviour
     private bool isPaused = false;
     private Camera mainCamera;
     private Interactable lastInteractable;
+    private bool isClimbing = false; // Add this variable
 
     // Movement
     public float GetAxisHorizontal()
@@ -27,6 +28,18 @@ public class PlayerInputs : MonoBehaviour
     public float GetBending()
     {
         return bending;
+    }
+
+    // Add this method
+    public void SetClimbingState(bool climbing)
+    {
+        isClimbing = climbing;
+        if (isClimbing)
+        {
+            // Reset horizontal and bending inputs immediately when climbing starts
+            horizontalInput = 0f;
+            bending = 0f;
+        }
     }
 
     private float CalculateAxis(float current, float raw)
@@ -152,14 +165,19 @@ public class PlayerInputs : MonoBehaviour
         CheckForInteractableUI();
 
         // Axis Raw
-        float horizontalRaw = Input.GetKey(keyData.m_KeyMoveLeft) ? -1 : Input.GetKey(keyData.m_KeyMoveRight) ? 1 : 0;
+        float horizontalRaw = 0f;
+        float bendingRaw = 0f;
+
+        if (!isClimbing)
+        {
+            horizontalRaw = Input.GetKey(keyData.m_KeyMoveLeft) ? -1 : Input.GetKey(keyData.m_KeyMoveRight) ? 1 : 0;
+            bendingRaw = Input.GetKey(keyData.m_BendingRight) ? -1 : Input.GetKey(keyData.m_BendingLeft) ? 1 : 0;
+        }
+        
         float verticalRaw = Input.GetKey(keyData.m_KeyMoveDown) ? -1 : Input.GetKey(keyData.m_KeyMoveUp) ? 1 : 0;
 
         horizontalInput = CalculateAxis(horizontalInput, horizontalRaw);
         verticalInput = CalculateAxis(verticalInput, verticalRaw);
-
-        // Bending
-        float bendingRaw = Input.GetKey(keyData.m_BendingRight) ? -1 : Input.GetKey(keyData.m_BendingLeft) ? 1 : 0;
         bending = CalculateAxis(bending, bendingRaw);
 
         if (null == OptionDataManager.Instance)
