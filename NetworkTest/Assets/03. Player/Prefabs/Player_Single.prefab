@@ -1437,6 +1437,7 @@ MonoBehaviour:
   fpv_aimCamera: {fileID: 1740771074089005496}
   tpvCamera: {fileID: 6166106216291031851}
   tpv_aimCamera: {fileID: 8881525642255880010}
+  mainCamera: {fileID: 0}
 --- !u!1 &1305454162068515327
 GameObject:
   m_ObjectHideFlags: 0
@@ -7209,6 +7210,7 @@ GameObject:
   - component: {fileID: 729731253929241830}
   - component: {fileID: -7306960511608734812}
   - component: {fileID: 5019025222216074575}
+  - component: {fileID: 4740383125139639114}
   m_Layer: 6
   m_Name: Player_Single
   m_TagString: Player
@@ -7391,6 +7393,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7710789deba60840b36958d19ad7249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4740383125139639114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b28c081ab80d8fc46a61d239679d6abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraController: {fileID: 0}
+  bodyTurnHandler: {fileID: 0}
+  model: {fileID: 0}
 --- !u!1 &6572041794920199261
 GameObject:
   m_ObjectHideFlags: 0

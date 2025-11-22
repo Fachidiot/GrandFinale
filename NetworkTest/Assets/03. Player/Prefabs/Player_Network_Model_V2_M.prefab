@@ -2546,6 +2546,7 @@ GameObject:
   - component: {fileID: 2584884767898990148}
   - component: {fileID: 7141207012547369512}
   - component: {fileID: 8921721327686769470}
+  - component: {fileID: -8463350597550300409}
   m_Layer: 6
   m_Name: Player_Network_Model_V2_M
   m_TagString: Player
@@ -2740,6 +2741,21 @@ MonoBehaviour:
   CameraSwitcher: {fileID: 2426467542955256964}
   NicknameUI: {fileID: 1824085159041276492}
   StateMachine: {fileID: 7565515042357441117}
+--- !u!114 &-8463350597550300409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3125512638087466591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b28c081ab80d8fc46a61d239679d6abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraController: {fileID: 0}
+  bodyTurnHandler: {fileID: 0}
+  model: {fileID: 0}
 --- !u!1 &3154526535571121985
 GameObject:
   m_ObjectHideFlags: 0
@@ -7156,6 +7172,7 @@ MonoBehaviour:
   fpv_aimCamera: {fileID: 7347851980304336388}
   tpvCamera: {fileID: 5773169237022774680}
   tpv_aimCamera: {fileID: 7587095511856033674}
+  mainCamera: {fileID: 0}
 --- !u!1 &6276067944514708326
 GameObject:
   m_ObjectHideFlags: 0
