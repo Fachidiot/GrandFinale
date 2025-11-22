@@ -81,6 +81,12 @@ public class OptionController : MonoBehaviour
             NetworkManager.Instance.Disconnect();
         }
 
+        if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
+        {
+            if (PlayerManager.Instance != null)
+                PlayerManager.Instance.ClearAllNetworkEntities();
+        }
+
         SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
     }
 }

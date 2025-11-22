@@ -83,20 +83,6 @@ public class GameManager : MonoBehaviour
         OnPauseStateChanged?.Invoke(pause);
     }
 
-    public void EnterLobby()
-    {
-        gameState = GameState.Lobby;
-        optionOn = false;
-        OnPauseStateChanged?.Invoke(optionOn);
-    }
-
-    public void EnterRoom()
-    {
-        gameState = GameState.Room;
-        optionOn = false;
-        OnPauseStateChanged?.Invoke(optionOn);
-    }
-
     // Button Methods.
     public void StartOffline()
     {

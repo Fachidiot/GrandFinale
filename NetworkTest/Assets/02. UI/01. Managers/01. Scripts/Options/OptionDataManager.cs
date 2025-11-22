@@ -65,7 +65,7 @@ public class OptionDataManager : MonoBehaviour
             QualitySettings.SetQualityLevel(OptionData.m_GraphicQuality, true);
         }
         else
-            Destroy(gameObject);
+            Destroy(transform.parent.gameObject);
     }
 
     private void LoadOptionData()

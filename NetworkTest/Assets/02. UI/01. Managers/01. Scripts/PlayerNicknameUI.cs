@@ -5,8 +5,7 @@ public class PlayerNicknameUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI nicknameText;
-
-    [SerializeField] private Camera mainCamera;
+    private Camera mainCamera;
 
     private void Start()
     {

@@ -49,7 +49,7 @@ public class CombatController : MonoBehaviour
 
         if (currentMeleeWeapon == null)
         {
-            Debug.LogWarning("[CombatManager] No melee weapon equipped.");
+            // Debug.LogWarning("[CombatManager] No melee weapon equipped.");
             return;
         }
 

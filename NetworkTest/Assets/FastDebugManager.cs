@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FastDebugManager : MonoBehaviour
 {
-    void Start()
+    void Awake()
     {
         if (NetworkManager.Instance)
             gameObject.SetActive(false);
