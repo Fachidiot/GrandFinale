@@ -427,7 +427,8 @@ public class SpriteCache
 public enum InventoryType
 {
     Small,
-    Full
+    Full,
+    Shop
 }
 
 #endregion

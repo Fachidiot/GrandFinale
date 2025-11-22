@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class InventoryAnimation : MonoBehaviour
 {
@@ -21,11 +22,15 @@ public class InventoryAnimation : MonoBehaviour
                        .SetEase(Ease.OutBack); // 튕기는 듯한 효과
     }
 
-    public void CloseInventory()
+    public void CloseInventory(Action onComplete)
     {
-        // 닫을 때는 부드럽게 작아지면서 사라집니다.
         _canvasGroup.DOFade(0f, _openDuration);
+
         _inventoryPanel.DOScale(Vector3.one * _startScale, _openDuration)
-                       .SetEase(Ease.InBack); // 들어가는 듯한 효과
+                       .SetEase(Ease.InBack)
+                       .OnComplete(() =>
+                       {
+                           onComplete?.Invoke();
+                       });
     }
 }

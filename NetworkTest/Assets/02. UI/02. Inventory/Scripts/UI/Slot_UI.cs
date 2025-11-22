@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
@@ -21,9 +21,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
     [Tooltip("선택됐을 때(눌렀을 때)의 슬롯 테두리 스프라이트")]
     [SerializeField] private Sprite selectedBorderSprite;
 
-    // [참고] 이 색상 로직은 UpdateSlotVisuals에서 처리되지만,
-    // UIManager의 SetSelected가 slotBorderImage를 제어하므로
-    // 둘 중 하나의 방식(스프라이트 또는 색상)을 선택하는 것이 좋습니다.
+
     [Tooltip("선택 시 색상이 변경될 배경/테두리 이미지")]
     public Image slotBackground;
     public Color defaultColor = Color.white;

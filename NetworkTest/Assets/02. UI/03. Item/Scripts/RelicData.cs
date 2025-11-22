@@ -1,4 +1,4 @@
-// Assets/Scripts/Data/RelicData.cs
+﻿// Assets/Scripts/Data/RelicData.cs
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "REL_", menuName = "Data/Relic")]
