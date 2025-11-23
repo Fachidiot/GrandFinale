@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 public class NetworkStateMachine : MonoBehaviour
 {
     [SerializeField] private WeaponController weaponController;
-    [SerializeField] private EventsCenter eventsCenter; // Still needed for other events, if any
+    [SerializeField] private EventsCenter eventsCenter;
 
     private bool isMine;
 
@@ -16,8 +16,7 @@ public class NetworkStateMachine : MonoBehaviour
         if (isMine)
         {
             weaponController.OnShoot += ShootEventSender;
-            // eventsCenter.OnWeaponChange += WeaponChangeEventSender; // No longer used for sending weapon change
-            weaponController.OnWeaponEquipped += WeaponEquippedEventSender; // New event
+            eventsCenter.OnWeaponChange += WeaponChangeEventSender;
         }
     }
 
@@ -26,8 +25,7 @@ public class NetworkStateMachine : MonoBehaviour
         if (isMine)
         {
             weaponController.OnShoot -= ShootEventSender;
-            // eventsCenter.OnWeaponChange -= WeaponChangeEventSender;
-            weaponController.OnWeaponEquipped -= WeaponEquippedEventSender;
+            eventsCenter.OnWeaponChange -= WeaponChangeEventSender;
         }
     }
 
@@ -53,20 +51,17 @@ public class NetworkStateMachine : MonoBehaviour
         SendAction("shoot");
     }
 
-    // New event sender for weapon equipped
-    private void WeaponEquippedEventSender(int newSlotIndex)
+    private void WeaponChangeEventSender(bool change)
     {
-        // Don't send if it's the unarmed slot (0)
-        if (newSlotIndex == 0) return;
-
-        // Ensure this is not a remote change being processed locally
+        if (!change || weaponController.nextID == 0)
+            return;
         if (weaponController.IsProcessingRemoteWeaponChange)
             return;
 
         JObject parameters = new JObject(
-            new JProperty("weapon_id", newSlotIndex)
+            new JProperty("weapon_id", weaponController.nextID)
         );
-        SendAction("weapon_equipped", parameters);
+        SendAction("weapon_change", parameters);
     }
 
     public void OnNetworkEvent(JObject eventData)
@@ -81,16 +76,14 @@ public class NetworkStateMachine : MonoBehaviour
             case "shoot":
                 if (weaponController != null)
                 {
-                    weaponController.RemoteAttack(); // Updated call
+                    weaponController.RemoteShoot();
                 }
                 break;
-            case "weapon_equipped": // Updated event type
+            case "weapon_change":
                 if (weaponController != null)
                 {
                     int weaponId = eventData["weapon_id"].Value<int>();
-                    weaponController.BeginRemoteWeaponChange(); // Set flag to prevent local loop
-                    weaponController.EquipWeapon(weaponId); // Updated call
-                    // Flag reset should be handled by WeaponController via Coroutine or Animation Event
+                    weaponController.RemoteToChange(weaponId);
                 }
                 break;
         }

@@ -45,10 +45,21 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
     {
         if (stateInfo.normalizedTime > endTime)
         {
-            if (weaponController.nextWeaponSlotIndex == 0) return;
+            if (weaponController.nextID == 0) return;
 
-            weaponController.FinalizeEquip(weaponController.nextWeaponSlotIndex);
-            weaponController.nextWeaponSlotIndex = 0; // Reset after use
+            //set active id
+            weaponController.activeID = weaponController.nextID;
+
+            //if nextID != 0 then transition to grab animation
+            if (weaponController.nextID <= weaponController.slots.Length)
+                animator.CrossFadeInFixedTime("GrabSlot" + weaponController.nextID, 0.25f, layerIndex);
+            else
+            {
+                // TODO : Melee Animate
+                animator.CrossFadeInFixedTime("Melee_Default", 0.25f, 3);
+                weaponController.changed = false;
+            }
+            weaponController.nextID = 0;
             return;
         }
 

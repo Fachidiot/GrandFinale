@@ -260,7 +260,7 @@ public class PlayerManager : MonoBehaviour
                 if (networkPlayer.BodyTransformSync != null) networkPlayer.BodyTransformSync.OnTransformReceived(playerState.position, playerState.rotation);
                 if (networkPlayer.CameraTransformSync != null) networkPlayer.CameraTransformSync.OnTransformReceived(networkPlayer.CameraTransformSync.transform.position, playerState.cameraRotation);
                 if (networkPlayer.AnimatorSync != null) networkPlayer.AnimatorSync.OnAnimationDataReceived(playerState.moveX, playerState.moveY, AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sprint), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Roll), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded), AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Crouch));
-                if (networkPlayer.WeaponController != null && networkPlayer.WeaponController.currentWeaponSlotIndex != playerState.weaponId) networkPlayer.WeaponController.EquipWeapon(playerState.weaponId);
+                if (networkPlayer.WeaponController != null && networkPlayer.WeaponController.activeID != playerState.weaponId) networkPlayer.WeaponController.ToChange(playerState.weaponId);
 
                 var bodySlopeHandler = playerObject.GetComponentInChildren<BodySlope_Handler>();
                 if (bodySlopeHandler != null)

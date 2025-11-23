@@ -6,14 +6,8 @@ using UnityEngine;
 /// This component is attached to a melee weapon prefab.
 /// It holds the weapon's stats and handles collision detection during an attack swing.
 /// </summary>
-public class MeleeWeapon : BaseWeapon
+public class MeleeWeapon : MonoBehaviour
 {
-    // These will be set in the inspector for this specific weapon instance
-    [field:SerializeField] public override GameObject WeaponGameObject { get; protected set; }
-    [field:SerializeField] public override string WeaponName { get; protected set; }
-    [field:SerializeField] public override int WeaponID { get; protected set; }
-    [field:SerializeField] public override SlotType Type { get; protected set; } = SlotType.melee;
-
     [Header("Weapon Stats")]
     public float damage = 15f;
     public float attackRange = 1.5f; // Used for visualization or AI, the collider is the authority
@@ -27,11 +21,6 @@ public class MeleeWeapon : BaseWeapon
 
     private void Awake()
     {
-        if (WeaponGameObject == null) // Only assign if not already set in inspector.
-        {
-            WeaponGameObject = this.gameObject; // Assign the GameObject to the base property
-        }
-
         if (damageCollider == null)
         {
             damageCollider = GetComponent<Collider>();
@@ -40,18 +29,6 @@ public class MeleeWeapon : BaseWeapon
         damageCollider.enabled = false; // The collider should be disabled by default.
 
         hitTargets = new List<Collider>();
-    }
-
-    /// <summary>
-    /// This is the IWeapon Attack() implementation for melee weapons.
-    /// It typically triggers the melee animation. The actual hit detection
-    /// is handled by animation events calling BeginAttack/EndAttack.
-    /// </summary>
-    public override void Attack()
-    {
-        // The PlayerCombatController will handle calling animator.SetTrigger("TriggerAttack")
-        // and its animation events will then call BeginAttack/EndAttack on this script.
-        // No direct action needed here other than to signify an attack was initiated.
     }
 
     /// <summary>

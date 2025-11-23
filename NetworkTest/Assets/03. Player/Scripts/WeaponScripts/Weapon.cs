@@ -2,9 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RangedWeapon : BaseWeapon
+public class Weapon : MonoBehaviour
 {
+    public enum SlotType
+    {
+        rifle = 1,
+        smg = 2,
+        pistol = 3
+    }
 
+    [Header("Weapon Settings")]
+    [SerializeField] private bool useObjectPooling = true;
+    [SerializeField] private SlotType slotType;
+    public SlotType Type => slotType;
 
     [SerializeField] private int playerDamage = 10;
     public int PlayerDamage => playerDamage;
@@ -75,7 +85,6 @@ public class RangedWeapon : BaseWeapon
     [SerializeField] private AudioClip emptySound;
 
     [Header("Effects Settings")]
-    [SerializeField] private bool useObjectPooling = true;
     [SerializeField] private float muzzleFlashLifetime = 0.5f;
     [SerializeField] private float casingLifetime = 5f;
     [SerializeField] private float casingEjectForce = 55f;
@@ -113,25 +122,6 @@ public class RangedWeapon : BaseWeapon
         }
     }
 
-    public override void Equip()
-    {
-        base.Equip(); // Calls SetActive(true)
-        // Additional equip specific to ranged weapons
-        Debug.Log($"{WeaponName} equipped.");
-    }
-
-    public override void Unequip()
-    {
-        base.Unequip(); // Calls SetActive(false)
-        // Additional unequip specific to ranged weapons
-        Debug.Log($"{WeaponName} unequipped.");
-    }
-
-    public override void Attack()
-    {
-        // Ranged weapon attack is Shoot()
-        Shoot();
-    }
 
     public bool Shoot()
     {

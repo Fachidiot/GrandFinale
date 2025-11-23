@@ -88,14 +88,6 @@ public class InGameUIManager : MonoBehaviour
             return;
         }
 
-        RangedWeapon currentRangedWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
-        if (currentRangedWeapon != null)
-        {
-            ammoCountText.text = currentRangedWeapon.CurrentAmmo.ToString();
-        }
-        else
-        {
-            ammoCountText.text = "-"; // Display nothing for melee or unarmed
-        }
+        ammoCountText.text = weaponController.GETCurrentWeapon.CurrentAmmo.ToString();
     }
 }
