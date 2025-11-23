@@ -1,4 +1,4 @@
-// Assets/Scripts/Managers/PlayerAbilityManager.cs
+﻿// Assets/Scripts/Managers/PlayerAbilityManager.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -141,7 +141,6 @@ public class PlayerAbilityManager : MonoBehaviour
 
         // (필요시 체력 동기화 - 최대 체력이 줄었을 때 현재 체력이 더 높을 수 있음)
         playerStats.ValidateHealth();
-        // (PlayerStats.cs에 ValidateHealth() { if (CurrentHealth > CurrentMaxHealth) CurrentHealth = CurrentMaxHealth; } 추가 필요)
     }
 
     /// <summary>

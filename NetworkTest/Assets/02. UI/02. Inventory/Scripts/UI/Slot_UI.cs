@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
@@ -21,9 +21,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
     [Tooltip("선택됐을 때(눌렀을 때)의 슬롯 테두리 스프라이트")]
     [SerializeField] private Sprite selectedBorderSprite;
 
-    // [참고] 이 색상 로직은 UpdateSlotVisuals에서 처리되지만,
-    // UIManager의 SetSelected가 slotBorderImage를 제어하므로
-    // 둘 중 하나의 방식(스프라이트 또는 색상)을 선택하는 것이 좋습니다.
+
     [Tooltip("선택 시 색상이 변경될 배경/테두리 이미지")]
     public Image slotBackground;
     public Color defaultColor = Color.white;
@@ -79,7 +77,6 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         }
     }
 
-    // ▼▼▼ [수정] OnPointerClick 구문 오류 수정 및 로직 정리 ▼▼▼
     public void OnPointerClick(PointerEventData eventData)
     {
         // 1. 우클릭 처리 (장착 시도)
@@ -89,7 +86,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             {
                 AttemptEquip();
             }
-            return; // 우클릭 시 좌클릭 로직(선택)은 실행하지 않음
+            return; 
         }
 
         // 2. 좌클릭 처리
@@ -123,25 +120,20 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             }
         }
     }
-    // ▲▲▲ [수정 완료] ▲▲▲
 
-    // ▼▼▼ [수정] HandleSingleClick이 UIManager의 새 함수를 호출하도록 변경 ▼▼▼
     private IEnumerator HandleSingleClick()
     {
-        yield return new WaitForSeconds(0.2f); // 0.2초 대기 (더블클릭 구분)
+        yield return new WaitForSeconds(0.2f); // 0.2초 대기
 
         if (InventoryUIManager.Instance != null)
         {
             // UIManager의 새 클릭 핸들러를 호출 (선택 상태와 정보창을 모두 관리)
-            // 아이템이 없으면 null을 전달
             InventoryUIManager.Instance.HandleSlotClick(this, HasValidItem() ? currentSlot.item : null);
         }
 
         singleClickCoroutine = null;
     }
-    // ▲▲▲ [수정 완료] ▲▲▲
 
-    // (참고: OnPointerClick에서 사용하던 HandleLeftClick, HandleDoubleClick 등 불필요한 메서드 제거)
 
     public void SetBoundItem(InventorySlot newSlot)
     {
@@ -163,24 +155,9 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             HideSlot();
         }
 
-        // UIManager의 SetSelected 로직이 스프라이트를 제어하므로
-        // 이 로직은 주석 처리하거나, UIManager의 로직과 통일해야 합니다.
-        // if (!isSelected && slotBorderImage != null)
-        // {
-        //     slotBorderImage.sprite = normalBorderSprite;
-        // }
-
-        // UIManager의 SetSelected와 이 색상 로직이 충돌할 수 있습니다.
-        // UIManager가 관리하는 `currentSelectedSlot`을 사용하도록 변경합니다.
         if (slotBackground != null && InventoryUIManager.Instance != null)
         {
-            // InventoryUIManager.Instance.GetSelectedSlotIndex() 같은 함수가 필요하지만,
-            // 현재 UIManager에는 없으므로, UIManager의 SetSelected가 이 로직을 대신해야 합니다.
-            // 여기서는 일단 기존 로직을 유지하되, UIManager의 SetSelected가
-            // slotBorderImage.sprite와 slotBackground.color를 모두 제어하는 것을 권장합니다.
-
-            // bool isSelected = (currentSlot != null && ...);
-            // slotBackground.color = isSelected ? selectedColor : defaultColor;
+        // 어떤 여자가 좋을까
         }
     }
 
@@ -276,6 +253,27 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         {
             HandleEquipmentSlotDrop(sourceEquipSlot);
         }
+
+        UpgradeSlotUI upgradeSlot = eventData.pointerDrag.GetComponent<UpgradeSlotUI>();
+        if (upgradeSlot != null && upgradeSlot.CurrentItem != null)
+        {
+            if (upgradeSlot._module != null)
+            {
+                upgradeSlot._module.ReturnEquipmentToInventory();
+            }
+            return;
+        }
+
+        // 강화 재료 슬롯 -> 인벤토리 이동
+        MaterialSlotUI materialSlot = eventData.pointerDrag.GetComponent<MaterialSlotUI>();
+        if (materialSlot != null && materialSlot.CurrentItem != null)
+        {
+            if (materialSlot._module != null)
+            {
+                materialSlot._module.ReturnMaterialToInventory(materialSlot);
+            }
+            return;
+        }
     }
 
     private void HandleInventorySlotDrop(Slot_UI sourceSlot)
@@ -287,12 +285,9 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         sourceSlot.dropSuccessful = true;
         dropSuccessful = true;
 
-        // ▼▼▼ [추가] 아이템이 놓였을 때 애니메이션 재생 (요청 사항) ▼▼▼
         StartCoroutine(PlayDropAnimationAfterFrame());
-        // ▲▲▲ [추가 완료] ▲▲▲
     }
 
-    // ▼▼▼ [추가] 아이템 드롭 애니메이션 관련 함수 ▼▼▼
     private IEnumerator PlayDropAnimationAfterFrame()
     {
         // OnInventoryChanged 이벤트가 UI를 업데이트할 때까지 한 프레임 대기
@@ -311,7 +306,6 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             slotIcon.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack); // 오버슈트 효과
         }
     }
-    // ▲▲▲ [추가 완료] ▲▲▲
 
     private void HandleEquipmentSlotDrop(EquipmentSlot_UI sourceEquipSlot)
     {

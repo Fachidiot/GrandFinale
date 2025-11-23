@@ -117,6 +117,13 @@ public class InventoryUIManager : MonoBehaviour
         tooltipController.ShowTooltip(item, type);
     }
 
+    //상점용
+    public void ShowTooltip(RelicData item, InventoryType type)
+    {
+        if (tooltipController == null) return;
+        tooltipController.ShowTooltip(item, type);
+    }
+
     /// <summary>
     /// 툴팁 숨기기
     /// </summary>

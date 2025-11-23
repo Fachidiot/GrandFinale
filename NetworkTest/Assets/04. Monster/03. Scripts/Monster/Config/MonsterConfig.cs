@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 모든 몬스터가 공통으로 사용할 최종 설정 파일입니다.
@@ -10,7 +10,6 @@ public class MonsterConfig : ScriptableObject
     public float maxHP = 100f;
     public float attackDamage = 10f;
     public float defense = 0f;
-    // 'currentHP'는 이제 MonsterHealth.cs가 관리하므로 여기서 제거합니다.
 
     [Header("AI 행동 및 감지")]
     public float fovRange = 10f;
@@ -19,7 +18,7 @@ public class MonsterConfig : ScriptableObject
     public float soundRange = 15f;
     public float attackRange = 2f;
     public float stoppingDistance = 1.5f;
-    public float persistenceTime = 5f; // 추적 유지 시간 (SpiderConfig에서 가져옴)
+    public float persistenceTime = 5f;
 
     [Header("순찰 및 대기")]
     public float patrolRadiusMin = 5f;
@@ -28,7 +27,7 @@ public class MonsterConfig : ScriptableObject
     public float idleTimeMax = 15f;
 
     [Header("주변 둘러보기")]
-    public float lookAroundTime = 3f; // looktime 대신 lookAroundTime으로 통일
+    public float lookAroundTime = 3f;
     public float lookAroundTurnInterval = 1.5f;
 
     [Header("이동 관련")]
@@ -40,7 +39,7 @@ public class MonsterConfig : ScriptableObject
     public float attackDelay = 0.5f;
     public float attackCooldown = 10f;
 
-    [Header("사운드 및 이펙트 (SpiderConfig에서 가져옴)")]
+    [Header("사운드 및 이펙트")]
     public AudioClip idleSound;
     public AudioClip chaseSound;
     public AudioClip attackSound;
@@ -49,11 +48,11 @@ public class MonsterConfig : ScriptableObject
     public GameObject hitEffect;
     public GameObject dieEffect;
 
-    /*    [Header("보상 (SpiderConfig에서 가져옴)")]
-        public int experiencePoints = 50;
-        public GameObject[] lootItems;
-    */
-    [Header("보상 (LootTable 가져옴)")]
+    [Header("경험치 설정")]
+    [Tooltip("이 몬스터를 처치했을 때 플레이어가 얻는 경험치")]
+    public int experienceReward = 10;
+
+    [Header("아이템")]
     public LootTable lootTable;
 
     [Header("사망 후 처리")]

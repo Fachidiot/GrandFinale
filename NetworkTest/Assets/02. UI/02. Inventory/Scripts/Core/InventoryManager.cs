@@ -14,6 +14,8 @@ public class InventoryManager : MonoBehaviour
 
     private string currentSearchQuery = string.Empty;
 
+    private bool isExternalInteractionActive = false;
+
     //private PlayerInputs playerInputs;
     public List<InventorySlot> inventorySlots;
 
@@ -38,10 +40,15 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private CanvasGroup smallCanvasGroup;
     [SerializeField] private float fadeDuration = 0.2f;
 
+    [Header("Animation References")]
+    [SerializeField] private InventoryAnimation smallInventoryAnim;
+    [SerializeField] private InventoryAnimation fullInventoryAnim;
+
     private Animator playerAnimator;
 
     public bool IsUIOpen => (smallInventoryUI != null && smallInventoryUI.activeSelf) ||
                             (fullInventoryUI != null && fullInventoryUI.activeSelf);
+    public bool IsExternalInteractionActive => isExternalInteractionActive;
 
     void Awake()
     {
@@ -104,8 +111,7 @@ public class InventoryManager : MonoBehaviour
         // }
 
 
-        // Tab 키: Small 인벤토리 토글
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (!isExternalInteractionActive && Input.GetKeyDown(KeyCode.Tab))
         {
             ToggleSmallInventory();
         }
@@ -122,16 +128,93 @@ public class InventoryManager : MonoBehaviour
             CloseAllInventories();
         }
 
-        // UI 외부 클릭 시 포커스 해제
-        if (IsFocused && Input.GetMouseButtonDown(0))
+        if (IsFocused && !isExternalInteractionActive && Input.GetMouseButtonDown(0))
         {
             bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
             if (!isOverUI)
             {
+                // 빈 공간을 클릭했으므로 포커스 해제 및 모든 인벤토리 닫기
+                SetFocusState(false);
+                CloseAllInventories();
+            }
+        }
+    }
+
+    #region NPC 전용
+
+    public void ToggleInventory()
+    {
+        ToggleFullInventory();
+    }
+
+    public void OpenSmallInventory()
+    {
+        // 이미 열려있다면 포커스만 맞추고 종료
+        if (smallInventoryUI != null && smallInventoryUI.activeSelf)
+        {
+            SetFocusState(true);
+            return;
+        }
+
+        // Full 인벤토리가 켜져 있다면 끄기
+        if (fullInventoryUI != null && fullInventoryUI.activeSelf)
+        {
+            fullInventoryUI.SetActive(false);
+        }
+
+        // Small 인벤토리 열기
+        if (smallInventoryUI != null)
+        {
+            smallInventoryUI.SetActive(true);
+
+            if (smallInventoryAnim != null)
+            {
+                smallInventoryAnim.OpenInventory();
+            }
+            else
+            {
+                if (smallCanvasGroup != null)
+                {
+                    smallCanvasGroup.alpha = 0f;
+                    smallCanvasGroup.blocksRaycasts = true;
+                    smallCanvasGroup.DOFade(1f, fadeDuration);
+                }
+            }
+
+            SetFocusState(true);
+        }
+    }
+
+    public void CloseSmallInventory()
+    {
+        if (smallInventoryUI == null || !smallInventoryUI.activeSelf) return;
+        if (smallInventoryAnim != null)
+        {
+            smallInventoryAnim.CloseInventory(() =>
+            {
+                smallInventoryUI.SetActive(false);
+                if (fullInventoryUI == null || !fullInventoryUI.activeSelf)
+                {
+                    SetFocusState(false);
+                }
+            });
+        }
+        else
+        {
+            smallInventoryUI.SetActive(false);
+
+            if (fullInventoryUI == null || !fullInventoryUI.activeSelf)
+            {
                 SetFocusState(false);
             }
         }
+    }
+    #endregion
+
+    public void SetExternalInteractionActive(bool isActive)
+    {
+        this.isExternalInteractionActive = isActive;
     }
 
     public void ToggleSmallInventory()
@@ -200,15 +283,14 @@ public class InventoryManager : MonoBehaviour
             SetFocusState(true);
         }
     }
-
     public void CloseAllInventories()
     {
         if (!IsUIOpen) return;
-
-        InventoryAnimation_Close();
-        if (smallInventoryUI != null) smallInventoryUI.SetActive(false);
-        if (fullInventoryUI != null) fullInventoryUI.SetActive(false);
-
+        CloseSmallInventory();
+        if (fullInventoryUI != null && fullInventoryUI.activeSelf)
+        {
+            InventoryAnimation_Close();
+        }
         SetFocusState(false);
     }
 
@@ -479,7 +561,6 @@ public class InventoryManager : MonoBehaviour
             OnInventoryChanged?.Invoke();
         }
     }
-
 
     /// <summary>
     /// Full Inventory UI를 열 때의 애니메이션 (페이드 인)

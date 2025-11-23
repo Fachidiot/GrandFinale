@@ -1,4 +1,4 @@
-// Assets/Scripts/Data/RelicData.cs
+﻿// Assets/Scripts/Data/RelicData.cs
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "REL_", menuName = "Data/Relic")]
@@ -17,6 +17,10 @@ public class RelicData : ScriptableObject
     public string description;
 
     public int price;
+
+    [Header("3D Model Setting")]
+    public string modelPath;
+    public GameObject modelPrefab;
 
     [Header("리소스 경로")]
     public string iconPath; // Icons/Relics/AuxHeart

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 public enum ItemType
 {
     Weapon, //무기
@@ -6,7 +6,6 @@ public enum ItemType
     Accessory, // 장신구
     Equipment, // 장비
 
-    // 단순 소모품 또는 기타
     StatBoost,
     Skill,
     Material,

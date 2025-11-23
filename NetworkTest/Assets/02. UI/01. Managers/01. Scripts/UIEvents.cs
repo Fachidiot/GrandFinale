@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 public static class UIEvents
 {
@@ -23,5 +23,10 @@ public static class UIEvents
     public static void PlayerInitialized(WeaponController weaponController)
     {
         OnPlayerInitialized?.Invoke(weaponController);
+    }
+
+    public static void FireInteractState(string text)
+    {
+        OnInteractableFocusChanged?.Invoke(text);
     }
 }
