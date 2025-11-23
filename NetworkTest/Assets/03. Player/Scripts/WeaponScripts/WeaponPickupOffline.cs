@@ -16,60 +16,40 @@ public class WeaponPickupOffline : WeaponPickup
 
     public override void PickupCheck()
     {
-        //Debug.DrawLine(detectionStartPoint.position, detectionStartPoint.TransformDirection(Vector3.forward) * detectionLength, Color.red);
-
         if (Physics.Raycast(rayCastStartPoint.position, rayCastStartPoint.TransformDirection(Vector3.forward), out RaycastHit hit, raycastLengh, weaponLayers))
         {
-            Weapon detectedGun = null;
+            BaseWeapon detectedWeapon = null;
 
-            if (hit.transform.CompareTag("Weapon")) detectedGun = hit.transform.GetComponent<Weapon>();
+            if (hit.transform.CompareTag("Weapon")) detectedWeapon = hit.transform.GetComponent<BaseWeapon>(); // Check for BaseWeapon
 
-            if (detectedGun == null) return;
+            if (detectedWeapon == null) return;
+            
+            // Try to pick up into the currently active slot
+            int targetSlotIndex = weaponController.currentWeaponSlotIndex;
 
-            if (weaponController.GETCurrentWeapon && weaponController.GETCurrentWeapon.Type == detectedGun.Type)
+            // If current slot is unarmed (0) or if the current weapon in that slot is different from the detected one
+            if (targetSlotIndex == 0 || weaponController.GETCurrentWeapon.WeaponID != detectedWeapon.WeaponID)
             {
-                RaiseTheGun(hit.transform, weaponController.activeID - 1);
-                weaponController.animator.Play("GunPickUp", 1);
+                // If there's already a weapon in the target slot, drop it first
+                if (weaponController.GetWeaponInSlot(targetSlotIndex) != null && targetSlotIndex > 0)
+                {
+                    weaponController.DropWeapon(targetSlotIndex);
+                }
+                weaponController.PickupWeapon(detectedWeapon, targetSlotIndex);
             }
-            else
+            else // If the current slot has the same type of weapon, try to find an empty slot
             {
-                RaiseTheGun(hit.transform, (int)detectedGun.Type - 1);
+                int emptySlot = weaponController.FindEmptySlot();
+                if (emptySlot != -1)
+                {
+                    weaponController.PickupWeapon(detectedWeapon, emptySlot);
+                }
+                else
+                {
+                    Debug.Log("[WeaponPickupOffline] No empty slot found.");
+                }
             }
-        }
-
-    }
-
-    void RaiseTheGun(Transform gun, int slotID)
-    {
-        gun.GetComponent<Rigidbody>().isKinematic = true;
-        gun.GetComponent<BoxCollider>().enabled = false;
-        gun.SetParent(weaponController.slots[slotID].transform);
-        gun.localPosition = Vector3.zero;
-        gun.localRotation = Quaternion.identity;
-        
-        if (weaponController.slots[slotID].GetComponentInChildren<Weapon>() == null)
-        {
-            // 슬롯이 비었을때
-        }
-        else
-        {
-            var oldGun = weaponController.slots[slotID].GetComponentInChildren<Weapon>().transform;
-            DropTheGun(oldGun);
-        }
-    }
-
-    private void DropTheGun(Transform gun)
-    {
-        gun.SetParent(null);
-        gun.transform.position = transform.position + Vector3.up * 2 + (rayCastStartPoint.forward * 0.3f);
-
-        if (gun.GetComponent<Rigidbody>() != null)
-        {
-            gun.GetComponent<BoxCollider>().enabled = true;
-            gun.GetComponent<Rigidbody>().isKinematic = false;
-            var up = rayCastStartPoint.up;
-            gun.GetComponent<Rigidbody>().AddForce(rayCastStartPoint.forward * 2f + up * 3f, ForceMode.VelocityChange);
-            gun.GetComponent<Rigidbody>().AddTorque(rayCastStartPoint.right * Random.Range(1, 7) + up * Random.Range(1, 7), ForceMode.VelocityChange);
+            weaponController.animator.Play("GunPickUp", 1); // Play pickup animation
         }
     }
 }

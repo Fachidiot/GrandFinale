@@ -36,7 +36,7 @@ public class SlotController : OnRig
 
     private void CheckSlot()
     {
-        if (GetComponentInChildren<Weapon>() == null)
+        if (GetComponentInChildren<BaseWeapon>() == null) // Check for any BaseWeapon
         {
             slotActive = false;
             return;

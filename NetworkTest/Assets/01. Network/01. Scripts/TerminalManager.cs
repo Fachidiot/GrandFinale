@@ -78,7 +78,7 @@ public class TerminalManager : MonoBehaviour
                 return;
             }
 
-            activePlayer.GetComponentInChildren<WeaponController>().ToChange(5);
+            activePlayer.GetComponentInChildren<WeaponController>().EquipWeapon(5);
             activeCameraSwitcher = activePlayer.GetComponentInChildren<CameraSwitcher>();
             if (activeCameraSwitcher != null)
             {

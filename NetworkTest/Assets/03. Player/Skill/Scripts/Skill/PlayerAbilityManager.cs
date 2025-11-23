@@ -316,20 +316,19 @@ public class PlayerAbilityManager : MonoBehaviour
         // (이펙트 생성: ability.resourcePath)
 
         // --- 2. 스킬 효과 (지속시간) ---
-        float timer = 0f;
-        while (timer < duration)
-        {
-            Weapon currentWeapon = weaponController.GETCurrentWeapon;
-
-            if (currentWeapon != null)
-            {
-                currentWeapon.InfiniteAmmo();
-            }
-
-            timer += Time.deltaTime;
-            yield return null; // 한 프레임씩 대기
-        }
-
+                    float timer = 0f;
+                    while (timer < duration)
+                    {
+                        RangedWeapon currentWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
+        
+                        if (currentWeapon != null) // Add null check after cast
+                        {
+                            currentWeapon.InfiniteAmmo();
+                        }
+        
+                        timer += Time.deltaTime;
+                        yield return null; // 한 프레임씩 대기
+                    }
         // --- 3. 스킬 종료 ---
         Debug.Log($"[{ability.abilityName}] 스킬 종료.");
         // (이펙트 파괴)

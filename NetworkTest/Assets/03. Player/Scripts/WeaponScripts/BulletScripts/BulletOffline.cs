@@ -38,9 +38,12 @@ public class BulletOffline : BulletBehaviour
     // Explicitly implement the new interface
     public override void BulletStart(Transform bulletCreator)
     {
-        var weap = bulletCreator.GetComponent<Weapon>();
-        force = weap.BulletForce;
-        startSpeed = weap.BulletStartSpeed;
+        var weap = bulletCreator.GetComponent<RangedWeapon>();
+        if (weap != null) // Add null check
+        {
+            force = weap.BulletForce;
+            startSpeed = weap.BulletStartSpeed;
+        }
 
         if (rb != null)
         {

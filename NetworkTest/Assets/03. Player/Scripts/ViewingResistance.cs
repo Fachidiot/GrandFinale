@@ -21,8 +21,17 @@ public class ViewingResistance : MonoBehaviour
     {
         if (!changing)
         {
-            resistanceForce = weaponController.GETCurrentWeapon.ResistanceForce;
-            resistanceSmoothing = weaponController.GETCurrentWeapon.ResistanceSmoothing;
+            RangedWeapon currentRangedWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
+            if (currentRangedWeapon != null)
+            {
+                resistanceForce = currentRangedWeapon.ResistanceForce;
+                resistanceSmoothing = currentRangedWeapon.ResistanceSmoothing;
+            }
+            else // Default values for non-ranged weapons (melee or unarmed)
+            {
+                resistanceForce = 0.5f; // Example default
+                resistanceSmoothing = 5f; // Example default
+            }
         }
     }
 

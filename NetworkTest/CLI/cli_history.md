@@ -83,3 +83,37 @@
     - `BodySlope_Handler.cs`를 수정하여 로컬 플레이어와 원격 플레이어를 구분하고(`isMine` 플래그), 네트워크로부터 받은 값으로 기울기를 직접 설정하는 `SetSlopeFromNetwork` 메서드를 추가했습니다.
     - `NetworkPlayer.cs`가 생성될 때 `BodySlope_Handler`를 올바르게 초기화하도록 수정했습니다.
     - `PlayerManager.cs`의 `UpdateFromGameState` 메서드가 수신된 `bending` 값을 원격 플레이어의 `BodySlope_Handler`에 적용하여 기울임이 모든 클라이언트에게 동일하게 보이도록 수정했습니다.
+- **월드 상호작용 오브젝트 네트워크 동기화**:
+    - `WorldInteractableManager.cs`를 새로 생성하여 씬 내 상호작용 가능한 오브젝트(문, 옷장 등)의 상태를 네트워크 동기화합니다.
+    - `IWorldInteractable` 인터페이스를 정의하여 모든 상호작용 오브젝트가 동일한 방식으로 관리되도록 했습니다.
+    - `WardrobeOpen.cs`, `DoubleDoorOpen.cs`, `SmallDoorOpen.cs`, `ContainerOpen.cs`, `CrateOpen.cs`, `HangarDoorOpenA.cs` 스크립트를 `IWorldInteractable` 인터페이스를 구현하도록 리팩토링했습니다.
+    - 기존의 마우스 레이캐스트 기반 상호작용 로직을 제거하고, `Interactable` 컴포넌트와 `WorldInteractableManager`를 통한 상태 동기화 방식으로 변경했습니다.
+    - 애니메이션 재생 로직을 개선하여 "즉시 재생" 및 "닫히지 않음" 문제를 해결했습니다.
+    - 호스트 및 싱글플레이어 모드에서 문이 열리지 않던 버그를 수정했습니다.
+    - `DoubleDoorOpen.cs`에서 문이 서로 반대 방향으로 움직이던 버그를 수정했습니다.
+    - `WorldInteractableManager.cs`의 `RequestStateChange` 메서드에서 `id` 및 `subId` 파싱 및 사용 로직을 개선하여 단일 플레이어 및 호스트 모드를 올바르게 지원하도록 했습니다.
+
+## 2025년 11월 24일 월요일
+
+- **플레이어 무기 시스템 대규모 리팩토링**:
+    - **`IWeapon` 인터페이스 생성**: 모든 무기의 공통 속성 및 동작을 정의.
+    - **`BaseWeapon` 추상 클래스 생성**: `IWeapon` 구현 및 공통 기능(`WeaponGameObject`, `WeaponName`, `WeaponID`, `Type`) 관리. `virtual` 프로퍼티로 파생 클래스에서 오버라이드 가능하게 함.
+    - **`RangedWeapon.cs` (이전 `Weapon.cs`) 리팩토링**: 파일명 변경, `BaseWeapon` 상속, `Attack()` 메서드를 `Shoot()`으로 구현, `SlotType`을 `BaseWeapon`으로 이동.
+    - **`MeleeWeapon.cs` 리팩토링**: `BaseWeapon` 상속, `Attack()` 메서드를 `PlayerCombatController`에 위임하도록 수정.
+    - **`UnarmedWeapon.cs` 생성**: 비무장 상태를 위한 `BaseWeapon` 구현.
+    - **`WeaponController.cs` 리팩토링 및 구조 개선**:
+        - `_slotControllers` (물리적 슬롯)와 `_weaponInventory` (논리적 `BaseWeapon` 인벤토리) 사용.
+        - `_unarmedWeapon` 자동 초기화.
+        - `GETCurrentSlot`, `GETCurrentWeapon` 속성이 새 인벤토리 구조를 따르도록 업데이트.
+        - `EquipWeapon` 및 `FinalizeEquip` 메서드 구현으로 무기 교체 로직 통합.
+        - `StartAttack`, `RemoteAttack` 메서드를 사용하여 `GETCurrentWeapon.Attack()` 호출.
+        - `DropWeapon` 및 `PickupWeapon` 메서드 틀 마련.
+        - IK 및 애니메이션 관련 메서드(`GunChangeCheck`, `ApplyGunPositionOffsetInHands`, `ApplyHandsIKTarget`)들이 `RangedWeapon` 및 `BaseWeapon` 타입을 올바르게 처리하도록 조정.
+        - `nextWeaponSlotIndex`, `IsProcessingRemoteWeaponChange` 추가.
+    - **`WeaponPoint.cs` 외부 파일로 분리**: `RangedWeapon.cs` 내부에 있던 `WeaponPoint` 정의를 별도 파일로 분리하여 전역적으로 사용 가능하게 함.
+    - **`PlayerCombatController.cs` 생성**: `CombatController`를 대체할 통합 전투 컨트롤러 생성.
+    - **`CombatController.cs` 삭제**: 기존 `CombatController` 스크립트 제거.
+    - **`GunChange_SMB.cs` 수정**: `WeaponController`의 `FinalizeEquip` 메서드를 호출하도록 로직 변경.
+    - **기타 종속 스크립트 수정**: `TerminalManager`, `NetworkManager`, `PlayerManager`, `InputHandler`, `InGameUIManager`, `ViewingResistance`, `RecoilController`, `SlotController`, `WeaponCollision`, `BulletOffline`, `BulletNetwork`, `WeaponPickupOffline`, `PlayerAbilityManager` 등 `Weapon` 타입을 사용하거나 `WeaponController`의 이전 멤버에 접근하던 모든 스크립트들을 새롭게 정의된 `RangedWeapon` 및 `WeaponController`의 메서드와 속성을 사용하도록 수정했습니다.
+    - **컴파일 오류 수정**: `BaseWeapon`의 속성을 `virtual`로 변경하여 파생 클래스에서 오버라이드 가능하도록 수정. (`MeleeWeapon.cs`, `UnarmedWeapon.cs` 오류 해결)
+    - **`WeaponPoint.cs` 중복 정의 수정**: `Assets/03. Player/Scripts/RigScripts/WeaponPoint.cs`에 있던 중복 정의를 삭제.

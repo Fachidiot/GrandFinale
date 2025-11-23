@@ -22,8 +22,9 @@ public class InputHandler : MonoBehaviour
     private void Start()
     {
         GameManager.OnPauseStateChanged += OnPause;
-        weaponController.activeID = 1;
-        weaponController.animator.Play("GunPickUp", 1);
+        //weaponController.activeID = 1; // Replaced by EquipWeapon
+        weaponController.EquipWeapon(1); // Equip weapon in slot 1 on start
+        weaponController.animator.Play("GunPickUp", 1); // This might need to be adjusted with new animation states
         GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
     }
 
@@ -40,29 +41,19 @@ public class InputHandler : MonoBehaviour
 
         bodyTiltInSprint.SetMouseXMove(Input.GetAxis("Mouse X"));
 
-        // if (Input.GetKeyDown(KeyCode.Alpha1))
-        //     weaponController.ToChange(1);
-        // if (Input.GetKeyDown(KeyCode.Alpha2))
-        //     weaponController.ToChange(2);
-        // if (Input.GetKeyDown(KeyCode.Alpha3))
-        //     weaponController.ToChange(3);
-        // if (Input.GetKeyDown(KeyCode.Alpha4))
-        //     weaponController.ToChange(4);
-
         if (playerInputs.GetSlot0())
-            weaponController.ToChange(5);
+            weaponController.EquipWeapon(0); // Equip unarmed
         if (playerInputs.GetSlot1())
-            weaponController.ToChange(1);
+            weaponController.EquipWeapon(1);
         if (playerInputs.GetSlot2())
-            weaponController.ToChange(2);
+            weaponController.EquipWeapon(2);
         if (playerInputs.GetSlot3())
-            weaponController.ToChange(3);
+            weaponController.EquipWeapon(3);
         if (playerInputs.GetSlot4())
-            weaponController.ToChange(4);
+            weaponController.EquipWeapon(4);
 
 
         if (Input.GetKeyDown(KeyCode.F) && weaponPickUp != null)
-        // if (playerInputs.GetInteract() && weaponPickUp != null)
         {
             weaponPickUp.PickupCheck();
         }
@@ -107,9 +98,8 @@ public class InputHandler : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.R))
-        // if (playerInputs.GetReload())
         {
-            weaponController.GETCurrentWeapon.Reload();
+            (weaponController.GETCurrentWeapon as RangedWeapon)?.Reload();
         }
     }
 
@@ -127,17 +117,28 @@ public class InputHandler : MonoBehaviour
 
         if (weaponController == null)
             return;
-        if (!weaponController.GETCurrentWeapon)
+        if (weaponController.GETCurrentWeapon == null || weaponController.GETCurrentWeapon.Type == BaseWeapon.SlotType.unarmed)
             return;
 
-        bool singleshoot = weaponController.GETCurrentWeapon.SingleShoot;
-        if (singleshoot && Input.GetMouseButtonDown(0))
+        RangedWeapon currentRangedWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
+        if (currentRangedWeapon != null)
         {
-            weaponController.StartShoot();
+            bool singleshoot = currentRangedWeapon.SingleShoot;
+            if (singleshoot && Input.GetMouseButtonDown(0))
+            {
+                weaponController.StartAttack();
+            }
+            else if (!singleshoot && Input.GetMouseButton(0))
+            {
+                weaponController.StartAttack();
+            }
         }
-        else if (!singleshoot && Input.GetMouseButton(0))
+        else if (weaponController.GETCurrentWeapon.Type == BaseWeapon.SlotType.melee)
         {
-            weaponController.StartShoot();
+            if (Input.GetMouseButtonDown(0))
+            {
+                weaponController.StartAttack();
+            }
         }
     }
 }

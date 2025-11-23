@@ -10,7 +10,7 @@ public class RecoilController : MonoBehaviour
     public EventsCenter eventsCenter;
     public CameraController cameraController;
     public WeaponController weaponController;
-    public RecoilParametersModel recoilParametersModel;
+    public RecoilParametersModel recoilParametersModel; // Default or unarmed recoil
     public Transform weaponRotationRecoilPivot;
     public Transform weaponPositionRecoilPivot;
 
@@ -30,8 +30,16 @@ public class RecoilController : MonoBehaviour
 
     private void Start()
     {
-        if (weaponController.GETCurrentWeapon)
-            recoilParametersModel = weaponController.GETCurrentWeapon.RecoilParameters;
+        // Set initial recoil parameters based on the currently equipped weapon, if it's a ranged weapon
+        RangedWeapon currentRangedWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
+        if (currentRangedWeapon != null)
+        {
+            recoilParametersModel = currentRangedWeapon.RecoilParameters;
+        }
+        else
+        {
+            recoilParametersModel = new RecoilParametersModel(); // Default/zero recoil
+        }
     }
 
     private void Update()
@@ -41,20 +49,32 @@ public class RecoilController : MonoBehaviour
 
     void weaponChangeCheck(bool changed)
     {
-        if (!changed) recoilParametersModel = weaponController.GETCurrentWeapon.RecoilParameters;
+        if (!changed) // When weapon change is completed
+        {
+            RangedWeapon currentRangedWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
+            if (currentRangedWeapon != null)
+            {
+                recoilParametersModel = currentRangedWeapon.RecoilParameters;
+            }
+            else
+            {
+                recoilParametersModel = new RecoilParametersModel(); // Default/zero recoil
+            }
+        }
     }
 
     void RecoilStarter()
     {
+        RangedWeapon currentRangedWeapon = weaponController.GETCurrentWeapon as RangedWeapon;
+        if (currentRangedWeapon == null) return; // Only apply recoil for ranged weapons
+
         StopAllCoroutines();
 
-        StartCoroutine(ApplyCameraRecoil(weaponController.GETCurrentWeapon.RecoilParameters.cameraRecoilAxes));
+        StartCoroutine(ApplyCameraRecoil(currentRangedWeapon.RecoilParameters.cameraRecoilAxes));
 
-        StartCoroutine(ApplyPositionRecoil(weaponRotationRecoilPivot, weaponController.GETCurrentWeapon.RecoilParameters.weaponRotationRecoilAxes, true));
+        StartCoroutine(ApplyPositionRecoil(weaponRotationRecoilPivot, currentRangedWeapon.RecoilParameters.weaponRotationRecoilAxes, true));
 
-        StartCoroutine(ApplyPositionRecoil(weaponPositionRecoilPivot, weaponController.GETCurrentWeapon.RecoilParameters.weaponPositionRecoilAxes, false));
-
-
+        StartCoroutine(ApplyPositionRecoil(weaponPositionRecoilPivot, currentRangedWeapon.RecoilParameters.weaponPositionRecoilAxes, false));
     }
 
     IEnumerator ApplyCameraRecoil(RecoilParametersModel.RecoilAxis[] recoilAxes)
