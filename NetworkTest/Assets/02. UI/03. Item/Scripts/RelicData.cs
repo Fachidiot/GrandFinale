@@ -19,6 +19,7 @@ public class RelicData : ScriptableObject
     public int price;
 
     [Header("3D Model Setting")]
+    public string modelPath;
     public GameObject modelPrefab;
 
     [Header("리소스 경로")]
