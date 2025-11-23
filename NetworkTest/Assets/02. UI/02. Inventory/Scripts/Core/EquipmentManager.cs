@@ -1,15 +1,26 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
 
 public class EquipmentManager : MonoBehaviour
 {
     public static EquipmentManager Instance;
+    private PlayerStats playerStats;
 
     private int equipmentSlotCapacity = 13;
+
     public List<RelicData> equipmentSlots;
 
     public static event Action OnEquipmentChanged;
+
+    private void Start()
+    {
+        playerStats = FindObjectOfType<PlayerStats>();
+        if (playerStats == null)
+        {
+            Debug.LogWarning("[EquipmentManager] 씬에서 PlayerStats를 찾을 수 없습니다.");
+        }
+    }
 
     void Awake()
     {
@@ -167,18 +178,45 @@ public class EquipmentManager : MonoBehaviour
     // 아이템 능력 적용/제거
     private void ApplyItemAbility(RelicData item, bool isEquipping)
     {
-        if (item.grantedAbility == null) return;
+        if (item == null || item.grantedAbility == null) return;
 
-        PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();
-        if (playerAbilities == null) return;
+        // 플레이어 스탯 참조가 없으면 찾기
+        if (playerStats == null) playerStats = FindObjectOfType<PlayerStats>();
+        if (playerStats == null) return;
 
-        if (isEquipping)
+        string key = item.grantedAbility.param_Key;
+        string valStr = item.grantedAbility.param_ValueA;
+
+        // 1. Stat_Add 로직인 경우 (단순 스탯 증감)
+        if (item.grantedAbility.abilityLogicID == "Stat_Add")
         {
-            playerAbilities.AddRelic(item.itemID);
+            if (float.TryParse(valStr, out float value))
+            {
+                float finalValue = isEquipping ? value : -value;
+
+                switch (key)
+                {
+                    case "MoveSpeed":
+                    case "AllDamage":
+                        playerStats.AddStatPercent(key, finalValue);
+                        break;
+                    default:
+                        playerStats.AddStat(key, finalValue);
+                        break;
+                }
+
+                Debug.Log($"[EquipmentManager] {item.itemName} {(isEquipping ? "장착" : "해제")} -> {key} : {finalValue}");
+            }
         }
+        // 2. 특수 능력 처리
         else
         {
-            playerAbilities.RemoveRelic(item.itemID);
+            PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();
+            if (playerAbilities != null)
+            {
+                if (isEquipping) playerAbilities.AddRelic(item.itemID);
+                else playerAbilities.RemoveRelic(item.itemID);
+            }
         }
     }
 }

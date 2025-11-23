@@ -148,24 +148,36 @@ public class PlayerStats : MonoBehaviour
     {
         switch (statName)
         {
+            // [체력 관련]
             case "MaxHealth":
+            case "Health":
                 CurrentMaxHealth += value;
-                CurrentHealth += value; // 최대 체력 증가분만큼 현재 체력도 증가
+                CurrentHealth += value;
                 break;
+
+            // [방어력 관련]
             case "Defense":
+            case "Bulwark_Armor": // 예: 불워크 장갑도 방어력으로 처리
                 CurrentDefense += value;
                 break;
-            case "Power":
+
+            // 시트의 다양한 무기 타입들을 모두Power에 통합
+            case "Power":        // 기본 공격력
+            case "PistolBullet": // 권총 데미지
+            case "RifleBullet":  // 소총 데미지
+            case "PlasmaPellet": // 샷건 데미지
+            case "Laser":        // 스나이퍼 레이저 데미지
+            case "Slash":        // 단검 베기 데미지
+            case "Stun":         // 진압봉 데미지
                 CurrentPower += value;
                 break;
+
+            // [치명타 관련]
             case "CritChance":
                 CurrentCritChance += value;
                 break;
-            case "AllDamage":
-                CurrentDamageModifier += (value / 100f);
-                break;
         }
-        // 스탯 변경 후 체력 검증 한 번 실행
+
         ValidateHealth();
         OnStatsChanged?.Invoke();
     }
@@ -175,21 +187,26 @@ public class PlayerStats : MonoBehaviour
         switch (statName)
         {
             case "MoveSpeed":
-                float walkBonus = baseWalkSpeed * (value / 100.0f);
-                float runBonus = baseRunSpeed * (value / 100.0f);
-                float sprintBonus = baseSprintSpeed * (value / 100.0f);
-                CurrentWalkSpeed += walkBonus;
-                CurrentRunSpeed += runBonus;
-                CurrentSprintSpeed += sprintBonus;
+            case "Speed":           
+                float ratio = value / 100.0f;
+                CurrentWalkSpeed += baseWalkSpeed * ratio;
+                CurrentRunSpeed += baseRunSpeed * ratio;
+                CurrentSprintSpeed += baseSprintSpeed * ratio;
                 break;
 
+            // [전체 데미지 배율]
+            case "AllDamage":
+                CurrentDamageModifier += (value / 100.0f);
+                break;
+
+            // [쿨타임 감소]
             case "CooldownReduction":
                 CurrentCooldownReduction += value;
                 break;
         }
+
         OnStatsChanged?.Invoke();
     }
-
     public void AddTemporaryShield(float amount, float duration)
     {
         StartCoroutine(ShieldRoutine(amount, duration));
@@ -203,5 +220,13 @@ public class PlayerStats : MonoBehaviour
         CurrentShield -= amount;
         if (CurrentShield < 0) CurrentShield = 0;
         OnStatsChanged?.Invoke();
+    }
+
+    private void OnValidate()
+    {
+        if (Application.isPlaying)
+        {
+            OnStatsChanged?.Invoke();
+        }
     }
 }

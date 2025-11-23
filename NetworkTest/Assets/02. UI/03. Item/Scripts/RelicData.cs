@@ -18,6 +18,9 @@ public class RelicData : ScriptableObject
 
     public int price;
 
+    [Header("3D Model Setting")]
+    public GameObject modelPrefab;
+
     [Header("리소스 경로")]
     public string iconPath; // Icons/Relics/AuxHeart
 
