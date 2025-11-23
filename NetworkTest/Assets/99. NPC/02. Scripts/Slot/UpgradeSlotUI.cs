@@ -3,11 +3,11 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class UpgradeSlotUI : MonoBehaviour, IDropHandler
+public class UpgradeSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+
     [Header("UI Components")]
-    [SerializeField] private Image iconImage;       // 장비 아이콘
-    [SerializeField] private TextMeshProUGUI nameText; // 장비 이름
+    [SerializeField] private Image iconImage;
 
     public UpgradeModule _module;
 
@@ -15,32 +15,71 @@ public class UpgradeSlotUI : MonoBehaviour, IDropHandler
 
     private void Awake()
     {
-        // 부모 계층에서 UpgradeModule 찾기
         _module = GetComponentInParent<UpgradeModule>();
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.clickCount == 2 && CurrentItem != null)
+        {
+            if (_module != null) _module.ReturnEquipmentToInventory();
+        }
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (CurrentItem == null || InventoryUIManager.Instance == null) return;
+
+        // 아이콘 이미지로 드래그 시작 (InventoryUIManager 활용)
+        if (iconImage != null && iconImage.sprite != null)
+        {
+            InventoryUIManager.Instance.StartDrag(iconImage.sprite);
+            iconImage.color = new Color(1, 1, 1, 0.5f);
+        }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (CurrentItem != null && InventoryUIManager.Instance != null)
+        {
+            InventoryUIManager.Instance.UpdateDragIcon(eventData.position);
+        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (InventoryUIManager.Instance != null) InventoryUIManager.Instance.EndDrag();
+
+        if (iconImage != null) iconImage.color = Color.white;
+    }
     public void OnDrop(PointerEventData eventData)
     {
-        Debug.Log($"[UpgradeSlotUI] OnDrop 호출됨! 대상: {gameObject.name}");
+        Debug.Log($"[UpgradeSlotUI] OnDrop 발생! 대상: {gameObject.name}");
 
         GameObject draggedObject = eventData.pointerDrag;
         if (draggedObject == null) return;
 
         Slot_UI sourceSlot = draggedObject.GetComponent<Slot_UI>();
 
-        // 유효한 아이템인지 확인
+        // 유효성 검사
         if (sourceSlot == null || sourceSlot.currentSlot == null || sourceSlot.currentSlot.item == null)
             return;
 
+        // 인벤토리에서 사라지기 전에, 아이템 정보를 미리 복사
+        RelicData droppedItem = sourceSlot.currentSlot.item;
+        int slotIndex = sourceSlot.currentSlot.slotIndex;
+
         if (_module != null)
         {
-            // 모듈에게 장비 등록 요청 (HandleEquipmentDrop)
-            bool success = _module.HandleEquipmentDrop(sourceSlot.currentSlot.item, sourceSlot.currentSlot.slotIndex);
+            // 저장해둔 droppedItem을 사용해서 전달
+            bool success = _module.HandleEquipmentDrop(droppedItem, slotIndex);
 
             if (success)
             {
-                // 성공 시 UI 업데이트 및 드롭 완료 처리
-                UpdateUI(sourceSlot.currentSlot.item);
+                Debug.Log("[UpgradeSlotUI] 드롭 처리 성공 -> UI 갱신");
+
+                UpdateUI(droppedItem);
+
                 sourceSlot.MarkDropSuccessful();
             }
         }
@@ -48,23 +87,41 @@ public class UpgradeSlotUI : MonoBehaviour, IDropHandler
 
     public void UpdateUI(RelicData item)
     {
+        if (item == null)
+        {
+            Debug.LogError("[UpgradeSlotUI] UpdateUI에 전달된 아이템이 null입니다!");
+            return;
+        }
+
         CurrentItem = item;
 
-        // 아이콘 표시
+
         if (iconImage != null)
         {
             if (!string.IsNullOrEmpty(item.iconPath))
             {
-                iconImage.sprite = Resources.Load<Sprite>(item.iconPath);
-                iconImage.enabled = true;
-                iconImage.color = Color.white;
+                Sprite loadedSprite = Resources.Load<Sprite>(item.iconPath);
+                if (loadedSprite != null)
+                {
+                    iconImage.sprite = loadedSprite;
+                    iconImage.enabled = true;
+                    iconImage.color = Color.white;
+                }
+                else
+                {
+                    Debug.LogError($"[UpgradeSlotUI] 아이콘 로드 실패: {item.iconPath}");
+                    iconImage.enabled = false;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[UpgradeSlotUI] 아이템의 iconPath가 비어있습니다.");
+                iconImage.enabled = false;
             }
         }
-
-        // 이름 표시
-        if (nameText != null)
+        else
         {
-            nameText.text = item.itemName;
+            Debug.LogError("[UpgradeSlotUI] iconImage 컴포넌트가 연결되지 않았습니다! 인스펙터를 확인하세요.");
         }
     }
 
@@ -79,11 +136,10 @@ public class UpgradeSlotUI : MonoBehaviour, IDropHandler
             iconImage.enabled = false;
             iconImage.color = new Color(1, 1, 1, 0);
         }
+    }
 
-        // 텍스트 초기화
-        if (nameText != null)
-        {
-            nameText.text = "장비 슬롯"; // 기본 텍스트
-        }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log("마우스 감지 : {gameObject.name}");
     }
 }

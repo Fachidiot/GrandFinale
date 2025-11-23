@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class MaterialSlotUI : MonoBehaviour, IDropHandler
+public class MaterialSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("UI Components")]
     [SerializeField] private Image iconImage;
@@ -19,29 +19,70 @@ public class MaterialSlotUI : MonoBehaviour, IDropHandler
         _module = GetComponentInParent<UpgradeModule>();
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.clickCount == 2 && CurrentItem != null)
+        {
+            if (_module != null) _module.ReturnMaterialToInventory(this);
+        }
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (CurrentItem == null || InventoryUIManager.Instance == null) return;
+
+        if (iconImage != null && iconImage.sprite != null)
+        {
+            InventoryUIManager.Instance.StartDrag(iconImage.sprite);
+            iconImage.color = new Color(1, 1, 1, 0.5f);
+        }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (CurrentItem != null && InventoryUIManager.Instance != null)
+        {
+            InventoryUIManager.Instance.UpdateDragIcon(eventData.position);
+        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (InventoryUIManager.Instance != null) InventoryUIManager.Instance.EndDrag();
+        if (iconImage != null) iconImage.color = Color.white;
+
+    }
     public void OnDrop(PointerEventData eventData)
     {
-        Debug.Log($"[MaterialSlotUI] OnDrop 호출됨! 대상: {gameObject.name}");
+        Debug.Log($"[MaterialSlotUI] OnDrop 발생! 대상: {gameObject.name}");
 
-        // 1. 드래그된 객체 확인
         GameObject draggedObject = eventData.pointerDrag;
         if (draggedObject == null) return;
 
-        // 2. 인벤토리 슬롯인지 확인
         Slot_UI sourceSlot = draggedObject.GetComponent<Slot_UI>();
 
-        // 유효한 아이템이 있는 슬롯인지 검사
+        // 유효성 검사
         if (sourceSlot == null || sourceSlot.currentSlot == null || sourceSlot.currentSlot.item == null)
             return;
 
+        // 인벤토리에서 사라지기 전에, 아이템 정보를 미리 복사
+        RelicData droppedItem = sourceSlot.currentSlot.item;
+        int slotIndex = sourceSlot.currentSlot.slotIndex;
+
         if (_module != null)
         {
-            bool success = _module.HandleMaterialDrop(sourceSlot.currentSlot.item, sourceSlot.currentSlot.slotIndex, this);
+            // 저장해둔 droppedItem을 사용해서 전달
+            bool success = _module.HandleMaterialDrop(droppedItem, slotIndex, this);
 
             if (success)
             {
+                Debug.Log($"[MaterialSlotUI] 재료 드롭 성공: {droppedItem.itemName}");
                 sourceSlot.MarkDropSuccessful();
             }
+        }
+        else
+        {
+            Debug.LogError("[MaterialSlotUI] 모듈 연결 안됨!");
         }
     }
 

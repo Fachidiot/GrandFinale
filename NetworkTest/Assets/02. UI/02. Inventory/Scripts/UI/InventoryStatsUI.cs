@@ -116,7 +116,6 @@ public class InventoryStatsUI : MonoBehaviour
             Defense = (int)playerStats.CurrentDefense,
             Speed = (int)playerStats.CurrentRunSpeed,
             Power = (int)playerStats.CurrentPower,
-            Level = playerStats.CurrentLevel,
             Currency = playerStats.CurrentCurrency
         };
 

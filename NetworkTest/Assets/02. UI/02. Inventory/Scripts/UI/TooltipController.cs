@@ -6,8 +6,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 툴팁 표시 전담 컨트롤러
-/// - UIHelper를 통해 자동 바인딩 구현 (수정 완료)
-/// - 헬퍼 클래스 포함 버전
+/// - Small_Item Kind Image Info 오브젝트를 텍스트로 사용하여 강화 수치 표시
 /// </summary>
 public class TooltipController : MonoBehaviour
 {
@@ -24,6 +23,10 @@ public class TooltipController : MonoBehaviour
     [SerializeField] private Image smallTooltipItemImage;
     [SerializeField] private TextMeshProUGUI smallTooltipGradeText;
     [SerializeField] private TextMeshProUGUI smallTooltipDescriptionText;
+
+    [Header("Upgrade Text (Small)")]
+    [Tooltip("Small_Item Kind Image Info 오브젝트에 있는 TMP 컴포넌트")]
+    [SerializeField] private TextMeshProUGUI smallTooltipUpgradeText;
 
     [Header("Full Tooltip Components")]
     [SerializeField] private RectTransform fullTooltipRect;
@@ -47,34 +50,42 @@ public class TooltipController : MonoBehaviour
     private Coroutine fadeCoroutine;
     private readonly SpriteCache spriteCache = new SpriteCache();
 
+    // 툴팁의 독립성을 위해 여기서 별도로 정의하여 사용
+    private readonly string[] upgradePrefixes = new string[]
+    {
+        "+5", "+4", "+3", "+2", "+1"
+    };
+
     #endregion
 
     #region Initialization
 
     void Awake()
     {
-        BindUI(); // 자동 연결 실행
+        BindUI();
         InitializeTooltipPanel(smallTooltipPanel);
         InitializeTooltipPanel(fullTooltipPanel);
     }
 
     private void BindUI()
     {
-        // 1. 패널 찾기 (Inspector 사진 기준 이름)
+        // 1. 패널 찾기
         smallTooltipPanel = UIHelper.FindObject(transform, "Small_Tooltip_Bar");
-        fullTooltipPanel = UIHelper.FindObject(transform, "fulll_Tooltip_Bar"); // 오타(fulll) 반영
+        fullTooltipPanel = UIHelper.FindObject(transform, "fulll_Tooltip_Bar");
 
         // 2. Small 컴포넌트 연결
         if (smallTooltipPanel != null)
         {
             smallTooltipRect = smallTooltipPanel.GetComponent<RectTransform>();
 
-            // 변수명 = UIHelper.FindChild<타입>(부모, "하이어라키 이름");
             smallTooltipTitleText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Title Text");
             smallTooltipItemKindText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item Kind Text");
-            smallTooltipItemImage = UIHelper.FindChild<Image>(smallTooltipPanel.transform, "Small_Item _Image"); // 띄어쓰기 주의
+            smallTooltipItemImage = UIHelper.FindChild<Image>(smallTooltipPanel.transform, "Small_Item _Image");
             smallTooltipGradeText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item_Grade_Text");
-            smallTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Smalll_Detail_Text"); // 오타(Smalll) 반영
+            smallTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Smalll_Detail_Text");
+
+
+            smallTooltipUpgradeText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item_Kind_Upgrade_Text");
         }
         else
         {
@@ -93,21 +104,13 @@ public class TooltipController : MonoBehaviour
             fullTooltipGradeText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item Class Text");
             fullTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Detail_Text");
         }
-        else
-        {
-            Debug.LogError("[TooltipController] fulll_Tooltip_Bar를 찾을 수 없습니다.");
-        }
     }
 
     private void InitializeTooltipPanel(GameObject panel)
     {
         if (panel == null) return;
-
         CanvasGroup canvasGroup = panel.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-        {
-            canvasGroup = panel.AddComponent<CanvasGroup>();
-        }
+        if (canvasGroup == null) canvasGroup = panel.AddComponent<CanvasGroup>();
 
         canvasGroup.blocksRaycasts = false;
         canvasGroup.alpha = 0f;
@@ -141,6 +144,7 @@ public class TooltipController : MonoBehaviour
 
     private TooltipData GetTooltipDataForInventory(InventoryType type)
     {
+        // Full 툴팁 데이터 구성
         if (type == InventoryType.Full)
         {
             return new TooltipData
@@ -153,9 +157,11 @@ public class TooltipController : MonoBehaviour
                 ItemImage = fullTooltipItemImage,
                 GradeText = fullTooltipGradeText,
                 GradeImage = fullTooltipGradeImage,
-                DescriptionText = fullTooltipDescriptionText
+                DescriptionText = fullTooltipDescriptionText,
+                UpgradeText = null // Full 툴팁엔 강화 표시 기획이 없으면 null
             };
         }
+        // Small 툴팁 데이터 구성
         else
         {
             return new TooltipData
@@ -168,7 +174,8 @@ public class TooltipController : MonoBehaviour
                 ItemImage = smallTooltipItemImage,
                 GradeText = smallTooltipGradeText,
                 GradeImage = null,
-                DescriptionText = smallTooltipDescriptionText
+                DescriptionText = smallTooltipDescriptionText,
+                UpgradeText = smallTooltipUpgradeText // [연결] 여기서 텍스트 컴포넌트 전달
             };
         }
     }
@@ -176,12 +183,8 @@ public class TooltipController : MonoBehaviour
     private CanvasGroup GetOrCreateCanvasGroup(GameObject panel)
     {
         if (panel == null) return null;
-
         CanvasGroup canvasGroup = panel.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-        {
-            canvasGroup = panel.AddComponent<CanvasGroup>();
-        }
+        if (canvasGroup == null) canvasGroup = panel.AddComponent<CanvasGroup>();
         return canvasGroup;
     }
 
@@ -196,6 +199,9 @@ public class TooltipController : MonoBehaviour
         UpdateItemIcon(data.ItemImage, item);
         UpdateGrade(data.GradeText, data.GradeImage, item);
         UpdateDescription(data.DescriptionText, item);
+
+        // [추가] 강화 수치 업데이트 호출
+        UpdateUpgradeLevel(data.UpgradeText, item);
     }
 
     private void UpdateTitle(TMP_Text titleText, RelicData item)
@@ -214,7 +220,6 @@ public class TooltipController : MonoBehaviour
     private void UpdateItemIcon(Image iconImage, RelicData item)
     {
         if (iconImage == null) return;
-
         Sprite icon = spriteCache.GetSprite(item.iconPath);
         iconImage.sprite = icon;
         iconImage.enabled = (icon != null);
@@ -227,43 +232,50 @@ public class TooltipController : MonoBehaviour
             gradeText.text = item.grade;
             string colorHex = GradeColorHelper.GetColor(item.grade);
             if (ColorUtility.TryParseHtmlString(colorHex, out Color color))
-            {
                 gradeText.color = color;
-            }
         }
-
-        if (gradeImage != null)
-        {
-            gradeImage.enabled = false;
-        }
+        if (gradeImage != null) gradeImage.enabled = false;
     }
 
     private void UpdateDescription(TMP_Text descText, RelicData item)
     {
         if (descText == null) return;
-
         StringBuilder builder = new StringBuilder();
         builder.AppendLine(item.description);
         builder.AppendLine();
+        if (item.grantedAbility != null) AppendAbilityInfo(builder, item.grantedAbility);
+        descText.text = builder.ToString();
+    }
 
-        if (item.grantedAbility != null)
+    // [핵심 로직] 아이템 이름에서 접두사를 찾아 텍스트에 표시
+    private void UpdateUpgradeLevel(TMP_Text upgradeText, RelicData item)
+    {
+        if (upgradeText == null) return;
+
+        string foundPrefix = ""; // 기본값 (강화 없음)
+
+        foreach (string prefix in upgradePrefixes)
         {
-            AppendAbilityInfo(builder, item.grantedAbility);
+            // 이름이 접두사로 시작하는지 확인 (예: "+1 Sword")
+            // 주의: 이름 사이에 띄어쓰기가 있는지 여부는 UpgradeModule의 작명 로직과 맞춰야 함
+            if (item.itemName.StartsWith(prefix))
+            {
+                foundPrefix = prefix;
+                break;
+            }
         }
 
-        descText.text = builder.ToString();
+        upgradeText.text = foundPrefix;
+        // 텍스트가 비어있으면 숨기고 싶다면 아래 주석 해제
+        // upgradeText.gameObject.SetActive(!string.IsNullOrEmpty(foundPrefix));
     }
 
     private void AppendAbilityInfo(StringBuilder builder, AbilityData ability)
     {
         if (ability.abilityLogicID == "Stat_Add")
-        {
             builder.AppendLine($"+{ability.param_ValueA} {ability.param_Key}");
-        }
         else
-        {
             builder.AppendLine($"능력: {ability.abilityName}");
-        }
     }
 
     #endregion
@@ -358,6 +370,7 @@ public class TooltipController : MonoBehaviour
         public TMP_Text GradeText;
         public Image GradeImage;
         public TMP_Text DescriptionText;
+        public TMP_Text UpgradeText; // 강화 수치 텍스트 필드
     }
 
     #endregion
@@ -365,9 +378,6 @@ public class TooltipController : MonoBehaviour
 
 #region Helper Classes & Enums
 
-/// <summary>
-/// 등급별 색상 관리 헬퍼
-/// </summary>
 public static class GradeColorHelper
 {
     private const string COLOR_COMMON = "#FFFFFF";
@@ -389,9 +399,6 @@ public static class GradeColorHelper
     }
 }
 
-/// <summary>
-/// 스프라이트 캐싱 헬퍼 (성능 최적화)
-/// </summary>
 public class SpriteCache
 {
     private readonly System.Collections.Generic.Dictionary<string, Sprite> cache
@@ -400,30 +407,15 @@ public class SpriteCache
     public Sprite GetSprite(string path)
     {
         if (string.IsNullOrEmpty(path)) return null;
-
-        if (cache.TryGetValue(path, out Sprite cached))
-        {
-            return cached;
-        }
-
+        if (cache.TryGetValue(path, out Sprite cached)) return cached;
         Sprite loaded = Resources.Load<Sprite>(path);
-        if (loaded != null)
-        {
-            cache[path] = loaded;
-        }
-
+        if (loaded != null) cache[path] = loaded;
         return loaded;
     }
 
-    public void Clear()
-    {
-        cache.Clear();
-    }
+    public void Clear() { cache.Clear(); }
 }
 
-/// <summary>
-/// 인벤토리 타입 열거형
-/// </summary>
 public enum InventoryType
 {
     Small,
