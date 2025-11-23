@@ -275,7 +275,7 @@ public class NetworkManager : MonoBehaviour
     private PlayerState GetPlayerStateFromGameObject(GameObject playerGo)
     {
         var networkPlayer = playerGo.GetComponent<NetworkPlayer>();
-        if (networkPlayer == null)
+        if (networkPlayer == null || networkPlayer.CharacterMove == null || networkPlayer.CharacterMove.Inputs == null)
         {
             return new PlayerState { playerId = INVALID_PLAYER_ID };
         }
@@ -289,7 +289,8 @@ public class NetworkManager : MonoBehaviour
             animationMask = networkPlayer.AnimatorSync != null ? networkPlayer.AnimatorSync.GetAnimationMask() : (byte)0,
             moveX = networkPlayer.AnimatorSync != null ? networkPlayer.AnimatorSync.GetHorizontal() : 0,
             moveY = networkPlayer.AnimatorSync != null ? networkPlayer.AnimatorSync.GetVertical() : 0,
-            weaponId = networkPlayer.WeaponController != null ? networkPlayer.WeaponController.activeID : 0
+            weaponId = networkPlayer.WeaponController != null ? networkPlayer.WeaponController.activeID : 0,
+            bending = networkPlayer.CharacterMove.Inputs.GetBending()
         };
     }
 

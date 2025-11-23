@@ -10,7 +10,8 @@ public class SpaceShipManager : MonoBehaviour
     // This method is called by the "Launch" button
     public void OnLaunchGameClicked()
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
+        // if (NetworkManager.Instance.Mode == NetworkMode.Client)
+        //     return;
         if (ServerRoomManager.Instance.SelectedPlanetId == -1)
         {
             Debug.LogWarning("[RoomUIManager] Cannot launch, no planet selected.");

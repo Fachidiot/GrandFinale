@@ -13,16 +13,30 @@ public class BodySlope_Handler : MonoBehaviour
     public float targetAngle;
     private float hitDistance;
 
+    private bool isMine = true;
+
+    public void Initialize(bool isMine)
+    {
+        this.isMine = isMine;
+    }
 
     public void setInput(float InputAngle)
     {
         targetAngle = InputAngle * maxSlopeAngle * hitDistance;
     }
 
+    public void SetSlopeFromNetwork(float networkAngle)
+    {
+        targetAngle = networkAngle * maxSlopeAngle;
+    }
+
     void Update()
     {
         bodySlope.slopeAngle = SmoothValue(bodySlope.slopeAngle, targetAngle, bodySlopeChangeRate);
-        CheckBodyCollision();
+        if (isMine)
+        {
+            CheckBodyCollision();
+        }
     }
 
     private float SmoothValue(float inputValue, float targetvalue, float changeRateValue)

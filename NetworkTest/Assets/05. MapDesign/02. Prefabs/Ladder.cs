@@ -30,14 +30,11 @@ public class Ladder : MonoBehaviour
     {
         IPlayerControllable localPlayer = null;
 
-#if UNITY_EDITOR
-        {
-            if (PlayerManager.Instance == null)
-                localPlayer = FindObjectOfType<SinglePlayer>();
-        }
-# endif
         if (PlayerManager.Instance)
             localPlayer = PlayerManager.Instance?.LocalPlayer;
+        else    // Test 용.
+            localPlayer = FindObjectOfType<SinglePlayer>();
+
         if (localPlayer != null && localPlayer.gameObject != null)
         {
             var climber = localPlayer.gameObject.GetComponent<PlayerLadderClimber>();

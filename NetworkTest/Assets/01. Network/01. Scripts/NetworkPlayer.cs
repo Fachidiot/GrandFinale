@@ -46,6 +46,12 @@ public class NetworkPlayer : MonoBehaviour, IPlayerControllable
         if (AnimatorSync != null) AnimatorSync.Initialize(steamId, isMine);
         if (StateMachine != null) StateMachine.Initialize(isMine);
 
+        var bodySlopeHandler = GetComponentInChildren<BodySlope_Handler>();
+        if (bodySlopeHandler != null)
+        {
+            bodySlopeHandler.Initialize(isMine);
+        }
+
         if (isMine)
         {
             if (NicknameUI != null) NicknameUI.gameObject.SetActive(false);

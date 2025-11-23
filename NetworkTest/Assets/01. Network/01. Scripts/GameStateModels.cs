@@ -35,6 +35,7 @@ public struct PlayerState
     public float moveX;
     public float moveY;
     public int weaponId;
+    public float bending;
 
     public byte[] ToByteArray()
     {
@@ -57,6 +58,7 @@ public struct PlayerState
             writer.Write(moveX);
             writer.Write(moveY);
             writer.Write(weaponId);
+            writer.Write(bending);
             return stream.ToArray();
         }
     }
@@ -75,6 +77,10 @@ public struct PlayerState
             state.moveX = reader.ReadSingle();
             state.moveY = reader.ReadSingle();
             state.weaponId = reader.ReadInt32();
+            if (reader.BaseStream.Position < reader.BaseStream.Length)
+            {
+                state.bending = reader.ReadSingle();
+            }
         }
         return state;
     }
@@ -173,6 +179,7 @@ public class NetworkGameState
                 writer.Write(p.moveX);
                 writer.Write(p.moveY);
                 writer.Write(p.weaponId);
+                writer.Write(p.bending);
             }
             
             // Write game-level state
@@ -202,7 +209,8 @@ public class NetworkGameState
                     animationMask = reader.ReadByte(),
                     moveX = reader.ReadSingle(),
                     moveY = reader.ReadSingle(),
-                    weaponId = reader.ReadInt32()
+                    weaponId = reader.ReadInt32(),
+                    bending = reader.ReadSingle()
                 };
                 gameState.players.Add(p);
             }

@@ -73,3 +73,13 @@
 - **게임 일시정지 상태 유지 버그 수정**:
     - `GameManager.cs`에서 `PauseGame(bool)` 메서드를 `OnPauseStateChanged` 이벤트에 구독하도록 하여, `SetPause(bool)`가 호출될 때 `Time.timeScale`이 항상 올바르게 업데이트되도록 함.
     - `MainMenuUIManager.cs`의 `OnMultiplayerButtonClicked` 및 `OnSingleplayerButtonClicked` 메서드 시작 부분에 `GameManager.Instance.SetPause(false)`를 추가하여, 새 게임 세션 시작 시 게임의 일시정지 상태가 명시적으로 재설정되도록 보장.
+
+## 2025년 11월 23일 일요일
+
+- **플레이어 기울이기(Q/E) 네트워크 동기화**:
+    - 플레이어의 기울이기 상태(`bending` 값)가 네트워크를 통해 동기화되지 않던 문제를 수정했습니다.
+    - `GameStateModels.cs`의 `PlayerState` 및 `NetworkGameState` 데이터 구조에 `bending` 필드를 추가하고 직렬화/역직렬화 로직을 업데이트했습니다.
+    - `NetworkManager.cs`가 로컬 플레이어의 `PlayerInputs`에서 `bending` 값을 수집하여 `PlayerState`에 포함하도록 수정했습니다.
+    - `BodySlope_Handler.cs`를 수정하여 로컬 플레이어와 원격 플레이어를 구분하고(`isMine` 플래그), 네트워크로부터 받은 값으로 기울기를 직접 설정하는 `SetSlopeFromNetwork` 메서드를 추가했습니다.
+    - `NetworkPlayer.cs`가 생성될 때 `BodySlope_Handler`를 올바르게 초기화하도록 수정했습니다.
+    - `PlayerManager.cs`의 `UpdateFromGameState` 메서드가 수신된 `bending` 값을 원격 플레이어의 `BodySlope_Handler`에 적용하여 기울임이 모든 클라이언트에게 동일하게 보이도록 수정했습니다.
