@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 툴팁 표시 전담 컨트롤러
-/// - Small_Item Kind Image Info 오브젝트를 텍스트로 사용하여 강화 수치 표시
+/// - 가격 표시 및 강화 수치 분리 기능 추가됨
 /// </summary>
 public class TooltipController : MonoBehaviour
 {
@@ -23,10 +23,8 @@ public class TooltipController : MonoBehaviour
     [SerializeField] private Image smallTooltipItemImage;
     [SerializeField] private TextMeshProUGUI smallTooltipGradeText;
     [SerializeField] private TextMeshProUGUI smallTooltipDescriptionText;
-
-    [Header("Upgrade Text (Small)")]
-    [Tooltip("Small_Item Kind Image Info 오브젝트에 있는 TMP 컴포넌트")]
-    [SerializeField] private TextMeshProUGUI smallTooltipUpgradeText;
+    [SerializeField] private TextMeshProUGUI smallTooltipUpgradeText; // 강화 수치(+1) 표시용
+    [SerializeField] private TextMeshProUGUI smallTooltipPriceText;   
 
     [Header("Full Tooltip Components")]
     [SerializeField] private RectTransform fullTooltipRect;
@@ -36,6 +34,7 @@ public class TooltipController : MonoBehaviour
     [SerializeField] private Image fullTooltipGradeImage;
     [SerializeField] private TextMeshProUGUI fullTooltipGradeText;
     [SerializeField] private TextMeshProUGUI fullTooltipDescriptionText;
+    [SerializeField] private TextMeshProUGUI fullTooltipPriceText;   
 
     [Header("Animation Settings")]
     [SerializeField] private Vector2 tooltipOffset = new Vector2(20f, -50f);
@@ -50,10 +49,9 @@ public class TooltipController : MonoBehaviour
     private Coroutine fadeCoroutine;
     private readonly SpriteCache spriteCache = new SpriteCache();
 
-    // 툴팁의 독립성을 위해 여기서 별도로 정의하여 사용
     private readonly string[] upgradePrefixes = new string[]
     {
-        "+5", "+4", "+3", "+2", "+1"
+        "+5", "+4", "+3", "+2", "+1", "0"
     };
 
     #endregion
@@ -69,7 +67,7 @@ public class TooltipController : MonoBehaviour
 
     private void BindUI()
     {
-        // 1. 패널 찾기
+        // 1. 패널 찾기 (이름은 Hierarchy 구조에 맞게 수정 필요)
         smallTooltipPanel = UIHelper.FindObject(transform, "Small_Tooltip_Bar");
         fullTooltipPanel = UIHelper.FindObject(transform, "fulll_Tooltip_Bar");
 
@@ -83,9 +81,9 @@ public class TooltipController : MonoBehaviour
             smallTooltipItemImage = UIHelper.FindChild<Image>(smallTooltipPanel.transform, "Small_Item _Image");
             smallTooltipGradeText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item_Grade_Text");
             smallTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Smalll_Detail_Text");
-
-
             smallTooltipUpgradeText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item_Kind_Upgrade_Text");
+
+            smallTooltipPriceText = UIHelper.FindChild<TextMeshProUGUI>(smallTooltipPanel.transform, "Small_Item_Price_Text");
         }
         else
         {
@@ -99,10 +97,12 @@ public class TooltipController : MonoBehaviour
 
             fullTooltipTitleText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Title Text");
             fullTooltipItemKindText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item Kind Text");
-            fullTooltipItemImage = UIHelper.FindChild<Image>(fullTooltipPanel.transform, "Item Image Info");
+            fullTooltipItemImage = UIHelper.FindChild<Image>(fullTooltipPanel.transform, "Item Kind Image");
             fullTooltipGradeImage = UIHelper.FindChild<Image>(fullTooltipPanel.transform, "Item Grade Info");
             fullTooltipGradeText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item Class Text");
             fullTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Detail_Text");
+
+            fullTooltipPriceText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item_Price_Text");
         }
     }
 
@@ -158,7 +158,8 @@ public class TooltipController : MonoBehaviour
                 GradeText = fullTooltipGradeText,
                 GradeImage = fullTooltipGradeImage,
                 DescriptionText = fullTooltipDescriptionText,
-                UpgradeText = null // Full 툴팁엔 강화 표시 기획이 없으면 null
+                UpgradeText = null, 
+                PriceText = fullTooltipPriceText 
             };
         }
         // Small 툴팁 데이터 구성
@@ -175,7 +176,8 @@ public class TooltipController : MonoBehaviour
                 GradeText = smallTooltipGradeText,
                 GradeImage = null,
                 DescriptionText = smallTooltipDescriptionText,
-                UpgradeText = smallTooltipUpgradeText // [연결] 여기서 텍스트 컴포넌트 전달
+                UpgradeText = smallTooltipUpgradeText,
+                PriceText = smallTooltipPriceText 
             };
         }
     }
@@ -200,15 +202,28 @@ public class TooltipController : MonoBehaviour
         UpdateGrade(data.GradeText, data.GradeImage, item);
         UpdateDescription(data.DescriptionText, item);
 
-        // [추가] 강화 수치 업데이트 호출
-        UpdateUpgradeLevel(data.UpgradeText, item);
+        UpdatePrice(data.PriceText, item);          
+        UpdateUpgradeLevel(data.UpgradeText, item); 
     }
 
     private void UpdateTitle(TMP_Text titleText, RelicData item)
     {
         if (titleText == null) return;
+
+        string cleanName = item.itemName;
+
+        
+        foreach (string prefix in upgradePrefixes)
+        {
+            if (cleanName.StartsWith(prefix))
+            {
+                cleanName = cleanName.Substring(prefix.Length).Trim();
+                break;
+            }
+        }
+
         string color = GradeColorHelper.GetColor(item.grade);
-        titleText.text = $"<color={color}>{item.itemName}</color>";
+        titleText.text = $"<color={color}>{cleanName}</color>";
     }
 
     private void UpdateItemKind(TMP_Text kindText, RelicData item)
@@ -247,27 +262,27 @@ public class TooltipController : MonoBehaviour
         descText.text = builder.ToString();
     }
 
-    // [핵심 로직] 아이템 이름에서 접두사를 찾아 텍스트에 표시
     private void UpdateUpgradeLevel(TMP_Text upgradeText, RelicData item)
     {
         if (upgradeText == null) return;
 
-        string foundPrefix = ""; // 기본값 (강화 없음)
+        string foundPrefix = "+0"; 
 
         foreach (string prefix in upgradePrefixes)
         {
-            // 이름이 접두사로 시작하는지 확인 (예: "+1 Sword")
-            // 주의: 이름 사이에 띄어쓰기가 있는지 여부는 UpgradeModule의 작명 로직과 맞춰야 함
             if (item.itemName.StartsWith(prefix))
             {
                 foundPrefix = prefix;
                 break;
             }
         }
-
         upgradeText.text = foundPrefix;
-        // 텍스트가 비어있으면 숨기고 싶다면 아래 주석 해제
-        // upgradeText.gameObject.SetActive(!string.IsNullOrEmpty(foundPrefix));
+    }
+
+    private void UpdatePrice(TMP_Text priceText, RelicData item)
+    {
+        if (priceText == null) return;
+        priceText.text = $"{item.price:N0} $";
     }
 
     private void AppendAbilityInfo(StringBuilder builder, AbilityData ability)
@@ -370,7 +385,8 @@ public class TooltipController : MonoBehaviour
         public TMP_Text GradeText;
         public Image GradeImage;
         public TMP_Text DescriptionText;
-        public TMP_Text UpgradeText; // 강화 수치 텍스트 필드
+        public TMP_Text UpgradeText; // 강화 수치
+        public TMP_Text PriceText;   // 가격
     }
 
     #endregion

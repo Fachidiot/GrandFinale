@@ -16,7 +16,8 @@ public class PlayerStats : MonoBehaviour
     public float baseDamageModifier = 1.0f;
     public float baseDefense = 10f;
     public float basePower = 10f;
-    public int baseCurrency = 22222;    
+    public float baseCritChance = 5.0f; // 기본 치명타 확률
+    public int baseCurrency = 1500;    // 기본 재화
 
     [Header("현재 상태 (모니터링)")]
     [SerializeField] private float currentHealth;
@@ -55,8 +56,8 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        // 방어력 적용 공식 (필요 시 수정)
-        float reducedDamage = Mathf.Max(1f, damage - (currentDefense * 0.5f)); 
+        // 방어력 적용 공식 (예시: 방어력의 절반만큼 데미지 감소, 최소 1)
+        float reducedDamage = Mathf.Max(1f, damage - (currentDefense * 0.5f));
         float damageToTake = reducedDamage;
 
         if (CurrentShield > 0)
@@ -93,10 +94,21 @@ public class PlayerStats : MonoBehaviour
         OnStatsChanged?.Invoke();
     }
 
+    public void ValidateHealth()
+    {
+        if (CurrentHealth > CurrentMaxHealth)
+        {
+            CurrentHealth = CurrentMaxHealth;
+        }
+        OnStatsChanged?.Invoke();
+    }
+
     private void Die()
     {
         Debug.Log("플레이어 사망");
+        // 사망 처리 로직 추가 가능
     }
+
 
     public void AddCurrency(int amount)
     {
@@ -126,17 +138,19 @@ public class PlayerStats : MonoBehaviour
         currentSprintSpeed = baseSprintSpeed;
         currentDefense = baseDefense;
         currentPower = basePower;
+        currentCritChance = baseCritChance;
 
         OnStatsChanged?.Invoke();
     }
 
+    // 장비 장착 해제 시 호출될 함수
     public void AddStat(string statName, float value)
     {
         switch (statName)
         {
             case "MaxHealth":
                 CurrentMaxHealth += value;
-                CurrentHealth += value; 
+                CurrentHealth += value; // 최대 체력 증가분만큼 현재 체력도 증가
                 break;
             case "Defense":
                 CurrentDefense += value;
@@ -151,6 +165,8 @@ public class PlayerStats : MonoBehaviour
                 CurrentDamageModifier += (value / 100f);
                 break;
         }
+        // 스탯 변경 후 체력 검증 한 번 실행
+        ValidateHealth();
         OnStatsChanged?.Invoke();
     }
 

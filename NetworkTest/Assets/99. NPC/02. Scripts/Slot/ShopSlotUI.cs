@@ -23,7 +23,35 @@ public class ShopSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
         _data = data;
         _shop = shop;
 
-        if (iconImage) iconImage.sprite = Resources.Load<Sprite>(data.iconPath);
+        //데이터가 null이면 슬롯을 비우고 함수를 종료합니다.
+        if (data == null)
+        {
+            if (iconImage)
+            {
+                iconImage.sprite = null;
+                iconImage.enabled = false; // 아이콘 숨김
+            }
+            if (nameText) nameText.text = ""; // 이름 지움
+            SetSelected(false);
+            return;
+        }
+
+        // 데이터가 있을 때만 아래 코드가 실행됩니다.
+        if (iconImage)
+        {
+            // 아이콘 경로가 있으면 로드, 없으면 null
+            if (!string.IsNullOrEmpty(data.iconPath))
+            {
+                iconImage.sprite = Resources.Load<Sprite>(data.iconPath);
+                iconImage.enabled = true; // 아이콘 보임
+            }
+            else
+            {
+                iconImage.sprite = null;
+                iconImage.enabled = false;
+            }
+        }
+
         if (nameText) nameText.text = data.itemName;
 
         SetSelected(false); // 초기화
@@ -39,7 +67,7 @@ public class ShopSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
             return;
         }
 
-        // 2. ShopModule로 전달 (Ctrl 키 체크 로직 제거 및 시그니처 단순화)
+        // 2. ShopModule로 전달
         if (_shop != null)
         {
             _shop.OnSlotClicked(_data, this);

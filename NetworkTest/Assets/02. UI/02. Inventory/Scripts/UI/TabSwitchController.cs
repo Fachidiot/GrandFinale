@@ -27,7 +27,7 @@ public class TabSwitchController : MonoBehaviour
     [SerializeField] private TMP_Text tabSelectText;
 
     [Header("Animation Settings")]
-    [SerializeField] private float tabSwitchDuration = 0.5f;
+    [SerializeField] private float tabSwitchDuration = 0.15f;
     [SerializeField] private float slideDistance = 10f;
 
     #endregion

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -9,8 +9,10 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private TMP_Text ammoCountText;
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private TMP_Text interactText;
+    [SerializeField] private TMP_Text cashText;
 
     private WeaponController weaponController;
+    private PlayerStats playerStats;
 
     void Awake()
     {
@@ -18,6 +20,18 @@ public class InGameUIManager : MonoBehaviour
         UIEvents.OnInteractableFocusChanged += SetInteractText;
         UIEvents.OnPlayerInitialized += SetInit;
         NetworkManager.OnDisconnected += HandleDisconnection;
+    }
+
+    void Start()
+    {
+        playerStats = FindObjectOfType<PlayerStats>();
+
+        if (playerStats != null)
+        {
+            // 돈이 바뀌면 UI도 바뀌도록 이벤트 연결
+            playerStats.OnStatsChanged += UpdateCashText;
+            UpdateCashText();
+        }
     }
 
     private void OnDestroy()
@@ -29,6 +43,7 @@ public class InGameUIManager : MonoBehaviour
         {
             NetworkManager.OnDisconnected -= HandleDisconnection;
         }
+        if (playerStats != null) playerStats.OnStatsChanged -= UpdateCashText;
     }
 
     private void HandleDisconnection()
@@ -63,6 +78,12 @@ public class InGameUIManager : MonoBehaviour
             interactText.text = _text;
             interactText.gameObject.SetActive(true);
         }
+    }
+
+    public void UpdateCashText()
+    {
+        if (cashText == null || playerStats == null) return;
+        cashText.text = $"{playerStats.CurrentCurrency:N0} G";
     }
 
     // Update is called once per frame

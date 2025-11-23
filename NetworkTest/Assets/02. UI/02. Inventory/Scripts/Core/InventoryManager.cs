@@ -562,7 +562,6 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-
     /// <summary>
     /// Full Inventory UI를 열 때의 애니메이션 (페이드 인)
     /// </summary>
