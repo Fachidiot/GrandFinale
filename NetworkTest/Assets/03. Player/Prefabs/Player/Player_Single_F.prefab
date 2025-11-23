@@ -6154,14 +6154,14 @@ GameObject:
   m_Component:
   - component: {fileID: 8084574304344481430}
   - component: {fileID: 2069173564584709051}
-  - component: {fileID: 4506929974751079687}
-  - component: {fileID: 5330286128028421865}
   - component: {fileID: 729731253929241830}
+  - component: {fileID: 4506929974751079687}
+  - component: {fileID: 5838210829009831418}
+  - component: {fileID: 5330286128028421865}
   - component: {fileID: -7306960511608734812}
   - component: {fileID: 5019025222216074575}
-  - component: {fileID: 5838210829009831418}
   m_Layer: 6
-  m_Name: Player_Single_Model_V2_F
+  m_Name: Player_Single_F
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6214,73 +6214,6 @@ CharacterController:
   m_SkinWidth: 0.015
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0.84995437, z: 0}
---- !u!114 &4506929974751079687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6428601940145922536}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85e61527c040af54aaacd368b9a1bd0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  characterController: {fileID: 2069173564584709051}
-  bodyTurnHandler: {fileID: 7273352970374012141}
-  animator: {fileID: 8992955343068930106}
-  directionOrienter: {fileID: 7176195554726556433}
-  crouchColliderHeight: 1
-  grounCheckDistance: 0.6
-  groundCheckMask:
-    serializedVersion: 2
-    m_Bits: 9
-  edgeFallMoveForce: 5
-  noSlipDistance: 0.17
-  gravity: -9.81
-  walkSpeed: 2
-  runSpeed: 4
-  sprintSpeed: 7
-  crouchSpeed: 2
-  jumpHeight: 1
-  moveVelocity: {x: 0, y: 0, z: 0}
-  velocity: {x: 0, y: 0, z: 0}
-  rollVelocity: {x: 0, y: 0, z: 0}
-  edgeSlipVelocity: {x: 0, y: 0, z: 0}
-  groundNormal: {x: 0, y: 0, z: 0}
---- !u!114 &5330286128028421865
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6428601940145922536}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c45fc6059df8984c86083603331511d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 8992955343068930106}
-  eventsCenter: {fileID: 3059675684589600096}
-  slots:
-  - {fileID: 4981015812175427537}
-  - {fileID: 268059861277710175}
-  - {fileID: 8232030767122642294}
-  - {fileID: 3042225696069072332}
-  rightHandIK: {fileID: 7030100312320728785}
-  leftHandIK: {fileID: 4726972015226307576}
-  activeID: 1
-  nextID: 0
-  offsetForGun: {fileID: 5841073164319555563}
-  aimPointEffector: {fileID: 2701391970925432670}
-  detectionLength: 4
-  detectionStartPoint: {fileID: 7176195554726556433}
-  detectionLayer:
-    serializedVersion: 2
-    m_Bits: 1
-  pickUpInputLong: 3
-  changed: 0
-  canShoot: 1
 --- !u!114 &729731253929241830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6315,6 +6248,88 @@ MonoBehaviour:
   currentPower: 0
   currentLevel: 0
   currentCurrency: 0
+--- !u!114 &4506929974751079687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85e61527c040af54aaacd368b9a1bd0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterController: {fileID: 2069173564584709051}
+  bodyTurnHandler: {fileID: 7273352970374012141}
+  animator: {fileID: 8992955343068930106}
+  directionOrienter: {fileID: 7176195554726556433}
+  crouchColliderHeight: 1
+  grounCheckDistance: 0.6
+  groundCheckMask:
+    serializedVersion: 2
+    m_Bits: 9
+  edgeFallMoveForce: 5
+  noSlipDistance: 0.17
+  gravity: -9.81
+  walkSpeed: 2
+  runSpeed: 4
+  sprintSpeed: 7
+  crouchSpeed: 2
+  jumpHeight: 1
+  moveVelocity: {x: 0, y: 0, z: 0}
+  velocity: {x: 0, y: 0, z: 0}
+  rollVelocity: {x: 0, y: 0, z: 0}
+  edgeSlipVelocity: {x: 0, y: 0, z: 0}
+  groundNormal: {x: 0, y: 0, z: 0}
+--- !u!114 &5838210829009831418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b28c081ab80d8fc46a61d239679d6abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraController: {fileID: 2521222289879229575}
+  bodyTurnHandler: {fileID: 7273352970374012141}
+  model: {fileID: 7613203203886053497}
+--- !u!114 &5330286128028421865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6428601940145922536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c45fc6059df8984c86083603331511d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 8992955343068930106}
+  eventsCenter: {fileID: 3059675684589600096}
+  slots:
+  - {fileID: 4981015812175427537}
+  - {fileID: 268059861277710175}
+  - {fileID: 8232030767122642294}
+  - {fileID: 3042225696069072332}
+  rightHandIK: {fileID: 7030100312320728785}
+  leftHandIK: {fileID: 4726972015226307576}
+  activeID: 1
+  nextID: 0
+  offsetForGun: {fileID: 5841073164319555563}
+  aimPointEffector: {fileID: 2701391970925432670}
+  detectionLength: 4
+  detectionStartPoint: {fileID: 7176195554726556433}
+  detectionLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  pickUpInputLong: 3
+  changed: 0
+  canShoot: 1
 --- !u!114 &-7306960511608734812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6342,21 +6357,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7710789deba60840b36958d19ad7249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5838210829009831418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6428601940145922536}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b28c081ab80d8fc46a61d239679d6abf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cameraController: {fileID: 2521222289879229575}
-  bodyTurnHandler: {fileID: 7273352970374012141}
-  model: {fileID: 7613203203886053497}
 --- !u!1 &6436919676384073551
 GameObject:
   m_ObjectHideFlags: 0
@@ -10148,7 +10148,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 766617263014645663, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Layer
-      value: 31
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 766617263014645663, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 842518739005875041, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Layer
@@ -10161,6 +10165,14 @@ PrefabInstance:
     - target: {fileID: 1299509254272106492, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Layer
       value: 31
+      objectReference: {fileID: 0}
+    - target: {fileID: 1382486433350663084, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1382486433350663084, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2699170413284247070, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Name
@@ -10180,11 +10192,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4224890653561108998, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Layer
-      value: 31
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4224890653561108998, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4687878876310601618, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Layer
-      value: 31
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4687878876310601618, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4825436742856223629, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       propertyPath: m_Layer
