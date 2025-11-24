@@ -24,6 +24,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
     private ScrollRect parentScrollRect;
     private bool isDragging = false;
     private Coroutine tooltipCoroutine;
+    private Coroutine singleClickCoroutine;
 
     private static readonly string[] EquippableTypes = { "weapon", "artifact", "accessory", "equipment" };
 
@@ -84,17 +85,38 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         }
         else if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (eventData.clickCount == 2)
+            // [수정] 더블 클릭과 단일 클릭 구분 로직 (지연 처리)
+
+            if (eventData.clickCount == 1)
             {
+                // 첫 번째 클릭: 바로 실행하지 않고 더블클릭인지 확인하기 위해 대기
+                if (singleClickCoroutine != null) StopCoroutine(singleClickCoroutine);
+                singleClickCoroutine = StartCoroutine(HandleSingleClick());
+            }
+            else if (eventData.clickCount == 2)
+            {
+                // 두 번째 클릭(더블클릭): 대기 중이던 단일 클릭 취소하고 장착 실행
+                if (singleClickCoroutine != null) StopCoroutine(singleClickCoroutine);
+
                 AttemptEquip();
+
+                // 장착 후 상세 정보창 닫기
                 if (InventoryUIManager.Instance) InventoryUIManager.Instance.ClearDetails();
             }
-            else
-            {
-                if (InventoryUIManager.Instance)
-                    InventoryUIManager.Instance.HandleSlotClick(this, currentItem.item);
-                SetSelected(true);
-            }
+        }
+    }
+
+    // [신규] 단일 클릭 지연 처리 함수
+    private IEnumerator HandleSingleClick()
+    {
+        // 더블 클릭 판정 대기 시간 (보통 0.2 ~ 0.25초가 적당함)
+        yield return new WaitForSeconds(0.25f);
+
+        // 더블 클릭이 아니라고 판단되면 그때 정보창 띄움
+        if (InventoryUIManager.Instance && currentItem != null && currentItem.item != null)
+        {
+            InventoryUIManager.Instance.HandleSlotClick(this, currentItem.item);
+            SetSelected(true);
         }
     }
 

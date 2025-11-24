@@ -54,37 +54,35 @@ public class InventorySlotUIController : MonoBehaviour
         allInventorySlots = new List<Slot_UI>(foundSlots);
     }
 
-    //  리스트 기반 UI 바인딩
+    // [핵심 수정] 리스트 개수에 맞춰 슬롯 껐다 켜기
     private void UpdateSlotUIBindings()
     {
         if (!IsValidState()) return;
 
+        // 1. 현재 탭에 해당하는 리스트 가져오기
+        // (무기 탭이면 15개, 장비 탭이면 10개, 전체 탭이면 60개가 옴)
         List<InventoryItem> displayItems = InventoryManager.Instance.GetFilteredItems();
-        int maxSlots = allInventorySlots.Count;
-        int displayCount = displayItems.Count;
 
-        // 2. 슬롯을 순회하며 아이템 채우기
-        for (int i = 0; i < maxSlots; i++)
+        int totalUISlots = allInventorySlots.Count; // 화면에 깔린 슬롯 전체 (60개)
+        int targetCapacity = displayItems.Count;    // 현재 보여줘야 할 슬롯 개수 (15개 등)
+
+        for (int i = 0; i < totalUISlots; i++)
         {
             Slot_UI slotUI = allInventorySlots[i];
             if (slotUI == null) continue;
 
-            // [추가] 슬롯의 인덱스를 설정합니다.
-            slotUI.SetListIndex(i);
-
-            if (i < displayCount)
+            // [변경] 현재 탭의 용량(targetCapacity) 안쪽이면 켜고, 넘치면 끕니다.
+            if (i < targetCapacity)
             {
-                // 데이터가 있으면 바인딩하고 활성화
                 slotUI.gameObject.SetActive(true);
+                slotUI.SetListIndex(i);
                 slotUI.BindItem(displayItems[i]);
             }
             else
             {
-                // 데이터가 없으면 비우기
-                slotUI.ClearSlot();
-
-                // 만약 빈 슬롯을 아예 숨기고 싶다면 아래 주석 해제
-                // slotUI.gameObject.SetActive(false); 
+                // 용량을 초과하는 나머지 슬롯은 숨김 처리
+                slotUI.gameObject.SetActive(false);
+                slotUI.ClearSlot(); // 혹시 모르니 데이터 비움
             }
         }
     }
