@@ -4,18 +4,19 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using TMPro;
 
-public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
-    IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler,
-    IPointerEnterHandler, IPointerExitHandler
+public class EquipmentSlot_UI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("필터 설정")]
+    #region Serialized Fields & Settings
+
+    [Header("Filter Settings")]
     public EquipmentSlot requiredSlotType = EquipmentSlot.None;
     public ItemType requiredItemType = ItemType.Etc;
 
-    [Header("UI")]
+    [Header("UI Components")]
     public Image slotIcon;
     public TextMeshProUGUI slotNameText;
 
+    [Header("State")]
     public int equipmentSlotIndex;
     public RelicData currentItem { get; private set; }
     public bool dropSuccessful = false;
@@ -24,6 +25,10 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
     private Coroutine hideTooltipCoroutine;
     private Coroutine tooltipCoroutine;
     private const float TooltipDelay = 0.5f;
+
+    #endregion
+
+    #region Initialization
 
     void Start()
     {
@@ -36,30 +41,25 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         EquipmentManager.OnEquipmentChanged -= UpdateSlotVisuals;
     }
 
-    // 슬롯 비주얼 업데이트
+    #endregion
+
+    #region Visual Updates
+
     void UpdateSlotVisuals()
     {
         if (EquipmentManager.Instance == null) return;
 
         currentItem = EquipmentManager.Instance.equipmentSlots[equipmentSlotIndex];
 
-        if (HasValidItem())
-        {
-            DisplayItem();
-        }
-        else
-        {
-            HideItem();
-        }
+        if (HasValidItem()) DisplayItem();
+        else HideItem();
     }
 
-    // 유효한 아이템이 있는지 확인
     private bool HasValidItem()
     {
         return currentItem != null && !string.IsNullOrEmpty(currentItem.iconPath);
     }
 
-    // 아이템 표시
     private void DisplayItem()
     {
         Sprite icon = Resources.Load<Sprite>(currentItem.iconPath);
@@ -80,7 +80,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 아이템 숨기기
     private void HideItem()
     {
         slotIcon.sprite = null;
@@ -93,7 +92,10 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 드롭 이벤트 처리
+    #endregion
+
+    #region Drag & Drop Handlers
+
     public void OnDrop(PointerEventData eventData)
     {
         Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
@@ -108,7 +110,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 소스 슬롯 유효성 검사
     private bool IsValidSourceSlot(Slot_UI sourceSlot)
     {
         return sourceSlot != null &&
@@ -116,10 +117,8 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
                sourceSlot.currentSlot.item != null;
     }
 
-    // 아이템 장착 시도
     private void TryEquipItem(Slot_UI sourceSlot, RelicData itemToEquip)
     {
-        // [수정된 부분] 인자 2개만 전달 (아이템, 장착할 슬롯 인덱스)
         bool success = EquipmentManager.Instance.EquipItem(
             itemToEquip,
             this.equipmentSlotIndex
@@ -132,7 +131,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 다음 클릭 무시
     private IEnumerator IgnoreNextClick()
     {
         isIgnoringClick = true;
@@ -140,7 +138,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         isIgnoringClick = false;
     }
 
-    // 아이템 장착 가능 여부 확인
     public bool CanEquipItem(RelicData item)
     {
         if (item == null) return false;
@@ -158,7 +155,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         return false;
     }
 
-    // 드래그 시작
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (currentItem == null) return;
@@ -173,7 +169,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 드래그 중
     public void OnDrag(PointerEventData eventData)
     {
         if (currentItem != null)
@@ -182,7 +177,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 드래그 종료
     public void OnEndDrag(PointerEventData eventData)
     {
         if (InventoryUIManager.Instance != null)
@@ -198,16 +192,17 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         dropSuccessful = false;
     }
 
-    // 드롭 성공 표시
     public void MarkDropSuccessful()
     {
         dropSuccessful = true;
     }
 
-    // 클릭 이벤트 처리
+    #endregion
+
+    #region Input Handlers (Click & Hover)
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 드롭 직후 클릭 무시
         if (isIgnoringClick)
         {
             isIgnoringClick = false;
@@ -226,16 +221,12 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 장비 해제 시도
     private void UnequipItemAttempt()
     {
         if (currentItem == null) return;
-
-        // [수정된 부분] 인자 1개만 전달 (아이템 데이터) - 인덱스 제거
         EquipmentManager.Instance.UnequipItem(currentItem);
     }
 
-    // 마우스 진입
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (hideTooltipCoroutine != null)
@@ -250,7 +241,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         tooltipCoroutine = StartCoroutine(ShowTooltipAfterDelay(currentItem));
     }
 
-    // 마우스 이탈
     public void OnPointerExit(PointerEventData eventData)
     {
         if (tooltipCoroutine != null) StopCoroutine(tooltipCoroutine);
@@ -260,7 +250,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         hideTooltipCoroutine = StartCoroutine(HideTooltipAfterDelay(0.1f));
     }
 
-    // 툴팁 표시 (딜레이 후)
     private IEnumerator ShowTooltipAfterDelay(RelicData item)
     {
         yield return new WaitForSeconds(TooltipDelay);
@@ -271,7 +260,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
         }
     }
 
-    // 툴팁 숨기기 (딜레이 후)
     private IEnumerator HideTooltipAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -283,4 +271,6 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
 
         hideTooltipCoroutine = null;
     }
+
+    #endregion
 }

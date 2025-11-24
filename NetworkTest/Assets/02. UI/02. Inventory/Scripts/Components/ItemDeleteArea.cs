@@ -27,10 +27,7 @@ public class ItemDeleteArea : MonoBehaviour, IDropHandler
     // 아이템 삭제
     private void DeleteItem(Slot_UI sourceSlot)
     {
-        // [수정] 인덱스가 아닌 아이템 객체 자체를 전달
         InventoryManager.Instance.RemoveItem(sourceSlot.currentItem);
-
-        // 삭제는 즉시 처리되므로 성공 표시
         sourceSlot.dropSuccessful = true;
     }
 }

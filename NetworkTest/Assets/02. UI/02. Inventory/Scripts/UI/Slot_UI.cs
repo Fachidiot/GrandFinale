@@ -5,10 +5,10 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using DG.Tweening;
 
-public class Slot_UI : MonoBehaviour, IPointerClickHandler,
-    IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler,
-    IPointerEnterHandler, IPointerExitHandler
+public class Slot_UI : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
+    #region UI Components & Settings
+
     [Header("Components")]
     public Image slotIcon;
     public TextMeshProUGUI countText;
@@ -16,17 +16,27 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
     [SerializeField] private Sprite normalBorderSprite;
     [SerializeField] private Sprite selectedBorderSprite;
 
+    private static readonly string[] EquippableTypes = { "weapon", "artifact", "accessory", "equipment" };
+
+    #endregion
+
+    #region Data & State
+
     public InventoryItem currentItem { get; private set; }
     public InventoryItem currentSlot => currentItem;
-    public bool dropSuccessful = false;
     public int listIndex { get; private set; }
+    public bool dropSuccessful = false;
 
     private ScrollRect parentScrollRect;
     private bool isDragging = false;
+
+    // Coroutines
     private Coroutine tooltipCoroutine;
     private Coroutine singleClickCoroutine;
 
-    private static readonly string[] EquippableTypes = { "weapon", "artifact", "accessory", "equipment" };
+    #endregion
+
+    #region Initialization & Binding
 
     void Start()
     {
@@ -39,19 +49,27 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         currentItem = item;
         UpdateSlotVisuals();
     }
+
     public void SetListIndex(int index)
     {
         this.listIndex = index;
     }
-    
+
     public void ClearSlot()
     {
         currentItem = null;
         UpdateSlotVisuals();
     }
 
+    public void SetBoundItem(InventoryItem newItem) => BindItem(newItem);
+
+    #endregion
+
+    #region Visual Updates
+
     void UpdateSlotVisuals()
     {
+        // 아이템이 있고, 껍데기(IsEmpty)가 아니어야 함
         if (currentItem != null && currentItem.item != null)
         {
             Sprite icon = Resources.Load<Sprite>(currentItem.item.iconPath);
@@ -74,6 +92,19 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         SetSelected(false, false);
     }
 
+    public void SetSelected(bool selected, bool animate = true)
+    {
+        if (slotBorderImage != null)
+        {
+            slotBorderImage.sprite = selected ? selectedBorderSprite : normalBorderSprite;
+            if (selected && animate) transform.DOPunchScale(Vector3.one * -0.05f, 0.15f);
+        }
+    }
+
+    #endregion
+
+    #region Input Handlers (Click)
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (isDragging) return;
@@ -85,34 +116,28 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         }
         else if (eventData.button == PointerEventData.InputButton.Left)
         {
-            // [수정] 더블 클릭과 단일 클릭 구분 로직 (지연 처리)
-
             if (eventData.clickCount == 1)
             {
-                // 첫 번째 클릭: 바로 실행하지 않고 더블클릭인지 확인하기 위해 대기
+                // 첫 번째 클릭: 대기 (더블클릭 판정 위해)
                 if (singleClickCoroutine != null) StopCoroutine(singleClickCoroutine);
                 singleClickCoroutine = StartCoroutine(HandleSingleClick());
             }
             else if (eventData.clickCount == 2)
             {
-                // 두 번째 클릭(더블클릭): 대기 중이던 단일 클릭 취소하고 장착 실행
+                // 더블 클릭: 대기 취소 후 장착 실행
                 if (singleClickCoroutine != null) StopCoroutine(singleClickCoroutine);
 
                 AttemptEquip();
-
-                // 장착 후 상세 정보창 닫기
                 if (InventoryUIManager.Instance) InventoryUIManager.Instance.ClearDetails();
             }
         }
     }
 
-    // [신규] 단일 클릭 지연 처리 함수
     private IEnumerator HandleSingleClick()
     {
-        // 더블 클릭 판정 대기 시간 (보통 0.2 ~ 0.25초가 적당함)
         yield return new WaitForSeconds(0.25f);
 
-        // 더블 클릭이 아니라고 판단되면 그때 정보창 띄움
+        // 더블클릭이 아니라고 판단되면 정보창 표시
         if (InventoryUIManager.Instance && currentItem != null && currentItem.item != null)
         {
             InventoryUIManager.Instance.HandleSlotClick(this, currentItem.item);
@@ -120,10 +145,15 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         }
     }
 
+    #endregion
+
+    #region Input Handlers (Drag & Drop)
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         isDragging = true;
 
+        // 스크롤 방향과 드래그 방향 비교하여 스크롤 뷰 제어
         if (parentScrollRect != null && (currentItem == null || Mathf.Abs(eventData.delta.y) > Mathf.Abs(eventData.delta.x)))
         {
             parentScrollRect.OnBeginDrag(eventData);
@@ -143,9 +173,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
 
     public void OnDrag(PointerEventData eventData)
     {
-        // [수정] IsDragging 속성이 없어서 오류가 났다면, 간단히 currentItem 체크로 대체
         bool isUIDragging = InventoryUIManager.Instance != null && currentItem != null;
-        // 만약 InventoryUIManager에 IsDragging 프로퍼티가 있다면 && InventoryUIManager.Instance.IsDragging 사용
 
         if (parentScrollRect != null && (currentItem == null || !isUIDragging))
         {
@@ -166,6 +194,8 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         {
             slotIcon.enabled = true;
             UpdateSlotVisuals();
+
+            // UI 밖으로 드롭 시 아이템 버리기
             if (!dropSuccessful && !EventSystem.current.IsPointerOverGameObject())
             {
                 InventoryManager.Instance.DropItem(currentItem);
@@ -175,36 +205,25 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
         isDragging = false;
     }
 
-public void OnDrop(PointerEventData eventData)
+    public void OnDrop(PointerEventData eventData)
     {
         Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
-        
-        // 인벤토리 -> 인벤토리 드롭 처리
-if (sourceSlot != null && sourceSlot.currentItem != null)
-        {
-            // 현재 슬롯(this)이 비어있는 경우
-            if (this.currentItem == null)
-            {
-                if (InventoryManager.Instance != null)
-                {
-                    Debug.Log("빈 슬롯으로 이동 요청");
 
-                    InventoryManager.Instance.MoveItemToEmptySlot(sourceSlot.currentItem, this.listIndex);
-                    sourceSlot.MarkDropSuccessful();
-                    this.MarkDropSuccessful();
-                }
-            }
-            // 현재 슬롯에 아이템이 있는 경우 (스왑)
-            else
+        // 1. 인벤토리 -> 인벤토리 드롭
+        if (sourceSlot != null && sourceSlot.currentItem != null)
+        {
+            if (InventoryManager.Instance != null)
             {
-                InventoryManager.Instance.SwapItems(sourceSlot.currentItem, this.currentItem);
+                // Manager가 타겟 슬롯 상태(빈칸/있음)를 확인하여 이동(Move) 또는 교환(Swap) 처리
+                InventoryManager.Instance.MoveItemToEmptySlot(sourceSlot.currentItem, this.listIndex);
+
                 sourceSlot.MarkDropSuccessful();
                 this.MarkDropSuccessful();
             }
             return;
         }
 
-        // 장비 슬롯 -> 인벤토리 드롭 처리
+        // 2. 장비 슬롯 -> 인벤토리 드롭 (장비 해제)
         EquipmentSlot_UI equipSlot = eventData.pointerDrag.GetComponent<EquipmentSlot_UI>();
         if (equipSlot != null && equipSlot.currentItem != null)
         {
@@ -214,10 +233,18 @@ if (sourceSlot != null && sourceSlot.currentItem != null)
         }
     }
 
+    public void MarkDropSuccessful() => dropSuccessful = true;
+    public void OnDropSuccess() => MarkDropSuccessful();
+
+    #endregion
+
+    #region Helpers & Tooltip
+
     private void AttemptEquip()
     {
         if (currentItem == null || currentItem.item == null) return;
         string typeStr = currentItem.item.itemTypeEnum.ToString().ToLower();
+
         if (IsEquippableType(typeStr))
         {
             EquipmentManager.Instance.EquipItemToFirstAvailableSlot(currentItem.item);
@@ -228,17 +255,6 @@ if (sourceSlot != null && sourceSlot.currentItem != null)
     {
         foreach (var t in EquippableTypes) if (t == type) return true;
         return false;
-    }
-
-    public void MarkDropSuccessful() => dropSuccessful = true;
-    public void OnDropSuccess() => MarkDropSuccessful();
-    public void SetSelected(bool selected, bool animate = true)
-    {
-        if (slotBorderImage != null)
-        {
-            slotBorderImage.sprite = selected ? selectedBorderSprite : normalBorderSprite;
-            if (selected && animate) transform.DOPunchScale(Vector3.one * -0.05f, 0.15f);
-        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -261,5 +277,5 @@ if (sourceSlot != null && sourceSlot.currentItem != null)
             InventoryUIManager.Instance.ShowTooltip(currentItem.item, transform.position);
     }
 
-    public void SetBoundItem(InventoryItem newItem) => BindItem(newItem);
+    #endregion
 }
