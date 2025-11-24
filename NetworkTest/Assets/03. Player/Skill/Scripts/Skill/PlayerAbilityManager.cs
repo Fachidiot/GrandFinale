@@ -318,11 +318,11 @@ public class PlayerAbilityManager : MonoBehaviour
         float timer = 0f;
         while (timer < duration)
         {
-            Weapon currentWeapon = weaponController.GETCurrentWeapon;
+            IWeapon currentWeapon = weaponController.GETCurrentWeapon;
 
-            if (currentWeapon != null)
+            if (currentWeapon is RangedWeapon rangedWeapon)
             {
-                currentWeapon.InfiniteAmmo();
+                rangedWeapon.InfiniteAmmo();
             }
 
             timer += Time.deltaTime;

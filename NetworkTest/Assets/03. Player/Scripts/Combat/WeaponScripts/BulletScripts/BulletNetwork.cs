@@ -50,13 +50,13 @@ public class BulletNetwork : BulletBehaviour
 
     public override void BulletStart(Transform bulletCreator)
     {
-        var weap = bulletCreator.GetComponent<Weapon>();
+        var weap = bulletCreator.GetComponent<RangedWeapon>();
 
         GetComponent<NetworkTransformSync>().IsMine = weap.transform.root.GetComponent<NetworkTransformSync>().IsMine;
         PlayerDamage = weap.PlayerDamage;
         force = weap.BulletForce;
         startSpeed = weap.BulletStartSpeed;
-        weaponName = bulletCreator.name;
+        weaponName = weap.gameObject.name;
 
         // Apply force and set start point now that parameters are initialized
         if (rb != null)

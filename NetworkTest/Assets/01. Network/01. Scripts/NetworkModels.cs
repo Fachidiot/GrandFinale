@@ -7,7 +7,11 @@ public class PlayerInfo
     public string steam_id; // The CSteamID as a string
     public string player_id; // The internal byte ID (0, 1, 2...) as a string
     public string nickname;
-    public bool is_ready;
+    public bool is_Male;
+    public int headIndex;
+    public int bodyIndex;
+    public int acce1Index;
+    public int acce2Index;
 }
 
 [Serializable]

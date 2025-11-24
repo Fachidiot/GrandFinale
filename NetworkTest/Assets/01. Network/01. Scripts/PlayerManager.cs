@@ -7,10 +7,6 @@ public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Instance { get; private set; }
 
-    [Header("Prefabs")]
-    [SerializeField] private GameObject networkPlayerPrefab;
-    [SerializeField] private GameObject singlePlayerPrefab; // Placeholder for a single-player variant
-
     private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
     private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
@@ -55,7 +51,7 @@ public class PlayerManager : MonoBehaviour
 
     private void SpawnSinglePlayer()
     {
-        if (singlePlayerPrefab == null)
+        if (PlayerCustomizer.Instance == null)
         {
             Debug.LogError("[PlayerManager] Single Player Prefab is not assigned!");
             return;
@@ -65,10 +61,12 @@ public class PlayerManager : MonoBehaviour
             Destroy(LocalPlayer.gameObject);
         }
 
-        GameObject playerObject = Instantiate(singlePlayerPrefab, GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
+        GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetSinglePlayerPrefab(), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = "SinglePlayer";
 
-        var singlePlayer = playerObject.AddComponent<SinglePlayer>();
+        playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(PlayerCustomizer.Instance.GetLocalPlayerInfo());
+
+        var singlePlayer = playerObject.GetComponent<SinglePlayer>();
         LocalPlayer = singlePlayer;
         DontDestroyOnLoad(playerObject);
     }
@@ -152,7 +150,7 @@ public class PlayerManager : MonoBehaviour
 
     private GameObject SpawnNetworkPlayer(PlayerInfo playerInfo)
     {
-        if (networkPlayerPrefab == null)
+        if (PlayerCustomizer.Instance == null)
         {
             Debug.LogError("[PlayerManager] Player Prefab is not assigned!");
             return null;
@@ -163,22 +161,32 @@ public class PlayerManager : MonoBehaviour
             players.Remove(playerInfo.steam_id);
         }
 
-        GameObject playerObject = Instantiate(networkPlayerPrefab, GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
+        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
+
+        GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetNetworkPlayerPrefab(isMine, playerInfo.is_Male), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = $"Player_{playerInfo.nickname}";
         players.Add(playerInfo.steam_id, playerObject);
 
-        var networkPlayer = playerObject.AddComponent<NetworkPlayer>();
-        bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
+        var networkPlayer = playerObject.GetComponent<NetworkPlayer>();
         networkPlayer.Initialize(playerInfo.steam_id, isMine);
+
+
+        if (networkPlayer.NicknameUI != null)
+            networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
 
         if (isMine)
         {
             LocalPlayer = networkPlayer;
+            playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(PlayerCustomizer.Instance.GetLocalPlayerInfo());
         }
-
-        if (networkPlayer.NicknameUI != null)
+        else
         {
-            networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
+            ModelInfo modelInfo = new ModelInfo(
+                playerInfo.headIndex,
+                playerInfo.bodyIndex,
+                playerInfo.acce1Index,
+                playerInfo.acce2Index);
+            playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
         }
 
         DontDestroyOnLoad(playerObject);

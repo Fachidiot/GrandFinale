@@ -44,7 +44,6 @@ public class CharacterMove : MonoBehaviour
     [Header("Move values")]
     public float gravity = -9.81f;
     public float walkSpeed = 2;
-    public float runSpeed = 3;
     public float sprintSpeed = 5;
     public float crouchSpeed = 1;
 
@@ -76,6 +75,20 @@ public class CharacterMove : MonoBehaviour
 
     IEnumerator colliderSizeChangeCor;
 
+    private void InitialCheck()
+    {
+        if (characterController == null)
+            Debug.LogError("CharacterMove: CharacterController is not assigned. Movement will not function.");
+        if (bodyTurnHandler == null)
+            Debug.LogError("CharacterMove: BodyTurnHandler is not assigned. Body turning will not function.");
+        if (animator == null)
+            Debug.LogError("CharacterMove: Animator is not assigned. Animations will not function.");
+        if (directionOrienter == null)
+            Debug.LogError("CharacterMove: DirectionOrienter is not assigned. Movement orientation will be incorrect.");
+        if (playerInputs == null)
+            Debug.LogError("CharacterMove: PlayerInputs is not found. Input will not be processed.");
+    }
+
     private void Awake()
     {
         AssighAnimatorIDs();
@@ -84,6 +97,7 @@ public class CharacterMove : MonoBehaviour
         normalColliderHeight = characterController.height;
         GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
 
+        InitialCheck(); // Call InitialCheck after all references are attempted to be assigned
 
         moveState = new MoveState(this);
         crouchState = new CrouchState(this);

@@ -21,8 +21,12 @@ public class ViewingResistance : MonoBehaviour
     {
         if (!changing)
         {
-            resistanceForce = weaponController.GETCurrentWeapon.ResistanceForce;
-            resistanceSmoothing = weaponController.GETCurrentWeapon.ResistanceSmoothing;
+            var weapon = weaponController.GETCurrentWeapon;
+            if (weapon != null)
+            {
+                resistanceForce = weapon.ResistanceForce;
+                resistanceSmoothing = weapon.ResistanceSmoothing;
+            }
         }
     }
 

@@ -2,16 +2,11 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-/// <summary>
-/// This component is attached to a melee weapon prefab.
-/// It holds the weapon's stats and handles collision detection during an attack swing.
-/// </summary>
-public class MeleeWeapon : MonoBehaviour
+public class MeleeWeapon : BaseWeapon
 {
     [Header("Weapon Stats")]
-    public float damage = 15f;
     public float attackRange = 1.5f; // Used for visualization or AI, the collider is the authority
-    
+
     [Header("Internal References")]
     [SerializeField] private Collider damageCollider;
 
@@ -35,11 +30,12 @@ public class MeleeWeapon : MonoBehaviour
     /// Called by an Animation Event at the start of the weapon's swing.
     /// Enables the damage collider and clears the list of targets hit in the previous swing.
     /// </summary>
-    public void BeginAttack()
+    public override bool Attack()
     {
         hitTargets.Clear();
         damageCollider.enabled = true;
-        Debug.Log("[MeleeWeapon] Attack Begun. Collider enabled.");
+        Debug.Log($"[{gameObject.name}] Attack Begun. Collider enabled.");
+        return true;
     }
 
     /// <summary>
@@ -49,15 +45,13 @@ public class MeleeWeapon : MonoBehaviour
     public void EndAttack()
     {
         damageCollider.enabled = false;
-        Debug.Log("[MeleeWeapon] Attack Ended. Collider disabled.");
+        Debug.Log($"[{gameObject.name}] Attack Ended. Collider disabled.");
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Ignore triggers that are not from the local player's authority.
-        // This check assumes the CombatManager is on the same root object as the NetworkPlayer component.
-        var networkPlayer = GetComponentInParent<NetworkPlayer>();
-        if (networkPlayer != null && !networkPlayer.IsMine)
+        var player = GetComponentInParent<IPlayerControllable>();
+        if (player == null || !player.IsMine)
         {
             return;
         }
@@ -70,31 +64,30 @@ public class MeleeWeapon : MonoBehaviour
 
         // Check if the hit object is a monster.
         var monsterHealth = other.GetComponent<MonsterHealth>();
-        if (monsterHealth != null)
-        {
-            hitTargets.Add(other); // Add to the list of hit targets for this swing.
-            
-            var networkMonster = other.GetComponent<NetworkMonster>();
-            if (networkMonster != null && NetworkManager.Instance != null)
-            {
-                Debug.Log($"[MeleeWeapon] Hit monster {networkMonster.MonsterId}. Sending damage report.");
+        if (monsterHealth == null) return;
 
-                // If we are the host, apply damage directly.
-                if (NetworkManager.Instance.Mode == NetworkMode.Host)
+        hitTargets.Add(other); // Add to the list of hit targets for this swing.
+
+        var networkMonster = other.GetComponent<NetworkMonster>();
+        if (networkMonster != null && NetworkManager.Instance != null)
+        {
+            Debug.Log($"[{gameObject.name}] Hit monster {networkMonster.MonsterId} for {PlayerDamage} damage. Sending damage report.");
+
+            // If we are the host, apply damage directly.
+            if (NetworkManager.Instance.Mode == NetworkMode.Host)
+            {
+                monsterHealth.TakeDamage(PlayerDamage);
+            }
+            // If we are a client, send a message to the host.
+            else
+            {
+                JObject damageData = new JObject
                 {
-                    monsterHealth.TakeDamage(damage);
-                }
-                // If we are a client, send a message to the host.
-                else
-                {
-                    JObject damageData = new JObject
-                    {
-                        ["type"] = "player_dealt_damage",
-                        ["monsterId"] = networkMonster.MonsterId,
-                        ["damage"] = damage
-                    };
-                    NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, damageData);
-                }
+                    ["type"] = "player_dealt_damage",
+                    ["monsterId"] = networkMonster.MonsterId,
+                    ["damage"] = PlayerDamage
+                };
+                NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, damageData);
             }
         }
     }

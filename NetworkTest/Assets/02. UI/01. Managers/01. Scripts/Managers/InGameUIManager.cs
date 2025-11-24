@@ -103,12 +103,20 @@ public class InGameUIManager : MonoBehaviour
             ammoCountText.enabled = true;
         }
 
-        if (weaponController.GETCurrentWeapon == null)
+        IWeapon currentWeapon = weaponController.GETCurrentWeapon;
+        if (currentWeapon == null)
         {
             ammoCountText.text = "-";
             return;
         }
 
-        ammoCountText.text = weaponController.GETCurrentWeapon.CurrentAmmo.ToString();
+        if (currentWeapon is RangedWeapon rangedWeapon)
+        {
+            ammoCountText.text = rangedWeapon.CurrentAmmo.ToString();
+        }
+        else
+        {
+            ammoCountText.text = "-"; // Melee weapons or other non-ranged
+        }
     }
 }

@@ -25,7 +25,7 @@ public class MoveState : StateMachineBase
             _walk = value;
             isSprint = false;
 
-            targetSpeed = value == true ? characterMove.walkSpeed : characterMove.runSpeed;
+            targetSpeed = value == true ? characterMove.walkSpeed : characterMove.sprintSpeed;
             animationBlendMultiply = value == true ? characterMove.walkSpeed : targetSpeed / 2f;
         }
     }
@@ -41,7 +41,7 @@ public class MoveState : StateMachineBase
 
             characterMove.animator.SetBool(characterMove.sprintID, value);
 
-            targetSpeed = value == true ? characterMove.sprintSpeed : characterMove.runSpeed;
+            targetSpeed = value == true ? characterMove.sprintSpeed : characterMove.sprintSpeed;
             animationBlendMultiply = value == true ? targetSpeed / 3f : targetSpeed / 2f;
         }
     }
@@ -63,7 +63,7 @@ public class MoveState : StateMachineBase
 
         // 1. 속도 계산
         var isMoving = inputVector.magnitude > 0 && characterMove.edgeSlipVelocity.magnitude == 0;
-        float targetSpeed = isMoving ? (isSprint ? characterMove.sprintSpeed : (walk ? characterMove.walkSpeed : characterMove.runSpeed)) : 0;
+        float targetSpeed = isMoving ? (isSprint ? characterMove.sprintSpeed : (walk ? characterMove.walkSpeed : characterMove.walkSpeed)) : 0;
         currentSpeed = SpeedValueChange(currentSpeed, targetSpeed, speedChangeRate);
 
         // 2. 이동 방향 벡터 계산
@@ -82,7 +82,7 @@ public class MoveState : StateMachineBase
         if (characterMove.isGrounded && verticalVelocity.y > characterMove.gravity * Time.deltaTime)
         {
             // 땅에 붙어있도록 약한 중력(-2)을 유지
-            verticalVelocity.y = -2f; 
+            verticalVelocity.y = -2f;
         }
 
         // 6. 최종 속도 결합 및 적용
@@ -124,7 +124,7 @@ public class MoveState : StateMachineBase
 
     public override void OnStateEnter()
     {
-        targetSpeed = characterMove.runSpeed;
+        targetSpeed = characterMove.walkSpeed;
         currentSpeed = 0;
         characterMove.moveVelocity = Vector3.zero;
         animationBlendMultiply = targetSpeed / 2;

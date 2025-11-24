@@ -29,9 +29,12 @@ public class RecoilController : MonoBehaviour
     }
 
     private void Start()
+
     {
-        if (weaponController.GETCurrentWeapon)
-            recoilParametersModel = weaponController.GETCurrentWeapon.RecoilParameters;
+        IWeapon currentWeapon = weaponController.GETCurrentWeapon;
+        if (currentWeapon is RangedWeapon rangedWeapon)
+            recoilParametersModel = rangedWeapon.RecoilParameters;
+
     }
 
     private void Update()
@@ -41,20 +44,30 @@ public class RecoilController : MonoBehaviour
 
     void weaponChangeCheck(bool changed)
     {
-        if (!changed) recoilParametersModel = weaponController.GETCurrentWeapon.RecoilParameters;
+        if (!changed)
+        {
+            IWeapon currentWeapon = weaponController.GETCurrentWeapon;
+            if (currentWeapon is RangedWeapon rangedWeapon)
+            {
+                recoilParametersModel = rangedWeapon.RecoilParameters;
+            }
+        }
     }
 
     void RecoilStarter()
     {
         StopAllCoroutines();
 
-        StartCoroutine(ApplyCameraRecoil(weaponController.GETCurrentWeapon.RecoilParameters.cameraRecoilAxes));
+        IWeapon currentWeapon = weaponController.GETCurrentWeapon;
 
-        StartCoroutine(ApplyPositionRecoil(weaponRotationRecoilPivot, weaponController.GETCurrentWeapon.RecoilParameters.weaponRotationRecoilAxes, true));
+        if (currentWeapon is RangedWeapon rangedWeapon)
+        {
+            StartCoroutine(ApplyCameraRecoil(rangedWeapon.RecoilParameters.cameraRecoilAxes));
 
-        StartCoroutine(ApplyPositionRecoil(weaponPositionRecoilPivot, weaponController.GETCurrentWeapon.RecoilParameters.weaponPositionRecoilAxes, false));
+            StartCoroutine(ApplyPositionRecoil(weaponRotationRecoilPivot, rangedWeapon.RecoilParameters.weaponRotationRecoilAxes, true));
 
-
+            StartCoroutine(ApplyPositionRecoil(weaponPositionRecoilPivot, rangedWeapon.RecoilParameters.weaponPositionRecoilAxes, false));
+        }
     }
 
     IEnumerator ApplyCameraRecoil(RecoilParametersModel.RecoilAxis[] recoilAxes)

@@ -14,6 +14,24 @@ public class PlayerLadderClimber : MonoBehaviour
     private CharacterMove characterMove; // Assuming CharacterMove is the main movement script
     private PlayerInputs playerInputs;
 
+    private void InitialCheck()
+    {
+        if (characterController == null)
+            Debug.LogError("PlayerLadderClimber: CharacterController is not assigned. Climbing will not function.");
+        if (animator == null)
+            Debug.LogError("PlayerLadderClimber: Animator is not assigned. Climbing animations will not function.");
+        if (cameraController == null)
+            Debug.LogError("PlayerLadderClimber: CameraController is not assigned. Camera rotation during climbing will not function.");
+        if (bodyTurnHandler == null)
+            Debug.LogError("PlayerLadderClimber: BodyTurnHandler is not assigned. Body turn functionality will be affected.");
+        if (model == null)
+            Debug.LogError("PlayerLadderClimber: Player Model is not assigned. Animator reference might be incorrect.");
+        if (characterMove == null)
+            Debug.LogError("PlayerLadderClimber: CharacterMove is not assigned. Player movement will not be disabled correctly.");
+        if (playerInputs == null)
+            Debug.LogError("PlayerLadderClimber: PlayerInputs component not found. Climbing input will not be processed.");
+    }
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
@@ -26,10 +44,9 @@ public class PlayerLadderClimber : MonoBehaviour
         {
             playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
         }
-        if (playerInputs == null)
-        {
-            Debug.LogError("PlayerLadderClimber: PlayerInputs component not found on LocalPlayer.", this);
-        }
+        // No longer logging error here, InitialCheck will handle it.
+
+        InitialCheck(); // Call InitialCheck after all references are attempted to be assigned
     }
 
     public void StartClimbing(Ladder ladder, Transform startTrans)

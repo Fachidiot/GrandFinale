@@ -83,3 +83,16 @@
     - `BodySlope_Handler.cs`를 수정하여 로컬 플레이어와 원격 플레이어를 구분하고(`isMine` 플래그), 네트워크로부터 받은 값으로 기울기를 직접 설정하는 `SetSlopeFromNetwork` 메서드를 추가했습니다.
     - `NetworkPlayer.cs`가 생성될 때 `BodySlope_Handler`를 올바르게 초기화하도록 수정했습니다.
     - `PlayerManager.cs`의 `UpdateFromGameState` 메서드가 수신된 `bending` 값을 원격 플레이어의 `BodySlope_Handler`에 적용하여 기울임이 모든 클라이언트에게 동일하게 보이도록 수정했습니다.
+## 2025년 11월 24일 월요일
+
+- **무기 시스템 리팩토링**:
+    - `IWeapon` 인터페이스 및 `BaseWeapon` 추상 클래스 구현.
+    - `Weapon.cs`를 `RangedWeapon.cs`로 이름 변경 및 `BaseWeapon` 상속하도록 리팩토링.
+    - `MeleeWeapon.cs`를 `BaseWeapon` 상속하도록 리팩토링.
+    - `PlayerAbilityManager.cs`, `ViewingResistance.cs`, `SlotController.cs`, `WeaponCollision.cs`, `InputHandler.cs`, `WeaponPickupOffline.cs`, `BulletOffline.cs`, `BulletNetwork.cs`, `WeaponController.cs`를 새 `IWeapon` 인터페이스 및 `RangedWeapon` 클래스를 사용하도록 업데이트.
+    - `IPlayerControllable` 인터페이스에 `IsMine` 속성 추가 및 `SinglePlayer.cs`에 `IsMine` 구현.
+    - `MeleeWeapon.cs`와 `UnarmedWeapon.cs`에서 `Reload()` 메서드 제거.
+- **비무장 전투 로직 구현**:
+    - `UnarmedWeapon.cs`를 자체 공격 및 애니메이션 로직을 내부적으로 처리하도록 리팩토링.
+    - `CombatController.cs` 삭제 (기능이 `WeaponController` 및 개별 무기 클래스로 이전됨).
+    - `InputHandler.cs`를 비무장 상태일 때 조준 애니메이션(`isCombat` 애니메이터 파라미터)을 관리하도록 업데이트.

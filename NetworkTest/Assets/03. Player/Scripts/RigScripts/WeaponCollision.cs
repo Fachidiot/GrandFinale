@@ -40,11 +40,14 @@ public class WeaponCollision : OnRig
     {
         if (!change)
         {
-            Weapon weapon = weaponController.GETCurrentWeapon;
-            detectionLength = weapon.CollisionDetectionLength;
-            maxOffset = weapon.MaxZPositionOffsetCollision;
-            rayPositionOffset = weapon.InHandsPositionOffset;
-            rayPositionOffset.y += 0.05f;
+            IWeapon weapon = weaponController.GETCurrentWeapon;
+            if (weapon is RangedWeapon rangedWeapon)
+            {
+                detectionLength = rangedWeapon.CollisionDetectionLength;
+                maxOffset = rangedWeapon.MaxZPositionOffsetCollision;
+                rayPositionOffset = rangedWeapon.InHandsPositionOffset;
+                rayPositionOffset.y += 0.05f;
+            }
         }
     }
 

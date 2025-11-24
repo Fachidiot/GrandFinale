@@ -2,22 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Weapon : MonoBehaviour
+public class RangedWeapon : BaseWeapon
 {
-    public enum SlotType
-    {
-        rifle = 1,
-        smg = 2,
-        pistol = 3
-    }
-
     [Header("Weapon Settings")]
     [SerializeField] private bool useObjectPooling = true;
-    [SerializeField] private SlotType slotType;
-    public SlotType Type => slotType;
-
-    [SerializeField] private int playerDamage = 10;
-    public int PlayerDamage => playerDamage;
 
     [SerializeField] private float shotTemp; // 0 - fast 1 - slow
     public float ShotTemp => shotTemp;
@@ -43,9 +31,6 @@ public class Weapon : MonoBehaviour
     public float Accuracy => accuracy;
 
     [Header("Components")]
-    [SerializeField] private Transform aimPoint;
-    public Transform AimPoint => aimPoint;
-
     [SerializeField] private GameObject muzzleFlash;
     [SerializeField] private GameObject casingPrefab;
     [SerializeField] private Transform casingSpawnPoint;
@@ -62,13 +47,6 @@ public class Weapon : MonoBehaviour
 
     [SerializeField] private WeaponPoint[] weaponPoints;
     public readonly Dictionary<WeaponPoint.PointType, Transform> WeaponPointsDict = new Dictionary<WeaponPoint.PointType, Transform>();
-
-    [Header("View Resistance")]
-    [SerializeField] private float resistanceForce; // view offset rotation
-    public float ResistanceForce => resistanceForce;
-
-    [SerializeField] private float resistanceSmoothing; // view offset rotation speed
-    public float ResistanceSmoothing => resistanceSmoothing;
 
     [SerializeField] private float collisionDetectionLength;
     public float CollisionDetectionLength => collisionDetectionLength;
@@ -123,7 +101,7 @@ public class Weapon : MonoBehaviour
     }
 
 
-    public bool Shoot()
+    public override bool Attack()
     {
         if (!_canShoot) return false;
 
@@ -158,7 +136,6 @@ public class Weapon : MonoBehaviour
 
         if (boltAnimation) boltAnimation.StartAnim(boltAnimationDelay);
         StartCoroutine(ShootPause());
-
         return true;
     }
 
@@ -213,6 +190,7 @@ public class Weapon : MonoBehaviour
 
     private void CasingSpawn()
     {
+        // Casing 안만들어짐. poolmanager로만 만드는 로직임 현재.
         if (PoolManager.Instance == null || casingPrefab == null) return;
 
         var cas = PoolManager.Instance.Spawn(casingPrefab, casingSpawnPoint.transform.position, Random.rotation);
@@ -230,3 +208,4 @@ public class Weapon : MonoBehaviour
         currentAmmo = maxAmmo;
     }
 }
+

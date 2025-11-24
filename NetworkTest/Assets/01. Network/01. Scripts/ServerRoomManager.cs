@@ -210,7 +210,6 @@ public class ServerRoomManager : MonoBehaviour
             steam_id = steamId.ToString(),
             player_id = newId.ToString(),
             nickname = nickname,
-            is_ready = false
         };
         playersInRoom[steamId] = playerInfo;
 

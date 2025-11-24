@@ -10,21 +10,43 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private BodySlope_Handler bodySlope_Handler;
     [SerializeField] private CameraSwitcher cameraSwitcher;
     [SerializeField] private BodyTiltInSprint bodyTiltInSprint;
+    [SerializeField] private Animator playerAnimator; // Added reference to Animator
 
     private PlayerInputs playerInputs;
     private bool isPause = false;
+
+    // Animator Parameter Hashes
+    private readonly int CombatHash = Animator.StringToHash("isCombat"); // Added CombatHash
 
     // --- 마우스 우클릭 상태 변수 ---
     private bool isPressing = false;
     private float pressTime = 0f;
     private bool isLongAimTriggered = false;
 
+    private void InitialCheck()
+    {
+        if (weaponController == null)
+            Debug.LogError("InputHandler: WeaponController not found in Player. InputHandler will not function.");
+        if (weaponPickUp == null)
+            Debug.LogError("InputHandler: WeaponPickup not found in Player. Weapon pickup functionality will be disabled.");
+        if (bodySlope_Handler == null)
+            Debug.LogError("InputHandler: BodySlope_Handler not found in Player. Body leaning functionality will be disabled.");
+        if (cameraSwitcher == null)
+            Debug.LogError("InputHandler: CameraSwitcher not found in Player. Camera switching functionality will be disabled.");
+        if (bodyTiltInSprint == null)
+            Debug.LogError("InputHandler: BodyTiltInSprint not found in Player. Body tilt functionality will be disabled.");
+        if (playerAnimator == null)
+            Debug.LogError("InputHandler: Player Animator not found in Player. Animator-related functions will not work.");
+        if (playerInputs == null)
+            Debug.LogError("InputHandler: PlayerInputs not found in Player. Input will not be processed.");
+    }
+
     private void Start()
     {
         GameManager.OnPauseStateChanged += OnPause;
-        weaponController.activeID = 1;
-        weaponController.animator.Play("GunPickUp", 1);
         GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
+
+        InitialCheck();
     }
 
     void Update()
@@ -34,23 +56,12 @@ public class InputHandler : MonoBehaviour
 
         TryShoot();
 
-        // bodySlope_Handler.setInput(-Input.GetAxisRaw("Slope")); // Q E
         bodySlope_Handler.setInput(playerInputs.GetBending());
-
 
         bodyTiltInSprint.SetMouseXMove(Input.GetAxis("Mouse X"));
 
-        // if (Input.GetKeyDown(KeyCode.Alpha1))
-        //     weaponController.ToChange(1);
-        // if (Input.GetKeyDown(KeyCode.Alpha2))
-        //     weaponController.ToChange(2);
-        // if (Input.GetKeyDown(KeyCode.Alpha3))
-        //     weaponController.ToChange(3);
-        // if (Input.GetKeyDown(KeyCode.Alpha4))
-        //     weaponController.ToChange(4);
-
         if (playerInputs.GetSlot0())
-            weaponController.ToChange(5);
+            weaponController.ToChange(0); // Changed to 0 for unarmed
         if (playerInputs.GetSlot1())
             weaponController.ToChange(1);
         if (playerInputs.GetSlot2())
@@ -60,13 +71,33 @@ public class InputHandler : MonoBehaviour
         if (playerInputs.GetSlot4())
             weaponController.ToChange(4);
 
-
-        if (Input.GetKeyDown(KeyCode.F) && weaponPickUp != null)
-        // if (playerInputs.GetInteract() && weaponPickUp != null)
+        if (playerInputs.GetInteract() && weaponPickUp != null)
         {
             weaponPickUp.PickupCheck();
         }
 
+        UnarmedAim();
+        ArmedAim();
+    }
+
+    void UnarmedAim()
+    {   // Combat Stance Logic for Unarmed
+        if (playerAnimator != null && weaponController != null)
+        {
+            var currentWeapon = weaponController.GETCurrentWeapon;
+            if (currentWeapon != null && currentWeapon.Type == IWeapon.SlotType.unarmed)
+            {
+                playerAnimator.SetBool(CombatHash, playerInputs.GetAimed());
+            }
+            else
+            {
+                playerAnimator.SetBool(CombatHash, false); // Ensure combat stance is off if not unarmed
+            }
+        }
+    }
+
+    void ArmedAim()
+    {
         // 1. 마우스 우클릭 시작 감지
         if (Input.GetMouseButtonDown(1))
         {
@@ -106,10 +137,13 @@ public class InputHandler : MonoBehaviour
             cameraSwitcher.ViewChange();
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
-        // if (playerInputs.GetReload())
+        if (playerInputs.GetReload())
         {
-            weaponController.GETCurrentWeapon.Reload();
+            var weapon = weaponController.GETCurrentWeapon as RangedWeapon;
+            if (weapon != null)
+            {
+                weapon.Reload();
+            }
         }
     }
 
@@ -127,10 +161,17 @@ public class InputHandler : MonoBehaviour
 
         if (weaponController == null)
             return;
-        if (!weaponController.GETCurrentWeapon)
+
+        var weapon = weaponController.GETCurrentWeapon;
+        if (weapon == null)
             return;
 
-        bool singleshoot = weaponController.GETCurrentWeapon.SingleShoot;
+        bool singleshoot = false;
+        if (weapon is RangedWeapon rangedWeapon)
+        {
+            singleshoot = rangedWeapon.SingleShoot;
+        }
+
         if (singleshoot && Input.GetMouseButtonDown(0))
         {
             weaponController.StartShoot();

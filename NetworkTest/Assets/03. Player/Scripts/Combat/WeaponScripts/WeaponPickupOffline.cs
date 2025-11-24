@@ -16,17 +16,15 @@ public class WeaponPickupOffline : WeaponPickup
 
     public override void PickupCheck()
     {
-        //Debug.DrawLine(detectionStartPoint.position, detectionStartPoint.TransformDirection(Vector3.forward) * detectionLength, Color.red);
-
         if (Physics.Raycast(rayCastStartPoint.position, rayCastStartPoint.TransformDirection(Vector3.forward), out RaycastHit hit, raycastLengh, weaponLayers))
         {
-            Weapon detectedGun = null;
+            IWeapon detectedGun = null;
 
-            if (hit.transform.CompareTag("Weapon")) detectedGun = hit.transform.GetComponent<Weapon>();
+            if (hit.transform.CompareTag("Weapon")) detectedGun = hit.transform.GetComponent<IWeapon>();
 
             if (detectedGun == null) return;
 
-            if (weaponController.GETCurrentWeapon && weaponController.GETCurrentWeapon.Type == detectedGun.Type)
+            if (weaponController.GETCurrentWeapon != null && weaponController.GETCurrentWeapon.Type == detectedGun.Type)
             {
                 RaiseTheGun(hit.transform, weaponController.activeID - 1);
                 weaponController.animator.Play("GunPickUp", 1);
@@ -36,7 +34,6 @@ public class WeaponPickupOffline : WeaponPickup
                 RaiseTheGun(hit.transform, (int)detectedGun.Type - 1);
             }
         }
-
     }
 
     void RaiseTheGun(Transform gun, int slotID)
@@ -47,13 +44,13 @@ public class WeaponPickupOffline : WeaponPickup
         gun.localPosition = Vector3.zero;
         gun.localRotation = Quaternion.identity;
         
-        if (weaponController.slots[slotID].GetComponentInChildren<Weapon>() == null)
+        if (weaponController.slots[slotID].GetComponentInChildren<IWeapon>() == null)
         {
             // 슬롯이 비었을때
         }
         else
         {
-            var oldGun = weaponController.slots[slotID].GetComponentInChildren<Weapon>().transform;
+            var oldGun = weaponController.slots[slotID].GetComponentInChildren<IWeapon>().gameObject.transform;
             DropTheGun(oldGun);
         }
     }
