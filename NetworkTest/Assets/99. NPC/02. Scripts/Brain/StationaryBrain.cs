@@ -45,7 +45,7 @@ public class StationaryBrain : NPCBrain, INpcInteractable
                 break;
 
             case NPCKind.SimpleTalk:
-                dialogueModule.StartDialogue();
+                dialogueModule.StartDialogue(); // null Error
                 break;
         }
     }
