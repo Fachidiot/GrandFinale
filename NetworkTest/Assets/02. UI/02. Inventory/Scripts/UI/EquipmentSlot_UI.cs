@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
@@ -113,16 +113,15 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
     {
         return sourceSlot != null &&
                sourceSlot.currentSlot != null &&
-               sourceSlot.currentSlot.item != null &&
-               sourceSlot.currentSlot.slotIndex != -1;
+               sourceSlot.currentSlot.item != null;
     }
 
     // 아이템 장착 시도
     private void TryEquipItem(Slot_UI sourceSlot, RelicData itemToEquip)
     {
+        // [수정된 부분] 인자 2개만 전달 (아이템, 장착할 슬롯 인덱스)
         bool success = EquipmentManager.Instance.EquipItem(
             itemToEquip,
-            sourceSlot.currentSlot.slotIndex,
             this.equipmentSlotIndex
         );
 
@@ -232,7 +231,8 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler,
     {
         if (currentItem == null) return;
 
-        EquipmentManager.Instance.UnequipItem(currentItem, this.equipmentSlotIndex);
+        // [수정된 부분] 인자 1개만 전달 (아이템 데이터) - 인덱스 제거
+        EquipmentManager.Instance.UnequipItem(currentItem);
     }
 
     // 마우스 진입

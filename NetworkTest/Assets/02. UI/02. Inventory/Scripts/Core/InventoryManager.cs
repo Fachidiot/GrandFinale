@@ -5,666 +5,435 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[System.Serializable]
+public class InventoryItem
+{
+    public RelicData item;
+    public int quantity;
+
+    public InventoryItem(RelicData data, int qty)
+    {
+        this.item = data;
+        this.quantity = qty;
+    }
+
+    public int slotIndex
+    {
+        get
+        {
+            if (InventoryManager.Instance == null) return -1;
+            return InventoryManager.Instance.allItems.IndexOf(this);
+        }
+    }
+}
+
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
+
+    // [중요] 이제 전체 크기는 이 변수들의 '합계'로 자동 결정됩니다.
+    // maxSlotCapacity 변수는 삭제했습니다. (충돌 방지)
+    [Header("Category Capacity Settings")]
+    [SerializeField] private int weaponCapacity = 15;
+    [SerializeField] private int equipmentCapacity = 10;
+    [SerializeField] private int accessoryCapacity = 10;
+    [SerializeField] private int relicCapacity = 10;
+    [SerializeField] private int etcCapacity = 15;
+
+    // 전체 용량 자동 계산 프로퍼티
+    public int TotalCapacity => weaponCapacity + equipmentCapacity + accessoryCapacity + relicCapacity + etcCapacity;
+
+    [Header("Data")]
+    public List<InventoryItem> allItems = new List<InventoryItem>();
     public InventoryFilterType currentFilter { get; private set; } = InventoryFilterType.All;
-
-    private int slotCapacity = 60;
-
-    private string currentSearchQuery = string.Empty;
-
-    private bool isExternalInteractionActive = false;
-
-    //private PlayerInputs playerInputs;
-    public List<InventorySlot> inventorySlots;
-
 
     public static event Action OnInventoryChanged;
     public static event Action<bool> OnInventoryToggle;
-    public bool IsFocused { get; private set; } = false;
 
     [Header("UI Reference")]
     [SerializeField] private GameObject smallInventoryUI;
     [SerializeField] private GameObject fullInventoryUI;
 
-    [Header("Loot Settings")]
-    [SerializeField] private GameObject genericLootPrefab;
-
-    [Header("Player Control References")]
+    [Header("Components")]
     [SerializeField] private CharacterMove characterMove;
     [SerializeField] private CameraSwitcher cameraSwitcher;
+    [SerializeField] private GameObject genericLootPrefab;
 
-    [Header("DOTween References")]
-    [SerializeField] private CanvasGroup fullCanvasGroup;
-    [SerializeField] private CanvasGroup smallCanvasGroup;
-    [SerializeField] private float fadeDuration = 0.2f;
-
-    [Header("Animation References")]
-    [SerializeField] private InventoryAnimation smallInventoryAnim;
-    [SerializeField] private InventoryAnimation fullInventoryAnim;
-
+    private CanvasGroup fullCanvasGroup;
+    private CanvasGroup smallCanvasGroup;
+    private float fadeDuration = 0.2f;
     private Animator playerAnimator;
+
+    public bool IsFocused { get; private set; } = false;
+    private bool isExternalInteractionActive = false;
+    public bool IsExternalInteractionActive => isExternalInteractionActive;
 
     public bool IsUIOpen => (smallInventoryUI != null && smallInventoryUI.activeSelf) ||
                             (fullInventoryUI != null && fullInventoryUI.activeSelf);
-    public bool IsExternalInteractionActive => isExternalInteractionActive;
 
     void Awake()
     {
-        //PlayerInputs = GetComponent<PlayerInputs>();
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
-        inventorySlots = new List<InventorySlot>();
-        for (int i = 0; i < slotCapacity; i++)
+        if (characterMove != null) playerAnimator = characterMove.GetComponent<Animator>();
+
+        InitCanvasGroup(fullInventoryUI, ref fullCanvasGroup);
+        InitCanvasGroup(smallInventoryUI, ref smallCanvasGroup);
+
+        InitializeInventorySlots();
+        CleanUpGhostItems();
+    }
+
+    // [수정] maxSlotCapacity 대신 TotalCapacity(합계) 사용
+    private void InitializeInventorySlots()
+    {
+        allItems.Clear();
+        int total = TotalCapacity; // 자동 합계 사용
+        for (int i = 0; i < total; i++)
         {
-            inventorySlots.Add(new InventorySlot() { slotIndex = i });
+            allItems.Add(null);
         }
+        Debug.Log($"[인벤토리 초기화] 총 {total}칸 생성됨 (무기:{weaponCapacity}, 장비:{equipmentCapacity}...)");
+    }
 
-        // 플레이어 애니메이터 찾기
-        if (characterMove != null)
-        {
-            playerAnimator = characterMove.GetComponent<Animator>();
-        }
+    private void InitCanvasGroup(GameObject obj, ref CanvasGroup cg)
+    {
+        if (obj == null) return;
+        if (cg == null) cg = obj.GetComponent<CanvasGroup>();
+        if (cg == null) cg = obj.AddComponent<CanvasGroup>();
 
-        if (fullInventoryUI != null)
-        {
-            fullCanvasGroup = fullInventoryUI.GetComponent<CanvasGroup>();
-            if (fullCanvasGroup == null) fullCanvasGroup = fullInventoryUI.AddComponent<CanvasGroup>();
-
-            fullCanvasGroup.alpha = 0f;
-            fullCanvasGroup.blocksRaycasts = false;
-            fullInventoryUI.SetActive(false);
-        }
-
-        if (smallInventoryUI != null)
-        {
-            smallCanvasGroup = smallInventoryUI.GetComponent<CanvasGroup>();
-            if (smallCanvasGroup == null) smallCanvasGroup = smallInventoryUI.AddComponent<CanvasGroup>();
-
-            smallCanvasGroup.alpha = 0f;
-            smallCanvasGroup.blocksRaycasts = false;
-            smallInventoryUI.SetActive(false);
-        }
+        cg.alpha = 0f;
+        cg.blocksRaycasts = false;
+        cg.interactable = false;
+        obj.SetActive(false);
     }
 
     void Update()
     {
-        // if (playerInput != null && playerInput.GetInventory())
-        // {
-        //     Debug.Log("인벤토리 키 입력 감지 (by PlayerInputs)!");
-        //     // ToggleSmallInventory(); // (이전에 'O'키에 연결된 ToggleInventory() 대신)
-        // }
-
-        // if (playerInput != null && playerInput.GetFullInventoryToggle())
-        // {
-        //     Debug.Log("Full 인벤토리 키 입력 감지 (by PlayerInputs)!");
-        //     ToggleInventory(); // (기존 'O'키에 연결된 함수)
-        // }
-
-
-        if (!isExternalInteractionActive && Input.GetKeyDown(KeyCode.Tab))
-        {
-            ToggleSmallInventory();
-        }
-
-        // O 키: Full 인벤토리 토글
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            ToggleFullInventory();
-        }
-
-        // ESC 키: 인벤토리가 열려있으면 닫기
-        if (IsFocused && Input.GetKeyDown(KeyCode.Escape))
-        {
-            CloseAllInventories();
-        }
+        if (!isExternalInteractionActive && Input.GetKeyDown(KeyCode.Tab)) ToggleSmallInventory();
+        if (Input.GetKeyDown(KeyCode.O)) ToggleFullInventory();
+        if (IsFocused && Input.GetKeyDown(KeyCode.Escape)) CloseAllInventories();
 
         if (IsFocused && !isExternalInteractionActive && Input.GetMouseButtonDown(0))
         {
-            bool isOverUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-
-            if (!isOverUI)
-            {
-                // 빈 공간을 클릭했으므로 포커스 해제 및 모든 인벤토리 닫기
-                SetFocusState(false);
+            if (EventSystem.current != null && !EventSystem.current.IsPointerOverGameObject())
                 CloseAllInventories();
-            }
         }
     }
 
-    #region NPC 전용
-
-    public void ToggleInventory()
+    // 탭별 시작 위치와 크기를 반환하는 핵심 함수
+    private (int start, int count) GetCategoryRange(InventoryFilterType filter)
     {
-        ToggleFullInventory();
+        int start = 0;
+
+        if (filter == InventoryFilterType.Weapon) return (0, weaponCapacity);
+        start += weaponCapacity;
+
+        if (filter == InventoryFilterType.Equipment) return (start, equipmentCapacity);
+        start += equipmentCapacity;
+
+        if (filter == InventoryFilterType.Accessory) return (start, accessoryCapacity);
+        start += accessoryCapacity;
+
+        if (filter == InventoryFilterType.Relic) return (start, relicCapacity);
+        start += relicCapacity;
+
+        if (filter == InventoryFilterType.Etc) return (start, etcCapacity);
+
+        return (0, 0);
     }
 
-    public void OpenSmallInventory()
+    private InventoryFilterType GetFilterFromItem(RelicData data)
     {
-        // 이미 열려있다면 포커스만 맞추고 종료
-        if (smallInventoryUI != null && smallInventoryUI.activeSelf)
+        if (data == null) return InventoryFilterType.All;
+        switch (data.itemTypeEnum)
         {
-            SetFocusState(true);
-            return;
-        }
-
-        // Full 인벤토리가 켜져 있다면 끄기
-        if (fullInventoryUI != null && fullInventoryUI.activeSelf)
-        {
-            fullInventoryUI.SetActive(false);
-        }
-
-        // Small 인벤토리 열기
-        if (smallInventoryUI != null)
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
-
-            smallInventoryUI.SetActive(true);
-
-            if (smallInventoryAnim != null)
-            {
-                smallInventoryAnim.OpenInventory();
-            }
-            else
-            {
-                if (smallCanvasGroup != null)
-                {
-                    smallCanvasGroup.alpha = 0f;
-                    smallCanvasGroup.blocksRaycasts = true;
-                    smallCanvasGroup.DOFade(1f, fadeDuration);
-                }
-            }
-
-            SetFocusState(true);
+            case ItemType.Weapon: return InventoryFilterType.Weapon;
+            case ItemType.Equipment: return InventoryFilterType.Equipment;
+            case ItemType.Accessory: return InventoryFilterType.Accessory;
+            case ItemType.Artifact: return InventoryFilterType.Relic;
+            default: return InventoryFilterType.Etc;
         }
     }
 
-    public void CloseSmallInventory()
+    public void MoveItemToEmptySlot(InventoryItem itemToMove, int targetLocalIndex)
     {
-        if (smallInventoryUI == null || !smallInventoryUI.activeSelf) return;
-        if (smallInventoryAnim != null)
+        if (currentFilter == InventoryFilterType.All) return;
+        if (itemToMove == null) return;
+
+        var (offset, count) = GetCategoryRange(currentFilter);
+        int targetGlobalIndex = offset + targetLocalIndex;
+
+        if (targetLocalIndex < 0 || targetLocalIndex >= count) return;
+
+        int currentGlobalIndex = allItems.IndexOf(itemToMove);
+        if (currentGlobalIndex == -1 || currentGlobalIndex == targetGlobalIndex) return;
+
+        // [핵심 수정] 타겟이 null이 아니더라도, 내용물(item)이 비어있으면 빈칸 취급해야 함
+        bool isTargetOccupied = (allItems[targetGlobalIndex] != null && allItems[targetGlobalIndex].item != null);
+
+        if (isTargetOccupied)
         {
-            smallInventoryAnim.CloseInventory(() =>
-            {
-                smallInventoryUI.SetActive(false);
-                if (fullInventoryUI == null || !fullInventoryUI.activeSelf)
-                {
-                    SetFocusState(false);
-                }
-            });
+            // 타겟에 진짜 아이템이 있으면 스왑
+            InventoryItem targetItem = allItems[targetGlobalIndex];
+            allItems[targetGlobalIndex] = itemToMove;
+            allItems[currentGlobalIndex] = targetItem;
         }
         else
         {
-            smallInventoryUI.SetActive(false);
+            // 타겟이 비어있거나 껍데기만 있으면 -> 덮어쓰고 이동
+            allItems[targetGlobalIndex] = itemToMove;
+            allItems[currentGlobalIndex] = null; // 원래 자리는 null로
+        }
 
-            if (fullInventoryUI == null || !fullInventoryUI.activeSelf)
+        OnInventoryChanged?.Invoke();
+    }
+
+    public bool AddItem(RelicData newItem, int amount = 1)
+    {
+        // 디버그용 상태 확인 (Ghost Item 확인용으로 조건 수정됨)
+        int currentCount = allItems != null ? allItems.Count : 0;
+        // [수정] 껍데기만 있는 경우도 빈칸으로 카운트
+        int emptyCount = allItems != null ? allItems.Count(x => x == null || x.item == null) : 0;
+
+        Debug.Log($"[상태 확인] 전체 칸 수: {currentCount}, 사용 가능 슬롯: {emptyCount}, 합계 용량: {TotalCapacity}");
+
+        if (newItem == null) return false;
+
+        InventoryFilterType type = GetFilterFromItem(newItem);
+        var (startIndex, count) = GetCategoryRange(type);
+
+        Debug.Log($"[아이템 획득 시도] 아이템: {newItem.itemName} / 타입: {type} / 탐색 범위: {startIndex} ~ {startIndex + count - 1}");
+
+        if (count <= 0)
+        {
+            Debug.LogError($"[오류] {type} 카테고리 용량이 0입니다.");
+            return false;
+        }
+
+        // 1. 중첩 확인 (Quantity 증가)
+        if (newItem.maxStack > 1)
+        {
+            for (int i = startIndex; i < startIndex + count; i++)
             {
-                SetFocusState(false);
+                if (i >= allItems.Count) break;
+
+                // [중요] x != null 체크 추가
+                var slot = allItems[i];
+                if (slot != null && slot.item == newItem && slot.quantity < newItem.maxStack)
+                {
+                    slot.quantity += amount;
+                    OnInventoryChanged?.Invoke();
+                    return true;
+                }
             }
         }
+
+        // 2. 빈 슬롯 찾기 (새 아이템 추가)
+        for (int i = startIndex; i < startIndex + count; i++)
+        {
+            if (i >= allItems.Count) break;
+
+            // [핵심 수정] 슬롯이 null이거나, 슬롯은 있는데 내용물(item)이 null이면 '빈칸'으로 인정!
+            if (allItems[i] == null || allItems[i].item == null)
+            {
+                // 새 아이템으로 덮어쓰기
+                allItems[i] = new InventoryItem(newItem, amount);
+                Debug.Log($"[획득 성공] {i}번 슬롯에 저장됨.");
+                OnInventoryChanged?.Invoke();
+                return true;
+            }
+        }
+
+        Debug.LogWarning($"[Inventory Full] {type} 카테고리가 가득 찼습니다.");
+        return false;
     }
-    #endregion
 
-    public void SetExternalInteractionActive(bool isActive)
+    public void RemoveItem(InventoryItem itemToRemove, int amount = 1)
     {
-        this.isExternalInteractionActive = isActive;
+        if (itemToRemove == null) return;
+
+        int index = allItems.IndexOf(itemToRemove);
+        if (index == -1) return;
+
+        itemToRemove.quantity -= amount;
+        if (itemToRemove.quantity <= 0)
+        {
+            allItems[index] = null;
+        }
+        OnInventoryChanged?.Invoke();
     }
 
-    public void ToggleSmallInventory()
+    public void RemoveItemFromSlot(int listIndex, int amount = 1)
     {
-        if (smallInventoryUI == null) return;
+        if (listIndex < 0 || listIndex >= allItems.Count) return;
+        if (allItems[listIndex] == null) return;
+        RemoveItem(allItems[listIndex], amount);
+    }
 
-        if (fullInventoryUI != null && fullInventoryUI.activeSelf)
+    public void RemoveItemByData(RelicData data, int amount = 1)
+    {
+        var target = allItems.Find(x => x != null && x.item == data);
+        if (target != null) RemoveItem(target, amount);
+    }
+
+    public void SwapItems(InventoryItem itemA, InventoryItem itemB)
+    {
+        if (itemA == itemB) return;
+        int indexA = allItems.IndexOf(itemA);
+        int indexB = allItems.IndexOf(itemB);
+
+        if (indexA != -1 && indexB != -1)
         {
-            fullInventoryUI.SetActive(false);
-            if (IsFocused) SetFocusState(false);
+            allItems[indexA] = itemB;
+            allItems[indexB] = itemA;
+            OnInventoryChanged?.Invoke();
+        }
+    }
+
+    public void DropItem(InventoryItem itemToDrop)
+    {
+        if (itemToDrop == null) return;
+        if (genericLootPrefab != null)
+        {
+            Transform playerTr = GameObject.FindWithTag("Player")?.transform ?? Camera.main.transform;
+            Vector3 dropPos = playerTr.position + playerTr.forward * 1.5f;
+            GameObject orb = Instantiate(genericLootPrefab, dropPos, Quaternion.identity);
+
+            if (orb.TryGetComponent(out ItemPickup pickup)) pickup.itemData = itemToDrop.item;
+            if (orb.TryGetComponent(out LootOrbVisuals visuals)) visuals.Initialize(itemToDrop.item.grade);
+
+            RemoveItem(itemToDrop, 1);
+        }
+    }
+    private void CleanUpGhostItems()
+    {
+        for (int i = 0; i < allItems.Count; i++)
+        {
+            // 객체는 있는데 내용물이 없으면 -> 가차없이 null로 초기화
+            if (allItems[i] != null && allItems[i].item == null)
+            {
+                allItems[i] = null;
+            }
+        }
+        Debug.Log("[시스템] 인벤토리 유령 아이템 청소 완료");
+    }
+
+    public List<InventoryItem> GetFilteredItems()
+    {
+        // 1. [전체(All) 탭] - 뷰어 모드
+        if (currentFilter == InventoryFilterType.All)
+        {
+            // 수정됨: x != null 뿐만 아니라 x.item != null 인 것만 가져옴
+            return allItems.Where(x => x != null && x.item != null).ToList();
         }
 
-        bool currentActive = smallInventoryUI.activeSelf;
+        // 2. [개별 탭] - 관리 모드
+        var (offset, count) = GetCategoryRange(currentFilter);
+        if (offset + count > allItems.Count) return new List<InventoryItem>();
+        return allItems.GetRange(offset, count);
+    }
 
-        if (currentActive && IsFocused) 
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
-
-            smallCanvasGroup.blocksRaycasts = false;
-            smallCanvasGroup.DOFade(0f, fadeDuration)
-                .OnComplete(() =>
-                {
-                    smallInventoryUI.SetActive(false);
-                    SetFocusState(false);
-                });
-        }
-        else if (!currentActive)
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
-
-            smallInventoryUI.SetActive(true);
-            smallCanvasGroup.alpha = 0f;
-            smallCanvasGroup.blocksRaycasts = true;
-            smallCanvasGroup.DOFade(1f, fadeDuration);
-            SetFocusState(true);
-        }
-        else
-        {
-            SetFocusState(true);
-        }
+    public void SetFilter(InventoryFilterType newFilter)
+    {
+        currentFilter = newFilter;
+        OnInventoryChanged?.Invoke();
     }
 
     public void ToggleFullInventory()
     {
-        if (fullInventoryUI == null) return;
+        if (!fullInventoryUI) return;
+        if (smallInventoryUI && smallInventoryUI.activeSelf) ToggleSmallInventory();
 
-        if (smallInventoryUI != null && smallInventoryUI.activeSelf)
+        bool isActive = fullInventoryUI.activeSelf;
+        if (isActive)
         {
-            smallInventoryUI.SetActive(false);
-            if (IsFocused) SetFocusState(false);
-        }
-
-        bool currentActive = fullInventoryUI.activeSelf;
-
-        if (currentActive && IsFocused) // 닫기
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
-
-            InventoryAnimation_Close();
-            fullInventoryUI.SetActive(false);
+            PlaySFX("Close");
+            if (fullCanvasGroup) { fullCanvasGroup.blocksRaycasts = false; fullCanvasGroup.interactable = false; }
             SetFocusState(false);
-        }
-        else if (!currentActive) // 열기
-        {
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
-
-            InventoryAnimation_Open();
-            fullInventoryUI.SetActive(true);
-            SetFocusState(true);
+            fullCanvasGroup.DOFade(0f, fadeDuration).OnComplete(() => fullInventoryUI.SetActive(false));
         }
         else
         {
+            PlaySFX("Open");
+            fullInventoryUI.SetActive(true);
+            if (fullCanvasGroup)
+            {
+                fullCanvasGroup.alpha = 0f;
+                fullCanvasGroup.blocksRaycasts = true;
+                fullCanvasGroup.interactable = true;
+                fullCanvasGroup.DOFade(1f, fadeDuration);
+            }
+            SetFocusState(true);
+        }
+    }
+
+    public void ToggleSmallInventory()
+    {
+        if (!smallInventoryUI) return;
+        if (fullInventoryUI && fullInventoryUI.activeSelf) fullInventoryUI.SetActive(false);
+
+        bool isActive = smallInventoryUI.activeSelf;
+        if (isActive)
+        {
+            PlaySFX("Close");
+            if (smallCanvasGroup) { smallCanvasGroup.blocksRaycasts = false; smallCanvasGroup.interactable = false; }
+            SetFocusState(false);
+            smallCanvasGroup.DOFade(0f, fadeDuration).OnComplete(() => smallInventoryUI.SetActive(false));
+        }
+        else
+        {
+            PlaySFX("Open");
+            smallInventoryUI.SetActive(true);
+            if (smallCanvasGroup)
+            {
+                smallCanvasGroup.alpha = 0f;
+                smallCanvasGroup.blocksRaycasts = true;
+                smallCanvasGroup.interactable = true;
+                smallCanvasGroup.DOFade(1f, fadeDuration);
+            }
             SetFocusState(true);
         }
     }
 
     public void CloseAllInventories()
     {
-        if (!IsUIOpen) return;
+        if (fullInventoryUI && fullInventoryUI.activeSelf) ToggleFullInventory();
+        else if (smallInventoryUI && smallInventoryUI.activeSelf) ToggleSmallInventory();
+    }
 
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
+    public void ToggleInventory() => ToggleFullInventory();
 
-        CloseSmallInventory();
-        if (fullInventoryUI != null && fullInventoryUI.activeSelf)
+    public void SetExternalInteractionActive(bool isActive)
+    {
+        this.isExternalInteractionActive = isActive;
+        if (!isActive) CloseAllInventories();
+    }
+
+    public void NotifyInventoryChanged() => OnInventoryChanged?.Invoke();
+    public void SetSearchQuery(string query) => OnInventoryChanged?.Invoke();
+    public void OpenSmallInventory() { if (smallInventoryUI != null && !smallInventoryUI.activeSelf) ToggleSmallInventory(); }
+
+    private void PlaySFX(string type)
+    {
+        if (AudioManager.Instance)
         {
-            InventoryAnimation_Close();
+            if (type == "Open") AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
+            else AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
         }
-        SetFocusState(false);
     }
 
     private void SetFocusState(bool isFocused)
     {
         if (this.IsFocused == isFocused) return;
-
         this.IsFocused = isFocused;
-
-        // Use the centralized pause system
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.SetPause(isFocused);
-        }
-
-        // 커서 제어
-        if (isFocused)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-
-        // 애니메이션 제어
-        if (isFocused)
-        {
-            StopPlayerAnimation();
-        }
-        else
-        {
-            ResumePlayerAnimation();
-        }
-
+        if (GameManager.Instance != null) GameManager.Instance.SetPause(isFocused);
+        if (isFocused) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; StopPlayerAnimation(); }
+        else { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; ResumePlayerAnimation(); }
         OnInventoryToggle?.Invoke(isFocused);
     }
 
-    private void StopPlayerAnimation()
-    {
-        if (playerAnimator != null)
-        {
-            playerAnimator.speed = 0f;
-        }
-
-        if (characterMove != null)
-        {
-            characterMove.StopAllActions();
-        }
-
-        // 조준 중이면 강제로 해제
-        if (cameraSwitcher != null)
-        {
-            cameraSwitcher.StopAiming();
-        }
-    }
-
-    private void ResumePlayerAnimation()
-    {
-        if (playerAnimator != null)
-        {
-            playerAnimator.speed = 1f;
-        }
-    }
-
-    public bool AddItem(RelicData itemToAdd)
-    {
-        // 1. 스택 가능한 아이템인지 확인 (maxStack > 1)
-        if (itemToAdd.maxStack > 1)
-        {
-            // 2. 인벤토리를 순회하며 같은 아이템이 있고, 스택이 가득 차지 않았는지 확인
-            for (int i = 0; i < slotCapacity; i++)
-            {
-                InventorySlot slot = inventorySlots[i];
-                if (slot.item != null &&
-                    slot.item.itemID == itemToAdd.itemID &&
-                    slot.quantity < slot.item.maxStack)
-                {
-                    // 3. (스택 성공) 수량을 1 증가시키고 알림
-                    slot.AddQuantity(1);
-                    OnInventoryChanged?.Invoke();
-                    return true;
-                }
-            }
-            // 4. (실패) 같은 아이템을 찾지 못했거나 모두 가득 찼음. -> 다음 단계(빈 슬롯 찾기)로 이동
-        }
-
-        // 5. (스택 불가 또는 스택 실패) 빈 슬롯을 찾습니다.
-        int emptySlotIndex = FindNextEmptySlot();
-
-        if (emptySlotIndex == -1)
-        {
-            Debug.Log("인벤토리가 꽉 찼습니다.");
-            return false;
-        }
-
-        // 6. 빈 슬롯에 아이템 정보와 수량 1을 설정합니다.
-        inventorySlots[emptySlotIndex].item = itemToAdd;
-        inventorySlots[emptySlotIndex].quantity = 1;
-
-        OnInventoryChanged?.Invoke();
-        return true;
-    }
-
-    public int FindNextEmptySlot()
-    {
-        for (int i = 0; i < slotCapacity; i++)
-        {
-            if (inventorySlots[i].item == null)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public void RemoveItemFromSlot(int slotIndex, int amountToRemove = 1)
-    {
-        if (slotIndex < 0 || slotIndex >= slotCapacity || inventorySlots[slotIndex].item == null)
-        {
-            return;
-        }
-
-        InventorySlot slot = inventorySlots[slotIndex];
-        slot.quantity -= amountToRemove;
-
-        if (slot.quantity <= 0)
-        {
-            slot.ClearSlot();
-        }
-
-        OnInventoryChanged?.Invoke();
-    }
-
-    public void SwapItems(int indexA, int indexB)
-    {
-        InventorySlot temp = inventorySlots[indexA];
-        inventorySlots[indexA] = inventorySlots[indexB];
-        inventorySlots[indexB] = temp;
-
-        inventorySlots[indexA].slotIndex = indexA;
-        inventorySlots[indexB].slotIndex = indexB;
-
-        OnInventoryChanged?.Invoke();
-    }
-
-    public bool RemoveItem(int slotIndex)
-    {
-        if (slotIndex < 0 || slotIndex >= slotCapacity)
-        {
-            Debug.LogError($"[InventoryManager] 잘못된 슬롯 인덱스: {slotIndex}");
-            return false;
-        }
-        inventorySlots[slotIndex].ClearSlot();
-        OnInventoryChanged?.Invoke();
-        return true;
-    }
-
-    public void DropItem(int slotIndex)
-    {
-        InventorySlot slotToDrop = inventorySlots[slotIndex];
-        if (slotToDrop.item == null) return;
-
-        RelicData itemToDrop = slotToDrop.item;
-
-        if (genericLootPrefab != null)
-        {
-            GameObject player = GameObject.FindWithTag("Player");
-            Vector3 dropPosition;
-
-            if (player != null)
-            {
-                dropPosition = player.transform.position + (player.transform.forward * 1f);
-            }
-            else
-            {
-                dropPosition = Camera.main.transform.position + (Camera.main.transform.forward * 1f);
-            }
-
-            GameObject orbInstance = Instantiate(genericLootPrefab, dropPosition, Quaternion.identity);
-
-            ItemPickup pickupScript = orbInstance.GetComponent<ItemPickup>();
-            if (pickupScript != null)
-            {
-                pickupScript.itemData = itemToDrop;
-            }
-            LootOrbVisuals visualScript = orbInstance.GetComponent<LootOrbVisuals>();
-            if (visualScript != null)
-            {
-                visualScript.Initialize(itemToDrop.grade);
-            }
-
-            RemoveItemFromSlot(slotIndex, 1);
-
-            Debug.Log($"{itemToDrop.itemName}을(를) 바닥에 1개 버렸습니다. (남은 수량: {slotToDrop.quantity})");
-        }
-        else
-        {
-            Debug.LogWarning("InventoryManager에 genericLootPrefab이 설정되지 않아 아이템을 버릴 수 없습니다.");
-        }
-    }
-
-    public void NotifyInventoryChanged()
-    {
-        OnInventoryChanged?.Invoke();
-    }
-
-    public void SetFilter(InventoryFilterType newFilter)
-    {
-        if (currentFilter != newFilter)
-        {
-            currentFilter = newFilter;
-            Debug.Log($"[InventoryManager] 필터 변경: {currentFilter}");
-            OnInventoryChanged?.Invoke();
-        }
-    }
-
-    public bool IsCombatInputBlockedByUI()
-    {
-        return IsFocused;
-    }
-
-    public void SortInventory()
-    {
-        // 1. 아이템이 있는 슬롯과 비어있는 슬롯을 분리
-        List<InventorySlot> filledSlots = inventorySlots
-            .Where(slot => slot.item != null)
-            .ToList();
-
-        List<InventorySlot> emptySlots = inventorySlots
-            .Where(slot => slot.item == null)
-            .ToList();
-
-        // 2. 아이템이 있는 슬롯을 정렬
-        filledSlots = filledSlots
-            .OrderBy(slot => slot.item.itemName)
-            .ThenByDescending(slot => slot.quantity)
-            .ToList();
-
-        // 3. 정렬된 슬롯과 빈 슬롯을 다시 합치기
-        inventorySlots.Clear();
-        inventorySlots.AddRange(filledSlots);
-        inventorySlots.AddRange(emptySlots);
-
-        // 4. 슬롯 인덱스 재설정
-        for (int i = 0; i < slotCapacity; i++)
-        {
-            inventorySlots[i].slotIndex = i;
-        }
-
-        // 5. UI 업데이트 이벤트 호출
-        OnInventoryChanged?.Invoke();
-        Debug.Log("[InventoryManager] 인벤토리 정렬 완료.");
-    }
-
-    public void SetSearchQuery(string query)
-    {
-        // 소문자로 변환하여 저장 (대소문자 구분 없이 검색하기 위함)
-        string newQuery = query.Trim().ToLower();
-
-        if (currentSearchQuery != newQuery)
-        {
-            currentSearchQuery = newQuery;
-            Debug.Log($"[InventoryManager] 검색어 변경: {currentSearchQuery}");
-            // 검색어가 변경되면 UI를 업데이트해야 함
-            OnInventoryChanged?.Invoke();
-        }
-    }
-
-    /// <summary>
-    /// Full Inventory UI를 열 때의 애니메이션 (페이드 인)
-    /// </summary>
-    private void InventoryAnimation_Open()
-    {
-        if (fullCanvasGroup == null || fullInventoryUI == null) return;
-
-        // 1. 초기 설정
-        fullInventoryUI.SetActive(true);
-        fullCanvasGroup.alpha = 0f;
-        fullCanvasGroup.blocksRaycasts = true;
-
-        // 2. DOTween 애니메이션 실행 (페이드 인)
-        fullCanvasGroup.DOFade(1f, fadeDuration).SetEase(Ease.OutSine);
-
-        // (테스트용 다른 애니메이션 버전: 스케일 확대)
-        /*
-        fullInventoryUI.transform.localScale = Vector3.one * 0.8f;
-        fullInventoryUI.transform.DOScale(1f, fadeDuration).SetEase(Ease.OutBack);
-        */
-    }
-
-    /// <summary>
-    /// Full Inventory UI를 닫을 때의 애니메이션 (페이드 아웃)
-    /// </summary>
-    private void InventoryAnimation_Close()
-    {
-        if (fullCanvasGroup == null || fullInventoryUI == null) return;
-
-        // 1. DOTween 애니메이션 실행 (페이드 아웃)
-        fullCanvasGroup.blocksRaycasts = false;
-
-        fullCanvasGroup.DOFade(0f, fadeDuration)
-            .SetEase(Ease.InSine)
-            .OnComplete(() =>
-            {
-                // 2. 애니메이션 완료 후 비활성화 및 포커스 해제
-                fullInventoryUI.SetActive(false);
-                SetFocusState(false);
-            });
-    }
-
-    public List<InventorySlot> GetFilteredInventory()
-    {
-        int capacity = slotCapacity;
-
-        if (currentFilter == InventoryFilterType.All)
-        {
-            return new List<InventorySlot>(inventorySlots);
-        }
-
-        List<InventorySlot> filteredList = new List<InventorySlot>();
-
-        foreach (InventorySlot slot in inventorySlots)
-        {
-            RelicData item = slot.item;
-            if (item == null) continue;
-
-            ItemType itemType = item.itemTypeEnum;
-
-            bool match = currentFilter switch
-            {
-                InventoryFilterType.Weapon => itemType == ItemType.Weapon,
-                InventoryFilterType.Equipment => itemType == ItemType.Equipment,
-                InventoryFilterType.Accessory => itemType == ItemType.Accessory,
-                InventoryFilterType.Relic => itemType == ItemType.Artifact,
-                InventoryFilterType.Etc => itemType != ItemType.Weapon &&
-                                           itemType != ItemType.Equipment &&
-                                           itemType != ItemType.Accessory &&
-                                           itemType != ItemType.Artifact,
-                _ => false,
-            };
-
-            if (match)
-            {
-                filteredList.Add(slot);
-            }
-        }
-
-        while (filteredList.Count < capacity)
-        {
-            filteredList.Add(new InventorySlot() { slotIndex = -1 });
-        }
-
-        return filteredList;
-    }
+    private void StopPlayerAnimation() { if (playerAnimator) playerAnimator.speed = 0f; if (characterMove) characterMove.StopAllActions(); if (cameraSwitcher) cameraSwitcher.StopAiming(); }
+    private void ResumePlayerAnimation() { if (playerAnimator) playerAnimator.speed = 1f; }
 }

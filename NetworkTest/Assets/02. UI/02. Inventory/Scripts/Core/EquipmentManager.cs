@@ -7,41 +7,26 @@ public class EquipmentManager : MonoBehaviour
     public static EquipmentManager Instance;
     private PlayerStats playerStats;
 
-    private int equipmentSlotCapacity = 13;
+    [Header("Settings")]
+    [SerializeField] private int equipmentSlotCapacity = 13;
 
     public List<RelicData> equipmentSlots;
 
     public static event Action OnEquipmentChanged;
 
-    private void Start()
-    {
-        playerStats = FindObjectOfType<PlayerStats>();
-        if (playerStats == null)
-        {
-            Debug.LogWarning("[EquipmentManager] 씬에서 PlayerStats를 찾을 수 없습니다.");
-        }
-    }
-
     void Awake()
     {
-        InitializeSingleton();
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
+
         InitializeEquipmentSlots();
     }
 
-    // 싱글톤 초기화
-    private void InitializeSingleton()
+    private void Start()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        playerStats = FindObjectOfType<PlayerStats>();
     }
 
-    // 장비 슬롯 초기화
     private void InitializeEquipmentSlots()
     {
         equipmentSlots = new List<RelicData>();
@@ -51,24 +36,31 @@ public class EquipmentManager : MonoBehaviour
         }
     }
 
-    // 장비 착용
-    public bool EquipItem(RelicData itemToEquip, int inventorySlotIndex, int targetEquipSlotIndex)
+    // ==================================================================================
+    // 1. 장비 장착 (인벤토리 인덱스 제거됨 -> 오류 해결)
+    // ==================================================================================
+
+    public bool EquipItem(RelicData itemToEquip, int targetEquipSlotIndex)
     {
-        InventoryManager.Instance.RemoveItemFromSlot(inventorySlotIndex, 1);
+        if (itemToEquip == null) return false;
+
+        // 1. 인벤토리에서 해당 아이템 1개 제거 (데이터 기준 검색)
+        InventoryManager.Instance.RemoveItemByData(itemToEquip, 1);
 
         RelicData oldItem = equipmentSlots[targetEquipSlotIndex];
 
-        // 기존 장비가 있으면 교체
+        // 2. 교체 로직
         if (oldItem != null)
         {
             if (!TrySwapEquipment(itemToEquip, oldItem))
             {
-                RestoreItemToInventory(itemToEquip);
+                // 교체 실패 시(인벤 꽉참 등), 방금 뺀 아이템 복구
+                InventoryManager.Instance.AddItem(itemToEquip);
                 return false;
             }
         }
 
-        // 새 장비 착용
+        // 3. 장비 슬롯 등록
         equipmentSlots[targetEquipSlotIndex] = itemToEquip;
         ApplyItemAbility(itemToEquip, true);
 
@@ -79,36 +71,16 @@ public class EquipmentManager : MonoBehaviour
         return true;
     }
 
-    // 장비 교체 시도
-    private bool TrySwapEquipment(RelicData newItem, RelicData oldItem)
+    // [오류 해결] 매개변수 1개(RelicData)만 받도록 명확히 정의
+    public bool EquipItemToFirstAvailableSlot(RelicData itemToEquip)
     {
-        bool addBackSuccess = InventoryManager.Instance.AddItem(oldItem);
+        if (itemToEquip == null) return false;
 
-        if (!addBackSuccess)
-        {
-            return false;
-        }
-
-        ApplyItemAbility(oldItem, false);
-        return true;
-    }
-
-    // 인벤토리에 아이템 복구
-    private void RestoreItemToInventory(RelicData item)
-    {
-        InventoryManager.Instance.AddItem(item);
-        InventoryManager.Instance.NotifyInventoryChanged();
-    }
-
-    // 사용 가능한 첫 슬롯에 장비 착용
-    public bool EquipItemToFirstAvailableSlot(RelicData itemToEquip, int inventorySlotIndex)
-    {
         EquipmentSlot_UI[] allEquipSlots = FindObjectsOfType<EquipmentSlot_UI>(true);
 
         int targetEmptySlotIndex = -1;
         int targetFilledSlotIndex = -1;
 
-        // 빈 슬롯 또는 채워진 슬롯 찾기
         foreach (EquipmentSlot_UI slotUI in allEquipSlots)
         {
             if (slotUI.CanEquipItem(itemToEquip))
@@ -125,69 +97,59 @@ public class EquipmentManager : MonoBehaviour
             }
         }
 
-        // 빈 슬롯 우선, 없으면 채워진 슬롯에 교체
-        if (targetEmptySlotIndex != -1)
-        {
-            return EquipItem(itemToEquip, inventorySlotIndex, targetEmptySlotIndex);
-        }
-
-        if (targetFilledSlotIndex != -1)
-        {
-            return EquipItem(itemToEquip, inventorySlotIndex, targetFilledSlotIndex);
-        }
+        if (targetEmptySlotIndex != -1) return EquipItem(itemToEquip, targetEmptySlotIndex);
+        if (targetFilledSlotIndex != -1) return EquipItem(itemToEquip, targetFilledSlotIndex);
 
         return false;
     }
 
-    // 장비 해제
-    public bool UnequipItem(RelicData itemToUnequip, int equipSlotIndex)
+    private bool TrySwapEquipment(RelicData newItem, RelicData oldItem)
     {
-        bool success = InventoryManager.Instance.AddItem(itemToUnequip);
+        bool addBackSuccess = InventoryManager.Instance.AddItem(oldItem);
+        if (!addBackSuccess) return false;
 
-        if (!success)
-        {
-            return false;
-        }
-
-        equipmentSlots[equipSlotIndex] = null;
-        ApplyItemAbility(itemToUnequip, false);
-
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayUnequipSound();
-
-        OnEquipmentChanged?.Invoke();
+        ApplyItemAbility(oldItem, false);
         return true;
     }
 
-    // 장비 슬롯 교체
-    public bool SwapEquipmentSlots(int slotIndexA, int slotIndexB)
+    // ==================================================================================
+    // 2. 장비 해제 (인벤토리 인덱스 제거됨 -> 오류 해결)
+    // ==================================================================================
+
+    // [오류 해결] 매개변수 1개(RelicData)만 받도록 수정
+    public bool UnequipItem(RelicData itemData)
     {
-        if (!IsValidSlotIndex(slotIndexA) || !IsValidSlotIndex(slotIndexB))
+        if (itemData == null) return false;
+
+        // 1. 인벤토리로 아이템을 되돌려줌 (자동으로 빈 곳에 들어감)
+        bool added = InventoryManager.Instance.AddItem(itemData);
+
+        if (added)
         {
-            return false;
+            // 2. 장비 슬롯 리스트에서 해당 아이템 제거
+            for (int i = 0; i < equipmentSlots.Count; i++)
+            {
+                if (equipmentSlots[i] == itemData)
+                {
+                    equipmentSlots[i] = null;
+                    ApplyItemAbility(itemData, false); // 능력치 제거
+                    OnEquipmentChanged?.Invoke();
+                    break;
+                }
+            }
+            return true;
         }
-
-        RelicData temp = equipmentSlots[slotIndexA];
-        equipmentSlots[slotIndexA] = equipmentSlots[slotIndexB];
-        equipmentSlots[slotIndexB] = temp;
-
-        OnEquipmentChanged?.Invoke();
-        return true;
+        return false;
     }
 
-    // 슬롯 인덱스 유효성 검사
-    private bool IsValidSlotIndex(int index)
-    {
-        return index >= 0 && index < equipmentSlots.Count;
-    }
+    // ==================================================================================
+    // 3. 능력치 적용
+    // ==================================================================================
 
-    // 아이템 능력 적용/제거
-    // 아이템 능력 적용/제거
     private void ApplyItemAbility(RelicData item, bool isEquipping)
     {
         if (item == null || item.grantedAbility == null) return;
 
-        // 플레이어 스탯 참조가 없으면 찾기
         if (playerStats == null) playerStats = FindObjectOfType<PlayerStats>();
         if (playerStats == null) return;
 
@@ -204,18 +166,13 @@ public class EquipmentManager : MonoBehaviour
                 switch (key)
                 {
                     case "MoveSpeed":
-                    case "Speed": 
+                    case "Speed":
+                        playerStats.AddStatPercent("MoveSpeed", finalValue); break;
                     case "AllDamage":
-                        string statKey = (key == "Speed") ? "MoveSpeed" : key;
-                        playerStats.AddStatPercent(statKey, finalValue);
-                        break;
-
+                        playerStats.AddStatPercent("AllDamage", finalValue); break;
                     default:
-                        playerStats.AddStat(key, finalValue);
-                        break;
+                        playerStats.AddStat(key, finalValue); break;
                 }
-
-                Debug.Log($"[EquipmentManager] {item.itemName} {(isEquipping ? "장착" : "해제")} -> {key} ({logicID}) : {finalValue}");
             }
         }
         else
