@@ -6,7 +6,6 @@ public class StationaryBrain : NPCBrain, INpcInteractable
     [SerializeField] private ShopModule shopModule;
     [SerializeField] private UpgradeModule upgradeModule;
     [SerializeField] private SimpleTalkModule simpleTalkModule;
-    [SerializeField] private DialogueModule dialogueModule;
 
     [Header("UI Settings")]
     [SerializeField] private string interactKeyName = "[F]";
@@ -17,7 +16,6 @@ public class StationaryBrain : NPCBrain, INpcInteractable
         if (!shopModule) shopModule = GetComponent<ShopModule>();
         if (!upgradeModule) upgradeModule = GetComponent<UpgradeModule>();
         if (!simpleTalkModule) simpleTalkModule = GetComponent<SimpleTalkModule>();
-        if (!dialogueModule) dialogueModule = GetComponent<DialogueModule>();
     }
 
     public string GetPrompt()
@@ -45,7 +43,6 @@ public class StationaryBrain : NPCBrain, INpcInteractable
                 break;
 
             case NPCKind.SimpleTalk:
-                dialogueModule.StartDialogue();
                 break;
         }
     }
