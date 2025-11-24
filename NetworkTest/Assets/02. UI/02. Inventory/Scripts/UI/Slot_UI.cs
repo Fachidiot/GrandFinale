@@ -79,6 +79,8 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (!HasValidItem()) return;
+
         // 1. 우클릭 처리 (장착 시도)
         if (eventData.button == PointerEventData.InputButton.Right)
         {
@@ -278,10 +280,24 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
 
     private void HandleInventorySlotDrop(Slot_UI sourceSlot)
     {
+        // 출발지의 데이터가 없으면 리턴
         if (sourceSlot.currentSlot == null || sourceSlot.currentSlot.slotIndex == -1) return;
         if (sourceSlot == this) return;
 
+        if (currentSlot.slotIndex == -1)
+        {
+            // 필터링된 탭(전체 탭이 아님)이라면, 빈 공간으로의 이동은 불가능하므로 리턴
+            if (InventoryManager.Instance.currentFilter != InventoryFilterType.All)
+            {
+                Debug.Log("필터링된 탭에서는 빈 공간으로 이동할 수 없습니다.");
+                return;
+            }
+            return;
+        }
+
+        // 정상적인 아이템 간 교환
         InventoryManager.Instance.SwapItems(sourceSlot.currentSlot.slotIndex, currentSlot.slotIndex);
+
         sourceSlot.dropSuccessful = true;
         dropSuccessful = true;
 
@@ -469,6 +485,9 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
             hideTooltipCoroutine = null;
         }
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.uiHoverClip);
+
         if (!HasValidItem()) return;
 
         if (tooltipCoroutine != null) StopCoroutine(tooltipCoroutine);
@@ -505,6 +524,7 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler,
 
     private bool IsMainInventoryView()
     {
-        return InventoryManager.Instance.currentFilter != InventoryFilterType.Relic;
+        //return InventoryManager.Instance.currentFilter != InventoryFilterType.Relic;
+        return true;
     }
 }

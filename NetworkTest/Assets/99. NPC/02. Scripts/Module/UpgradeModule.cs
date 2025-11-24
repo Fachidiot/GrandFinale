@@ -131,6 +131,9 @@ public class UpgradeModule : MonoBehaviour
         {
             Debug.Log($"[Upgrade] {currentEquipment.itemName} 강화 성공!");
 
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.upgradeSuccessClip);
+
             // 3. 원본 데이터 보호를 위해 복제본 생성
             RelicData upgradedItem = Instantiate(currentEquipment);
 
@@ -145,8 +148,6 @@ public class UpgradeModule : MonoBehaviour
             string originalName = currentEquipment.itemName;
             int currentLevel = 0;
 
-            // 기존 접두사가 있는지 확인하고 제거하여 '순수 이름' 추출
-            // (긴 접두사부터 체크해야 정확함, 하지만 배열 순서대로 해도 무방)
             for (int i = 1; i < upgradePrefixes.Length; i++)
             {
                 string prefix = upgradePrefixes[i];
@@ -172,6 +173,9 @@ public class UpgradeModule : MonoBehaviour
         else
         {
             Debug.Log($"[Upgrade] {currentEquipment.itemName} 강화 실패...");
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.upgradeFailClip);
             // 실패 시 패널티가 있다면 여기에 추가
         }
 

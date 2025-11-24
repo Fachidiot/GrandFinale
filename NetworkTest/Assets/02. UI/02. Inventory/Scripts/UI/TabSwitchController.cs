@@ -160,13 +160,23 @@ public class TabSwitchController : MonoBehaviour
 
     private void SwitchTab(TabType targetTab)
     {
+        // 사운드 재생
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTabSound();
+        }
+
         if (targetTab == TabType.Inventory)
         {
             SwitchToInventoryWithAnimation();
+            if (inventoryButton)
+                inventoryButton.transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f, 10, 1);
         }
         else
         {
             SwitchToArtifactsWithAnimation();
+            if (artifactsButton)
+                artifactsButton.transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f, 10, 1);
         }
 
         currentTab = targetTab;
@@ -324,11 +334,13 @@ public class TabSwitchController : MonoBehaviour
         if (inventoryButton != null)
         {
             inventoryButton.interactable = (activeTab != TabType.Inventory);
+            if (activeTab == TabType.Inventory) inventoryButton.transform.localScale = Vector3.one;
         }
 
         if (artifactsButton != null)
         {
             artifactsButton.interactable = (activeTab != TabType.Artifacts);
+            if (activeTab == TabType.Artifacts) artifactsButton.transform.localScale = Vector3.one;
         }
 
         if (tabSelectText != null)

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class CharacterMove : MonoBehaviour
@@ -76,6 +76,8 @@ public class CharacterMove : MonoBehaviour
 
     IEnumerator colliderSizeChangeCor;
 
+    private PlayerStats playerStats;
+
     private void Awake()
     {
         AssighAnimatorIDs();
@@ -83,6 +85,12 @@ public class CharacterMove : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         normalColliderHeight = characterController.height;
         GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
+        playerStats = FindObjectOfType<PlayerStats>();
+        if (playerStats != null)
+        {
+            playerStats.OnStatsChanged += UpdateMoveSpeeds;
+            UpdateMoveSpeeds(); // 초기 속도 설정
+        }
 
 
         moveState = new MoveState(this);
@@ -114,6 +122,16 @@ public class CharacterMove : MonoBehaviour
 
         if (currentState != null)
             currentState.OnStateEnter();
+    }
+    public void UpdateMoveSpeeds()
+    {
+        if (playerStats == null) return;
+
+        walkSpeed = playerStats.CurrentWalkSpeed;
+        runSpeed = playerStats.CurrentRunSpeed;
+        sprintSpeed = playerStats.CurrentSprintSpeed;
+        crouchSpeed = playerStats.CurrentCrouchSpeed;
+
     }
 
     private void Update()

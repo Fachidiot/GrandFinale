@@ -11,6 +11,7 @@ public class PlayerStats : MonoBehaviour
     public float baseWalkSpeed = 2f;
     public float baseRunSpeed = 3f;
     public float baseSprintSpeed = 5f;
+    public float baseCrouchSpeed = 1f;
     public float baseCooldownReduction = 0f;
     public float baseMaxHealth = 100f;
     public float baseDamageModifier = 1.0f;
@@ -25,6 +26,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float currentShield;
     [SerializeField] private float currentWalkSpeed;
     [SerializeField] private float currentRunSpeed;
+    [SerializeField] private float currentCrouchSpeed;
     [SerializeField] private float currentSprintSpeed;
     [SerializeField] private float currentDamageModifier;
     [SerializeField] private float currentCooldownReduction;
@@ -43,6 +45,7 @@ public class PlayerStats : MonoBehaviour
     public float CurrentWalkSpeed { get { return currentWalkSpeed; } private set { currentWalkSpeed = value; } }
     public float CurrentRunSpeed { get { return currentRunSpeed; } private set { currentRunSpeed = value; } }
     public float CurrentSprintSpeed { get { return currentSprintSpeed; } private set { currentSprintSpeed = value; } }
+    public float CurrentCrouchSpeed { get { return currentCrouchSpeed; } private set { currentCrouchSpeed = value; } }
     public float CurrentDamageModifier { get { return currentDamageModifier; } private set { currentDamageModifier = value; } }
     public float CurrentCooldownReduction { get { return currentCooldownReduction; } private set { currentCooldownReduction = value; } }
     public int CurrentCurrency { get { return currentCurrency; } private set { currentCurrency = value; } }
@@ -187,7 +190,7 @@ public class PlayerStats : MonoBehaviour
         switch (statName)
         {
             case "MoveSpeed":
-            case "Speed":           
+            case "Speed":
                 float ratio = value / 100.0f;
                 CurrentWalkSpeed += baseWalkSpeed * ratio;
                 CurrentRunSpeed += baseRunSpeed * ratio;

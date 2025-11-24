@@ -1,24 +1,46 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Rendering;
+﻿using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
     private static AudioManager m_Instance;
     public static AudioManager Instance { get { return m_Instance; } }
+
+    [Header("BGM")]
     [SerializeField] private AudioClip[] lobbyMusicClips;
     [SerializeField] private AudioClip[] loadingMusicClips;
     [SerializeField] private AudioClip[] backgroundMusicClips;
 
-    private float m_masterVolume;
-    public float MasterVolume { set { m_masterVolume = value; VolumeUpdate(); } }
-    private float m_bgmVolume;
-    public float BGMVolume { set { m_bgmVolume = value; VolumeUpdate(); } }
-    private float m_effectVolume;
-    public float EffectVolume { set { m_effectVolume = value; VolumeUpdate(); } }
+    [Header("SFX - UI")]
+    public AudioClip uiClickClip;
+    public AudioClip uiOpenClip;
+    public AudioClip uiCloseClip;
+    public AudioClip uiTabSwapClip;
+    public AudioClip uiHoverClip;
+    public AudioClip uiErrorClip;
 
-    private AudioSource audioSource;
+    [Header("SFX - Item")]
+    public AudioClip itemPickupClip;
+    public AudioClip itemEquipClip;   
+    public AudioClip itemUnequipClip; 
+
+
+    [Header("SFX - NPC")]
+    public AudioClip shopBuyClip;
+    public AudioClip shopSellClip;
+    public AudioClip Shop_Reroll;
+    public AudioClip upgradeSuccessClip;
+    public AudioClip upgradeFailClip;
+
+    [Header("Audio Sources")]
+    [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private AudioSource sfxSource;
+
+    private float m_masterVolume = 1f;
+    public float MasterVolume { set { m_masterVolume = value; VolumeUpdate(); } }
+    private float m_bgmVolume = 1f;
+    public float BGMVolume { set { m_bgmVolume = value; VolumeUpdate(); } }
+    private float m_effectVolume = 1f;
+    public float EffectVolume { set { m_effectVolume = value; VolumeUpdate(); } }
 
     void Awake()
     {
@@ -28,53 +50,96 @@ public class AudioManager : MonoBehaviour
             DontDestroyOnLoad(this);
         }
         else
+        {
             Destroy(gameObject);
+            return;
+        }
 
-        audioSource = GetComponent<AudioSource>();
+        if (bgmSource == null) bgmSource = gameObject.AddComponent<AudioSource>();
+        if (sfxSource == null) sfxSource = gameObject.AddComponent<AudioSource>();
     }
 
     void Start()
     {
-        if (lobbyMusicClips.Length < 1)
-            return;
-        int random = Random.Range(0, lobbyMusicClips.Length);
-        audioSource.clip = lobbyMusicClips[random];
-        audioSource.Play();
+        PlayLobbyMusic();
     }
+
+    // 폴더 전용 자동 바인딩
+    [ContextMenu("Auto Bind Sounds")]
+    public void LoadAllSounds()
+    {
+        // Assets/Resources/Sound/ 경로에서 파일을 가져옵니다.
+        string path = "Sound/";
+
+        uiClickClip = Resources.Load<AudioClip>(path + "UI_Click");
+        uiOpenClip = Resources.Load<AudioClip>(path + "UI_Open");
+        uiCloseClip = Resources.Load<AudioClip>(path + "UI_Open");
+        uiTabSwapClip = Resources.Load<AudioClip>(path + "UI_Tab");
+        uiHoverClip = Resources.Load<AudioClip>(path + "UI_Hover");
+        uiErrorClip = Resources.Load<AudioClip>(path + "UI_Error");
+
+        itemPickupClip = Resources.Load<AudioClip>(path + "Item_Pickup");
+        itemEquipClip = Resources.Load<AudioClip>(path + "Item_Equip");
+        itemUnequipClip = Resources.Load<AudioClip>(path + "Item_Unequip");
+
+        shopBuyClip = Resources.Load<AudioClip>(path + "Shop_Buy");
+        shopSellClip = Resources.Load<AudioClip>(path + "Shop_Sell");
+        Shop_Reroll = Resources.Load<AudioClip>(path + "Shop_Reroll");
+        upgradeSuccessClip = Resources.Load<AudioClip>(path + "Upgrade_Success");
+        upgradeFailClip = Resources.Load<AudioClip>(path + "Upgrade_Fail");
+
+        // BGM
+        AudioClip lobbyBgm = Resources.Load<AudioClip>(path + "BGM_Lobby");
+        if (lobbyBgm != null) lobbyMusicClips = new AudioClip[] { lobbyBgm };
+
+        Debug.Log("[AudioManager] Resources/Sound 폴더에서 사운드 연결 완료!");
+    }
+
+    public void PlaySFX(AudioClip clip)
+    {
+        if (clip != null && sfxSource != null)
+        {
+            sfxSource.PlayOneShot(clip, m_effectVolume * m_masterVolume);
+        }
+    }
+
+    public void PlayClickSound() => PlaySFX(uiClickClip);
+    public void PlayTabSound() => PlaySFX(uiTabSwapClip);
+    public void PlayErrorSound() => PlaySFX(uiErrorClip);
+    public void PlayEquipSound() => PlaySFX(itemEquipClip);
+    public void PlayUnequipSound() => PlaySFX(itemUnequipClip);
+    public void PlayPickupSound() => PlaySFX(itemPickupClip);
 
     public void PlayLobbyMusic()
     {
-        if (lobbyMusicClips.Length <= 0)
-            return;
+        if (lobbyMusicClips == null || lobbyMusicClips.Length == 0 || bgmSource == null) return;
         int random = Random.Range(0, lobbyMusicClips.Length);
-        audioSource.clip = lobbyMusicClips[random];
-        audioSource.Play();
+        bgmSource.loop = true;
+        bgmSource.clip = lobbyMusicClips[random];
+        bgmSource.Play();
     }
 
     public void PlayLoadingMusic()
     {
-        if (loadingMusicClips.Length <= 0)
-            return;
+        if (loadingMusicClips == null || loadingMusicClips.Length == 0 || bgmSource == null) return;
         int random = Random.Range(0, loadingMusicClips.Length);
-        audioSource.clip = loadingMusicClips[random];
-        audioSource.Play();
+        bgmSource.loop = true;
+        bgmSource.clip = loadingMusicClips[random];
+        bgmSource.Play();
     }
 
     public void PlayBackgroundMusic()
     {
-        if (backgroundMusicClips.Length <= 0)
-            return;
+        if (backgroundMusicClips == null || backgroundMusicClips.Length == 0 || bgmSource == null) return;
         int random = Random.Range(0, backgroundMusicClips.Length);
-        audioSource.clip = backgroundMusicClips[random];
-        audioSource.Play();
+        bgmSource.loop = true;
+        bgmSource.clip = backgroundMusicClips[random];
+        bgmSource.Play();
     }
 
     private void VolumeUpdate()
     {
-        if (!audioSource)
-            return;
-
-        audioSource.volume = m_masterVolume * m_bgmVolume;
-        audioSource.volume = m_masterVolume * m_effectVolume;
+        if (bgmSource != null) bgmSource.volume = m_masterVolume * m_bgmVolume;
+        if (sfxSource != null) sfxSource.volume = m_masterVolume * m_effectVolume;
     }
 }

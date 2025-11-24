@@ -166,6 +166,9 @@ public class InventoryManager : MonoBehaviour
         // Small 인벤토리 열기
         if (smallInventoryUI != null)
         {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
+
             smallInventoryUI.SetActive(true);
 
             if (smallInventoryAnim != null)
@@ -221,7 +224,6 @@ public class InventoryManager : MonoBehaviour
     {
         if (smallInventoryUI == null) return;
 
-        // 전체 창이 켜져 있으면 끄기
         if (fullInventoryUI != null && fullInventoryUI.activeSelf)
         {
             fullInventoryUI.SetActive(false);
@@ -230,8 +232,11 @@ public class InventoryManager : MonoBehaviour
 
         bool currentActive = smallInventoryUI.activeSelf;
 
-        if (currentActive && IsFocused)
+        if (currentActive && IsFocused) 
         {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
+
             smallCanvasGroup.blocksRaycasts = false;
             smallCanvasGroup.DOFade(0f, fadeDuration)
                 .OnComplete(() =>
@@ -242,6 +247,9 @@ public class InventoryManager : MonoBehaviour
         }
         else if (!currentActive)
         {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
+
             smallInventoryUI.SetActive(true);
             smallCanvasGroup.alpha = 0f;
             smallCanvasGroup.blocksRaycasts = true;
@@ -266,14 +274,20 @@ public class InventoryManager : MonoBehaviour
 
         bool currentActive = fullInventoryUI.activeSelf;
 
-        if (currentActive && IsFocused)
+        if (currentActive && IsFocused) // 닫기
         {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
+
             InventoryAnimation_Close();
             fullInventoryUI.SetActive(false);
             SetFocusState(false);
         }
-        else if (!currentActive)
+        else if (!currentActive) // 열기
         {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.uiOpenClip);
+
             InventoryAnimation_Open();
             fullInventoryUI.SetActive(true);
             SetFocusState(true);
@@ -283,9 +297,14 @@ public class InventoryManager : MonoBehaviour
             SetFocusState(true);
         }
     }
+
     public void CloseAllInventories()
     {
         if (!IsUIOpen) return;
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.uiCloseClip);
+
         CloseSmallInventory();
         if (fullInventoryUI != null && fullInventoryUI.activeSelf)
         {

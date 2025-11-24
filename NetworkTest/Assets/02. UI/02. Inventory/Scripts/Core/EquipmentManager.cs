@@ -72,6 +72,9 @@ public class EquipmentManager : MonoBehaviour
         equipmentSlots[targetEquipSlotIndex] = itemToEquip;
         ApplyItemAbility(itemToEquip, true);
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayEquipSound();
+
         OnEquipmentChanged?.Invoke();
         return true;
     }
@@ -149,6 +152,9 @@ public class EquipmentManager : MonoBehaviour
         equipmentSlots[equipSlotIndex] = null;
         ApplyItemAbility(itemToUnequip, false);
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayUnequipSound();
+
         OnEquipmentChanged?.Invoke();
         return true;
     }
@@ -176,6 +182,7 @@ public class EquipmentManager : MonoBehaviour
     }
 
     // 아이템 능력 적용/제거
+    // 아이템 능력 적용/제거
     private void ApplyItemAbility(RelicData item, bool isEquipping)
     {
         if (item == null || item.grantedAbility == null) return;
@@ -184,11 +191,11 @@ public class EquipmentManager : MonoBehaviour
         if (playerStats == null) playerStats = FindObjectOfType<PlayerStats>();
         if (playerStats == null) return;
 
+        string logicID = item.grantedAbility.abilityLogicID;
         string key = item.grantedAbility.param_Key;
         string valStr = item.grantedAbility.param_ValueA;
 
-        // 1. Stat_Add 로직인 경우 (단순 스탯 증감)
-        if (item.grantedAbility.abilityLogicID == "Stat_Add")
+        if (logicID == "Stat_Add" || logicID == "Stat_Percent")
         {
             if (float.TryParse(valStr, out float value))
             {
@@ -197,18 +204,20 @@ public class EquipmentManager : MonoBehaviour
                 switch (key)
                 {
                     case "MoveSpeed":
+                    case "Speed": 
                     case "AllDamage":
-                        playerStats.AddStatPercent(key, finalValue);
+                        string statKey = (key == "Speed") ? "MoveSpeed" : key;
+                        playerStats.AddStatPercent(statKey, finalValue);
                         break;
+
                     default:
                         playerStats.AddStat(key, finalValue);
                         break;
                 }
 
-                Debug.Log($"[EquipmentManager] {item.itemName} {(isEquipping ? "장착" : "해제")} -> {key} : {finalValue}");
+                Debug.Log($"[EquipmentManager] {item.itemName} {(isEquipping ? "장착" : "해제")} -> {key} ({logicID}) : {finalValue}");
             }
         }
-        // 2. 특수 능력 처리
         else
         {
             PlayerAbilityManager playerAbilities = FindObjectOfType<PlayerAbilityManager>();

@@ -8,7 +8,7 @@ public class ShopSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     [Header("UI Components")]
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private Image borderImage; // 선택 표시용 테두리
+    [SerializeField] private Image borderImage;
 
     [Header("Selection Colors")]
     [SerializeField] private Color normalColor = Color.white;
@@ -18,32 +18,33 @@ public class ShopSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     private ShopModule _shop;
     private bool _isSelected = false;
 
+    private bool HasItem => _data != null;
+
     public void Setup(RelicData data, ShopModule shop)
     {
         _data = data;
         _shop = shop;
 
-        //데이터가 null이면 슬롯을 비우고 함수를 종료합니다.
-        if (data == null)
+        // 데이터가 없으면(빈 슬롯) 초기화 후 종료
+        if (!HasItem)
         {
             if (iconImage)
             {
                 iconImage.sprite = null;
-                iconImage.enabled = false; // 아이콘 숨김
+                iconImage.enabled = false;
             }
-            if (nameText) nameText.text = ""; // 이름 지움
+            if (nameText) nameText.text = "";
             SetSelected(false);
             return;
         }
 
-        // 데이터가 있을 때만 아래 코드가 실행됩니다.
+        // 데이터가 있을 때만 아이콘/텍스트 설정
         if (iconImage)
         {
-            // 아이콘 경로가 있으면 로드, 없으면 null
             if (!string.IsNullOrEmpty(data.iconPath))
             {
                 iconImage.sprite = Resources.Load<Sprite>(data.iconPath);
-                iconImage.enabled = true; // 아이콘 보임
+                iconImage.enabled = true;
             }
             else
             {
@@ -53,40 +54,38 @@ public class ShopSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
         }
 
         if (nameText) nameText.text = data.itemName;
-
-        SetSelected(false); // 초기화
+        SetSelected(false);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (!HasItem) return;
 
-        // 1. 데이터 유무 확인 및 무시
-        if (_data == null)
+        // 2. 소리 재생
+        if (AudioManager.Instance != null)
         {
-            Debug.LogWarning($"[ShopSlotUI] 클릭 무시: {gameObject.name}에 할당된 아이템 데이터가 없습니다.");
-            return;
+            AudioManager.Instance.PlayClickSound();
         }
 
-        // 2. ShopModule로 전달
+        // 3. 상점 모듈에 알림
         if (_shop != null)
         {
             _shop.OnSlotClicked(_data, this);
         }
     }
 
-    public void SetSelected(bool selected)
-    {
-        _isSelected = selected;
-        if (borderImage)
-        {
-            borderImage.color = selected ? selectedColor : normalColor;
-        }
-    }
-
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (_data == null) return;
+        // 1. 아이템 없으면 즉시 종료
+        if (!HasItem) return;
 
+        // 2. 호버 소리 재생
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.uiHoverClip);
+        }
+
+        // 3. 툴팁 표시
         if (InventoryUIManager.Instance != null)
         {
             InventoryUIManager.Instance.ShowTooltip(_data, InventoryType.Shop);
@@ -97,5 +96,14 @@ public class ShopSlotUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     {
         if (InventoryUIManager.Instance != null)
             InventoryUIManager.Instance.HideTooltip();
+    }
+
+    public void SetSelected(bool selected)
+    {
+        _isSelected = selected;
+        if (borderImage)
+        {
+            borderImage.color = selected ? selectedColor : normalColor;
+        }
     }
 }
