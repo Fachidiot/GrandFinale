@@ -9,6 +9,7 @@ public class RelicData : ScriptableObject
     public string itemName;
     public ItemType itemTypeEnum;
     public EquipmentSlot equipmentSlot;
+    public WeaponType weaponType;
 
     public string grade;
     public int maxStack;

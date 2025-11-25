@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class EquipmentSlot_UI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -11,6 +12,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler, IBeginDragHandler, 
     [Header("Filter Settings")]
     public EquipmentSlot requiredSlotType = EquipmentSlot.None;
     public ItemType requiredItemType = ItemType.Etc;
+    public List<WeaponType> allowedWeaponTypes;
 
     [Header("UI Components")]
     public Image slotIcon;
@@ -142,17 +144,39 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler, IBeginDragHandler, 
     {
         if (item == null) return false;
 
-        if (requiredSlotType != EquipmentSlot.None)
-        {
-            return item.equipmentSlot == requiredSlotType;
-        }
 
         if (requiredItemType != ItemType.Etc)
         {
-            return item.itemTypeEnum == requiredItemType;
+            if (item.itemTypeEnum != requiredItemType)
+            {
+                // 디버깅용: 타입이 안 맞음
+                return false;
+            }
         }
 
-        return false;
+
+        if (requiredSlotType != EquipmentSlot.None)
+        {
+            if (item.equipmentSlot != requiredSlotType)
+            {
+                return false;
+            }
+        }
+
+        if (item.itemTypeEnum == ItemType.Weapon)
+        {
+            // 이 슬롯에 허용된 무기 리스트가 있고, 비어있지 않다면 검사
+            if (allowedWeaponTypes != null && allowedWeaponTypes.Count > 0)
+            {
+                // 내 허용 리스트에 이 아이템의 타입이 없다면 차단
+                if (!allowedWeaponTypes.Contains(item.weaponType))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
