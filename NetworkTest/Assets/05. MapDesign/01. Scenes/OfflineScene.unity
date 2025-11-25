@@ -1404,6 +1404,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e61527c040af54aaacd368b9a1bd0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2122027946 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1257234468334349989, guid: 91a1fd44f7e68d74e84ec602f2803a7b, type: 3}
+  m_PrefabInstance: {fileID: 3023738858406954776}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2122027951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2122027946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22b2702ae1c2c3f4eb209fb8d4d1fa4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  punchScale: 0.15
+  rotationStrength: 360
 --- !u!1 &18220940972683583
 GameObject:
   m_ObjectHideFlags: 0
@@ -9342,7 +9361,7 @@ PrefabInstance:
       objectReference: {fileID: 1496522315}
     - target: {fileID: 8086045619233287240, guid: 91a1fd44f7e68d74e84ec602f2803a7b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SortInventory
+      value: SortItems
       objectReference: {fileID: 0}
     - target: {fileID: 8190152299236560647, guid: 91a1fd44f7e68d74e84ec602f2803a7b, type: 3}
       propertyPath: m_AnchorMax.y
@@ -9567,7 +9586,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1257234468334349989, guid: 91a1fd44f7e68d74e84ec602f2803a7b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2122027951}
   m_SourcePrefab: {fileID: 100100000, guid: 91a1fd44f7e68d74e84ec602f2803a7b, type: 3}
 --- !u!4 &3046475038546370803
 Transform:

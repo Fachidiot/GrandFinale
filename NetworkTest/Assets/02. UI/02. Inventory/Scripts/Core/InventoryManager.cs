@@ -153,7 +153,7 @@ public class InventoryManager : MonoBehaviour
 
     #endregion
 
-    #region Item Management (Add / Remove / Drop)
+    #region Item Management (Add / Remove / Drop /Sort)
 
     public bool AddItem(RelicData newItem, int amount = 1)
     {
@@ -262,6 +262,75 @@ public class InventoryManager : MonoBehaviour
         if (orb.TryGetComponent(out LootOrbVisuals visuals)) visuals.Initialize(itemToDrop.item.grade);
 
         RemoveItem(itemToDrop, 1);
+    }
+    public void SortItems()
+    {
+        // [CASE A] 전체(All) 탭 정렬 -> 뷰어 리스트(allTabDisplayList)만 정렬
+        if (currentFilter == InventoryFilterType.All)
+        {
+            // 1. 빈칸과 껍데기를 제외한 알맹이만 추출
+            var validItems = allTabDisplayList
+                .Where(x => x != null && x.item != null)
+                .ToList();
+
+            // 2. 정렬 로직 실행 (등급 내림차순 -> 이름 오름차순)
+            validItems.Sort(CompareItems);
+
+            // 3. 리스트 재구성 (앞에서부터 채우고 나머지는 null)
+            for (int i = 0; i < allTabDisplayList.Count; i++)
+            {
+                if (i < validItems.Count)
+                    allTabDisplayList[i] = validItems[i];
+                else
+                    allTabDisplayList[i] = null;
+            }
+        }
+        // [CASE B] 개별 카테고리 탭 정렬 -> 실제 저장소(allItems)의 해당 구역만 정렬
+        else
+        {
+            var (startIndex, count) = GetCategoryRange(currentFilter);
+
+            // 1. 해당 구역의 아이템 추출
+            List<InventoryItem> rangeItems = new List<InventoryItem>();
+            for (int i = startIndex; i < startIndex + count; i++)
+            {
+                if (allItems[i] != null && allItems[i].item != null)
+                {
+                    rangeItems.Add(allItems[i]);
+                }
+            }
+
+            // 2. 정렬 로직 실행
+            rangeItems.Sort(CompareItems);
+
+            // 3. 해당 구역 덮어쓰기
+            for (int i = 0; i < count; i++)
+            {
+                int targetIndex = startIndex + i;
+                if (i < rangeItems.Count)
+                    allItems[targetIndex] = rangeItems[i];
+                else
+                    allItems[targetIndex] = null; // 나머지는 빈칸
+            }
+        }
+
+        Debug.Log("[Inventory] 아이템 정렬 완료");
+        OnInventoryChanged?.Invoke();
+    }
+    private int CompareItems(InventoryItem a, InventoryItem b)
+    {
+        // 1. 아이템 타입 우선 (무기 > 장비 > ...)
+        if (a.item.itemTypeEnum != b.item.itemTypeEnum)
+        {
+            return a.item.itemTypeEnum.CompareTo(b.item.itemTypeEnum);
+        }
+
+        // 2. 등급 비교 (높은 등급이 먼저 오게: 내림차순)
+        int gradeCompare = String.Compare(b.item.grade, a.item.grade, StringComparison.Ordinal);
+        if (gradeCompare != 0) return gradeCompare;
+
+        // 3. 이름 비교 (가나다순)
+        return String.Compare(a.item.itemName, b.item.itemName, StringComparison.Ordinal);
     }
 
     #endregion
