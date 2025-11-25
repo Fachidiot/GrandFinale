@@ -53,7 +53,7 @@ namespace creepycat.scifikitvol4
         public JToken GetState(string subId)
         {
             // This is called on the host. We toggle the state and return the new state.
-            isOpen = !isOpen;
+            bool nextState = !isOpen;
             return new JObject { ["isOpen"] = isOpen };
         }
 
@@ -63,7 +63,7 @@ namespace creepycat.scifikitvol4
 
             bool shouldBeOpen = state["isOpen"].Value<bool>();
             if (isOpen == shouldBeOpen) return;
-            
+
             isOpen = shouldBeOpen;
             PlayAnimation(isOpen);
         }

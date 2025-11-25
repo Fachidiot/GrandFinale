@@ -19,7 +19,7 @@ namespace creepycat.scifikitvol4
         public GameObject DoorButtonB;
         public Light SpotLightA;
         public AudioClip DoorSound;
-        
+
         [Header("Animation Settings")]
         public float moveTimeA = 2.0f;
         public float moveTimeB = 2.0f;
@@ -59,7 +59,7 @@ namespace creepycat.scifikitvol4
         }
 
         #region IWorldInteractable Implementation
-        
+
         public void Initialize(string id)
         {
             this.uniqueId = id;
@@ -68,14 +68,14 @@ namespace creepycat.scifikitvol4
         public JToken GetState(string subId)
         {
             // This is called on the host. We toggle the state and return the new state.
-            isOpen = !isOpen;
+            bool nextState = !isOpen;
             return new JObject { ["isOpen"] = isOpen };
         }
 
         public void SetState(string subId, JToken state)
         {
             if (state == null || state["isOpen"] == null) return;
-            
+
             bool shouldBeOpen = state["isOpen"].Value<bool>();
             if (isOpen == shouldBeOpen) return;
 
@@ -111,8 +111,8 @@ namespace creepycat.scifikitvol4
             }
 
             UpdateVisuals(open);
-            
-            if(audioSource != null && DoorSound != null)
+
+            if (audioSource != null && DoorSound != null)
                 audioSource.PlayOneShot(DoorSound, 1.0F);
         }
 
@@ -123,7 +123,7 @@ namespace creepycat.scifikitvol4
                 buttonRendererA.material.SetColor("_EmissionColor", open ? Color.white / 3 : Color.white * 1.5f);
             if (buttonRendererB != null)
                 buttonRendererB.material.SetColor("_EmissionColor", open ? Color.white / 3 : Color.white * 1.5f);
-            
+
             // Emissive List
             if (emissiveRenderers == null) return;
             foreach (var emissiveRenderer in emissiveRenderers)
@@ -132,7 +132,7 @@ namespace creepycat.scifikitvol4
                     emissiveRenderer.material.SetColor("_EmissionColor", open ? Color.white * 1.5f : Color.white / 3.0f);
             }
         }
-        
+
         private void EndAnimationFlag()
         {
             animationInProgress = false;
@@ -141,7 +141,7 @@ namespace creepycat.scifikitvol4
         void Update()
         {
             // Light fading can remain a local effect
-            if(SpotLightA == null) return;
+            if (SpotLightA == null) return;
 
             float targetIntensity = isOpen ? emissionIntensity : 0.0f;
             SpotLightA.intensity = Mathf.Lerp(SpotLightA.intensity, targetIntensity, Time.deltaTime * fadeTime);

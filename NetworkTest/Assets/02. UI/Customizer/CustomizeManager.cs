@@ -8,6 +8,7 @@ public class CustomizeManager : MonoBehaviour
     [SerializeField] private GameObject customizePanel;
     [SerializeField] private ModelCustom fModel;
     [SerializeField] private ModelCustom mModel;
+    [SerializeField] private List<GameObject> customizePreviewOffer;
     public ModelCustom GetCurrentModel()
     {
         return isMale ? mModel : fModel;
@@ -22,11 +23,29 @@ public class CustomizeManager : MonoBehaviour
     private PlayerCustomizer customizer;
     private bool isMale = true;
 
+    private void InitialCheck()
+    {
+        // Check prefabs
+        if (customizePanel == null) Debug.LogError("CustomizeManager: NetworkLocal_M prefab not assigned.");
+        if (fModel == null) Debug.LogError("CustomizeManager: NetworkLocal_F prefab not assigned.");
+        if (mModel == null) Debug.LogError("CustomizeManager: NetworkClient_M prefab not assigned.");
+        if (isMaleSelector == null) Debug.LogError("CustomizeManager: NetworkClient_F prefab not assigned.");
+        if (headSelector == null) Debug.LogError("CustomizeManager: Single_M prefab not assigned.");
+        if (bodySelector == null) Debug.LogError("CustomizeManager: Single_F prefab not assigned.");
+        if (acce1Selector == null) Debug.LogError("CustomizeManager: Single_F prefab not assigned.");
+        if (acce2Selector == null) Debug.LogError("CustomizeManager: Single_F prefab not assigned.");
+
+        fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
+        mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
+    }
+
     void Start()
     {
         customizer = PlayerCustomizer.Instance;
+
         ActiveMale();
         ModelApply();
+        InitialCheck();
     }
 
     private void ModelApply()
@@ -37,7 +56,16 @@ public class CustomizeManager : MonoBehaviour
 
     public void TogglePanel()
     {
-        customizePanel.SetActive(!customizePanel.activeSelf);
+        bool toggle = !customizePanel.activeSelf;
+
+        customizePanel.SetActive(toggle);
+
+        fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
+        mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
+        fModel.transform.parent.localRotation = Quaternion.Euler(0, 180, 0);
+        mModel.transform.parent.localRotation = Quaternion.Euler(0, 180, 0);
+        for (int i = 0; i < customizePreviewOffer.Count; ++i)
+            customizePreviewOffer[i].SetActive(!toggle);
     }
 
     public void ChangeMale(int isMale)

@@ -6,6 +6,7 @@ public class PlayerInputs : MonoBehaviour
 {
     [SerializeField] private OptionKeyData keyData;
     [SerializeField] private float interactionDistance = 8f;
+    [SerializeField] private LayerMask interactLayerMask;
 
     private float horizontalInput = 0f;
     private float verticalInput = 0f;
@@ -173,7 +174,7 @@ public class PlayerInputs : MonoBehaviour
             horizontalRaw = Input.GetKey(keyData.m_KeyMoveLeft) ? -1 : Input.GetKey(keyData.m_KeyMoveRight) ? 1 : 0;
             bendingRaw = Input.GetKey(keyData.m_BendingRight) ? -1 : Input.GetKey(keyData.m_BendingLeft) ? 1 : 0;
         }
-        
+
         float verticalRaw = Input.GetKey(keyData.m_KeyMoveDown) ? -1 : Input.GetKey(keyData.m_KeyMoveUp) ? 1 : 0;
 
         horizontalInput = CalculateAxis(horizontalInput, horizontalRaw);

@@ -6,6 +6,12 @@ using UnityEngine;
 
 public class SpaceShipManager : MonoBehaviour
 {
+    [SerializeField] private Animator doorAnimator;
+    [SerializeField] private Animator legAnimator;
+    [SerializeField] private Animator wingAnimator;
+
+    private bool isDoorOpen = true;
+    private bool isLanded = false;
 
     // This method is called by the "Launch" button
     public void OnLaunchGameClicked()

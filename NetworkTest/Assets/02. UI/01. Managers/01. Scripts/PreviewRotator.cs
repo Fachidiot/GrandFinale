@@ -28,6 +28,6 @@ public class PreviewRotator : MonoBehaviour, IDragHandler
         float direction = invertDirection ? -1 : 1;
 
         // Y축 기준으로 회전 적용 (Space.World 또는 Space.Self 선택 가능, 보통 모델 뷰어는 World 기준이 자연스러움)
-        customizeManager.GetCurrentModel().transform.parent.transform.Rotate(Vector3.up, x * rotationSpeed * direction, Space.World);
+        customizeManager.GetCurrentModel().transform.parent.Rotate(Vector3.up, x * rotationSpeed * direction, Space.Self);
     }
 }

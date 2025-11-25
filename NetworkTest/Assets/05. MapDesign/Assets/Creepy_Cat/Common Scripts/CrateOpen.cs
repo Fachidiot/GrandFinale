@@ -12,7 +12,7 @@ namespace creepycat.scifikitvol4
         [Header("Crate Objects")]
         public GameObject CrateTop;
         public GameObject CrateButton;
- 
+
         [Header("Visual/Audio Feedback")]
         [SerializeField] private Light[] lightList;
         public AudioClip CrateSound;
@@ -21,7 +21,7 @@ namespace creepycat.scifikitvol4
         public float OpenTime = 2.0f;
         public float EmissionIntensity = 1.2f;
         private float RotateMax = -90f;
-        
+
         // Internal State
         private bool isOpen = false;
         private bool animationInProgress = false;
@@ -33,7 +33,7 @@ namespace creepycat.scifikitvol4
         // Components
         private Renderer ButtonRenderer;
         private AudioSource AudioSource;
-        
+
         void Start()
         {
             ButtonRenderer = CrateButton.GetComponent<Renderer>();
@@ -45,12 +45,12 @@ namespace creepycat.scifikitvol4
                 light.enabled = false;
                 light.intensity = 0.0f;
             }
-            
+
             UpdateVisuals(isOpen);
         }
 
         #region IWorldInteractable Implementation
-        
+
         public void Initialize(string id)
         {
             this.uniqueId = id;
@@ -59,14 +59,14 @@ namespace creepycat.scifikitvol4
         public JToken GetState(string subId)
         {
             // This is called on the host. We toggle the state and return the new state.
-            isOpen = !isOpen;
-            return new JObject { ["isOpen"] = isOpen };
+            bool nextState = !isOpen;
+            return new JObject { ["isOpen"] = nextState };
         }
 
         public void SetState(string subId, JToken state)
         {
             if (state == null || state["isOpen"] == null) return;
-            
+
             bool shouldBeOpen = state["isOpen"].Value<bool>();
             if (isOpen == shouldBeOpen) return;
 
@@ -100,8 +100,8 @@ namespace creepycat.scifikitvol4
             }
 
             UpdateVisuals(open);
-            
-            if(AudioSource != null && CrateSound != null)
+
+            if (AudioSource != null && CrateSound != null)
                 AudioSource.PlayOneShot(CrateSound, 1.0F);
         }
 
@@ -138,7 +138,7 @@ namespace creepycat.scifikitvol4
                 playerNearby = false;
             }
         }
-        
+
         void Update()
         {
             // This locally-driven light effect is fine to keep.

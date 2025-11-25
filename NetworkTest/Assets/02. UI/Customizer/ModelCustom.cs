@@ -26,7 +26,7 @@ public class ModelCustom : MonoBehaviour
     {
         InitialCheck();
 
-        ModelInfo initialInfo = new ModelInfo(0, 0, -1, -1);
+        ModelInfo initialInfo = new ModelInfo(0, 0, 0, 0);
         ApplyModelInfo(initialInfo);
     }
 
@@ -73,7 +73,7 @@ public class ModelCustom : MonoBehaviour
 
         if (acc1 >= 0 && acc1 < acc1Models.Count && acc1Models[acc1] != null)
             acc1Models[acc1].SetActive(true);
-        else
+        else if (acc1Models[acc1] != null)
             Debug.LogWarning($"ModelCustom: Head model index {acc1} is out of bounds or model is null. Head model not activated.");
     }
 
@@ -86,7 +86,7 @@ public class ModelCustom : MonoBehaviour
 
         if (acc2 >= 0 && acc2 < acc2Models.Count && acc2Models[acc2] != null)
             acc2Models[acc2].SetActive(true);
-        else
+        else if (acc2Models[acc2] != null)
             Debug.LogWarning($"ModelCustom: Head model index {acc2} is out of bounds or model is null. Head model not activated.");
     }
 }

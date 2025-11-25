@@ -1,7 +1,5 @@
 using System;
-using UnityEngine;
 
-[CreateAssetMenu(fileName = "ModelInfo", menuName = "Fachidiot/ModelInfo", order = 0)]
 [Serializable]
 public class ModelInfo
 {

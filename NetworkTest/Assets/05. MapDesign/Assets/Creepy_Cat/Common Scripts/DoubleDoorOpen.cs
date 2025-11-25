@@ -20,7 +20,7 @@ namespace creepycat.scifikitvol4
         public Light SpotLightA;
         public Light SpotLightB;
         public AudioClip DoorSound;
-        
+
         [Header("Animation Settings")]
         public float moveTimeA = 2.0f;
         public float emissionIntensity = 3.0f;
@@ -32,7 +32,7 @@ namespace creepycat.scifikitvol4
 
         // Networking
         private string uniqueId;
-        
+
         // Components
         private Renderer buttonRendererA;
         private Renderer buttonRendererB;
@@ -46,7 +46,7 @@ namespace creepycat.scifikitvol4
             buttonRendererB = DoorButtonB?.GetComponent<Renderer>();
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-            
+
             emissiveRenderers = new Renderer[emissiveList.Length];
             for (int i = 0; i < emissiveList.Length; i++)
             {
@@ -67,15 +67,15 @@ namespace creepycat.scifikitvol4
         public JToken GetState(string subId)
         {
             // This is called on the host. We toggle the state and return the new state.
-            isOpen = !isOpen;
-            return new JObject { ["isOpen"] = isOpen };
+            bool nextState = !isOpen;
+            return new JObject { ["isOpen"] = nextState };
         }
 
         public void SetState(string subId, JToken state)
         {
             // This object only has one state, so we ignore subId.
             if (state == null || state["isOpen"] == null) return;
-            
+
             bool shouldBeOpen = state["isOpen"].Value<bool>();
 
             // If we are already in the correct state, do nothing.
@@ -143,7 +143,7 @@ namespace creepycat.scifikitvol4
                     emissiveRenderer.material.SetColor("_EmissionColor", open ? Color.white * 1.5f : Color.white / 3.0f);
             }
         }
-        
+
         private void EndAnimationFlag()
         {
             animationInProgress = false;

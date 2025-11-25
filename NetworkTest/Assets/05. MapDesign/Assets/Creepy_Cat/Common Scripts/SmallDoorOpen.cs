@@ -66,14 +66,14 @@ namespace creepycat.scifikitvol4
         public JToken GetState(string subId)
         {
             // This is called on the host. We toggle the state and return the new state.
-            isOpen = !isOpen;
-            return new JObject { ["isOpen"] = isOpen };
+            bool nextState = !isOpen;
+            return new JObject { ["isOpen"] = nextState };
         }
 
         public void SetState(string subId, JToken state)
         {
             if (state == null || state["isOpen"] == null) return;
-            
+
             bool shouldBeOpen = state["isOpen"].Value<bool>();
             if (isOpen == shouldBeOpen) return;
 
@@ -105,7 +105,7 @@ namespace creepycat.scifikitvol4
             {
                 TweenX.Add(DoorLeftA, moveTimeA, -moveMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
             }
-            
+
             UpdateVisuals(open);
 
             if (audioSource != null && DoorSound != null)
@@ -131,7 +131,7 @@ namespace creepycat.scifikitvol4
                     emissiveRenderer.material.SetColor("_EmissionColor", open ? Color.white * 1.5f : Color.white / 3.0f);
             }
         }
-        
+
         private void EndAnimationFlag()
         {
             animationInProgress = false;
