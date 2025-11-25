@@ -320,10 +320,10 @@ namespace FIMSpace.Generating
                 Collider col = objectsToSimulate[i].GetComponent<Collider>();
                 if (!col) col = objectsToSimulate[i].GetComponentInChildren<Collider>();
 
-                if ( col is MeshCollider)
+                if (col is MeshCollider)
                 {
                     MeshCollider mCol = col as MeshCollider;
-                    if ( mCol.convex == false)
+                    if (mCol.convex == false)
                     {
                         _mMeshNonConvexColliders.Add(mCol);
                         mCol.convex = true;
@@ -461,7 +461,7 @@ namespace FIMSpace.Generating
             if (firstGround.transform == null)
             {
                 //UnityEngine.Debug.Log("NO GROUND");
-                return null; 
+                return null;
             }
 
             float toGround = firstGround.distance;

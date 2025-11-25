@@ -111,6 +111,9 @@ public class ServerRoomManager : MonoBehaviour
             case "picked_up_loot":
                 HandleLootPickup(msg);
                 break;
+            case "player_customization":
+                HandlePlayerCustomization(sender, msg);
+                break;
         }
     }
 
@@ -133,6 +136,28 @@ public class ServerRoomManager : MonoBehaviour
 
         // Broadcast to all clients (and run on host)
         NetworkManager.Instance.BroadcastJsonMessage(destroyMsg);
+    }
+
+    /// <summary>
+    /// (Host-only) Handles a client's customization data and updates the room state.
+    /// </summary>
+    private void HandlePlayerCustomization(CSteamID sender, JObject data)
+    {
+        if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
+        {
+            playerInfo.is_Male = data["is_Male"]?.ToObject<bool>() ?? playerInfo.is_Male;
+            playerInfo.headIndex = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
+            playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
+            playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
+            playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
+
+            Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
+            BroadcastRoomUpdate();
+        }
+        else
+        {
+            Debug.LogWarning($"[ServerRoomManager] Received customization for unknown player: {sender}");
+        }
     }
 
     /// <summary>
@@ -205,12 +230,40 @@ public class ServerRoomManager : MonoBehaviour
         steamIdToByteId[steamId] = newId;
         byteIdToSteamId[newId] = steamId;
 
-        var playerInfo = new PlayerInfo
+        PlayerInfo playerInfo;
+
+        if (isHost)
         {
-            steam_id = steamId.ToString(),
-            player_id = newId.ToString(),
-            nickname = nickname,
-        };
+            ModelInfo localModelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
+            bool isLocalMale = PlayerCustomizer.Instance.IsLocalPlayerMale;
+
+            playerInfo = new PlayerInfo
+            {
+                steam_id = steamId.ToString(),
+                player_id = newId.ToString(),
+                nickname = nickname,
+                is_Male = isLocalMale,
+                headIndex = localModelInfo.head,
+                bodyIndex = localModelInfo.body,
+                acc1Index = localModelInfo.acc1,
+                acc2Index = localModelInfo.acc2
+            };
+        }
+        else
+        {
+            playerInfo = new PlayerInfo
+            {
+                steam_id = steamId.ToString(),
+                player_id = newId.ToString(),
+                nickname = nickname,
+                is_Male = true, // Default to male for clients until they send customization
+                headIndex = 0,
+                bodyIndex = 0,
+                acc1Index = 0,
+                acc2Index = 0
+            };
+        }
+
         playersInRoom[steamId] = playerInfo;
 
         // Broadcast the updated room state to everyone.

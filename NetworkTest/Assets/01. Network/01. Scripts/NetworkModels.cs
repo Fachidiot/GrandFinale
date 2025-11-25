@@ -10,8 +10,8 @@ public class PlayerInfo
     public bool is_Male;
     public int headIndex;
     public int bodyIndex;
-    public int acce1Index;
-    public int acce2Index;
+    public int acc1Index;
+    public int acc2Index;
 }
 
 [Serializable]

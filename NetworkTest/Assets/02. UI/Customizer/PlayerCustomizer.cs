@@ -23,21 +23,17 @@ public class PlayerCustomizer : MonoBehaviour
     [SerializeField] private GameObject Single_F;
     [SerializeField] private GameObject Single_M;
 
-    public ModelInfo Test;
-
     private ModelInfo _localFemaleModel;    // 여성 프리팹 정보
     public ModelInfo LocalFemaleModelInfo => _localFemaleModel;
-    private readonly string LOCAL_FEMALE = "LocalFemaleModel";
+    private readonly string LOCAL_FEMALE = "/LocalFemaleModel.json";
     private ModelInfo _localMaleModel;      // 남성 프리팹 정보
     public ModelInfo LocalMaleModelInfo => _localMaleModel;
-    private readonly string LOCAL_MALE = "LocalMaleModel";
+    private readonly string LOCAL_MALE = "/LocalMaleModel.json";
 
     private bool _isMale = true;    // UI와 연동해서 UI에서 선택할 성별 저장.
     public bool IsMale { get { return _isMale; } set { _isMale = value; } }
 
     public bool IsLocalPlayerMale { get; private set; } = true; // Default to male
-
-    private readonly string CUSTOMIZER_FOLDER = "CustomizerData";
 
     private void InitialCheck()
     {
@@ -69,19 +65,48 @@ public class PlayerCustomizer : MonoBehaviour
         }
 
         InitialCheck();
-        _localFemaleModel = LoadModelInfo(LOCAL_FEMALE);
-        _localMaleModel = LoadModelInfo(LOCAL_MALE);
+        LoadModelInfo();
     }
 
-    public void SaveModelInfo(ModelInfo info, string fileName)
+    public void SaveModelInfo()
     {
-        // TODO : ModelInfo 저장.
+        // TODO : Model ModelInfo 저장.
+        string ToJsonData = JsonUtility.ToJson(_localMaleModel);
+        string filePath = Application.persistentDataPath + LOCAL_MALE;
+        // 이미 저장된 파일이 있다면 덮어쓰기
+        File.WriteAllText(filePath, ToJsonData);
+
+        // TODO : Female ModelInfo 저장.
+        ToJsonData = JsonUtility.ToJson(_localFemaleModel);
+        filePath = Application.persistentDataPath + LOCAL_FEMALE;
+        // 이미 저장된 파일이 있다면 덮어쓰기
+        File.WriteAllText(filePath, ToJsonData);
     }
 
-    public ModelInfo LoadModelInfo(string fileName)
+    public void LoadModelInfo()
     {
-        // TODO : 저장된 ModelInfo 로드.
-        return null;
+        // TODO : 저장된 Male ModelInfo 로드.
+        string filePath = Application.persistentDataPath + LOCAL_MALE;
+
+        if (File.Exists(filePath))
+        {
+            string FromJsonData = File.ReadAllText(filePath);
+            var data = JsonUtility.FromJson<ModelInfo>(FromJsonData);
+            _localMaleModel = data;
+        }
+        else
+            _localMaleModel = new ModelInfo();
+
+        // TODO : 저장된 Female ModelInfo 로드.
+        filePath = Application.persistentDataPath + LOCAL_FEMALE;
+
+        if (File.Exists(filePath))
+        {
+            string FromJsonData = File.ReadAllText(filePath);
+            _localFemaleModel = JsonUtility.FromJson<ModelInfo>(FromJsonData);
+        }
+        else
+            _localFemaleModel = new ModelInfo();
     }
 
     public GameObject GetNetworkPlayerPrefab(bool isLocal, bool isMale)
@@ -103,8 +128,8 @@ public class PlayerCustomizer : MonoBehaviour
 
     public ModelInfo GetLocalPlayerInfo()
     {
-        // Only Test
-        return Test;
-        // return IsMale ? _localMaleModel : _localFemaleModel;
+        // // Only Test
+        // return Test;
+        return IsMale ? _localMaleModel : _localFemaleModel;
     }
 }

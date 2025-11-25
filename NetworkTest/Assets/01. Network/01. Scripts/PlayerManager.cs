@@ -184,8 +184,8 @@ public class PlayerManager : MonoBehaviour
             ModelInfo modelInfo = new ModelInfo(
                 playerInfo.headIndex,
                 playerInfo.bodyIndex,
-                playerInfo.acce1Index,
-                playerInfo.acce2Index);
+                playerInfo.acc1Index,
+                playerInfo.acc2Index);
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
         }
 

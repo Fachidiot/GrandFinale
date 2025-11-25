@@ -1,0 +1,5 @@
+- CLI폴더의 파일을 읽고 작업 준비만 해라. 니 멋대로 작업 시작하지 말고. 하위 작업 추가하지도 말고
+- NetworkManager.cs 파일의 403, 404번째 줄 TODO 내용을 작업했습니다.
+    - 클라이언트에서 PlayerCustomizer의 GetLocalPlayerInfo()를 가져와 host에게 보냅니다.
+    - 호스트는 ServerRoomManager에서 해당 정보를 받아 PlayerInfo에 적용합니다.
+    - 호스트가 처음 방을 생성할 때 자신의 PlayerInfo도 초기화합니다.

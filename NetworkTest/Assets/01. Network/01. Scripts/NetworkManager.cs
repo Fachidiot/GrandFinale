@@ -400,6 +400,24 @@ public class NetworkManager : MonoBehaviour
             ServerRoomManager.Instance.Initialize(Mode);
             // Now that we know the instance exists and is initialized, we can safely call this.
             ServerRoomManager.Instance.SendNickname();
+
+            // Get local player customization info
+            ModelInfo localModelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
+            bool isLocalMale = PlayerCustomizer.Instance.IsLocalPlayerMale;
+
+            // Create JSON message for customization
+            JObject customizationMessage = new JObject
+            {
+                { "type", "player_customization" },
+                { "is_Male", isLocalMale },
+                { "head", localModelInfo.head },
+                { "body", localModelInfo.body },
+                { "acc1", localModelInfo.acc1 },
+                { "acc2", localModelInfo.acc2 }
+            };
+
+            // Send customization data to the host
+            NetworkManager.Instance.SendJsonMessage(lobbyHostID, customizationMessage);
         }
         else
         {
