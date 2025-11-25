@@ -64,4 +64,56 @@ public class ModelCustom : MonoBehaviour
         else
             Debug.LogWarning($"ModelCustom: Accessory 2 model index {info.acce2} is out of bounds or model is null. Accessory 2 not activated.");
     }
+
+    public void ChangeHead(int head)
+    {
+        foreach (GameObject model in headModels)
+        {
+            if (model != null) model.SetActive(false);
+        }
+
+        if (head >= 0 && head < headModels.Count && headModels[head] != null)
+            headModels[head].SetActive(true);
+        else
+            Debug.LogWarning($"ModelCustom: Head model index {head} is out of bounds or model is null. Head model not activated.");
+    }
+
+    public void ChangeBody(int body)
+    {
+        foreach (GameObject model in headModels)
+        {
+            if (model != null) model.SetActive(false);
+        }
+
+        if (body >= 0 && body < headModels.Count && headModels[body] != null)
+            headModels[body].SetActive(true);
+        else
+            Debug.LogWarning($"ModelCustom: Head model index {body} is out of bounds or model is null. Head model not activated.");
+    }
+
+    public void ChangeAcc1(int acc1)
+    {
+        foreach (GameObject model in headModels)
+        {
+            if (model != null) model.SetActive(false);
+        }
+
+        if (acc1 >= 0 && acc1 < headModels.Count && headModels[acc1] != null)
+            headModels[acc1].SetActive(true);
+        else
+            Debug.LogWarning($"ModelCustom: Head model index {acc1} is out of bounds or model is null. Head model not activated.");
+    }
+
+    public void ChangeAcc2(int acc2)
+    {
+        foreach (GameObject model in headModels)
+        {
+            if (model != null) model.SetActive(false);
+        }
+
+        if (acc2 >= 0 && acc2 < headModels.Count && headModels[acc2] != null)
+            headModels[acc2].SetActive(true);
+        else
+            Debug.LogWarning($"ModelCustom: Head model index {acc2} is out of bounds or model is null. Head model not activated.");
+    }
 }
