@@ -78,6 +78,20 @@ public class CharacterMove : MonoBehaviour
 
     private PlayerStats playerStats;
 
+    private void InitialCheck()
+    {
+        if (characterController == null)
+            Debug.LogError("CharacterMove: CharacterController is not assigned. Movement will not function.");
+        if (bodyTurnHandler == null)
+            Debug.LogError("CharacterMove: BodyTurnHandler is not assigned. Body turning will not function.");
+        if (animator == null)
+            Debug.LogError("CharacterMove: Animator is not assigned. Animations will not function.");
+        if (directionOrienter == null)
+            Debug.LogError("CharacterMove: DirectionOrienter is not assigned. Movement orientation will be incorrect.");
+        if (playerInputs == null)
+            Debug.LogError("CharacterMove: PlayerInputs is not found. Input will not be processed.");
+    }
+
     private void Awake()
     {
         AssighAnimatorIDs();
@@ -92,6 +106,7 @@ public class CharacterMove : MonoBehaviour
             UpdateMoveSpeeds(); // 초기 속도 설정
         }
 
+        InitialCheck();
 
         moveState = new MoveState(this);
         crouchState = new CrouchState(this);
