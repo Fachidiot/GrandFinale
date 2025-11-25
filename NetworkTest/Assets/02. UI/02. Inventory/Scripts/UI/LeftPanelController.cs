@@ -174,6 +174,9 @@ public class LeftPanelController : MonoBehaviour
     /// </summary>
     public void ShowEquipmentPanel()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayClickSound();
+
         SwitchPanel(equipmentCanvasGroup);
         UpdateButtonStates(PanelType.Equipment);
     }
@@ -183,6 +186,9 @@ public class LeftPanelController : MonoBehaviour
     /// </summary>
     public void ShowPlayerStatsPanel()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayClickSound();
+
         SwitchPanel(statsCanvasGroup);
         UpdateButtonStates(PanelType.PlayerStats);
     }

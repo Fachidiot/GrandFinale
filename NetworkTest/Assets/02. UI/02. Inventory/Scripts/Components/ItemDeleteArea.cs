@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
@@ -18,20 +18,16 @@ public class ItemDeleteArea : MonoBehaviour, IDropHandler
     // 유효한 슬롯인지 확인
     private bool IsValidSlot(Slot_UI slot)
     {
+        // InventoryItem 구조에 맞춰 수정됨
         return slot != null &&
-               slot.currentSlot != null &&
-               slot.currentSlot.item != null &&
-               slot.currentSlot.slotIndex != -1;
+               slot.currentItem != null &&
+               slot.currentItem.item != null;
     }
 
     // 아이템 삭제
     private void DeleteItem(Slot_UI sourceSlot)
     {
-        bool success = InventoryManager.Instance.RemoveItem(sourceSlot.currentSlot.slotIndex);
-
-        if (success)
-        {
-            sourceSlot.dropSuccessful = true;
-        }
+        InventoryManager.Instance.RemoveItem(sourceSlot.currentItem);
+        sourceSlot.dropSuccessful = true;
     }
 }

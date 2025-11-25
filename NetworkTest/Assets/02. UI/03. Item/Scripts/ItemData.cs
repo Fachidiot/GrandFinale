@@ -22,6 +22,17 @@ public enum InventoryFilterType
     Etc         // 기타
 }
 
+public enum WeaponType
+{
+    None,       // 무기가 아님 (방어구, 소모품 등)
+    Rifle,      // 라이플 (돌격소총) - 슬롯 1, 2
+    Sniper,     // 스나이퍼 - 슬롯 1, 2
+    Shotgun,    // 샷건 - 슬롯 1, 2
+    Melee,      // 근접 무기 - 슬롯 1, 2
+    SMG,        // 기관단총 - 슬롯 3 전용
+    Pistol      // 권총 - 슬롯 4 전용
+}
+
 public enum EquipmentSlot
 {
     None,     // 장착 부위 없음 (재료, 유물, 무기 등)
@@ -50,6 +61,9 @@ public class ItemData : ScriptableObject
 
     [Header("Item Type")]
     public ItemType itemType;
+
+    [Header("Weapon Details")]
+    public WeaponType weaponType;
 
     [Header("Equipment Info")]
     public EquipmentSlot equipmentSlot;

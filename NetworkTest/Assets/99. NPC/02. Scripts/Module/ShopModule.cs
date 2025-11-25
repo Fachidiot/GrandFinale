@@ -128,13 +128,27 @@ public class ShopModule : MonoBehaviour
     // 버튼 클릭 시 UI 강제 갱신 추가
     private void OnRefreshButtonClicked()
     {
+        // 1. 사운드 재생
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.uiTabSwapClip);
+        }
+
+        // 2. 버튼 애니메이션 (DOTween)
+        if (refreshButton != null)
+        {
+            refreshButton.transform.DOKill(); // 기존 애니메이션 중지
+            refreshButton.transform.localScale = Vector3.one;
+            refreshButton.transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f, 10, 1);
+        }
+
+        // 3. 리셋 로직
         if (_currentRefreshCount > 0)
         {
             _currentRefreshCount--;
 
             RestockShop(false);
 
-            // RestockShop이 DB오류 등으로 중간에 멈추더라도
             // 횟수는 차감되었으니 UI는 무조건 갱신해줍니다.
             UpdateRefreshUI();
         }
@@ -182,8 +196,13 @@ public class ShopModule : MonoBehaviour
         if (!_currentCustomer.SpendCurrency(totalPrice))
         {
             ShowSystemMessage("소지금이 부족합니다!");
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayErrorSound();
             return;
         }
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(AudioManager.Instance.shopBuyClip);
+
 
         foreach (var pair in purchaseCart)
         {
@@ -207,6 +226,9 @@ public class ShopModule : MonoBehaviour
 
             InventoryManager.Instance.RemoveItemFromSlot(slotIndex, 1);
             _currentCustomer.AddCurrency(sellPrice);
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFX(AudioManager.Instance.shopSellClip);
         }
     }
 

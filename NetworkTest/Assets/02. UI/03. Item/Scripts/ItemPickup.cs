@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -6,7 +6,7 @@ using UnityEngine;
 public class ItemPickup : MonoBehaviour
 {
     [Header("이 아이템의 데이터")]
-    [Tooltip("여기에 RelicData ScriptableObject를 끌어다 놓으세요.")]
+    [Tooltip("여기에 RelicData")]
     public RelicData itemData;
 
     [Header("픽업 방식 설정")]
@@ -16,19 +16,15 @@ public class ItemPickup : MonoBehaviour
     [Tooltip("플레이어가 줍기 범위 내에 들어왔을 때 UI를 띄우기 위한 이벤트")]
     public static event Action<bool, ItemPickup> OnPlayerNearbyPickup;
     private bool playerInRange = false;
-    private GameObject nearbyPlayer; // PlayerAbilityManager를 찾기 위해 필요
+    private GameObject nearbyPlayer; 
 
-    private PlayerInputs playerInputs; // GameManager에 있는 PlayerInputs를 저장할 변수
+    private PlayerInputs playerInputs;
     private SphereCollider sphereCollider;
 
     private void Awake()
     {
         sphereCollider = GetComponent<SphereCollider>();
         sphereCollider.isTrigger = true;
-
-        // 1.  Awake에서는 GameManager.Instance를 호출하지 않습니다. (순서 문제 방지)
-
-
     }
 
     private void OnTriggerEnter(Collider other)
@@ -36,13 +32,11 @@ public class ItemPickup : MonoBehaviour
         // 2.  플레이어가 들어왔는지 확인
         if (other.CompareTag("Player"))
         {
-            // 3. (핵심 수정!) PlayerInputs가 GameManager에 있으므로 GameManager.Instance에서 찾아옵니다.
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
             }
 
-            // 4. PlayerInputs를 찾았고, 활성화되어 있을 때만 픽업 가능 상태로 변경
             if (playerInputs != null && playerInputs.enabled)
             {
                 playerInRange = true;
@@ -82,7 +76,6 @@ public class ItemPickup : MonoBehaviour
             return;
         }
 
-        // 아이템 획득 시도 (이 부분은 플레이어별로 로컬에서 처리)
         bool success = false;
         if (addToInventoryInstead)
         {
@@ -108,6 +101,10 @@ public class ItemPickup : MonoBehaviour
         // 아이템 획득에 성공했다면, 네트워크에 알림
         if (success)
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayPickupSound();
+            }
             // UI 숨기기
             OnPlayerNearbyPickup?.Invoke(false, this);
 

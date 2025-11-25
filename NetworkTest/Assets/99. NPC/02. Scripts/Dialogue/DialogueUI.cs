@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class DialogueUI : MonoBehaviour
 {
     private DialogueService _dialogueService;
-    private NPCBubbleUI _activeBubble; // ÇöÀç È°¼ºÈ­µÈ ¸»Ç³¼± ÂüÁ¶
+    private NPCBubbleUI _activeBubble; // í˜„ì¬ í™œì„±í™”ëœ ë§í’ì„  ì°¸ì¡°
 
     private void Start()
     {
@@ -23,7 +23,7 @@ public class DialogueUI : MonoBehaviour
 
     private void Update()
     {
-        // ´ëÈ­ Áß¿¡ FÅ°¸¦ ´©¸£¸é ´ÙÀ½ ´ë»ç·Î ÁøÇà
+        // ëŒ€í™” ì¤‘ì— Fí‚¤ë¥¼ ëˆ„ë¥´ë©´ ë‹¤ìŒ ëŒ€ì‚¬ë¡œ ì§„í–‰
         if (_dialogueService.IsDialogueActive && Input.GetKeyDown(KeyCode.F))
         {
             _dialogueService.ProceedToNextLine();
@@ -34,14 +34,14 @@ public class DialogueUI : MonoBehaviour
     {
         if (speaker == null) return;
 
-        // ÀÌÀü¿¡ È°¼ºÈ­µÈ ¸»Ç³¼±ÀÌ ÀÖ´Ù¸é ¼û±è Ã³¸®
+        // ì´ì „ì— í™œì„±í™”ëœ ë§í’ì„ ì´ ìˆë‹¤ë©´ ìˆ¨ê¹€ ì²˜ë¦¬
         if (_activeBubble != null) _activeBubble.Hide();
 
         var bubble = speaker.GetComponentInChildren<NPCBubbleUI>(true);
         if (bubble != null)
         {
             _activeBubble = bubble;
-            // È­ÀÚ ÀÌ¸§°ú ´ë»ç¸¦ ÇÕÃÄ¼­ Ç¥½Ã
+            // í™”ì ì´ë¦„ê³¼ ëŒ€ì‚¬ë¥¼ í•©ì³ì„œ í‘œì‹œ
             string fullText = $"{dialogue.speaker}: {dialogue.text}";
             _activeBubble.ShowMessage(fullText);
         }
