@@ -22,22 +22,24 @@ MonoBehaviour:
   stoppingDistance: 1.5
   persistenceTime: 5
   patrolRadiusMin: 5
-  patrolRadiusMax: 10
-  idleTimeMin: 10
-  idleTimeMax: 15
+  patrolRadiusMax: 15
+  idleTimeMin: 1
+  idleTimeMax: 3
   lookAroundTime: 3
   lookAroundTurnInterval: 1.5
-  walkSpeed: 1.5
-  runSpeed: 3
-  turnSpeed: 5
+  walkSpeed: 2
+  runSpeed: 4.5
+  turnSpeed: 5000
   attackDelay: 0.5
-  attackCooldown: 10
-  idleSound: {fileID: 0}
-  chaseSound: {fileID: 0}
-  attackSound: {fileID: 0}
-  hitSound: {fileID: 0}
-  dieSound: {fileID: 0}
+  attackCooldown: 2
+  monsterFolderName: 
+  idleSound: {fileID: 8300000, guid: b5c545ad3d7a0bb43bf5b1f27ea501ca, type: 3}
+  chaseSound: {fileID: 8300000, guid: 6a9d361ecbf3e1549b11c313a1eb6801, type: 3}
+  attackSound: {fileID: 8300000, guid: e4625e8a15253da4caf4305b77905c0d, type: 3}
+  hitSound: {fileID: 8300000, guid: b1fcc1f64f5fde743a357daae6cb1e5d, type: 3}
+  dieSound: {fileID: 8300000, guid: 7b04e4c16a242894691df44669790062, type: 3}
   hitEffect: {fileID: 0}
   dieEffect: {fileID: 0}
+  experienceReward: 10
   lootTable: {fileID: 11400000, guid: ae8feaff93d52ca4aaf9af8b86b15add, type: 2}
   corpseDestroyDelay: 5
