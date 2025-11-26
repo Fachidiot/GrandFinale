@@ -117,6 +117,32 @@ public class EquipmentManager : MonoBehaviour
 
     #endregion
 
+    #region Swap Logic (New)
+
+    public void SwapEquipment(int slotIndexA, int slotIndexB)
+    {
+        if (slotIndexA == slotIndexB) return;
+        if (slotIndexA < 0 || slotIndexA >= equipmentSlots.Count) return;
+        if (slotIndexB < 0 || slotIndexB >= equipmentSlots.Count) return;
+
+        // 1. 데이터 스왑
+        RelicData temp = equipmentSlots[slotIndexA];
+        equipmentSlots[slotIndexA] = equipmentSlots[slotIndexB];
+        equipmentSlots[slotIndexB] = temp;
+
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayEquipSound();
+
+        // 2. UI 갱신 알림
+        NotifyEquipmentChanged();
+    }
+
+    public void NotifyEquipmentChanged()
+    {
+        OnEquipmentChanged?.Invoke();
+    }
+
+    #endregion
+
     #region Unequip Logic
 
     public bool UnequipItem(RelicData itemData)
