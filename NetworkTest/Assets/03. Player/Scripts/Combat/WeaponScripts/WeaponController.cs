@@ -49,7 +49,7 @@ public class WeaponController : MonoBehaviour
     public bool changed; // true if weapon changed
     public bool canShoot;
 
-    private BaseWeapon _unarmedWeapon;
+    [SerializeField] private BaseWeapon _unarmedWeapon;
 
     private void InitialCheck()
     {
@@ -76,7 +76,6 @@ public class WeaponController : MonoBehaviour
         // Cache weapon components for faster access
         _weaponCache.Clear();
 
-        _unarmedWeapon = GetComponent<UnarmedWeapon>();
         _weaponCache[0] = _unarmedWeapon;
         for (int i = 0; i < slots.Length; i++)
         {
