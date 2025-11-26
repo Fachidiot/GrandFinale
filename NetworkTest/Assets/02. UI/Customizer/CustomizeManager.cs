@@ -9,10 +9,6 @@ public class CustomizeManager : MonoBehaviour
     [SerializeField] private ModelCustom fModel;
     [SerializeField] private ModelCustom mModel;
     [SerializeField] private List<GameObject> customizePreviewOffer;
-    public ModelCustom GetCurrentModel()
-    {
-        return isMale ? mModel : fModel;
-    }
 
     [SerializeField] private HorizontalSelector isMaleSelector;
     [SerializeField] private HorizontalSelector headSelector;
@@ -22,6 +18,11 @@ public class CustomizeManager : MonoBehaviour
 
     private PlayerCustomizer customizer;
     private bool isMale = true;
+
+    public ModelCustom GetCurrentModel()
+    {
+        return isMale ? mModel : fModel;
+    }
 
     private void InitialCheck()
     {

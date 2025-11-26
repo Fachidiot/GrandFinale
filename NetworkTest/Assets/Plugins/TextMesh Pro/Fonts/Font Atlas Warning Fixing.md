@@ -1,0 +1,1 @@
+fonts atlas관련 warning이 뜰때 : font파일 > atlas -> inspector -> 상단에서 보기방식을 debug로 해서 isReadable에 체크박스 해주면 해결.
