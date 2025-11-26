@@ -35,8 +35,9 @@ public class PlayerManager : MonoBehaviour
             NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
         }
 
-#if UNITY_EDITOR
-        LocalPlayer = FindObjectOfType<CharacterMove>().GetComponent<IPlayerControllable>();
+#if UNITY_EDITOR    // Fast Debug Needs it
+        if (FindObjectOfType<CharacterMove>())
+            LocalPlayer = FindObjectOfType<CharacterMove>().GetComponent<IPlayerControllable>();
 #endif
     }
 

@@ -111,14 +111,14 @@ namespace FIMSpace.Generating
         Scene preSimScene;
         Scene simScene;
         PhysicsScene simPhysScene;
-        bool preAutoSim;
+        SimulationMode preAutoSim;
 
         /// <summary>
         /// Returns false if no physical environment detected
         /// </summary>
         bool PrepareSimulation()
         {
-            preAutoSim = Physics.autoSimulation;
+            preAutoSim = Physics.simulationMode;
             if (objectsToSimulate.Count == 0) return false;
             preSimScene = objectsToSimulate[0].gameObject.scene;
 
@@ -156,7 +156,7 @@ namespace FIMSpace.Generating
 
         void ApplySimulation()
         {
-            Physics.autoSimulation = false;
+            Physics.simulationMode = SimulationMode.Script;
 
             for (int i = 0; i < MinimumIterations; i++)
             {
@@ -213,7 +213,7 @@ namespace FIMSpace.Generating
 
         void FinishSimulation()
         {
-            Physics.autoSimulation = preAutoSim;
+            Physics.simulationMode = preAutoSim;
 
             if (generatedRigidbodies != null)
                 for (int g = 0; g < generatedRigidbodies.Count; g++)

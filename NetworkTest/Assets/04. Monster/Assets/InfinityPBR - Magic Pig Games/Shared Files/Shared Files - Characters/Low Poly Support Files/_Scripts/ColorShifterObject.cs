@@ -234,7 +234,7 @@ namespace InfinityPBR
         [HideInInspector] public bool testView = false;
 
         public List<int> children = new List<int>();
-        public List<ColorShifterColorItem> colorItemChildren = new List<ColorShifterColorItem>();
+        [SerializeReference] public List<ColorShifterColorItem> colorItemChildren = new List<ColorShifterColorItem>();
         public bool isChild = false;
         public int parentIndex = 0;
         public string parentName;

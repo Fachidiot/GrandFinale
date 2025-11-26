@@ -17,7 +17,7 @@ public class SlotController : OnRig
         public Quaternion rotationOffset = Quaternion.identity;
     }
 
-    [SerializeField] [Range(0, 1)] private float handActive;
+    [SerializeField][Range(0, 1)] private float handActive;
     public float HandActive
     {
         get => handActive;
@@ -25,11 +25,6 @@ public class SlotController : OnRig
     }
 
     void Awake()
-    {
-        CheckSlot();
-    }
-
-    void Update()
     {
         CheckSlot();
     }
@@ -42,8 +37,28 @@ public class SlotController : OnRig
             return;
         }
         else
-        slotActive = true;
+            slotActive = true;
     }
+
+    private GameObject slotItem;
+    public void AddSlot(GameObject item)
+    {
+        if (constrained.childCount > 0)
+            Debug.LogError($"SlotController: {name} slot already exist item, but add other item.");
+
+        slotActive = true;
+        slotItem = Instantiate(item, constrained);
+    }
+
+    public void DeleteSlot()
+    {
+        if (constrained.childCount == 0)
+            Debug.LogError($"SlotController: {name} slot is empty, but delete item.");
+
+        slotActive = false;
+        Destroy(slotItem);
+    }
+
     public HandSlot[] hands = new HandSlot[2];
 
     public void ApplyHandOffset(int handID, bool applyOffset)

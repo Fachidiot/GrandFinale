@@ -103,6 +103,9 @@ public class WeaponController : MonoBehaviour
         eventsCenter.OnHandIKTargetChange += ApplyHandsIKTarget;
         eventsCenter.OnApplyGunPositionOffset += ApplyGunPositionOffsetInHands;
         eventsCenter.OnWeaponChange += GunChangeCheck;
+
+
+        UIEvents.PlayerInitialized(this);
     }
 
     private void OnDisable()
@@ -139,6 +142,9 @@ public class WeaponController : MonoBehaviour
         nextID = -1;
         animator.CrossFadeInFixedTime("UnArmIdle", 0.25f, 3);
         changed = false;
+
+        EquipmentManager.Instance.OnSlotEquip += SlotEquip;
+        EquipmentManager.Instance.OnSlotUnequip += SlotUnequip;
     }
 
     private float lastChangeDebugTime = 0f;
@@ -166,6 +172,24 @@ public class WeaponController : MonoBehaviour
     {
         var currentWeapon = GETCurrentWeapon;
         currentWeapon?.Attack();
+    }
+
+    private void SlotEquip(int slotIndex, RelicData relicData)
+    {
+        Debug.Log($"{slotIndex} 슬롯 -> {relicData}");
+
+        // 슬롯이 비어있으면 장비 착용.
+        if (!slots[slotIndex].slotActive)
+            slots[slotIndex].AddSlot(relicData.modelPrefab);
+    }
+
+    private void SlotUnequip(int slotIndex)
+    {
+        Debug.Log($"{slotIndex} 슬롯 해제.");
+
+        // 슬롯에 장비가 있다면 해제.
+        if (slots[slotIndex].slotActive)
+            slots[slotIndex].DeleteSlot();
     }
 
     public void ToChange(int nextGunSlotID)
@@ -240,7 +264,6 @@ public class WeaponController : MonoBehaviour
         yield return new WaitForSeconds(0.5f); // 필요에 따라 지연 시간 조정
         IsProcessingRemoteWeaponChange = false;
     }
-
 
     #region AnimIKFunctions
     IEnumerator setLHandIkWeight(float t, float pause)

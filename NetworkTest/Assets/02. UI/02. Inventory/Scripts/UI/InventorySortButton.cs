@@ -7,8 +7,8 @@ public class InventorySortButton : MonoBehaviour
     private Button btn;
 
     [Header("Animation Settings")]
-    [SerializeField] private float punchScale = 0.15f; // Å¬¸¯ ½Ã Å©±â º¯È­
-    [SerializeField] private float rotationStrength = 360f; // È¸Àü °¢µµ
+    [SerializeField] private float punchScale = 0.15f; // í´ë¦­ ì‹œ í¬ê¸° ë³€í™”
+    [SerializeField] private float rotationStrength = 360f; // íšŒì „ ê°ë„
 
     void Awake()
     {
@@ -21,24 +21,24 @@ public class InventorySortButton : MonoBehaviour
 
     private void OnSortClicked()
     {
-        // 1. ¸Å´ÏÀú Á¤·Ä È£Ãâ
+        // 1. ë§¤ë‹ˆì € ì •ë ¬ í˜¸ì¶œ
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.SortItems();
         }
 
-        // 2. »ç¿îµå Àç»ı
+        // 2. ì‚¬ìš´ë“œ ì¬ìƒ
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySFX(AudioManager.Instance.uiClickClip);
         }
 
-        // 3. ¾Ö´Ï¸ŞÀÌ¼Ç (Å©±â º¯È­ + ÇÑ ¹ÙÄû È¸Àü)
+        // 3. ì• ë‹ˆë©”ì´ì…˜ (í¬ê¸° ë³€í™” + í•œ ë°”í€´ íšŒì „)
         transform.DOKill();
-        transform.localScale = Vector3.one; // Å©±â ÃÊ±âÈ­
-        transform.rotation = Quaternion.identity; // È¸Àü ÃÊ±âÈ­
+        transform.localScale = Vector3.one; // í¬ê¸° ì´ˆê¸°í™”
+        transform.rotation = Quaternion.identity; // íšŒì „ ì´ˆê¸°í™”
 
-        // ¶ì¿ë È¿°ú
+        // ë ìš© íš¨ê³¼
         transform.DOPunchScale(Vector3.one * punchScale, 0.3f, 10, 1);
 
     }

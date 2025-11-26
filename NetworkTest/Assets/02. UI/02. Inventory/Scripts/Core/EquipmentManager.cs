@@ -4,6 +4,21 @@ using System.Collections.Generic;
 
 public class EquipmentManager : MonoBehaviour
 {
+    /*
+    0 : Head
+    1 : Face
+    2 : Necklace
+    3 : Armor
+    4 : Pants
+    5 : Shoes
+    6 : Slot1 (Rifle)
+    7 : Slot2 (Rifle)
+    8 : Slot3 (SMG)
+    9 : Slot4 (Pistol)
+    10 : 유물
+    11 : 유물
+    12 : 유물
+    */
     public static EquipmentManager Instance;
     private PlayerStats playerStats;
 
@@ -69,11 +84,22 @@ public class EquipmentManager : MonoBehaviour
         equipmentSlots[targetEquipSlotIndex] = itemToEquip;
         ApplyItemAbility(itemToEquip, true);
 
+        // TODO : weaponcontroller의 slotmanager에 넣어줘야함.
+        // 6 : Slot1 (Rifle)
+        // 7 : Slot2 (Rifle)
+        // 8 : Slot3 (SMG)
+        // 9 : Slot4 (Pistol)
+        if (6 <= targetEquipSlotIndex || targetEquipSlotIndex <= 9)
+            OnSlotEquip.Invoke(targetEquipSlotIndex - 6, itemToEquip);
+
         if (AudioManager.Instance != null) AudioManager.Instance.PlayEquipSound();
 
         OnEquipmentChanged?.Invoke();
         return true;
     }
+
+    public event Action<int, RelicData> OnSlotEquip;
+    public event Action<int> OnSlotUnequip;
 
     public bool EquipItemToFirstAvailableSlot(RelicData itemToEquip)
     {
@@ -135,6 +161,8 @@ public class EquipmentManager : MonoBehaviour
                     equipmentSlots[i] = null;
                     ApplyItemAbility(itemData, false);
                     OnEquipmentChanged?.Invoke();
+                    if (itemData.itemTypeEnum == ItemType.Weapon)
+                        OnSlotUnequip.Invoke(i - 6);
                     break;
                 }
             }

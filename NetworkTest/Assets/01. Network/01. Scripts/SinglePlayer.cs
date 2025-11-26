@@ -7,12 +7,12 @@ public class SinglePlayer : MonoBehaviour, IPlayerControllable
     public new GameObject gameObject => base.gameObject;
     public new Transform transform => base.transform;
 
-    public T GetComponent<T>()
+    public new T GetComponent<T>()
     {
         return base.GetComponent<T>();
     }
 
-    public T GetComponentInChildren<T>()
+    public new T GetComponentInChildren<T>()
     {
         return base.GetComponentInChildren<T>();
     }

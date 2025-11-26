@@ -4,6 +4,7 @@ using System.Threading;
 using System.Globalization;
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class OptionDataManager : MonoBehaviour
 {
@@ -25,8 +26,7 @@ public class OptionDataManager : MonoBehaviour
         if (Instance == null)
         {
             m_Instance = this;
-            if (gameObject.scene.name != "DontDestroyOnLoad" && transform.parent == null)
-                DontDestroyOnLoad(transform.parent);
+            DontDestroyOnLoad(this);
 
             m_OptionManager = FindObjectOfType<OptionManager>();
 
@@ -66,7 +66,7 @@ public class OptionDataManager : MonoBehaviour
             QualitySettings.SetQualityLevel(OptionData.m_GraphicQuality, true);
         }
         else
-            Destroy(transform.parent.gameObject);
+            Destroy(this);
     }
 
     private void LoadOptionData()

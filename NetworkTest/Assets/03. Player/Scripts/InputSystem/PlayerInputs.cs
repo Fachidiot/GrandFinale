@@ -146,7 +146,7 @@ public class PlayerInputs : MonoBehaviour
         GameManager.OnPauseStateChanged += OnPause; // Subscribe to pause event
         mainCamera = Camera.main;
 
-        SetCursorState(true);
+        // SetCursorState(true);
     }
 
     void OnPause(bool pause)

@@ -11,12 +11,19 @@ public class RoomUIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Subscribe to the central ServerRoomManager for UI updates
-        ServerRoomManager.OnRoomDataUpdated += UpdateUI;
-        NetworkManager.OnDisconnected += HandleDisconnection;
+        if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
+        {
+            SinglePlayerUI();
+        }
+        else
+        {
+            // Subscribe to the central ServerRoomManager for UI updates
+            ServerRoomManager.OnRoomDataUpdated += UpdateUI;
+            NetworkManager.OnDisconnected += HandleDisconnection;
 
-        // Update UI with current data on enable
-        UpdateUI();
+            // Update UI with current data on enable
+            UpdateUI();
+        }
     }
 
     private void OnDisable()
@@ -72,5 +79,14 @@ public class RoomUIManager : MonoBehaviour
                 item.Setup(playerInfo, playerInfo.player_id == hostId);
             }
         }
+    }
+
+    private void SinglePlayerUI()
+    {
+        foreach (Transform child in playerListContent)
+        {
+            Destroy(child.gameObject);
+        }
+        roomNameText.gameObject.SetActive(false);
     }
 }

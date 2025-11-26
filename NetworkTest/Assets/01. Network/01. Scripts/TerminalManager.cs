@@ -62,7 +62,10 @@ public class TerminalManager : MonoBehaviour
         if (hasFocus)
         {
             if (hasBeenAltTab)
+            {
+                GameManager.Instance.PlayerInput.SetCursorState(true);
                 inputField.ActivateInputField();
+            }
             hasBeenAltTab = false;
         }
         else
