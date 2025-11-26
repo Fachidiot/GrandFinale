@@ -36,6 +36,7 @@ public class TooltipController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI fullTooltipGradeText;
     [SerializeField] private TextMeshProUGUI fullTooltipDescriptionText;
     [SerializeField] private TextMeshProUGUI fullTooltipPriceText;
+    [SerializeField] private TextMeshProUGUI fullTooltipUpgradeText;
 
     [Header("Animation Settings")]
     [SerializeField] private Vector2 tooltipOffset = new Vector2(20f, -50f);
@@ -105,6 +106,7 @@ public class TooltipController : MonoBehaviour
             fullTooltipDescriptionText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Detail_Text");
 
             fullTooltipPriceText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item_Price_Text");
+            fullTooltipUpgradeText = UIHelper.FindChild<TextMeshProUGUI>(fullTooltipPanel.transform, "Item_Kind_Upgrade_Text");
         }
     }
 
@@ -160,7 +162,8 @@ public class TooltipController : MonoBehaviour
                 GradeText = fullTooltipGradeText,
                 GradeImage = fullTooltipGradeImage,
                 DescriptionText = fullTooltipDescriptionText,
-                UpgradeText = null,
+
+                UpgradeText = fullTooltipUpgradeText,
                 PriceText = fullTooltipPriceText
             };
         }
