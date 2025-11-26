@@ -7,6 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 툴팁 표시 전담 컨트롤러
 /// - 가격 표시 및 강화 수치 분리 기능 추가됨
+/// - 페이드 애니메이션 없이 즉시 표시되도록 수정됨 (fadeDuration = 0f)
 /// </summary>
 public class TooltipController : MonoBehaviour
 {
@@ -23,8 +24,8 @@ public class TooltipController : MonoBehaviour
     [SerializeField] private Image smallTooltipItemImage;
     [SerializeField] private TextMeshProUGUI smallTooltipGradeText;
     [SerializeField] private TextMeshProUGUI smallTooltipDescriptionText;
-    [SerializeField] private TextMeshProUGUI smallTooltipUpgradeText; // 강화 수치(+1) 표시용
-    [SerializeField] private TextMeshProUGUI smallTooltipPriceText;   
+    [SerializeField] private TextMeshProUGUI smallTooltipUpgradeText;
+    [SerializeField] private TextMeshProUGUI smallTooltipPriceText;
 
     [Header("Full Tooltip Components")]
     [SerializeField] private RectTransform fullTooltipRect;
@@ -34,11 +35,12 @@ public class TooltipController : MonoBehaviour
     [SerializeField] private Image fullTooltipGradeImage;
     [SerializeField] private TextMeshProUGUI fullTooltipGradeText;
     [SerializeField] private TextMeshProUGUI fullTooltipDescriptionText;
-    [SerializeField] private TextMeshProUGUI fullTooltipPriceText;   
+    [SerializeField] private TextMeshProUGUI fullTooltipPriceText;
 
     [Header("Animation Settings")]
     [SerializeField] private Vector2 tooltipOffset = new Vector2(20f, -50f);
-    [SerializeField] private float fadeDuration = 0.2f;
+    // 수정됨: 페이드 애니메이션 시간을 0으로 설정하여 즉시 표시
+    [SerializeField] private float fadeDuration = 0f;
 
     #endregion
 
@@ -158,8 +160,8 @@ public class TooltipController : MonoBehaviour
                 GradeText = fullTooltipGradeText,
                 GradeImage = fullTooltipGradeImage,
                 DescriptionText = fullTooltipDescriptionText,
-                UpgradeText = null, 
-                PriceText = fullTooltipPriceText 
+                UpgradeText = null,
+                PriceText = fullTooltipPriceText
             };
         }
         // Small 툴팁 데이터 구성
@@ -177,7 +179,7 @@ public class TooltipController : MonoBehaviour
                 GradeImage = null,
                 DescriptionText = smallTooltipDescriptionText,
                 UpgradeText = smallTooltipUpgradeText,
-                PriceText = smallTooltipPriceText 
+                PriceText = smallTooltipPriceText
             };
         }
     }
@@ -202,8 +204,8 @@ public class TooltipController : MonoBehaviour
         UpdateGrade(data.GradeText, data.GradeImage, item);
         UpdateDescription(data.DescriptionText, item);
 
-        UpdatePrice(data.PriceText, item);          
-        UpdateUpgradeLevel(data.UpgradeText, item); 
+        UpdatePrice(data.PriceText, item);
+        UpdateUpgradeLevel(data.UpgradeText, item);
     }
 
     private void UpdateTitle(TMP_Text titleText, RelicData item)
@@ -212,7 +214,7 @@ public class TooltipController : MonoBehaviour
 
         string cleanName = item.itemName;
 
-        
+
         foreach (string prefix in upgradePrefixes)
         {
             if (cleanName.StartsWith(prefix))
@@ -266,7 +268,7 @@ public class TooltipController : MonoBehaviour
     {
         if (upgradeText == null) return;
 
-        string foundPrefix = "+0"; 
+        string foundPrefix = "+0";
 
         foreach (string prefix in upgradePrefixes)
         {
@@ -348,18 +350,26 @@ public class TooltipController : MonoBehaviour
 
     private IEnumerator FadeTooltip(CanvasGroup canvasGroup, float targetAlpha, GameObject panel)
     {
-        float startAlpha = canvasGroup.alpha;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < fadeDuration)
+        // 수정됨: fadeDuration이 0보다 작거나 같으면 즉시 반영
+        if (fadeDuration <= 0f)
         {
-            elapsedTime += Time.deltaTime;
-            float currentAlpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeDuration);
-            canvasGroup.alpha = currentAlpha;
-            yield return null;
+            canvasGroup.alpha = targetAlpha;
+        }
+        else
+        {
+            float startAlpha = canvasGroup.alpha;
+            float elapsedTime = 0f;
+
+            while (elapsedTime < fadeDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float currentAlpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeDuration);
+                canvasGroup.alpha = currentAlpha;
+                yield return null;
+            }
+            canvasGroup.alpha = targetAlpha;
         }
 
-        canvasGroup.alpha = targetAlpha;
         currentTargetAlpha = targetAlpha;
 
         if (targetAlpha == 0f)
@@ -385,20 +395,25 @@ public class TooltipController : MonoBehaviour
         public TMP_Text GradeText;
         public Image GradeImage;
         public TMP_Text DescriptionText;
-        public TMP_Text UpgradeText; // 강화 수치
-        public TMP_Text PriceText;   // 가격
+        public TMP_Text UpgradeText;
+        public TMP_Text PriceText;
     }
 
     #endregion
 }
 
 #region Helper Classes & Enums
-
+// GradeColorHelper, SpriteCache, InventoryType 등은 그대로 유지합니다.
 public static class GradeColorHelper
 {
     private const string COLOR_COMMON = "#FFFFFF";
     private const string COLOR_RARE = "#00CCFF";
     private const string COLOR_EPIC = "#9900FF";
+
+    private const string COLOR_UNCOMMON = "#1EFF00";
+    private const string COLOR_LEGENDARY = "#FF9900";
+    private const string COLOR_MYTHIC = "#FF0000";
+
     private const string COLOR_DEFAULT = "#FFFFFF";
 
     public static string GetColor(string grade)
@@ -408,8 +423,11 @@ public static class GradeColorHelper
         return grade.ToLower() switch
         {
             "common" => COLOR_COMMON,
+            "uncommon" => COLOR_UNCOMMON,
             "rare" => COLOR_RARE,
             "epic" => COLOR_EPIC,
+            "legendary" => COLOR_LEGENDARY,
+            "mythic" => COLOR_MYTHIC,
             _ => COLOR_DEFAULT,
         };
     }

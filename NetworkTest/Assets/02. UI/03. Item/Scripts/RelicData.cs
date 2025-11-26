@@ -24,7 +24,7 @@ public class RelicData : ScriptableObject
     public GameObject modelPrefab;
 
     [Header("리소스 경로")]
-    public string iconPath; // Icons/Relics/AuxHeart
+    public string iconPath;
 
     [Header("★핵심 연동★")]
     public AbilityData grantedAbility;

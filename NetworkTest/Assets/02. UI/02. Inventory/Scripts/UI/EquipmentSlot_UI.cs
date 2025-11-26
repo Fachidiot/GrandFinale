@@ -100,15 +100,38 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler, IBeginDragHandler, 
 
     public void OnDrop(PointerEventData eventData)
     {
-        Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
-
-        if (!IsValidSourceSlot(sourceSlot)) return;
-
-        RelicData itemToEquip = sourceSlot.currentSlot.item;
-
-        if (CanEquipItem(itemToEquip))
+        Slot_UI sourceInventorySlot = eventData.pointerDrag.GetComponent<Slot_UI>();
+        if (IsValidSourceSlot(sourceInventorySlot))
         {
-            TryEquipItem(sourceSlot, itemToEquip);
+            RelicData itemToEquip = sourceInventorySlot.currentSlot.item;
+            if (CanEquipItem(itemToEquip))
+            {
+                TryEquipItem(sourceInventorySlot, itemToEquip);
+            }
+            return;
+        }
+
+        //추가 로직
+        EquipmentSlot_UI sourceEquipSlot = eventData.pointerDrag.GetComponent<EquipmentSlot_UI>();
+        if (sourceEquipSlot != null)
+        {
+            if (sourceEquipSlot == this) return;
+
+            RelicData itemComing = sourceEquipSlot.currentItem; 
+            RelicData itemGoing = this.currentItem;            
+
+            bool canIncomingFitHere = this.CanEquipItem(itemComing);
+            bool canOutgoingFitThere = sourceEquipSlot.CanEquipItem(itemGoing);
+
+            if (canIncomingFitHere && canOutgoingFitThere)
+            {
+                EquipmentManager.Instance.SwapEquipment(sourceEquipSlot.equipmentSlotIndex, this.equipmentSlotIndex);
+
+                sourceEquipSlot.MarkDropSuccessful();
+                this.MarkDropSuccessful();
+
+                StartCoroutine(IgnoreNextClick());
+            }
         }
     }
 
@@ -142,7 +165,7 @@ public class EquipmentSlot_UI : MonoBehaviour, IDropHandler, IBeginDragHandler, 
 
     public bool CanEquipItem(RelicData item)
     {
-        if (item == null) return false;
+        if (item == null) return true;
 
 
         if (requiredItemType != ItemType.Etc)

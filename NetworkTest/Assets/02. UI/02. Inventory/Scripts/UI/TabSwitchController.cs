@@ -7,15 +7,24 @@ using UnityEngine.UI;
 /// 탭 전환 전담 컨트롤러
 /// - Inventory/Artifacts 탭 전환
 /// - Fade + Slide 애니메이션
-/// - 탭 버튼 상태 관리
+/// - 유물 탭 진입 시 왼쪽 정보창 활성화
 /// </summary>
 public class TabSwitchController : MonoBehaviour
 {
+    public enum TabType
+    {
+        Inventory,
+        Artifacts
+    }
+
     #region Serialized Fields
 
     [Header("Tab Panels")]
-    [SerializeField] private GameObject inventoryPanel;
-    [SerializeField] private GameObject artifactsPanel;
+    [SerializeField] private GameObject inventoryPanel;       // Mid_Inventory_Info
+    [SerializeField] private GameObject artifactsPanel;       // Artifacts_Info
+
+    [Header("Additional Panels")]
+    [SerializeField] private GameObject leftInventoryInfoPanel; // Left_Inventory_Info
 
     [Header("Canvas Groups")]
     [SerializeField] private CanvasGroup inventoryCanvasGroup;
@@ -43,10 +52,6 @@ public class TabSwitchController : MonoBehaviour
     void Start()
     {
         BindUI();
-
-        //if (inventoryButton != null) inventoryButton.onClick.AddListener(() => OnTabClicked(0));
-        //if (artifactsButton != null) artifactsButton.onClick.AddListener(() => OnTabClicked(1));
-
         InitializeTabState();
         RegisterButtonEvents();
     }
@@ -60,6 +65,7 @@ public class TabSwitchController : MonoBehaviour
     {
         inventoryPanel = UIHelper.FindObject(transform, "Mid_Inventory_Info");
         artifactsPanel = UIHelper.FindObject(transform, "Artifacts_Info");
+        leftInventoryInfoPanel = UIHelper.FindObject(transform, "Left_Inventory_Info");
 
         if (inventoryPanel) inventoryCanvasGroup = inventoryPanel.GetComponent<CanvasGroup>();
         if (artifactsPanel) artifactsCanvasGroup = artifactsPanel.GetComponent<CanvasGroup>();
@@ -68,90 +74,45 @@ public class TabSwitchController : MonoBehaviour
         artifactsButton = UIHelper.FindChild<Button>(transform, "Artifacts_Button");
         tabSelectText = UIHelper.FindChild<TMP_Text>(transform, "Button_Sellect_Text");
     }
+
     private void InitializeTabState()
     {
-        // Inventory 탭 기본 활성화
-        if (inventoryPanel != null) inventoryPanel.SetActive(true);
-        if (artifactsPanel != null) artifactsPanel.SetActive(false);
-
-        if (inventoryCanvasGroup != null)
-        {
-            inventoryCanvasGroup.alpha = 1f;
-            inventoryCanvasGroup.blocksRaycasts = true;
-        }
-
-        if (artifactsCanvasGroup != null)
-        {
-            artifactsCanvasGroup.alpha = 0f;
-            artifactsCanvasGroup.blocksRaycasts = false;
-        }
-
-        UpdateButtonStates(TabType.Inventory);
+        // 초기화 시 Inventory 탭 활성화
+        SetTabImmediate(TabType.Inventory);
     }
 
     private void RegisterButtonEvents()
     {
-        if (inventoryButton != null)
-        {
-            inventoryButton.onClick.AddListener(OnInventoryTabClick);
-        }
-
-        if (artifactsButton != null)
-        {
-            artifactsButton.onClick.AddListener(OnArtifactsTabClick);
-        }
+        if (inventoryButton != null) inventoryButton.onClick.AddListener(OnInventoryTabClick);
+        if (artifactsButton != null) artifactsButton.onClick.AddListener(OnArtifactsTabClick);
     }
 
     private void UnregisterButtonEvents()
     {
-        if (inventoryButton != null)
-        {
-            inventoryButton.onClick.RemoveListener(OnInventoryTabClick);
-        }
-
-        if (artifactsButton != null)
-        {
-            artifactsButton.onClick.RemoveListener(OnArtifactsTabClick);
-        }
+        if (inventoryButton != null) inventoryButton.onClick.RemoveListener(OnInventoryTabClick);
+        if (artifactsButton != null) artifactsButton.onClick.RemoveListener(OnArtifactsTabClick);
     }
 
     #endregion
 
     #region Public API
 
-    /// <summary>
-    /// Inventory 탭으로 전환
-    /// </summary>
     public void OnInventoryTabClick()
     {
         if (currentTab == TabType.Inventory) return;
-
         SwitchTab(TabType.Inventory);
     }
 
-    /// <summary>
-    /// Artifacts 탭으로 전환
-    /// </summary>
     public void OnArtifactsTabClick()
     {
         if (currentTab == TabType.Artifacts) return;
-
         SwitchTab(TabType.Artifacts);
     }
 
-    /// <summary>
-    /// 강제로 탭 설정 (애니메이션 없음)
-    /// </summary>
     public void SetTab(TabType tab, bool animated = false)
     {
-        if (animated)
-        {
-            SwitchTab(tab);
-        }
-        else
-        {
-            SetTabImmediate(tab);
-        }
+        if (animated) SwitchTab(tab);
+        else SetTabImmediate(tab);
     }
 
     #endregion
@@ -160,23 +121,20 @@ public class TabSwitchController : MonoBehaviour
 
     private void SwitchTab(TabType targetTab)
     {
-        // 사운드 재생
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.PlayTabSound();
-        }
 
         if (targetTab == TabType.Inventory)
         {
             SwitchToInventoryWithAnimation();
             if (inventoryButton)
-                inventoryButton.transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f, 10, 1);
+                inventoryButton.transform.DOPunchScale(Vector3.one * 0.1f, 0.2f, 10, 1);
         }
         else
         {
             SwitchToArtifactsWithAnimation();
             if (artifactsButton)
-                artifactsButton.transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f, 10, 1);
+                artifactsButton.transform.DOPunchScale(Vector3.one * 0.1f, 0.2f, 10, 1);
         }
 
         currentTab = targetTab;
@@ -195,24 +153,25 @@ public class TabSwitchController : MonoBehaviour
                 inventoryCanvasGroup.alpha = 1f;
                 inventoryCanvasGroup.blocksRaycasts = true;
             }
-
             if (artifactsCanvasGroup != null)
             {
                 artifactsCanvasGroup.alpha = 0f;
                 artifactsCanvasGroup.blocksRaycasts = false;
             }
         }
-        else
+        else // Artifacts
         {
             if (inventoryPanel != null) inventoryPanel.SetActive(false);
             if (artifactsPanel != null) artifactsPanel.SetActive(true);
+
+            // [핵심] 유물 탭일 때 왼쪽 패널 켜기
+            if (leftInventoryInfoPanel != null) leftInventoryInfoPanel.SetActive(true);
 
             if (inventoryCanvasGroup != null)
             {
                 inventoryCanvasGroup.alpha = 0f;
                 inventoryCanvasGroup.blocksRaycasts = false;
             }
-
             if (artifactsCanvasGroup != null)
             {
                 artifactsCanvasGroup.alpha = 1f;
@@ -241,6 +200,9 @@ public class TabSwitchController : MonoBehaviour
     private void SwitchToArtifactsWithAnimation()
     {
         if (!ShouldAnimateTransition(inventoryPanel, artifactsPanel)) return;
+
+        // [핵심] 애니메이션 전환 시에도 왼쪽 패널 켜기
+        if (leftInventoryInfoPanel != null) leftInventoryInfoPanel.SetActive(true);
 
         TabTransitionData fadeOut = CreateFadeOutData(inventoryPanel, inventoryCanvasGroup, slideDistance);
         TabTransitionData fadeIn = CreateFadeInData(artifactsPanel, artifactsCanvasGroup, -slideDistance);
@@ -277,12 +239,7 @@ public class TabSwitchController : MonoBehaviour
 
     private void AnimateTabTransition(TabTransitionData fadeOut, TabTransitionData fadeIn)
     {
-        // Phase 1: Fade Out 현재 패널
-        FadeOutPanel(fadeOut, () =>
-        {
-            // Phase 2: Fade In 새 패널
-            FadeInPanel(fadeIn);
-        });
+        FadeOutPanel(fadeOut, () => { FadeInPanel(fadeIn); });
     }
 
     private void FadeOutPanel(TabTransitionData data, System.Action onComplete)
@@ -309,11 +266,9 @@ public class TabSwitchController : MonoBehaviour
         data.Panel.SetActive(true);
         data.CanvasGroup.alpha = 0f;
 
-        // 시작 위치 설정
         Vector2 startPos = data.RectTransform.anchoredPosition - new Vector2(data.SlideDirection, 0);
         data.RectTransform.anchoredPosition = startPos;
 
-        // Fade In 애니메이션
         data.CanvasGroup.DOFade(1f, tabSwitchDuration);
 
         Vector2 targetPos = startPos + new Vector2(data.SlideDirection, 0);
@@ -363,16 +318,3 @@ public class TabSwitchController : MonoBehaviour
 
     #endregion
 }
-
-#region Enums
-
-/// <summary>
-/// 탭 타입 열거형
-/// </summary>
-public enum TabType
-{
-    Inventory,
-    Artifacts
-}
-
-#endregion

@@ -31,7 +31,6 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, I
     private bool isDragging = false;
 
     // Coroutines
-    private Coroutine tooltipCoroutine;
     private Coroutine singleClickCoroutine;
 
     #endregion
@@ -261,18 +260,17 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, I
     {
         if (currentItem == null) return;
         if (AudioManager.Instance) AudioManager.Instance.PlaySFX(AudioManager.Instance.uiHoverClip);
-        tooltipCoroutine = StartCoroutine(ShowTooltipDelay());
+        StartCoroutine(ShowTooltipDelay());
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (tooltipCoroutine != null) StopCoroutine(tooltipCoroutine);
         if (InventoryUIManager.Instance) InventoryUIManager.Instance.HideTooltip();
     }
 
     private IEnumerator ShowTooltipDelay()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
         if (InventoryUIManager.Instance && currentItem != null)
             InventoryUIManager.Instance.ShowTooltip(currentItem.item, transform.position);
     }
