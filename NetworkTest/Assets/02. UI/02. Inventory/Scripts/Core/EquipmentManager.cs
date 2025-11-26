@@ -89,8 +89,8 @@ public class EquipmentManager : MonoBehaviour
         // 7 : Slot2 (Rifle)
         // 8 : Slot3 (SMG)
         // 9 : Slot4 (Pistol)
-        if (6 <= targetEquipSlotIndex || targetEquipSlotIndex <= 9)
-            OnSlotEquip.Invoke(targetEquipSlotIndex - 6, itemToEquip);
+        if (itemToEquip.itemTypeEnum == ItemType.Weapon)
+            OnSlotEquip.Invoke(targetEquipSlotIndex - 5, itemToEquip);
 
         if (AudioManager.Instance != null) AudioManager.Instance.PlayEquipSound();
 
@@ -162,7 +162,7 @@ public class EquipmentManager : MonoBehaviour
                     ApplyItemAbility(itemData, false);
                     OnEquipmentChanged?.Invoke();
                     if (itemData.itemTypeEnum == ItemType.Weapon)
-                        OnSlotUnequip.Invoke(i - 6);
+                        OnSlotUnequip.Invoke(i - 5);
                     break;
                 }
             }

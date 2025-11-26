@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class SlotController : OnRig
 {
+    [SerializeField] private bool isMale;
     public bool slotActive = false;
     public Transform constrained;
     [Range(0, 1)] public float weight;
@@ -41,13 +42,15 @@ public class SlotController : OnRig
     }
 
     private GameObject slotItem;
-    public void AddSlot(GameObject item)
+    public IWeapon AddSlot(GameObject item)
     {
         if (constrained.childCount > 0)
             Debug.LogError($"SlotController: {name} slot already exist item, but add other item.");
 
         slotActive = true;
         slotItem = Instantiate(item, constrained);
+        slotItem.GetComponent<IWeapon>().SetOwnerGender(isMale);
+        return slotItem.GetComponent<IWeapon>();
     }
 
     public void DeleteSlot()

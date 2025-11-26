@@ -48,6 +48,9 @@ public class RangedWeapon : BaseWeapon
     [SerializeField] private WeaponPoint[] weaponPoints;
     public readonly Dictionary<WeaponPoint.PointType, Transform> WeaponPointsDict = new Dictionary<WeaponPoint.PointType, Transform>();
 
+    [SerializeField] private WeaponPoint[] femaleWeaponPoints;
+    public readonly Dictionary<WeaponPoint.PointType, Transform> FemaleWeaponPointsDict = new Dictionary<WeaponPoint.PointType, Transform>();
+
     [SerializeField] private float collisionDetectionLength;
     public float CollisionDetectionLength => collisionDetectionLength;
 
@@ -77,15 +80,6 @@ public class RangedWeapon : BaseWeapon
     {
         _audioSource = GetComponent<AudioSource>();
         boltAnimation = GetComponent<BoltAnimation>();
-
-        // Cache weapon points for fast lookups
-        foreach (var point in weaponPoints)
-        {
-            if (point != null && !WeaponPointsDict.ContainsKey(point.pointType))
-            {
-                WeaponPointsDict.Add(point.pointType, point.transform);
-            }
-        }
     }
 
     void Start()
@@ -97,6 +91,27 @@ public class RangedWeapon : BaseWeapon
             if (bulletPrefab != null) PoolManager.Instance.CreatePool(bulletPrefab, 20);
             if (casingPrefab != null) PoolManager.Instance.CreatePool(casingPrefab, 20);
             if (muzzleFlash != null) PoolManager.Instance.CreatePool(muzzleFlash, 5);
+        }
+
+        if (IsMale)
+        {
+            foreach (var point in weaponPoints)
+            {
+                if (point != null && !WeaponPointsDict.ContainsKey(point.pointType))
+                {
+                    WeaponPointsDict.Add(point.pointType, point.transform);
+                }
+            }
+        }
+        else
+        {
+            foreach (var point in femaleWeaponPoints)
+            {
+                if (point != null && !FemaleWeaponPointsDict.ContainsKey(point.pointType))
+                {
+                    FemaleWeaponPointsDict.Add(point.pointType, point.transform);
+                }
+            }
         }
     }
 

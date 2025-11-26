@@ -20,5 +20,14 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
     [SerializeField] private float resistanceSmoothing; // view offset rotation speed
     public float ResistanceSmoothing => resistanceSmoothing;
 
+    [SerializeField] private bool isMale;
+    public bool IsMale => isMale;
+
     public abstract bool Attack();
+
+    public void SetOwnerGender(bool isMale)
+    {
+        this.isMale = isMale;
+    }
+
 }

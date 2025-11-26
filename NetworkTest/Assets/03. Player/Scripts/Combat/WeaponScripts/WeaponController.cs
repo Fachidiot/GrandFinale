@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using Unity.VisualScripting;
+using System.Text;
 
 public class WeaponController : MonoBehaviour
 {
+    [SerializeField] private bool isMale;
     public Animator animator;
     public EventsCenter eventsCenter;
     public SlotController[] slots;
@@ -104,7 +106,6 @@ public class WeaponController : MonoBehaviour
         eventsCenter.OnApplyGunPositionOffset += ApplyGunPositionOffsetInHands;
         eventsCenter.OnWeaponChange += GunChangeCheck;
 
-
         UIEvents.PlayerInitialized(this);
     }
 
@@ -174,22 +175,57 @@ public class WeaponController : MonoBehaviour
         currentWeapon?.Attack();
     }
 
+    public void PrintInventoryLog()
+    {
+        // 1. 문자열을 조합할 빌더 생성
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"=== 현재 장착된 무기 (총 {_weaponCache.Count}개) ===");
+
+        // 2. 딕셔너리 순회
+        foreach (var pair in _weaponCache)
+        {
+            int slotIndex = pair.Key;
+            IWeapon weapon = pair.Value;
+
+            // IWeapon의 속성들을 활용해 정보를 구성
+            // 예: "Slot [1] : Rifle (Damage: 10)"
+            sb.AppendLine($"Slot [{slotIndex}] : {weapon.Type} | Obj: {weapon.gameObject.name} | Dmg: {weapon.PlayerDamage}");
+        }
+
+        // 3. 최종 출력
+        Debug.Log(sb.ToString());
+    }
+
     private void SlotEquip(int slotIndex, RelicData relicData)
     {
-        Debug.Log($"{slotIndex} 슬롯 -> {relicData}");
+        Debug.Log($"슬롯 [{slotIndex - 1}] {relicData.weaponType} 장착");
 
         // 슬롯이 비어있으면 장비 착용.
-        if (!slots[slotIndex].slotActive)
-            slots[slotIndex].AddSlot(relicData.modelPrefab);
+        if (!slots[slotIndex - 1].slotActive)
+        {
+            var _weapon = slots[slotIndex - 1].AddSlot(relicData.modelPrefab);
+            _weaponCache[slotIndex] = _weapon;
+        }
+
+        PrintInventoryLog();
     }
 
     private void SlotUnequip(int slotIndex)
     {
-        Debug.Log($"{slotIndex} 슬롯 해제.");
+        Debug.Log($"슬롯 [{slotIndex}] {_weaponCache[slotIndex].gameObject.name} 장착해제.");
 
         // 슬롯에 장비가 있다면 해제.
-        if (slots[slotIndex].slotActive)
-            slots[slotIndex].DeleteSlot();
+        if (slots[slotIndex - 1].slotActive)
+        {
+            // ToChange(0);
+            animator.CrossFadeInFixedTime("UnArmIdle", 0.25f, 3);
+            animator.SetBool("isArmed", false);
+
+            slots[slotIndex - 1].DeleteSlot();
+            _weaponCache.Remove(slotIndex);
+        }
+
+        PrintInventoryLog();
     }
 
     public void ToChange(int nextGunSlotID)
@@ -350,13 +386,27 @@ public class WeaponController : MonoBehaviour
             // Use the cached dictionary for a fast lookup
             if (Enum.TryParse<WeaponPoint.PointType>(pointName, out var pointType))
             {
-                if (rangedWeapon.WeaponPointsDict.TryGetValue(pointType, out var targetTransform))
+                if (isMale)
                 {
-                    handIk.target = targetTransform;
+                    if (rangedWeapon.WeaponPointsDict.TryGetValue(pointType, out var targetTransform))
+                    {
+                        handIk.target = targetTransform;
+                    }
+                    else
+                    {
+                        handIk.target = null; // Or a default target
+                    }
                 }
                 else
                 {
-                    handIk.target = null; // Or a default target
+                    if (rangedWeapon.FemaleWeaponPointsDict.TryGetValue(pointType, out var targetTransform))
+                    {
+                        handIk.target = targetTransform;
+                    }
+                    else
+                    {
+                        handIk.target = null; // Or a default target
+                    }
                 }
             }
             else

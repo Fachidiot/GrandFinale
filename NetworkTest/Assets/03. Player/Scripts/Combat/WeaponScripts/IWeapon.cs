@@ -17,5 +17,8 @@ public interface IWeapon
     Transform AimPoint { get; }
     float ResistanceForce { get; }
     float ResistanceSmoothing { get; }
+    bool IsMale { get; }
+
+    void SetOwnerGender(bool isMale);
     bool Attack();
 }

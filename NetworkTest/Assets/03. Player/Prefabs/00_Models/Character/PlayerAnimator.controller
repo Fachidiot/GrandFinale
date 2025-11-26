@@ -1626,7 +1626,7 @@ AnimatorStateMachine:
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: -70, y: 80, z: 0}
-  m_EntryPosition: {x: -110, y: 120, z: 0}
+  m_EntryPosition: {x: 40, y: 130, z: 0}
   m_ExitPosition: {x: 260, y: 70, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: -2912027672189399201}
@@ -3038,7 +3038,8 @@ AnimatorState:
   - {fileID: 1408876402315087778}
   - {fileID: 5852239460035428063}
   - {fileID: -3922043664442652336}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: 9108692821740092149}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -5704,6 +5705,30 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
+--- !u!114 &9108692821740092149
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cfc6e1cadb360d4d81ced8dc01f7504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  endTime: 0
+  weaponController: {fileID: 0}
+  curveEvents: []
+  enterEvents: []
+  updateEvents: []
+  exitEvents:
+  - funcId: 7
+    funcName: OnWeaponChange
+    parameters:
+    - changed|System.Boolean|False
+    time: 0
+    done: 0
 --- !u!206 &9153504890414068376
 BlendTree:
   m_ObjectHideFlags: 1
