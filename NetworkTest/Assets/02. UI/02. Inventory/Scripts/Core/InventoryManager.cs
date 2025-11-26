@@ -213,7 +213,6 @@ public class InventoryManager : MonoBehaviour
         allItems[realIndex] = newInvItem;
         allTabDisplayList[displayIndex] = newInvItem;
 
-        Debug.Log($"[Item Added] {newItem.itemName} (Slot {realIndex})");
         OnInventoryChanged?.Invoke();
         return true;
     }

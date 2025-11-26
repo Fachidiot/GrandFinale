@@ -1,4 +1,4 @@
-using UnityEngine;
+癤퓎sing UnityEngine;
 using UnityEngine.EventSystems;
 
 public class SynthesisDropArea : MonoBehaviour, IDropHandler
@@ -7,11 +7,8 @@ public class SynthesisDropArea : MonoBehaviour, IDropHandler
 
     void Start()
     {
-        if (manager == null)
-            manager = GetComponentInParent<RelicSynthesisManager>();
-
-        if (manager == null)
-            manager = FindObjectOfType<RelicSynthesisManager>();
+        if (manager == null) manager = GetComponentInParent<RelicSynthesisManager>();
+        if (manager == null) manager = FindObjectOfType<RelicSynthesisManager>();
     }
 
     public void OnDrop(PointerEventData eventData)
@@ -23,11 +20,9 @@ public class SynthesisDropArea : MonoBehaviour, IDropHandler
         if (sourceSlot != null && sourceSlot.currentItem != null)
         {
             var type = sourceSlot.currentItem.item.itemTypeEnum;
-            // 유물 또는 재료만 허용
             if (type != ItemType.Artifact && type != ItemType.Etc) return;
 
-            // 매니저에게 생성 요청 (마우스 위치 전달)
-            manager.SpawnNodeAtPosition(sourceSlot.currentItem, eventData.position);
+            manager.SpawnNode(sourceSlot.currentItem);
         }
     }
 }

@@ -1,80 +1,38 @@
-using UnityEngine;
+癤퓎sing UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class SynthesisNode_UI : MonoBehaviour, IPointerClickHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class SynthesisNode_UI : MonoBehaviour, IPointerClickHandler
 {
-    [Header("Floating Effect")]
-    public float floatSpeed = 15f;
-    public float floatRange = 15f;
-
+    #region Serialized Fields
     [Header("Components")]
     public Image iconImage;
-    public Button removeButton;
+    #endregion
 
+    #region Private Fields
     public InventoryItem LinkedItem { get; private set; }
+    private RelicSynthesisManager manager;
+    #endregion
 
-    private RelicSynthesisManager manager; 
-    private Vector3 floatBasePos;
-    private Vector3 randomOffset;
-    private bool isDragging = false;
-
+    #region Public Methods
     public void Initialize(RelicSynthesisManager managerRef, InventoryItem item)
     {
         this.manager = managerRef;
         this.LinkedItem = item;
 
-        // 이미지 설정
         if (iconImage != null)
             iconImage.sprite = Resources.Load<Sprite>(item.item.iconPath);
-
-        // 무중력 초기값 설정
-        floatBasePos = transform.localPosition; // 로컬 좌표 기준
-        randomOffset = new Vector3(Random.Range(0, 100), Random.Range(0, 100), 0);
     }
+    #endregion
 
-    void Start()
-    {
-        if (removeButton != null) removeButton.onClick.AddListener(OnRemoveClick);
-    }
-
-    void Update()
-    {
-        // 드래그 중이 아닐 때만 둥둥 떠다님
-        if (!isDragging)
-        {
-            float time = Time.time * floatSpeed * 0.01f;
-            float x = (Mathf.PerlinNoise(time + randomOffset.x, 0) - 0.5f) * floatRange;
-            float y = (Mathf.PerlinNoise(0, time + randomOffset.y) - 0.5f) * floatRange;
-
-            // 로컬 좌표 기준으로 이동
-            transform.localPosition = Vector3.Lerp(transform.localPosition, floatBasePos + new Vector3(x, y, 0), Time.deltaTime * 5f);
-        }
-    }
-
-    public void OnRemoveClick()
-    {
-        if (manager != null) manager.RemoveNode(this);
-    }
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        isDragging = true;
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        transform.position = eventData.position;
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        isDragging = false;
-        floatBasePos = transform.localPosition; 
-    }
-
+    #region Event Handlers
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 필요 시 툴팁 표시
+        if (eventData.button == PointerEventData.InputButton.Right ||
+           (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 2))
+        {
+            if (manager != null) manager.RemoveNode(this);
+        }
     }
+    #endregion
 }

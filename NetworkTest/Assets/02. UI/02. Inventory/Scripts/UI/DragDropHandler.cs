@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
 /// 드래그 & 드롭 처리 전담 컨트롤러
-/// - 아이템 드래그 시각화
+/// - 아이템 드래그 시각화 (최상위 레이어 이동 기능 추가)
 /// - 패널 드래그 이동
 /// - 드래그 아이콘 관리
 /// </summary>
@@ -28,10 +28,12 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     private Vector2 dragOffset;
     private Image currentActiveDragIcon;
+    private Transform originalParent;
+    private int originalSiblingIndex; 
 
     #endregion
 
-    #region IBeginDragHandler Implementation
+    #region IBeginDragHandler Implementation (Panel Drag)
 
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -48,7 +50,7 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     #endregion
 
-    #region IDragHandler Implementation
+    #region IDragHandler Implementation (Panel Drag)
 
     public void OnDrag(PointerEventData eventData)
     {
@@ -70,9 +72,32 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
         Image dragIcon = GetActiveDragIcon();
         if (dragIcon == null) return;
 
+        currentActiveDragIcon = dragIcon;
+
+        if (originalParent == null)
+        {
+            originalParent = dragIcon.transform.parent;
+            originalSiblingIndex = dragIcon.transform.GetSiblingIndex();
+        }
+
+        Canvas rootCanvas = GetComponentInParent<Canvas>();
+        if (rootCanvas != null && rootCanvas.rootCanvas != null)
+        {
+            dragIcon.transform.SetParent(rootCanvas.rootCanvas.transform, true);
+            dragIcon.transform.SetAsLastSibling(); 
+        }
+
+        Canvas iconCanvas = dragIcon.GetComponent<Canvas>();
+        if (iconCanvas == null) iconCanvas = dragIcon.gameObject.AddComponent<Canvas>();
+        iconCanvas.overrideSorting = true;
+        iconCanvas.sortingOrder = 3000;
+
+        CanvasGroup group = dragIcon.GetComponent<CanvasGroup>();
+        if (group == null) group = dragIcon.gameObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
+
         dragIcon.sprite = iconSprite;
         dragIcon.gameObject.SetActive(true);
-        currentActiveDragIcon = dragIcon;
     }
 
     /// <summary>
@@ -92,17 +117,21 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
     /// </summary>
     public void EndItemDrag()
     {
-        if (smallDragIcon != null)
+        if (currentActiveDragIcon != null)
         {
-            smallDragIcon.gameObject.SetActive(false);
+            if (originalParent != null)
+            {
+                currentActiveDragIcon.transform.SetParent(originalParent, true);
+                currentActiveDragIcon.transform.SetSiblingIndex(originalSiblingIndex);
+                originalParent = null; // 초기화
+            }
+
+            currentActiveDragIcon.gameObject.SetActive(false);
+            currentActiveDragIcon = null;
         }
 
-        if (fullDragIcon != null)
-        {
-            fullDragIcon.gameObject.SetActive(false);
-        }
-
-        currentActiveDragIcon = null;
+        if (smallDragIcon != null) smallDragIcon.gameObject.SetActive(false);
+        if (fullDragIcon != null) fullDragIcon.gameObject.SetActive(false);
     }
 
     #endregion
@@ -140,13 +169,11 @@ public class DragDropHandler : MonoBehaviour, IBeginDragHandler, IDragHandler
 
     private Image GetActiveDragIcon()
     {
-        // 이미 활성화된 아이콘이 있으면 재사용
         if (currentActiveDragIcon != null)
         {
             return currentActiveDragIcon;
         }
 
-        // 현재 활성화된 인벤토리에 따라 선택
         if (IsInventoryActive(fullInventoryPanel))
         {
             return fullDragIcon;

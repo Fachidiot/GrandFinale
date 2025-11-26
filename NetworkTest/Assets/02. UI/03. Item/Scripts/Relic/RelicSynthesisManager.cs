@@ -1,145 +1,201 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class RelicSynthesisManager : MonoBehaviour
 {
-    [Header("Settings")]
-    public string magicThreadID = "MAT_REL_01"; // ¸¶¹ı½Ç ID
-    public GameObject nodePrefab;               // ³ëµå ÇÁ¸®ÆÕ
-    public GameObject linePrefab;               // ¼± ÇÁ¸®ÆÕ
-    public Transform synthesisCanvas;           // ³ëµå°¡ »ı¼ºµÉ ºÎ¸ğ (Panel)
-    public Button synthesisButton;              // Á¶ÇÕ ¹öÆ°
+    public static RelicSynthesisManager Instance;
 
-    // --- »óÅÂ °ü¸® ---
+    #region Serialized Fields
+    [Header("Components")]
+    public SynthesisRoulette roulette;
+    public SynthesisResultPopup resultPopup;
+    public SynthesisMessagePopup messagePopup;
+    public GameObject nodePrefab;
+    public Button synthesisButton;
+
+    [Header("Settings")]
+    public string magicThreadID = "MAT_REL_01";
+    #endregion
+
+    #region Private Fields
     private List<SynthesisNode_UI> activeNodes = new List<SynthesisNode_UI>();
-    private List<GameObject> activeLines = new List<GameObject>();
     private string currentBaseGrade = "";
+    private bool isSynthesizing = false;
+    #endregion
+
+    #region Unity Lifecycle
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+    }
 
     void Start()
     {
+        DOTween.Init();
+
+        if (synthesisButton == null)
+            synthesisButton = transform.Find("Synthesis_Button")?.GetComponent<Button>();
+
         if (synthesisButton != null)
             synthesisButton.onClick.AddListener(TrySynthesize);
 
-        if (synthesisCanvas == null) synthesisCanvas = transform;
+        if (roulette == null)
+            roulette = GetComponentInChildren<SynthesisRoulette>();
+
+        // íŒì—… ìë™ ì°¾ê¸° (êº¼ì ¸ ìˆì–´ë„ ë¶€ëª¨ í†µí•´ ì°¾ê¸°)
+        if (resultPopup == null && transform.parent != null)
+            resultPopup = transform.parent.GetComponentInChildren<SynthesisResultPopup>(true);
+
+        if (messagePopup == null && transform.parent != null)
+            messagePopup = transform.parent.GetComponentInChildren<SynthesisMessagePopup>(true);
     }
 
-    void Update()
+    void OnDisable()
     {
-        // ¸Å ÇÁ·¹ÀÓ ¼±À» °»½Å
-        UpdateAutomaticLines();
+        ReturnAllItemsToInventory();
+        if (resultPopup != null) resultPopup.ClosePopup();
+        if (messagePopup != null) messagePopup.ClosePopup();
+        isSynthesizing = false;
     }
+    #endregion
 
-    // 1. ³ëµå »ı¼º (µå·Ó ½Ã È£ÃâµÊ)
-    public void SpawnNodeAtPosition(InventoryItem item, Vector3 screenPos)
+    #region Node Management
+    public void SpawnNode(InventoryItem item)
     {
+        if (isSynthesizing) return;
+        if (activeNodes.Any(node => node.LinkedItem == item)) return;
+
+        // ë“±ê¸‰ ê²€ì¦
         if (item.item.itemTypeEnum == ItemType.Artifact)
         {
-            // ÇöÀç È­¸é¿¡ À¯¹°ÀÌ ¾øÀ¸¸é ±âÁØ µî±Ş ¼³Á¤
             if (string.IsNullOrEmpty(currentBaseGrade))
             {
                 if (!activeNodes.Any(n => n.LinkedItem.item.itemTypeEnum == ItemType.Artifact))
                     currentBaseGrade = item.item.grade;
             }
-            // ±âÁØ µî±Ş°ú ´Ù¸£¸é °ÅºÎ
             else if (currentBaseGrade != item.item.grade)
             {
-                Debug.LogWarning("´Ù¸¥ µî±ŞÀÇ À¯¹°Àº ¼¯À» ¼ö ¾ø½À´Ï´Ù!");
+                ShowWarning("ë“±ê¸‰ ë¶ˆì¼ì¹˜");
                 return;
             }
         }
 
-        // B. À§Ä¡ °è»ê
-        Vector2 localPos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            (RectTransform)synthesisCanvas, screenPos, null, out localPos);
+        // ë§ˆë²•ì‹¤ ì„ ì œ í™•ì¸
+        int projectedCount = activeNodes.Count + 1;
+        int requiredThread = Mathf.Max(0, projectedCount - 1);
 
-        // C. ³ëµå »ı¼º ¹× ÃÊ±âÈ­
-        GameObject go = Instantiate(nodePrefab, synthesisCanvas);
-        go.transform.localPosition = localPos;
+        if (InventoryManager.Instance != null)
+        {
+            if (!InventoryManager.Instance.HasItem(magicThreadID, requiredThread))
+            {
+                ShowWarning($"ë§ˆë²•ì‹¤ì´ ë¶€ì¡±í•©ë‹ˆë‹¤.\n({requiredThread}ê°œ í•„ìš”)");
+                return;
+            }
+        }
 
+        InventoryManager.Instance.RemoveItem(item, 1);
+
+        GameObject go = Instantiate(nodePrefab, roulette.transform);
         SynthesisNode_UI nodeUI = go.GetComponent<SynthesisNode_UI>();
+
         nodeUI.Initialize(this, item);
 
         activeNodes.Add(nodeUI);
+        roulette.RefreshLayout(activeNodes);
     }
 
-    // ³ëµå »èÁ¦ ¿äÃ» Ã³¸®
     public void RemoveNode(SynthesisNode_UI node)
     {
+        if (isSynthesizing) return;
+
         if (activeNodes.Contains(node))
         {
+            InventoryManager.Instance.AddItem(node.LinkedItem.item, 1);
+
             activeNodes.Remove(node);
             Destroy(node.gameObject);
 
-            // ³²Àº À¯¹°ÀÌ ¾øÀ¸¸é ±âÁØ µî±Ş ÃÊ±âÈ­
             if (!activeNodes.Any(n => n.LinkedItem.item.itemTypeEnum == ItemType.Artifact))
                 currentBaseGrade = "";
+
+            roulette.RefreshLayout(activeNodes);
         }
     }
 
-  
-    // 2. ÀÚµ¿ ¿¬°á ·ÎÁ÷
-    private void UpdateAutomaticLines()
+    private void ReturnAllItemsToInventory()
     {
-        // ±âÁ¸ ¼± ¸ğµÎ »èÁ¦
-        foreach (var line in activeLines) Destroy(line);
-        activeLines.Clear();
+        if (isSynthesizing) return;
 
-        if (activeNodes.Count < 2) return;
-
-        // ¸¶¹ı½Ç È®ÀÎ
-        if (InventoryManager.Instance != null && !InventoryManager.Instance.HasItem(magicThreadID, 1))
-            return;
-
-        // ¼øÂ÷ÀûÀ¸·Î ¿¬°á
-        for (int i = 0; i < activeNodes.Count - 1; i++)
+        for (int i = activeNodes.Count - 1; i >= 0; i--)
         {
-            DrawLine(activeNodes[i].transform.position, activeNodes[i + 1].transform.position);
+            InventoryManager.Instance.AddItem(activeNodes[i].LinkedItem.item, 1);
+            Destroy(activeNodes[i].gameObject);
         }
+        activeNodes.Clear();
+        currentBaseGrade = "";
+        if (roulette) roulette.RefreshLayout(activeNodes);
     }
+    #endregion
 
-    private void DrawLine(Vector3 startPos, Vector3 endPos)
-    {
-        GameObject line = Instantiate(linePrefab, synthesisCanvas);
-        line.transform.SetAsFirstSibling();
-        activeLines.Add(line);
-
-        RectTransform rt = line.GetComponent<RectTransform>();
-
-        Vector3 mid = (startPos + endPos) / 2;
-        float dist = Vector3.Distance(startPos, endPos);
-        Vector3 dir = (endPos - startPos).normalized;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-        rt.position = mid;
-        rt.sizeDelta = new Vector2(dist, 5f);
-        rt.rotation = Quaternion.Euler(0, 0, angle);
-    }
-
-    // 3. Á¶ÇÕ ½ÇÇà
+    #region Synthesis Logic
     public void TrySynthesize()
     {
-        // À¯¹°°ú Àç·á ºĞ·ù
+        if (isSynthesizing) return;
+
         var artifacts = activeNodes.Where(n => n.LinkedItem.item.itemTypeEnum == ItemType.Artifact).ToList();
         var boosters = activeNodes.Where(n => n.LinkedItem.item.itemTypeEnum == ItemType.Etc).Select(n => n.LinkedItem.item).ToList();
 
-        // Á¶°Ç Ã¼Å©
-        if (artifacts.Count < 2) { Debug.Log("À¯¹° 2°³ ÀÌ»ó ÇÊ¿ä"); return; }
-
-        int threadCost = Mathf.Max(1, activeNodes.Count - 1); // ¿¬°á ¼ö = ³ëµå ¼ö - 1
-        if (!InventoryManager.Instance.HasItem(magicThreadID, threadCost))
+        if (artifacts.Count < 2)
         {
-            Debug.Log($"¸¶¹ı½ÇÀÌ {threadCost}°³ ÇÊ¿äÇÕ´Ï´Ù.");
+            ShowWarning("ìœ ë¬¼ 2ê°œ ì´ìƒ í•„ìš”");
             return;
         }
 
-        // È®·ü °è»ê
-        var prob = SynthesisProbabilityTable.GetProbabilities(currentBaseGrade, artifacts.Count, boosters);
+        int threadCost = Mathf.Max(1, activeNodes.Count - 1);
+        if (!InventoryManager.Instance.HasItem(magicThreadID, threadCost))
+        {
+            ShowWarning($"ë§ˆë²•ì‹¤ ë¶€ì¡±\n({threadCost}ê°œ í•„ìš”)");
+            return;
+        }
 
-        // °á°ú ÆÇÁ¤
+        // --- ì¡°í•© ì‹œì‘ ---
+        isSynthesizing = true;
+
+        // ë§ˆë²•ì‹¤ ì†Œëª¨
+        InventoryManager.Instance.RemoveItemByID(magicThreadID, threadCost);
+
+        if (roulette != null)
+        {
+            roulette.PlayConvergenceAnimation(() =>
+            {
+                CompleteSynthesis(artifacts.Count, boosters);
+            });
+        }
+        else
+        {
+            CompleteSynthesis(artifacts.Count, boosters);
+        }
+    }
+
+    private void CompleteSynthesis(int artifactCount, List<RelicData> boosters)
+    {
+        // 1. íŒì—… ì˜¤ë¸Œì íŠ¸ê°€ ì—°ê²°ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸
+        if (resultPopup == null)
+        {
+            Debug.LogError("Result Popupì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! ì¸ìŠ¤í™í„°ë¥¼ í™•ì¸í•˜ì„¸ìš”.");
+            // ì—°ê²° ì•ˆ ë˜ì–´ë„ ì¸ë²¤í† ë¦¬ì—ë¼ë„ ë„£ìœ¼ë ¤ë©´ ì•„ë˜ ë¡œì§ ì§„í–‰, ì•„ë‹ˆë©´ return
+        }
+        else
+        {
+            resultPopup.gameObject.SetActive(true);
+        }
+
+        var prob = SynthesisProbabilityTable.GetProbabilities(currentBaseGrade, artifactCount, boosters);
         float roll = Random.Range(0f, 100f);
+
         int currentTier = SynthesisProbabilityTable.GetTier(currentBaseGrade);
         string resultGrade = currentBaseGrade;
 
@@ -148,26 +204,33 @@ public class RelicSynthesisManager : MonoBehaviour
         else if (roll < prob.jackpot + prob.next)
             resultGrade = SynthesisProbabilityTable.GetGradeString(currentTier + 1);
 
-        // °á°ú Ã³¸®
-        foreach (var node in activeNodes)
-        {
-            InventoryManager.Instance.RemoveItem(node.LinkedItem, 1);
-        }
-        InventoryManager.Instance.RemoveItemByID(magicThreadID, threadCost);
+        Debug.Log($"ì¡°í•© ê²°ê³¼ ë“±ê¸‰: {resultGrade} (í™•ë¥  ë¡¤: {roll})");
 
-        // °á°ú Áö±Ş
         RelicData reward = GetRandomRelicByGrade(resultGrade);
+
         if (reward != null)
         {
             InventoryManager.Instance.AddItem(reward);
-            Debug.Log($"[Á¶ÇÕ ¿Ï·á] {reward.itemName} ({reward.grade}) È¹µæ!");
+
+            if (resultPopup != null)
+                resultPopup.ShowResult(reward);
+            else
+                Debug.Log($"[ì„±ê³µ] íŒì—… ì—†ìŒ, ì¸ë²¤í† ë¦¬ ì¶”ê°€ë¨: {reward.itemName}");
         }
         else
         {
-            Debug.Log("Á¶ÇÕ ½ÇÆĞ ¶Ç´Â ÇØ´ç µî±Ş ¾ÆÀÌÅÛ µ¥ÀÌÅÍ ¾øÀ½.");
+            string errorMsg = $"[{resultGrade}] ë“±ê¸‰ì— í•´ë‹¹í•˜ëŠ” Artifact íƒ€ì… ìœ ë¬¼ì´ DBì— ì—†ìŠµë‹ˆë‹¤.";
+            Debug.LogError(errorMsg);
+            ShowWarning("í•´ë‹¹ ë“±ê¸‰ì˜ ìœ ë¬¼ ë°ì´í„°ê°€ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
         }
 
-        ClearBoard();
+        // ë…¸ë“œ ì •ë¦¬
+        foreach (var node in activeNodes) Destroy(node.gameObject);
+        activeNodes.Clear();
+        currentBaseGrade = "";
+
+        if (roulette) roulette.RefreshLayout(activeNodes);
+        isSynthesizing = false;
     }
 
     private RelicData GetRandomRelicByGrade(string grade)
@@ -178,12 +241,14 @@ public class RelicSynthesisManager : MonoBehaviour
         return list.Count > 0 ? list[Random.Range(0, list.Count)] : null;
     }
 
-    private void ClearBoard()
+    private void ShowWarning(string msg)
     {
-        foreach (var node in activeNodes) Destroy(node.gameObject);
-        activeNodes.Clear();
-        foreach (var line in activeLines) Destroy(line);
-        activeLines.Clear();
-        currentBaseGrade = "";
+        if (messagePopup != null)
+        {
+            messagePopup.gameObject.SetActive(true); // ë¨¼ì € ì¼œì£¼ê³ 
+            messagePopup.ShowMessage(msg);
+        }
+        else Debug.LogWarning(msg);
     }
+    #endregion
 }

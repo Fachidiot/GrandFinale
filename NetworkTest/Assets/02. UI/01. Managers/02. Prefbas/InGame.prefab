@@ -639,9 +639,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &158796930661025592
 GameObject:
@@ -1083,6 +1080,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 4
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &259688733408083586
 GameObject:
   m_ObjectHideFlags: 0
@@ -2030,9 +2032,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &350073043765834027
 GameObject:
@@ -2786,9 +2785,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &461715480253765802
 GameObject:
@@ -2885,9 +2881,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &466921102782866538
 GameObject:
@@ -3327,9 +3320,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &555654804830395493
 GameObject:
@@ -4739,9 +4729,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &813092311697269255
 GameObject:
@@ -4838,9 +4825,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &816490169774846753
 GameObject:
@@ -5280,9 +5264,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &841086380372578701
 GameObject:
@@ -6027,9 +6008,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &926084928147879829
 GameObject:
@@ -6873,6 +6851,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 3
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &1098214829235319454
 GameObject:
   m_ObjectHideFlags: 0
@@ -6968,9 +6951,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1113175867900303898
 GameObject:
@@ -7449,9 +7429,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1203793331745346795
 GameObject:
@@ -7548,9 +7525,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1205349969471310968
 GameObject:
@@ -7647,9 +7621,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1205849901694031932
 GameObject:
@@ -8164,9 +8135,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1273382527264407348
 GameObject:
@@ -8263,9 +8231,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1275328835918497021
 GameObject:
@@ -8423,6 +8388,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 4
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &1277009835461177573
 GameObject:
   m_ObjectHideFlags: 0
@@ -8802,9 +8772,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1353376260271180851
 GameObject:
@@ -8901,9 +8868,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1358679458531030081
 GameObject:
@@ -9000,9 +8964,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1371629464845180296
 GameObject:
@@ -9517,9 +9478,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1430218420977895854
 GameObject:
@@ -9901,9 +9859,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1488371553376771493
 GameObject:
@@ -10380,9 +10335,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1606804892721222801
 GameObject:
@@ -10518,9 +10470,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1616180297074236630
 GameObject:
@@ -11203,9 +11152,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1716169722826235993
 GameObject:
@@ -11436,9 +11382,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1741176111549501952
 GameObject:
@@ -11685,9 +11628,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &1764672168337753504
 GameObject:
@@ -13295,6 +13235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 0
+  allowedWeaponTypes: 
   slotIcon: {fileID: 7081710026575691225}
   slotNameText: {fileID: 3758107338849856671}
   equipmentSlotIndex: 9
@@ -13925,9 +13866,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2189075712764713390
 GameObject:
@@ -14099,9 +14037,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2242509618058485825
 GameObject:
@@ -14959,9 +14894,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2398820474778908894
 GameObject:
@@ -15283,9 +15215,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2445119576187238881
 GameObject:
@@ -15457,9 +15386,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2456734054677620408
 GameObject:
@@ -15713,6 +15639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 6
   requiredItemType: 6
+  allowedWeaponTypes: 
   slotIcon: {fileID: 6585871263497775039}
   slotNameText: {fileID: 0}
   equipmentSlotIndex: 5
@@ -15959,6 +15886,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 0
+  allowedWeaponTypes: 
   slotIcon: {fileID: 3320019914646421128}
   slotNameText: {fileID: 8252965597720818709}
   equipmentSlotIndex: 7
@@ -16236,9 +16164,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2544287328785774251
 GameObject:
@@ -16335,9 +16260,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2552882325830904685
 GameObject:
@@ -16568,9 +16490,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2581325677276310380
 GameObject:
@@ -16951,9 +16870,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2690522888968297233
 GameObject:
@@ -17184,9 +17100,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2700216188334136704
 GameObject:
@@ -17358,9 +17271,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2707911077597918669
 GameObject:
@@ -17457,9 +17367,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2745793284194479486
 GameObject:
@@ -17631,9 +17538,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2790717222862822273
 GameObject:
@@ -18357,9 +18261,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &2903880719431183435
 GameObject:
@@ -19198,6 +19099,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 0
+  allowedWeaponTypes: 
   slotIcon: {fileID: 5966392095991996784}
   slotNameText: {fileID: 8606778395481512391}
   equipmentSlotIndex: 6
@@ -19369,6 +19271,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 4
   requiredItemType: 6
+  allowedWeaponTypes: 
   slotIcon: {fileID: 8346899450356900721}
   slotNameText: {fileID: 0}
   equipmentSlotIndex: 3
@@ -19468,9 +19371,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3058881642459793756
 GameObject:
@@ -19642,9 +19542,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3074664373551880069
 GameObject:
@@ -20237,9 +20134,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3167695275715929402
 GameObject:
@@ -20890,6 +20784,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 0
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &3262860214618176285
 GameObject:
   m_ObjectHideFlags: 0
@@ -21155,9 +21054,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3309579102747899845
 GameObject:
@@ -21390,6 +21286,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 2
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &3322684681620379976
 GameObject:
   m_ObjectHideFlags: 0
@@ -22524,6 +22425,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 0
+  allowedWeaponTypes: 
   slotIcon: {fileID: 637830295508584799}
   slotNameText: {fileID: 6993728377842083632}
   equipmentSlotIndex: 8
@@ -22623,9 +22525,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3463143583040590392
 GameObject:
@@ -23692,9 +23591,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3657183872108641742
 GameObject:
@@ -23791,9 +23687,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3668235080169264540
 GameObject:
@@ -23890,9 +23783,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3684488334831130965
 GameObject:
@@ -24388,9 +24278,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3772380711789606516
 GameObject:
@@ -24487,9 +24374,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3787011976677874574
 GameObject:
@@ -24661,9 +24545,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3845072376991976297
 GameObject:
@@ -24956,6 +24837,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 5
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &3857450957714754733
 GameObject:
   m_ObjectHideFlags: 0
@@ -25201,9 +25087,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3890490393904739235
 GameObject:
@@ -25720,9 +25603,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3952523476991545034
 GameObject:
@@ -25894,9 +25774,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &3966636541317250729
 GameObject:
@@ -26278,9 +26155,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4072350385135690656
 GameObject:
@@ -26929,9 +26803,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4093630986347358729
 GameObject:
@@ -27162,9 +27033,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4161685623479393201
 GameObject:
@@ -27470,9 +27338,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4226145338052471407
 GameObject:
@@ -27569,9 +27434,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4249581484739579421
 GameObject:
@@ -28183,7 +28045,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statsTextMidLeft: {fileID: 0}
   statsTextMidRight: {fileID: 0}
-  statsTextMidBottom: {fileID: 0}
   cashText: {fileID: 0}
   statsInfoLeftText: {fileID: 0}
   statsInfoRightText: {fileID: 0}
@@ -28227,6 +28088,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryPanel: {fileID: 0}
   artifactsPanel: {fileID: 0}
+  leftInventoryInfoPanel: {fileID: 0}
   inventoryCanvasGroup: {fileID: 0}
   artifactsCanvasGroup: {fileID: 0}
   inventoryButton: {fileID: 0}
@@ -29285,6 +29147,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 2
   requiredItemType: 6
+  allowedWeaponTypes: 
   slotIcon: {fileID: 5703763980907014312}
   slotNameText: {fileID: 0}
   equipmentSlotIndex: 1
@@ -29381,6 +29244,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 1
+  allowedWeaponTypes: 
   slotIcon: {fileID: 3362417407280339728}
   slotNameText: {fileID: 7925336106931444460}
   equipmentSlotIndex: 10
@@ -30048,9 +29912,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4606310962834116277
 GameObject:
@@ -30699,9 +30560,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4662603262845202956
 GameObject:
@@ -31871,9 +31729,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4844978288827068514
 GameObject:
@@ -32308,6 +32163,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 1
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &4869150059217623997
 GameObject:
   m_ObjectHideFlags: 0
@@ -32403,9 +32263,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4880422682138671324
 GameObject:
@@ -32713,9 +32570,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &4961676581223710785
 GameObject:
@@ -32882,7 +32736,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4988657519279504125}
   - {fileID: 1536911167469422370}
   - {fileID: 6224109085649775286}
   m_Father: {fileID: 8254071535643554221}
@@ -33411,6 +33264,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 5
   requiredItemType: 6
+  allowedWeaponTypes: 
   slotIcon: {fileID: 6185053202505402036}
   slotNameText: {fileID: 0}
   equipmentSlotIndex: 4
@@ -33510,9 +33364,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5059291997881044847
 GameObject:
@@ -33907,9 +33758,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5099492140667336581
 GameObject:
@@ -34373,9 +34221,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5136174325663292651
 GameObject:
@@ -34907,9 +34752,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5271532040013022811
 GameObject:
@@ -35217,9 +35059,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5354739882767854501
 GameObject:
@@ -36279,9 +36118,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5495739249470568591
 GameObject:
@@ -36378,9 +36214,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5504422122866629717
 GameObject:
@@ -36611,9 +36444,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5554724026035809520
 GameObject:
@@ -36860,9 +36690,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5557261176147621786
 GameObject:
@@ -37093,9 +36920,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5572066381155003335
 GameObject:
@@ -37807,9 +37631,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5781694840749803457
 GameObject:
@@ -38040,9 +37861,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5799344302808065496
 GameObject:
@@ -38136,6 +37954,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 1
   requiredItemType: 6
+  allowedWeaponTypes: 
   slotIcon: {fileID: 2805871879372164091}
   slotNameText: {fileID: 0}
   equipmentSlotIndex: 0
@@ -38503,9 +38322,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5885264885138736230
 GameObject:
@@ -38602,9 +38418,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &5912440701713546379
 GameObject:
@@ -39440,9 +39253,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6076669803062798168
 GameObject:
@@ -39539,9 +39349,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6096598657301385891
 GameObject:
@@ -39767,18 +39574,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6119954839346925115}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5794521169739429167}
   - {fileID: 8904580089459658388}
-  m_Father: {fileID: 4627248272435454907}
+  m_Father: {fileID: 8254071535643554221}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 100, y: -90}
   m_SizeDelta: {x: 600, y: 700}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!1 &6134643465697467336
@@ -40101,9 +39908,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6226275243202572864
 GameObject:
@@ -40505,9 +40309,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6305800204365012068
 GameObject:
@@ -40754,9 +40555,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6370360394317451310
 GameObject:
@@ -40987,9 +40785,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6400334827084064919
 GameObject:
@@ -42207,9 +42002,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6584247847982989298
 GameObject:
@@ -42381,9 +42173,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6604605106847189206
 GameObject:
@@ -42480,9 +42269,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6636583228706050506
 GameObject:
@@ -43360,9 +43146,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6751280116156638741
 GameObject:
@@ -43593,9 +43376,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6785681634757279557
 GameObject:
@@ -43976,9 +43756,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &6885436878273252021
 GameObject:
@@ -44683,6 +44460,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 3
   requiredItemType: 6
+  allowedWeaponTypes: 
   slotIcon: {fileID: 2462617821145525501}
   slotNameText: {fileID: 0}
   equipmentSlotIndex: 2
@@ -44843,6 +44621,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 3
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &7010274075224076804
 GameObject:
   m_ObjectHideFlags: 0
@@ -45549,9 +45332,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7083133181706785884
 GameObject:
@@ -46188,9 +45968,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7263983199887069559
 GameObject:
@@ -46287,9 +46064,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7284239506357810009
 GameObject:
@@ -46386,9 +46160,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7297397322852294642
 GameObject:
@@ -46698,9 +46469,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7325497753084309030
 GameObject:
@@ -47619,9 +47387,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7454895950677752509
 GameObject:
@@ -48307,9 +48072,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7593604184800627003
 GameObject:
@@ -48685,6 +48447,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4322670949552538201}
+  - {fileID: 4988657519279504125}
   - {fileID: 4627248272435454907}
   - {fileID: 1810007730829734165}
   m_Father: {fileID: 6980313592651783357}
@@ -48827,9 +48590,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7661457735542669927
 GameObject:
@@ -48926,9 +48686,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7676672385338755633
 GameObject:
@@ -49159,9 +48916,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7693696931154188991
 GameObject:
@@ -49258,9 +49012,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7716254703846688399
 GameObject:
@@ -49357,9 +49108,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7749481720665685098
 GameObject:
@@ -49456,9 +49204,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7752564241520923839
 GameObject:
@@ -50411,9 +50156,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7858749949512081017
 GameObject:
@@ -51005,9 +50747,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &7953420046195642069
 GameObject:
@@ -51165,6 +50904,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 5
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &7970642793576412837
 GameObject:
   m_ObjectHideFlags: 0
@@ -51335,9 +51079,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8024870711984884674
 GameObject:
@@ -51644,9 +51385,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8062438093420605121
 GameObject:
@@ -51743,9 +51481,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8063973331260249781
 GameObject:
@@ -52604,9 +52339,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8197501791891413548
 GameObject:
@@ -52913,9 +52645,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8226649630247540525
 GameObject:
@@ -53073,6 +52802,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 0
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &8228036033990267267
 GameObject:
   m_ObjectHideFlags: 0
@@ -53411,6 +53145,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 1
+  allowedWeaponTypes: 
   slotIcon: {fileID: 352350266014525385}
   slotNameText: {fileID: 1204759444062027897}
   equipmentSlotIndex: 11
@@ -53597,6 +53332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredSlotType: 0
   requiredItemType: 1
+  allowedWeaponTypes: 
   slotIcon: {fileID: 1464865360408364401}
   slotNameText: {fileID: 3968130391394082121}
   equipmentSlotIndex: 12
@@ -53696,9 +53432,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8311956446389334281
 GameObject:
@@ -54173,9 +53906,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8416970445355464118
 GameObject:
@@ -54883,9 +54613,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8547184672455211735
 GameObject:
@@ -55487,9 +55214,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8701123970380122333
 GameObject:
@@ -55722,6 +55446,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 2
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &8706707275498483907
 GameObject:
   m_ObjectHideFlags: 0
@@ -56101,9 +55830,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8742697432603708506
 GameObject:
@@ -56200,9 +55926,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8744595373678561491
 GameObject:
@@ -56643,9 +56366,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8785774235789724534
 GameObject:
@@ -56939,9 +56659,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8901101612097264741
 GameObject:
@@ -57397,9 +57114,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 4931834084771005171}
   normalBorderSprite: {fileID: 21300000, guid: f4ac51eb3fc597c429c548e784699043, type: 3}
   selectedBorderSprite: {fileID: 21300000, guid: 1756781b076badb4cbb16423f0752857, type: 3}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8942594249677751041
 GameObject:
@@ -57496,9 +57210,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &8975072407336061519
 GameObject:
@@ -57730,9 +57441,6 @@ MonoBehaviour:
   slotBorderImage: {fileID: 0}
   normalBorderSprite: {fileID: 0}
   selectedBorderSprite: {fileID: 0}
-  slotBackground: {fileID: 0}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dropSuccessful: 1
 --- !u!1 &9032602100356933946
 GameObject:
@@ -58670,6 +58378,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filterType: 1
+  targetBorderImage: {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  punchScale: 0.1
+  duration: 0.2
 --- !u!1 &9180419600666864785
 GameObject:
   m_ObjectHideFlags: 0
