@@ -145,6 +145,8 @@ public class PlayerInputs : MonoBehaviour
             keyData = OptionDataManager.Instance.OptionData.m_keyData;
         GameManager.OnPauseStateChanged += OnPause; // Subscribe to pause event
         mainCamera = Camera.main;
+
+        SetCursorState(true);
     }
 
     void OnPause(bool pause)
@@ -239,6 +241,33 @@ public class PlayerInputs : MonoBehaviour
         {
             UIEvents.InteractableFocusChanged("");
             lastInteractable = null;
+        }
+    }
+
+    // 마우스 커서를 잠그고 숨깁니다. (게임 플레이 모드)
+    public void LockCursor()
+    {
+        Cursor.lockState = CursorLockMode.Locked; // 화면 중앙 고정
+        Cursor.visible = false;                   // 커서 숨김
+    }
+
+    // 마우스 커서 잠금을 풀고 보이게 합니다. (UI/메뉴 모드)
+    public void UnlockCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;   // 자유롭게 이동 가능
+        Cursor.visible = true;                    // 커서 보임
+    }
+
+    // 상태에 따라 커서를 제어하는 통합 함수
+    public void SetCursorState(bool isLocked)
+    {
+        if (isLocked)
+        {
+            LockCursor();
+        }
+        else
+        {
+            UnlockCursor();
         }
     }
 }

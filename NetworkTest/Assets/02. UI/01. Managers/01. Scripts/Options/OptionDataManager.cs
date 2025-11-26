@@ -25,7 +25,8 @@ public class OptionDataManager : MonoBehaviour
         if (Instance == null)
         {
             m_Instance = this;
-            DontDestroyOnLoad(transform.parent);
+            if (gameObject.scene.name != "DontDestroyOnLoad" && transform.parent == null)
+                DontDestroyOnLoad(transform.parent);
 
             m_OptionManager = FindObjectOfType<OptionManager>();
 

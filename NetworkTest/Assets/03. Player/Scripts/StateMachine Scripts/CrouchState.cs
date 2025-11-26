@@ -38,16 +38,41 @@ public class CrouchState : StateMachineBase
         // --- 상태 변경 로직 ---
         if (characterMove.Inputs.GetCrouch())
         {
-            // 일어서도 되는지 천장 체크
-            if (Physics.SphereCast(characterMove.transform.position, characterMove.characterController.radius, Vector3.up, out RaycastHit hit2, characterMove.normalColliderHeight - characterMove.characterController.radius + characterMove.characterController.skinWidth, characterMove.groundCheckMask))
+            // 1. 가독성을 위해 변수로 추출
+            Vector3 origin = characterMove.transform.position;
+            float radius = characterMove.characterController.radius;
+            Vector3 direction = Vector3.up;
+            float maxDistance = characterMove.normalColliderHeight - radius + characterMove.characterController.skinWidth;
+
+            // 2. [디버그] 쏘기 전에 예상 궤적 그리기 (노란색)
+            // 중심선
+            Debug.DrawRay(origin, direction * maxDistance, Color.yellow);
+            // 구체의 부피를 체감하기 위한 외곽선 4개 (전, 후, 좌, 우)
+            Debug.DrawRay(origin + Vector3.forward * radius, direction * maxDistance, Color.yellow);
+            Debug.DrawRay(origin + Vector3.back * radius, direction * maxDistance, Color.yellow);
+            Debug.DrawRay(origin + Vector3.left * radius, direction * maxDistance, Color.yellow);
+            Debug.DrawRay(origin + Vector3.right * radius, direction * maxDistance, Color.yellow);
+
+            // 3. 실제 SphereCast 수행
+            if (Physics.SphereCast(origin, radius, direction, out RaycastHit hit2, maxDistance, characterMove.groundCheckMask))
             {
-                Debug.Log("Can't get up");
+                // [디버그] 충돌 발생 시 충돌 지점까지 빨간색 선 표시
+                Debug.DrawLine(origin, hit2.point, Color.red);
+                // 충돌한 물체 이름과 거리 로그 출력
+                Debug.Log($"Can't get up. Hit: {hit2.collider.name}, Dist: {hit2.distance}");
+
                 return;
             }
-            else
-            {
-                characterMove.SetState(characterMove.moveState);
-            }
+            // // 일어서도 되는지 천장 체크
+            // if (Physics.SphereCast(characterMove.transform.position, characterMove.characterController.radius, Vector3.up, out RaycastHit hit2, characterMove.normalColliderHeight - characterMove.characterController.radius + characterMove.characterController.skinWidth, characterMove.groundCheckMask))
+            // {
+            //     Debug.Log("Can't get up");
+            //     return;
+            // }
+            // else
+            // {
+            //     characterMove.SetState(characterMove.moveState);
+            // }
         }
 
         if (characterMove.Inputs.GetJump() || characterMove.Inputs.GetSprint())

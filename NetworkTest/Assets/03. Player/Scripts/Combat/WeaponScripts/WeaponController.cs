@@ -212,6 +212,7 @@ public class WeaponController : MonoBehaviour
         this.activeID = nextGunSlotID;
 
         animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
+        animator.SetBool("isArmed", true);
     }
 
     public void RemoteToChange(int nextGunSlotID)

@@ -20,8 +20,8 @@ public class AudioManager : MonoBehaviour
 
     [Header("SFX - Item")]
     public AudioClip itemPickupClip;
-    public AudioClip itemEquipClip;   
-    public AudioClip itemUnequipClip; 
+    public AudioClip itemEquipClip;
+    public AudioClip itemUnequipClip;
 
 
     [Header("SFX - NPC")]
@@ -47,7 +47,8 @@ public class AudioManager : MonoBehaviour
         if (Instance == null)
         {
             m_Instance = this;
-            DontDestroyOnLoad(this);
+            if (gameObject.scene.name != "DontDestroyOnLoad" && transform.parent == null)
+                DontDestroyOnLoad(this);
         }
         else
         {

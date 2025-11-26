@@ -6,6 +6,7 @@ public class FastDebugManager : MonoBehaviour
 {
     void Awake()
     {
+        DontDestroyOnLoad(this);
         if (NetworkManager.Instance)
             gameObject.SetActive(false);
     }

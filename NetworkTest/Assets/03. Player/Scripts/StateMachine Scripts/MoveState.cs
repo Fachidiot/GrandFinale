@@ -138,5 +138,6 @@ public class MoveState : StateMachineBase
     void OnPause(bool pause)
     {
         isPause = pause;
+        characterMove.StopAllActions();
     }
 }

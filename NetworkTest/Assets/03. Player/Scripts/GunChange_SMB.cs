@@ -52,11 +52,15 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
 
             //if nextID != 0 then transition to grab animation
             if (weaponController.nextID > 0 && weaponController.nextID <= weaponController.slots.Length)
+            {
                 animator.CrossFadeInFixedTime("GrabSlot" + weaponController.nextID, 0.25f, layerIndex);
+                animator.SetBool("isArmed", true);
+            }
             else
             {
                 // TODO : Melee Animation Start.
                 animator.CrossFadeInFixedTime("UnArmIdle", 0.25f, 3);
+                animator.SetBool("isArmed", false);
                 weaponController.changed = false;
             }
             weaponController.nextID = -1;

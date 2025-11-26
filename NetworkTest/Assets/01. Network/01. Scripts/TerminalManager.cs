@@ -5,6 +5,7 @@ using Cinemachine;
 using Newtonsoft.Json.Linq;
 using Steamworks;
 using System.Collections;
+using UnityEditor;
 
 public class TerminalManager : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class TerminalManager : MonoBehaviour
     private readonly StringBuilder outputLog = new StringBuilder();
     private bool isTerminalActive = false;
     public bool IsTerminalActive { get { return isTerminalActive; } }
+    private bool hasBeenAltTab = false;
 
     private IPlayerControllable activePlayer;
     private CameraSwitcher activeCameraSwitcher;
@@ -55,9 +57,24 @@ public class TerminalManager : MonoBehaviour
         terminalPanel.SetActive(false); // Start with the terminal closed
     }
 
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            if (hasBeenAltTab)
+                inputField.ActivateInputField();
+            hasBeenAltTab = false;
+        }
+        else
+        {
+            hasBeenAltTab = true;
+        }
+    }
 
     public void ToggleTerminal()
     {
+        inputField.text = string.Empty;
+        inputField.ForceLabelUpdate();
         isTerminalActive = !isTerminalActive;
 
         GameManager.Instance.SetPause(isTerminalActive);
@@ -88,15 +105,18 @@ public class TerminalManager : MonoBehaviour
             activePlayer.transform.position = playerStandPosition.position;
 
             Animator playerAnimator = activePlayer.GetComponentInChildren<Animator>();
-            CharacterMove playerCharacterMove = activePlayer.GetComponent<CharacterMove>();
-            if (playerAnimator != null && playerCharacterMove != null)
-            {
-                playerAnimator.SetFloat(playerCharacterMove.horizontalInputID, 0);
-                playerAnimator.SetFloat(playerCharacterMove.verticalInputID, 0);
-                playerAnimator.SetBool(playerCharacterMove.sprintID, false);
-                playerAnimator.SetBool(playerCharacterMove.crouchID, false);
-                playerAnimator.SetBool(playerCharacterMove.rollID, false);
-            }
+            playerAnimator.SetBool("useTerminal", isTerminalActive);
+
+            // Animator playerAnimator = activePlayer.GetComponentInChildren<Animator>();
+            // CharacterMove playerCharacterMove = activePlayer.GetComponent<CharacterMove>();
+            // if (playerAnimator != null && playerCharacterMove != null)
+            // {
+            //     playerAnimator.SetFloat(playerCharacterMove.horizontalInputID, 0);
+            //     playerAnimator.SetFloat(playerCharacterMove.verticalInputID, 0);
+            //     playerAnimator.SetBool(playerCharacterMove.sprintID, false);
+            //     playerAnimator.SetBool(playerCharacterMove.crouchID, false);
+            //     playerAnimator.SetBool(playerCharacterMove.rollID, false);
+            // }
 
             terminalVirtualCamera.Priority = 10;
 
@@ -115,9 +135,7 @@ public class TerminalManager : MonoBehaviour
             activeCameraSwitcher = null;
         }
 
-        //  임시방편 마우스 focus해제되는 버그
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        inputField.text = string.Empty;
     }
 
     private void PrintWelcomeMessage()
@@ -132,7 +150,7 @@ public class TerminalManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(command)) return;
         AppendToLog($"> {command}");
         ParseCommand(command.Trim().ToLower());
-        inputField.text = "";
+        inputField.text = string.Empty;
         inputField.ActivateInputField();
         UpdateOutput();
     }
@@ -239,5 +257,6 @@ public class TerminalManager : MonoBehaviour
     private void UpdateOutput()
     {
         terminalOutput.text = outputLog.ToString();
+        GameManager.Instance.PlayerInput.SetCursorState(true);
     }
 }

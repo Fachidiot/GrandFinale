@@ -20,7 +20,8 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.scene.name != "DontDestroyOnLoad" && transform.parent == null)
+                DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -28,13 +29,20 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
-        NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
+        if (NetworkManager.Instance)
+        {
+            NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
+            NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
+        }
+
+#if UNITY_EDITOR
+        LocalPlayer = FindObjectOfType<CharacterMove>().GetComponent<IPlayerControllable>();
+#endif
     }
 
     private void OnDestroy()
     {
-        if (NetworkManager.Instance != null)
+        if (NetworkManager.Instance)
         {
             NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
         }
