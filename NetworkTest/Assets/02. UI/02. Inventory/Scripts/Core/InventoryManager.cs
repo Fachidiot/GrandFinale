@@ -420,6 +420,59 @@ public class InventoryManager : MonoBehaviour
 
     #endregion
 
+    #region Relic
+    /// <summary>
+    /// 특정 ID의 아이템을 특정 개수만큼 가지고 있는지 확인
+    /// </summary>
+    public bool HasItem(string itemID, int count)
+    {
+        // allItems 리스트에서 ID가 같고, 수량이 충분한지 체크
+        int totalCount = 0;
+        foreach (var slot in allItems)
+        {
+            if (slot != null && slot.item != null && slot.item.itemID == itemID)
+            {
+                totalCount += slot.quantity;
+            }
+        }
+        return totalCount >= count;
+    }
+
+    /// <summary>
+    /// 특정 ID의 아이템을 개수만큼 제거 (마법실 소모용)
+    /// </summary>
+    public void RemoveItemByID(string itemID, int count)
+    {
+        int remainingToRemove = count;
+
+        // 뒤에서부터 검색하여 제거 (리스트 인덱스 문제 방지)
+        for (int i = allItems.Count - 1; i >= 0; i--)
+        {
+            var slot = allItems[i];
+            if (slot != null && slot.item != null && slot.item.itemID == itemID)
+            {
+                if (slot.quantity > remainingToRemove)
+                {
+                    slot.quantity -= remainingToRemove;
+                    remainingToRemove = 0;
+                    OnInventoryChanged?.Invoke(); // UI 갱신
+                    break;
+                }
+                else
+                {
+                    remainingToRemove -= slot.quantity;
+                    RemoveItem(slot, slot.quantity);
+                }
+            }
+        }
+
+        if (remainingToRemove > 0)
+        {
+            Debug.LogWarning($"[Inventory] 아이템({itemID})을 {count}개 삭제하려 했으나 {remainingToRemove}개가 부족했습니다.");
+        }
+    }
+    #endregion
+
     #region Data Retrieval & Helpers
 
     public List<InventoryItem> GetFilteredItems()
