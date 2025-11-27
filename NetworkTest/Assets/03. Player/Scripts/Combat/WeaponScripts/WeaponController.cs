@@ -33,7 +33,7 @@ public class WeaponController : MonoBehaviour
     public GetActualTransform aimPointEffector;
 
     public bool IsProcessingRemoteWeaponChange { get; private set; } = false;
-
+    private bool isEquipmentInit = false;
 
     [Header("Gun Detection")]
     public float detectionLength;   //raycast Length
@@ -143,8 +143,12 @@ public class WeaponController : MonoBehaviour
         animator.CrossFadeInFixedTime("UnArmIdle", 0.25f, 3);
         changed = false;
 
-        EquipmentManager.Instance.OnSlotEquip += SlotEquip;
-        EquipmentManager.Instance.OnSlotUnequip += SlotUnequip;
+        if (EquipmentManager.Instance != null)
+        {
+            isEquipmentInit = true;
+            EquipmentManager.Instance.OnSlotEquip += SlotEquip;
+            EquipmentManager.Instance.OnSlotUnequip += SlotUnequip;
+        }
     }
 
     private float lastChangeDebugTime = 0f;
@@ -156,6 +160,13 @@ public class WeaponController : MonoBehaviour
         {
             Debug.LogWarning("WeaponController: GunChange_SMB 실행전 애니메이션 중복 실행 오류 발생. 임시방편 완화 실행.");
             changed = false;
+        }
+
+        if (!isEquipmentInit && EquipmentManager.Instance != null)
+        {
+            isEquipmentInit = true;
+            EquipmentManager.Instance.OnSlotEquip += SlotEquip;
+            EquipmentManager.Instance.OnSlotUnequip += SlotUnequip;
         }
     }
 

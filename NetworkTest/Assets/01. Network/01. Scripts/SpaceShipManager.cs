@@ -33,6 +33,15 @@ public class SpaceShipManager : MonoBehaviour
     private bool isDoorOpen = false;
     private bool isLanded = false;
 
+    void Start()
+    {
+        if (null != GameObject.FindWithTag("Player"))
+        {
+            OpenDoor();
+            Landing();
+        }
+    }
+
     // private Animator animator;
 
     // void Start()
