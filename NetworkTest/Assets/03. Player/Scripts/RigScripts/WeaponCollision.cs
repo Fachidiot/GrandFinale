@@ -48,6 +48,13 @@ public class WeaponCollision : OnRig
                 rayPositionOffset = rangedWeapon.InHandsPositionOffset;
                 rayPositionOffset.y += 0.05f;
             }
+            else if (weapon is MeleeWeapon meleeWeapon)
+            {
+                detectionLength = meleeWeapon.CollisionDetectionLength;
+                maxOffset = meleeWeapon.MaxZPositionOffsetCollision;
+                rayPositionOffset = meleeWeapon.InHandsPositionOffset;
+                rayPositionOffset.y += 0.05f;
+            }
         }
     }
 

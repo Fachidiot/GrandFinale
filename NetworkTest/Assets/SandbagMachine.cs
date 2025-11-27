@@ -7,9 +7,11 @@ public class SandbagMachine : MonoBehaviour
 {
     [SerializeField] private TMP_Text tmpScore;
     [SerializeField] private float limitTime = 60;
+    [SerializeField] private float coolDown = 2;
 
     private bool isStart = false;
     private float startTime = 0;
+    private float coolTime = 0;
     private int score;
     private int bestScore;
 
@@ -36,6 +38,8 @@ public class SandbagMachine : MonoBehaviour
 
     public void Punching()
     {
+        if (coolTime + coolDown > Time.time)
+            return;
         if (!isStart)
         {
             isStart = true;
@@ -52,5 +56,6 @@ public class SandbagMachine : MonoBehaviour
     void Reset()
     {
         tmpScore.text = $"최고점수\n{bestScore}";
+        coolTime = Time.time;
     }
 }

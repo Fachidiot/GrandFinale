@@ -353,6 +353,10 @@ public class WeaponController : MonoBehaviour
         {
             offsetForGun.localPosition = rangedWeapon.InHandsPositionOffset * active;
         }
+        else if (currentWeapon is MeleeWeapon meleeWeapon)
+        {
+            offsetForGun.localPosition = meleeWeapon.InHandsPositionOffset * active;
+        }
     }
 
     void ApplyRightHandIkWeight(float weight) => rightHandIK.weight = weight;
@@ -399,6 +403,40 @@ public class WeaponController : MonoBehaviour
                 else
                 {
                     if (rangedWeapon.FemaleWeaponPointsDict.TryGetValue(pointType, out var targetTransform))
+                    {
+                        handIk.target = targetTransform;
+                    }
+                    else
+                    {
+                        handIk.target = null; // Or a default target
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Not a correct WeaponPoint Type: " + pointName);
+                handIk.target = null;
+            }
+        }
+        else if (currentWeapon is MeleeWeapon meleeWeapon)
+        {
+            // Use the cached dictionary for a fast lookup
+            if (Enum.TryParse<WeaponPoint.PointType>(pointName, out var pointType))
+            {
+                if (isMale)
+                {
+                    if (meleeWeapon.WeaponPointsDict.TryGetValue(pointType, out var targetTransform))
+                    {
+                        handIk.target = targetTransform;
+                    }
+                    else
+                    {
+                        handIk.target = null; // Or a default target
+                    }
+                }
+                else
+                {
+                    if (meleeWeapon.FemaleWeaponPointsDict.TryGetValue(pointType, out var targetTransform))
                     {
                         handIk.target = targetTransform;
                     }
