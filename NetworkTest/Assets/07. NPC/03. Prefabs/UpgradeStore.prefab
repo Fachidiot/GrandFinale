@@ -14032,7 +14032,8 @@ GameObject:
   - component: {fileID: 1214369206407144229}
   - component: {fileID: 7642608438389888538}
   - component: {fileID: 2687510037075058852}
-  m_Layer: 0
+  - component: {fileID: 8710997247893621868}
+  m_Layer: 9
   m_Name: UpgradeNPC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14117,11 +14118,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1224ba05ba06a114f8a1b2dcb6ce5307, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetTag: Player
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  interactKey: 102
   brain: {fileID: 7642608438389888538}
 --- !u!114 &7642608438389888538
 MonoBehaviour:
@@ -14165,6 +14161,36 @@ MonoBehaviour:
   gaugeImage: {fileID: 5764132463456385805}
   gaugeText: {fileID: 4210152508516731231}
   autoCloseDistance: 5
+--- !u!114 &8710997247893621868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9110926331411904015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 0
+  interactionText: "\uAC15\uD654\uD558\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1214369206407144229}
+        m_TargetAssemblyTypeName: NpcInputSensor, Assembly-CSharp
+        m_MethodName: InteractWithNPC
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &9147166035966709820
 GameObject:
   m_ObjectHideFlags: 0
