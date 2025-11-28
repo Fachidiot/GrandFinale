@@ -44,7 +44,6 @@ public class CharacterMove : MonoBehaviour
     [Header("Move values")]
     public float gravity = -9.81f;
     public float walkSpeed = 2;
-    public float runSpeed = 3;
     public float sprintSpeed = 5;
     public float crouchSpeed = 1;
 
@@ -143,7 +142,6 @@ public class CharacterMove : MonoBehaviour
         if (playerStats == null) return;
 
         walkSpeed = playerStats.CurrentWalkSpeed;
-        runSpeed = playerStats.CurrentRunSpeed;
         sprintSpeed = playerStats.CurrentSprintSpeed;
         crouchSpeed = playerStats.CurrentCrouchSpeed;
 

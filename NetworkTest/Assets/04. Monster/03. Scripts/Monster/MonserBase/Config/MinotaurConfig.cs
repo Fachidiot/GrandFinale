@@ -3,35 +3,33 @@
 [CreateAssetMenu(fileName = "NewMinotaurConfig", menuName = "Monster/Minotaur Config")]
 public class MinotaurConfig : MonsterConfig
 {
-    [Header("=== Minotaur Charge Attack ===")]
+    [Header("=== Minotaur Charge (Ram) ===")]
+    [Tooltip("돌진 속도")]
+    public float chargeSpeed = 10f;
 
-    [Tooltip("돌진을 시작할 최대 거리 (이 거리 안에 들어오면 무조건 돌진!)")]
-    public float chargeRange = 10f;
+    [Tooltip("돌진 데미지")]
+    public float chargeDamage = 20f;
 
-    [Tooltip("돌진 속도 (기본 runSpeed보다 빠르게)")]
-    public float chargeSpeed = 8f;
+    [Tooltip("돌진 최대 지속 시간 (못 맞췄을 때 멈추는 시간)")]
+    public float chargeMaxDuration = 3.0f;
 
-    [Tooltip("돌진이 멈추는 거리 (플레이어와 이 거리만큼 가까워지면 공격으로 전환)")]
-    public float chargeStoppingDistance = 1.5f;
+    [Tooltip("벽 충돌 감지 거리")]
+    public float wallCheckDist = 1.5f;
 
-    [Tooltip("돌진 후 다음 돌진까지의 쿨다운 시간 (초)")]
-    public float chargeCooldown = 5f;
+    [Header("=== Combat Movement (Strafe) ===")]
+    [Tooltip("공격 쿨타임 동안 플레이어 주위를 돌(Strafe) 속도")]
+    public float strafeSpeed = 2.0f;
 
-    [Tooltip("돌진이 중단되었을 때(근접무기 맞음) 경직 시간 (초)")]
-    public float chargeStunDuration = 1.5f;
+    [Tooltip("플레이어와 유지하려는 적정 거리 (이보다 가까우면 백스탭)")]
+    public float keepDistance = 3.0f;
 
-    [Tooltip("돌진 중 데미지 (플레이어에게 부딪혔을 때)")]
-    public float chargeDamage = 15f;
+    [Tooltip("한 방향으로 이동하는 시간 (좌/우 방향 전환 주기)")]
+    public float changeDirectionTime = 2.0f;
 
-    [Header("=== Combat Behavior ===")]
+    [Header("=== AI Patterns ===")]
+    [Tooltip("전투 대치(Combat Idle) 유지 시간")]
+    public float combatIdleTime = 3.0f;
 
-    [Tooltip("연속 공격 후 후퇴할 공격 횟수")]
-    public int attacksBeforeRetreat = 2;
-
-    [Tooltip("후퇴할 거리")]
-    public float retreatDistance = 6f;
-
-    [Tooltip("HP가 이 비율 이하로 떨어지면 회피 패턴 사용 (0.0 ~ 1.0)")]
-    [Range(0f, 1f)]
-    public float dodgeHealthThreshold = 0.3f;
+    [Tooltip("백스탭(Dodge) 후 바로 돌진할 확률 (0~1)")]
+    public float ramAfterDodgeChance = 0.5f;
 }

@@ -206,29 +206,51 @@ public class Slot_UI : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, I
 
     public void OnDrop(PointerEventData eventData)
     {
-        Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
+        if (eventData.pointerDrag == null) return;
 
-        // 1. 인벤토리 -> 인벤토리 드롭
+        // 1. 인벤토리 -> 인벤토리 이동
+        Slot_UI sourceSlot = eventData.pointerDrag.GetComponent<Slot_UI>();
         if (sourceSlot != null && sourceSlot.currentItem != null)
         {
             if (InventoryManager.Instance != null)
             {
-                // Manager가 타겟 슬롯 상태(빈칸/있음)를 확인하여 이동(Move) 또는 교환(Swap) 처리
                 InventoryManager.Instance.MoveItemToEmptySlot(sourceSlot.currentItem, this.listIndex);
-
                 sourceSlot.MarkDropSuccessful();
                 this.MarkDropSuccessful();
             }
             return;
         }
 
-        // 2. 장비 슬롯 -> 인벤토리 드롭 (장비 해제)
         EquipmentSlot_UI equipSlot = eventData.pointerDrag.GetComponent<EquipmentSlot_UI>();
         if (equipSlot != null && equipSlot.currentItem != null)
         {
             EquipmentManager.Instance.UnequipItem(equipSlot.currentItem);
             equipSlot.MarkDropSuccessful();
             this.MarkDropSuccessful();
+            return;
+        }
+
+        UpgradeSlotUI upgradeSlot = eventData.pointerDrag.GetComponent<UpgradeSlotUI>();
+        if (upgradeSlot != null && upgradeSlot.CurrentItem != null)
+        {
+            // UpgradeSlotUI는 _module 변수를 가지고 있으므로 그것을 통해 반환
+            if (upgradeSlot._module != null)
+            {
+                upgradeSlot._module.ReturnEquipmentToInventory();
+                this.MarkDropSuccessful();
+            }
+            return;
+        }
+
+        MaterialSlotUI materialSlot = eventData.pointerDrag.GetComponent<MaterialSlotUI>();
+        if (materialSlot != null && materialSlot.CurrentItem != null)
+        {
+            if (materialSlot._module != null)
+            {
+                materialSlot._module.ReturnMaterialToInventory(materialSlot);
+                this.MarkDropSuccessful();
+            }
+            return;
         }
     }
 

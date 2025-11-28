@@ -9,7 +9,6 @@ public class PlayerStats : MonoBehaviour
 
     [Header("기본 능력치 (Base Stats)")]
     public float baseWalkSpeed = 2f;
-    public float baseRunSpeed = 3f;
     public float baseSprintSpeed = 5f;
     public float baseCrouchSpeed = 1f;
     public float baseCooldownReduction = 0f;
@@ -17,15 +16,14 @@ public class PlayerStats : MonoBehaviour
     public float baseDamageModifier = 1.0f;
     public float baseDefense = 10f;
     public float basePower = 10f;
-    public float baseCritChance = 5.0f; // 기본 치명타 확률
-    public int baseCurrency = 1500;    // 기본 재화
+    public float baseCritChance = 5.0f;
+    public int baseCurrency = 1500;
 
     [Header("현재 상태 (모니터링)")]
     [SerializeField] private float currentHealth;
     [SerializeField] private float currentMaxHealth;
     [SerializeField] private float currentShield;
     [SerializeField] private float currentWalkSpeed;
-    [SerializeField] private float currentRunSpeed;
     [SerializeField] private float currentCrouchSpeed;
     [SerializeField] private float currentSprintSpeed;
     [SerializeField] private float currentDamageModifier;
@@ -43,7 +41,7 @@ public class PlayerStats : MonoBehaviour
     public float CurrentPower { get { return currentPower; } private set { currentPower = value; } }
     public float CurrentCritChance { get { return currentCritChance; } private set { currentCritChance = value; } }
     public float CurrentWalkSpeed { get { return currentWalkSpeed; } private set { currentWalkSpeed = value; } }
-    public float CurrentRunSpeed { get { return currentRunSpeed; } private set { currentRunSpeed = value; } }
+    // public float CurrentRunSpeed { get { return currentRunSpeed; } private set { currentRunSpeed = value; } } // [삭제됨]
     public float CurrentSprintSpeed { get { return currentSprintSpeed; } private set { currentSprintSpeed = value; } }
     public float CurrentCrouchSpeed { get { return currentCrouchSpeed; } private set { currentCrouchSpeed = value; } }
     public float CurrentDamageModifier { get { return currentDamageModifier; } private set { currentDamageModifier = value; } }
@@ -59,7 +57,6 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        // 방어력 적용 공식 (예시: 방어력의 절반만큼 데미지 감소, 최소 1)
         float reducedDamage = Mathf.Max(1f, damage - (currentDefense * 0.5f));
         float damageToTake = reducedDamage;
 
@@ -109,9 +106,7 @@ public class PlayerStats : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망");
-        // 사망 처리 로직 추가 가능
     }
-
 
     public void AddCurrency(int amount)
     {
@@ -130,15 +125,14 @@ public class PlayerStats : MonoBehaviour
         return false;
     }
 
-
     public void ResetToBaseStats()
     {
         currentMaxHealth = baseMaxHealth;
         currentDamageModifier = baseDamageModifier;
         currentCooldownReduction = baseCooldownReduction;
         currentWalkSpeed = baseWalkSpeed;
-        currentRunSpeed = baseRunSpeed;
         currentSprintSpeed = baseSprintSpeed;
+        currentCrouchSpeed = baseCrouchSpeed;
         currentDefense = baseDefense;
         currentPower = basePower;
         currentCritChance = baseCritChance;
@@ -146,36 +140,31 @@ public class PlayerStats : MonoBehaviour
         OnStatsChanged?.Invoke();
     }
 
-    // 장비 장착 해제 시 호출될 함수
     public void AddStat(string statName, float value)
     {
         switch (statName)
         {
-            // [체력 관련]
             case "MaxHealth":
             case "Health":
                 CurrentMaxHealth += value;
                 CurrentHealth += value;
                 break;
 
-            // [방어력 관련]
             case "Defense":
-            case "Bulwark_Armor": // 예: 불워크 장갑도 방어력으로 처리
+            case "Bulwark_Armor":
                 CurrentDefense += value;
                 break;
 
-            // 시트의 다양한 무기 타입들을 모두Power에 통합
-            case "Power":        // 기본 공격력
-            case "PistolBullet": // 권총 데미지
-            case "RifleBullet":  // 소총 데미지
-            case "PlasmaPellet": // 샷건 데미지
-            case "Laser":        // 스나이퍼 레이저 데미지
-            case "Slash":        // 단검 베기 데미지
-            case "Stun":         // 진압봉 데미지
+            case "Power":
+            case "PistolBullet":
+            case "RifleBullet":
+            case "PlasmaPellet":
+            case "Laser":
+            case "Slash":
+            case "Stun":
                 CurrentPower += value;
                 break;
 
-            // [치명타 관련]
             case "CritChance":
                 CurrentCritChance += value;
                 break;
@@ -193,16 +182,15 @@ public class PlayerStats : MonoBehaviour
             case "Speed":
                 float ratio = value / 100.0f;
                 CurrentWalkSpeed += baseWalkSpeed * ratio;
-                CurrentRunSpeed += baseRunSpeed * ratio;
                 CurrentSprintSpeed += baseSprintSpeed * ratio;
+
+                CurrentCrouchSpeed += baseCrouchSpeed * ratio;
                 break;
 
-            // [전체 데미지 배율]
             case "AllDamage":
                 CurrentDamageModifier += (value / 100.0f);
                 break;
 
-            // [쿨타임 감소]
             case "CooldownReduction":
                 CurrentCooldownReduction += value;
                 break;
@@ -210,6 +198,7 @@ public class PlayerStats : MonoBehaviour
 
         OnStatsChanged?.Invoke();
     }
+
     public void AddTemporaryShield(float amount, float duration)
     {
         StartCoroutine(ShieldRoutine(amount, duration));
