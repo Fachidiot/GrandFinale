@@ -209,7 +209,7 @@ public class TerminalManager : MonoBehaviour
             default: AppendToLog($"Unknown planet: '{planetName}'"); return;
         }
 
-        AppendToLog($"Proposing planet '{planetName}'...");
+        AppendToLog($"Selecting planet '{planetName}'...");
         ProposePlanet(planetId);
     }
 
@@ -217,14 +217,16 @@ public class TerminalManager : MonoBehaviour
     {
         if (NetworkManager.Instance == null || ServerRoomManager == null)
         {
-            AppendToLog("Error: Network systems not available.");
+            AppendToLog("Error: Core systems not available.");
             return;
         }
 
-        if (NetworkManager.Instance.Mode == NetworkMode.Host)
+        var mode = NetworkManager.Instance.Mode;
+
+        if (mode == NetworkMode.Host || mode == NetworkMode.SinglePlayer)
         {
             ServerRoomManager.SelectPlanet(planetId);
-            AppendToLog("Planet selected as host.");
+            AppendToLog("Planet selection confirmed.");
         }
         else // Client
         {

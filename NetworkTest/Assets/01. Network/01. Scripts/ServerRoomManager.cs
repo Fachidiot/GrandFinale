@@ -63,10 +63,11 @@ public class ServerRoomManager : MonoBehaviour
         {
             NetworkManager.OnJsonMessageReceived += HandleHostJsonMessage;
         }
-        else // Client
+        else if (mode == NetworkMode.Client) // Client
         {
             NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
         }
+        // In SinglePlayer mode, we don't handle any network messages.
     }
 
     private void OnDestroy()
@@ -83,6 +84,34 @@ public class ServerRoomManager : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Single Player Logic
+    public void AddSinglePlayer()
+    {
+        ClearRoom(); // Ensure we're starting fresh
+
+        ModelInfo localModelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
+        bool isLocalMale = PlayerCustomizer.Instance.IsLocalPlayerMale;
+
+        var playerInfo = new PlayerInfo
+        {
+            steam_id = "0",
+            player_id = "0",
+            nickname = "Player",
+            is_Male = isLocalMale,
+            headIndex = localModelInfo.head,
+            bodyIndex = localModelInfo.body,
+            acc1Index = localModelInfo.acc1,
+            acc2Index = localModelInfo.acc2
+        };
+
+        PlayerList.Add(playerInfo);
+        HostId = "0"; // In single player, we are our own host.
+
+        Debug.Log("[ServerRoomManager] Single Player room initialized.");
+        OnRoomDataUpdated?.Invoke();
+    }
     #endregion
 
     #region Host-Only Logic
@@ -285,22 +314,33 @@ public class ServerRoomManager : MonoBehaviour
     }
 
     /// <summary>
-    /// (Host-only) Sets the selected planet and broadcasts the change.
+    /// (Host or SinglePlayer) Sets the selected planet. Broadcasts the change if host.
     /// </summary>
     public void SelectPlanet(int planetId)
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
+        var mode = NetworkManager.Instance.Mode;
+        if (mode != NetworkMode.Host && mode != NetworkMode.SinglePlayer) return;
+
         SelectedPlanetId = planetId;
-        Debug.Log($"[ServerRoomManager] Host authoritatively selected planet ID: {planetId}");
-        BroadcastRoomUpdate();
+        Debug.Log($"[ServerRoomManager] Authoritatively selected planet ID: {planetId}");
+
+        if (mode == NetworkMode.Host)
+        {
+            BroadcastRoomUpdate();
+        }
+        else // SinglePlayer
+        {
+            OnRoomDataUpdated?.Invoke();
+        }
     }
 
     /// <summary>
-    /// (Host-only) Tells all clients to load the game scene, then loads it locally.
+    /// (Host or SinglePlayer) Loads the game scene for the selected planet.
     /// </summary>
     public void LaunchToPlanet(int planetId)
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
+        var mode = NetworkManager.Instance.Mode;
+        if (mode != NetworkMode.Host && mode != NetworkMode.SinglePlayer) return;
 
         PlanetData planet = GameManager.Instance.PlanetDatabase.GetPlanetById(planetId);
         if (planet == null)
@@ -311,10 +351,13 @@ public class ServerRoomManager : MonoBehaviour
 
         string sceneToLoad = planet.sceneName;
 
-        JObject message = new JObject { { "type", "load_scene" }, { "scene_name", sceneToLoad } };
-        NetworkManager.Instance.BroadcastJsonMessage(message);
+        if (mode == NetworkMode.Host)
+        {
+            JObject message = new JObject { { "type", "load_scene" }, { "scene_name", sceneToLoad } };
+            NetworkManager.Instance.BroadcastJsonMessage(message);
+        }
 
-        Debug.Log($"[ServerRoomManager] Host is loading scene: {sceneToLoad}");
+        Debug.Log($"[ServerRoomManager] Loading scene: {sceneToLoad}");
         SceneManager.LoadScene(sceneToLoad);
     }
 

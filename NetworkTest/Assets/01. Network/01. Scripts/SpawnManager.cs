@@ -16,7 +16,9 @@ public class SpawnManager : MonoBehaviour
     public static SpawnManager Instance { get; private set; }
 
     [Header("Spawning Configuration")]
+    public int maxEntity = 30;
     public List<MonsterPrefabMapping> monsterPrefabs;
+    public List<MonsterPrefabMapping> NetworkedMonsterPrefabs;
     public Transform spawnPoint;
     public int initialPoolSize = 10; // Number of each monster type to pre-spawn
 
@@ -48,7 +50,7 @@ public class SpawnManager : MonoBehaviour
 
     void Start()
     {
-        if (NetworkManager.Instance.Mode != NetworkMode.Host)
+        if (NetworkManager.Instance.Mode == NetworkMode.Client)
         {
             enabled = false;
             return;
@@ -98,7 +100,7 @@ public class SpawnManager : MonoBehaviour
         {
             yield return new WaitForSeconds(timeBetweenWaves);
             currentWave++;
-            Debug.Log($"[SpawnManager] Starting Wave {currentWave}");
+            // Debug.Log($"[SpawnManager] Starting Wave {currentWave}");
             yield return StartCoroutine(SpawnWave());
         }
     }
@@ -115,7 +117,7 @@ public class SpawnManager : MonoBehaviour
             }
             yield return new WaitForSeconds(spawnInterval);
         }
-        Debug.Log($"[SpawnManager] Wave {currentWave} finished spawning.");
+        // Debug.Log($"[SpawnManager] Wave {currentWave} finished spawning.");
     }
 
     GameObject SpawnMonster(MonsterType monsterType)
@@ -135,7 +137,7 @@ public class SpawnManager : MonoBehaviour
         {
             monsterGO = Instantiate(monsterPrefab, spawnPoint.position, spawnPoint.rotation);
         }
-        
+
         NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
         if (networkMonster == null)
         {
@@ -143,11 +145,11 @@ public class SpawnManager : MonoBehaviour
             Destroy(monsterGO);
             return null;
         }
-        
+
         ushort newId = nextMonsterId++;
         networkMonster.Initialize(newId, monsterType);
         monsterGO.name = $"{monsterPrefab.name}_{newId}";
-        
+
         spawnedMonsters.Add(monsterGO);
         Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
 

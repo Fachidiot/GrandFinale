@@ -26,6 +26,15 @@ public class NetworkManager : MonoBehaviour
     public void SetMode(NetworkMode mode)
     {
         Mode = mode;
+        if (mode == NetworkMode.SinglePlayer)
+        {
+            // Ensure ServerRoomManager exists for single-player sessions
+            if (ServerRoomManager.Instance == null)
+            {
+                gameObject.AddComponent<ServerRoomManager>();
+            }
+            // No network connection is established, but the room manager is needed for local state.
+        }
     }
     public byte MyPlayerId { get; private set; } = INVALID_PLAYER_ID;
     public bool IsConnected { get; private set; }

@@ -3,3 +3,9 @@
     - 클라이언트에서 PlayerCustomizer의 GetLocalPlayerInfo()를 가져와 host에게 보냅니다.
     - 호스트는 ServerRoomManager에서 해당 정보를 받아 PlayerInfo에 적용합니다.
     - 호스트가 처음 방을 생성할 때 자신의 PlayerInfo도 초기화합니다.
+- `TerminalManager`와 `ServerRoomManager`에 `SinglePlayer` 모드 지원 로직을 추가했습니다.
+    - `GameManager`가 오프라인 모드를 시작할 때 `ServerRoomManager`를 `SinglePlayer` 모드로 초기화하고, 씬이 로드되면 싱글 플레이어 정보를 추가하도록 수정했습니다.
+    - `ServerRoomManager`는 `SinglePlayer` 모드에서 네트워크 관련 로직(메시지 구독, 브로드캐스트)을 건너뛰고 로컬 데이터만 관리하도록 수정했습니다.
+    - `TerminalManager`가 `SinglePlayer` 모드에서 행성 선택 시, 네트워크 통신 없이 `ServerRoomManager`의 상태를 직접 변경하도록 수정했습니다.
+- 싱글플레이어 모드에서 `ServerRoomManager`가 생성되지 않아 플레이어가 스폰되지 않는 문제를 해결했습니다.
+    - `NetworkManager.cs`의 `SetMode` 메소드를 수정하여, `SinglePlayer` 모드로 설정될 때 `ServerRoomManager` 컴포넌트가 동적으로 추가되도록 변경했습니다. 이를 통해 기존의 `Host` 및 `Client` 모드와 유사하게 `ServerRoomManager` 인스턴스가 존재하도록 보장하여 싱글플레이어 로직이 정상적으로 실행될 수 있도록 수정했습니다.

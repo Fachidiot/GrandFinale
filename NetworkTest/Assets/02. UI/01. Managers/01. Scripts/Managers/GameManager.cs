@@ -50,13 +50,14 @@ public class GameManager : MonoBehaviour
         // In multiplayer, player spawning is handled by NetworkPlayerManager based on lobby events.
         if (scene.name == gameSettings.spaceroomScene && NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
         {
-            if (PlayerManager.Instance != null)
+            if (PlayerManager.Instance != null && ServerRoomManager.Instance != null)
             {
                 PlayerManager.Instance.SpawnInitialPlayer();
+                ServerRoomManager.Instance.AddSinglePlayer(); // Add the single player to the room
             }
             else
             {
-                Debug.LogError("PlayerManager instance not found! Cannot spawn single player.");
+                Debug.LogError("A manager instance is not found! Cannot start single player game.");
             }
         }
     }
@@ -75,22 +76,13 @@ public class GameManager : MonoBehaviour
 
     public void SetPause(bool pause)
     {
+        Debug.Log("GamePaused");
         OnPauseStateChanged?.Invoke(pause);
     }
 
     // Button Methods.
     public void StartOffline()
     {
-        if (NetworkManager.Instance != null)
-        {
-            NetworkManager.Instance.SetMode(NetworkMode.SinglePlayer);
-        }
-        else
-        {
-            Debug.LogError("NetworkManager instance not found!");
-            return;
-        }
-
         SceneManager.LoadScene(gameSettings.spaceroomScene);
     }
 

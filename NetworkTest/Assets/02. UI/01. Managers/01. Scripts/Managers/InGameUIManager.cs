@@ -24,13 +24,9 @@ public class InGameUIManager : MonoBehaviour
 
     void Start()
     {
-        playerStats = FindObjectOfType<PlayerStats>();
-
-        if (playerStats != null)
+        if (null != GameObject.FindWithTag("Player"))
         {
-            // 돈이 바뀌면 UI도 바뀌도록 이벤트 연결
-            playerStats.OnStatsChanged += UpdateCashText;
-            UpdateCashText();
+            gameObject.SetActive(false);
         }
     }
 
@@ -52,10 +48,23 @@ public class InGameUIManager : MonoBehaviour
         SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
     }
 
-    public void SetInit(WeaponController weaponController)
+    public void SetInit(WeaponController weaponController, PlayerStats playerStats)
     {
         Debug.Log($"InGameUIManager received WeaponController: {weaponController}");
         this.weaponController = weaponController;
+        Debug.Log($"InGameUIManager received PlayerStats: {playerStats}");
+        this.playerStats = playerStats;
+
+        if (playerStats != null)
+        {
+            // 돈이 바뀌면 UI도 바뀌도록 이벤트 연결
+            playerStats.OnStatsChanged += UpdateCashText;
+            UpdateCashText();
+        }
+        else
+        {
+            Debug.LogError("PlayerStats couldnt find");
+        }
     }
 
     public void SetHealthValue(float value)
@@ -97,13 +106,31 @@ public class InGameUIManager : MonoBehaviour
             }
             return;
         }
-
         if (!ammoCountText.enabled)
         {
             ammoCountText.enabled = true;
         }
+        WeaponUI();
 
+        if (playerStats == null)
+        {
+            if (healthText != null && healthText.enabled)
+            {
+                healthText.enabled = false;
+            }
+            return;
+        }
+        if (!healthText.enabled)
+        {
+            healthText.enabled = true;
+        }
+        PlayerStatsUI();
+    }
+
+    private void WeaponUI()
+    {
         IWeapon currentWeapon = weaponController.GETCurrentWeapon;
+        Debug.Log($"{currentWeapon}");
         if (currentWeapon == null)
         {
             ammoCountText.text = "-";
@@ -117,6 +144,18 @@ public class InGameUIManager : MonoBehaviour
         else
         {
             ammoCountText.text = "-"; // Melee weapons or other non-ranged
+        }
+    }
+
+    private void PlayerStatsUI()
+    {
+        if (0 >= playerStats.CurrentHealth)
+        {
+            healthText.text = "0";
+        }
+        else
+        {
+            healthText.text = playerStats.CurrentHealth.ToString();
         }
     }
 }

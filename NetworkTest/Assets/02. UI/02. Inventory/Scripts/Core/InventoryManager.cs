@@ -531,6 +531,7 @@ public class InventoryManager : MonoBehaviour
         if (smallInventoryUI.activeSelf) ToggleSmallInventory();
 
         bool isOpen = !fullInventoryUI.activeSelf;
+        // GameManager.Instance.SetPause(isOpen);
         SetUIState(fullInventoryUI, fullCanvasGroup, isOpen);
     }
 
@@ -540,6 +541,7 @@ public class InventoryManager : MonoBehaviour
         if (fullInventoryUI.activeSelf) ToggleFullInventory();
 
         bool isOpen = !smallInventoryUI.activeSelf;
+        // GameManager.Instance.SetPause(isOpen);
         SetUIState(smallInventoryUI, smallCanvasGroup, isOpen);
     }
 

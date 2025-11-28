@@ -104,8 +104,6 @@ public class WeaponController : MonoBehaviour
         eventsCenter.OnHandIKTargetChange += ApplyHandsIKTarget;
         eventsCenter.OnApplyGunPositionOffset += ApplyGunPositionOffsetInHands;
         eventsCenter.OnWeaponChange += GunChangeCheck;
-
-        UIEvents.PlayerInitialized(this);
     }
 
     private void OnDisable()

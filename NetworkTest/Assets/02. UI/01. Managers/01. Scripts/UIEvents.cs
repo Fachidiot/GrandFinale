@@ -12,7 +12,7 @@ public static class UIEvents
     /// Called when the local player's components have been initialized.
     /// Passes the local player's WeaponController to the UI.
     /// </summary>
-    public static event Action<WeaponController> OnPlayerInitialized;
+    public static event Action<WeaponController, PlayerStats> OnPlayerInitialized;
 
     // Helper methods to invoke the events safely
     public static void InteractableFocusChanged(string text)
@@ -20,9 +20,9 @@ public static class UIEvents
         OnInteractableFocusChanged?.Invoke(text);
     }
 
-    public static void PlayerInitialized(WeaponController weaponController)
+    public static void PlayerInitialized(WeaponController weaponController, PlayerStats playerStats)
     {
-        OnPlayerInitialized?.Invoke(weaponController);
+        OnPlayerInitialized?.Invoke(weaponController, playerStats);
     }
 
     public static void FireInteractState(string text)

@@ -16,4 +16,10 @@ public class SinglePlayer : MonoBehaviour, IPlayerControllable
     {
         return base.GetComponentInChildren<T>();
     }
+
+    public void Initialize()
+    {
+        if (IsMine)
+            UIEvents.PlayerInitialized(GetComponent<WeaponController>(), GetComponent<PlayerStats>());
+    }
 }

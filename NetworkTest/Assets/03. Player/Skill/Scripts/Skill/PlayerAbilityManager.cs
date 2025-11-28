@@ -36,34 +36,34 @@ public class PlayerAbilityManager : MonoBehaviour
 
 
     // [테스트용] 키 입력
-    void Update()
-    {
-        // TODO (추가) G/H 키로 유물 추가/삭제 테스트 TODO
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            Debug.Log("REL_001 장착");
-            AddRelic("REL_001"); // (유물) 최대 체력 증가
-        }
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            Debug.Log("REL_001 해제");
-            RemoveRelic("REL_001"); // (유물) 최대 체력 증가 (해제)
-        }
+    // void Update()
+    // {
+    //     // TODO (추가) G/H 키로 유물 추가/삭제 테스트 TODO
+    //     if (Input.GetKeyDown(KeyCode.G))
+    //     {
+    //         Debug.Log("REL_001 장착");
+    //         AddRelic("REL_001"); // (유물) 최대 체력 증가
+    //     }
+    //     if (Input.GetKeyDown(KeyCode.H))
+    //     {
+    //         Debug.Log("REL_001 해제");
+    //         RemoveRelic("REL_001"); // (유물) 최대 체력 증가 (해제)
+    //     }
 
-        // K키로 '무한 탄창' 발동 테스트
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            Debug.Log("ABIL_007 사용");
-            TryActivateAbility("ABIL_007");
-        }
+    //     // K키로 '무한 탄창' 발동 테스트
+    //     if (Input.GetKeyDown(KeyCode.K))
+    //     {
+    //         Debug.Log("ABIL_007 사용");
+    //         TryActivateAbility("ABIL_007");
+    //     }
 
-        // L키로 '수호의 방패' 발동 테스트
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            Debug.Log("ABIL_006 사용");
-            TryActivateAbility("ABIL_006");
-        }
-    }
+    //     // L키로 '수호의 방패' 발동 테스트
+    //     if (Input.GetKeyDown(KeyCode.L))
+    //     {
+    //         Debug.Log("ABIL_006 사용");
+    //         TryActivateAbility("ABIL_006");
+    //     }
+    // }
 
     // ====================================================================
     // TODO 2. (신규) 유물 추가 / 해제 (관리 함수) 들

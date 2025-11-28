@@ -21,6 +21,8 @@ public class MainMenuUIManager : MonoBehaviour
         {
             GameManager.Instance.SetPause(false);
             GameManager.Instance.StartOffline();
+            NetworkManager.Instance.SetMode(NetworkMode.SinglePlayer);
+            ServerRoomManager.Instance.Initialize(NetworkMode.SinglePlayer);
         }
         else
         {

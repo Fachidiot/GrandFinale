@@ -22,7 +22,7 @@ public class ChatManager : MonoBehaviour
     private void Start()
     {
         playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
-        
+
         // Ensure components are assigned
         if (chatPanel == null || chatInputField == null || chatLogText == null)
         {
@@ -33,7 +33,7 @@ public class ChatManager : MonoBehaviour
 
         // Add a listener to the input field's onSubmit event (fires on Enter key)
         chatInputField.onSubmit.AddListener((text) => SendMessage());
-        
+
         // Start with chat closed
         chatPanel.SetActive(false);
         chatLogText.text = "";
@@ -54,7 +54,9 @@ public class ChatManager : MonoBehaviour
 
     private void Update()
     {
-        // Use the chat open key to toggle the chat window
+        if (playerInputs == null)
+            return;
+
         if (playerInputs.GetChatOpen())
         {
             ToggleChat();

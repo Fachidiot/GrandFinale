@@ -49,7 +49,12 @@ public class LootManager : MonoBehaviour
                 {
                     ushort lootNetId = msg["lootNetId"].ToObject<ushort>();
                     string itemId = msg["itemId"].ToString();
-                    Vector3 position = msg["position"].ToObject<Vector3>();
+                    JObject posData = msg["position"] as JObject;
+                    Vector3 position = new Vector3(
+                        posData["x"].Value<float>(),
+                        posData["y"].Value<float>(),
+                        posData["z"].Value<float>()
+                    );
                     SpawnLootInstance(lootNetId, itemId, position);
                 }
                 break;
@@ -76,7 +81,12 @@ public class LootManager : MonoBehaviour
             ["type"] = "spawn_loot",
             ["lootNetId"] = lootNetId,
             ["itemId"] = itemId,
-            ["position"] = JToken.FromObject(position)
+            ["position"] = new JObject
+            {
+                ["x"] = position.x,
+                ["y"] = position.y,
+                ["z"] = position.z
+            }
         };
         NetworkManager.Instance.BroadcastJsonMessage(spawnMsg);
 

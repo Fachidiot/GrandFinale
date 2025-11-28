@@ -77,7 +77,10 @@ public class PlayerManager : MonoBehaviour
 
         var singlePlayer = playerObject.GetComponent<SinglePlayer>();
         LocalPlayer = singlePlayer;
+        singlePlayer.Initialize();
         DontDestroyOnLoad(playerObject);
+
+        OptionDataManager.Instance.GetComponentInChildren<InGameUIManager>().gameObject.SetActive(true);
     }
 
     private void HandleServerJsonMessage(CSteamID sender, string jsonMsg)
@@ -187,6 +190,7 @@ public class PlayerManager : MonoBehaviour
         {
             LocalPlayer = networkPlayer;
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(PlayerCustomizer.Instance.GetLocalPlayerInfo());
+            OptionDataManager.Instance.GetComponentInChildren<InGameUIManager>().gameObject.SetActive(true);
         }
         else
         {

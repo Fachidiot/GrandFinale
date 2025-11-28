@@ -35,6 +35,7 @@ public class RangedWeapon : BaseWeapon
     [SerializeField] private GameObject casingPrefab;
     [SerializeField] private Transform casingSpawnPoint;
     [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private GameObject networkBulletPrefab;
     [SerializeField] private Transform bulletSpawnPoint;
     [SerializeField] private float bulletForce;
     public float BulletForce => bulletForce;

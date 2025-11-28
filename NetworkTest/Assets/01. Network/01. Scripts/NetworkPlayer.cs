@@ -55,8 +55,8 @@ public class NetworkPlayer : MonoBehaviour, IPlayerControllable
         if (isMine)
         {
             if (NicknameUI != null) NicknameUI.gameObject.SetActive(false);
-            
-            UIEvents.PlayerInitialized(WeaponController);
+
+            UIEvents.PlayerInitialized(WeaponController, GetComponent<PlayerStats>());
         }
         else
         {
