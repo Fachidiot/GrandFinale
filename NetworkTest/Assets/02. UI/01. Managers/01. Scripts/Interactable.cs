@@ -11,6 +11,7 @@ public enum InteractType
     Closet_Right,
     Craft,
     ShipDoor,
+    Dungeon,
 }
 
 public class Interactable : MonoBehaviour
@@ -78,6 +79,12 @@ public class Interactable : MonoBehaviour
                     interactionText = "함선 문 열기" + $"\n[{interactCode}]";
                 else
                     interactionText = "함선 문 닫기" + $"\n[{interactCode}]";
+                break;
+            case InteractType.Dungeon:
+                if (!toggle)
+                    interactionText = "던전 입장" + $"\n[{interactCode}]";
+                else
+                    interactionText = "던전 탈출" + $"\n[{interactCode}]";
                 break;
         }
     }
