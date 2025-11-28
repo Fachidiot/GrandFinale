@@ -151,7 +151,7 @@ public class SpawnManager : MonoBehaviour
         monsterGO.name = $"{monsterPrefab.name}_{newId}";
 
         spawnedMonsters.Add(monsterGO);
-        Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
+        // Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
 
         // Broadcast the spawn event to all clients
         var monsterState = new MonsterState
