@@ -1,27 +1,12 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
-
-/*
- * [MinotaurStates.cs]
- * 미노타우로스의 AI 행동 패턴을 정의하는 클래스 모음입니다.
- * * 주요 흐름:
- * 1. Idle / Patrol / LookAround: 기본 배회 및 탐색
- * 2. Trace: 추적 중 근접 시 'CombatIdle(간보기/좌우무빙)'으로 전환하여 패턴 시작.
- * 3. CombatIdle: 플레이어 주위를 돌며(Strafe) 간보기. 상황에 따라 Dodge, Attack, RamAttack 중 랜덤 분기.
- * 4. RamAttack: 돌진 공격. 벽 충돌(Wall)과 플레이어 충돌(Hit)을 구분하여 처리.
- * 5. Dodge: 백스탭 회피 후 다시 패턴 복귀.
- */
 
 namespace MinotaurStates
 {
-    // =================================================================================
-    // 1. Idle (대기)
-    // =================================================================================
     public class Idle : ZombieBaseState<MonsterAIController>
     {
         private float idleTime;
         private float timer;
-
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
@@ -30,7 +15,6 @@ namespace MinotaurStates
             idleTime = Random.Range(monster.config.idleTimeMin, monster.config.idleTimeMax);
             timer = 0f;
         }
-
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
             if (monster.sensor.CanSeePlayer)
@@ -47,12 +31,10 @@ namespace MinotaurStates
         public override void ExitState(MonsterAIController monster) { }
     }
 
-    // =================================================================================
-    // 2. Patrol (순찰)
-    // =================================================================================
     public class Patrol : ZombieBaseState<MonsterAIController>
     {
         private Vector3 patrolDestination;
+
         private float entryTimer;
 
         public override void EnterState(MonsterAIController monster)
@@ -70,8 +52,12 @@ namespace MinotaurStates
             }
 
             monster.MoveTo(patrolDestination);
+
+            // 타이머를 매 프레임 증가시킵니다
             entryTimer += Time.deltaTime;
 
+            // 태 진입 후 아주 약간의 시간이 지난 뒤에만 도착 여부를 체크합니다.
+            // 이렇게 하면 NavMeshAgent가 거리를 계산할 시간을 벌 수 있습니다.
             if (entryTimer > 0.1f && monster.arrivedAtDestination)
             {
                 return monster.fsm.IdleState;
@@ -86,39 +72,37 @@ namespace MinotaurStates
         }
     }
 
-    // =================================================================================
-    // 3. Trace (추적) - 첫 강제 돌진 로직 제거
-    // =================================================================================
     public class Trace : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)
         {
-            monster.SetAnimFloat(monster.hashMoveSpeed, 2f); // 뛰기
-        }
+            monster.SetAnimFloat(monster.hashMoveSpeed, 2f);
 
+            if (monster.player != null)
+            {
+                monster.MoveTo(monster.player.transform.position);
+            }
+        }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
-            var minoFsm = monster.fsm as MinotaurFSM;
-            float dist = monster.GetDistanceToPlayer();
-
-            // [수정] 공격 사거리 내 진입 시 -> CombatIdle로 전환하여 랜덤 패턴 시작
-            if (dist <= monster.config.attackRange)
+            if (monster.GetDistanceToPlayer() <= monster.config.attackRange)
             {
-                return minoFsm.CombatIdleState;
+                return monster.fsm.AttackState;
             }
-
-            // [이동 로직]
-            Vector3 target = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
-            monster.MoveTo(target, monster.config.runSpeed);
-
+            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
+            monster.MoveTo(targetPosition);
+            if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
+            {
+                return monster.fsm.LookAroundState;
+            }
             return this;
         }
-        public override void ExitState(MonsterAIController monster) { monster.StopMoving(); }
+        public override void ExitState(MonsterAIController monster)
+        {
+            monster.StopMoving();
+        }
     }
 
-    // =================================================================================
-    // 4. LookAround (주변 경계)
-    // =================================================================================
     public class LookAround : ZombieBaseState<MonsterAIController>
     {
         private float timer;
@@ -131,13 +115,16 @@ namespace MinotaurStates
 
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
+            // 1. 플레이어를 감지하면 즉시 추적합니다.
             if (monster.sensor.CanSeePlayer)
             {
                 return monster.fsm.TraceState;
             }
 
+            // 2. C# 타이머를 증가시킵니다.
             timer += Time.deltaTime;
 
+            // 3. MonsterConfig에 설정된 시간이 다 되면 Patrol 상태로 갑니다.
             if (timer >= monster.config.lookAroundTime)
             {
                 return monster.fsm.PatrolState;
@@ -145,244 +132,80 @@ namespace MinotaurStates
             return this;
         }
 
-        public override void ExitState(MonsterAIController monster) { }
-    }
-
-    // =================================================================================
-    // 5. CombatIdle (전투 대치): 플레이어를 보며 좌우 이동(Strafe) 및 패턴 분기
-    // =================================================================================
-    public class CombatIdle : ZombieBaseState<MonsterAIController>
-    {
-        private float timer;
-        private float strafeTimer;
-        private int strafeDir = 1; // 1: 오른쪽, -1: 왼쪽
-        private MinotaurFSM minoFsm;
-
-        public override void EnterState(MonsterAIController monster)
-        {
-            MinotaurConfig mConfig = (MinotaurConfig)monster.config;
-
-            monster.StopMoving();
-            monster.SetAnimFloat(monster.hashMoveSpeed, 1f);
-            timer = 0f;
-            strafeTimer = 0f;
-            strafeDir = Random.value > 0.5f ? 1 : -1;
-            minoFsm = monster.fsm as MinotaurFSM;
-
-            if (Random.value < 0.2f) monster.SetAnimTrigger(monster.hashTaunt);
-        }
-
-        public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
-        {
-            MinotaurConfig mConfig = (MinotaurConfig)monster.config;
-            timer += Time.deltaTime;
-            strafeTimer += Time.deltaTime;
-
-            if (monster.player != null) monster.LookAt(monster.player.transform.position);
-
-            float dist = monster.GetDistanceToPlayer();
-            if (dist < mConfig.keepDistance)
-            {
-                return minoFsm.DodgeState;
-            }
-
-            if (strafeTimer >= mConfig.changeDirectionTime)
-            {
-                strafeDir *= -1;
-                strafeTimer = 0f;
-            }
-
-            Vector3 moveDir = monster.transform.right * strafeDir;
-            monster.MoveDirection(moveDir, mConfig.strafeSpeed);
-
-            if (timer >= mConfig.combatIdleTime)
-            {
-                // 거리가 멀면 돌진, 가까우면 일반 공격
-                if (dist > 6.0f) return minoFsm.RamAttackState;
-                else return monster.fsm.AttackState;
-            }
-
-            return this;
-        }
-        public override void ExitState(MonsterAIController monster) { monster.StopMoving(); }
-    }
-
-    // =================================================================================
-    // 6. Dodge (회피): 백스탭 후 재정비
-    // =================================================================================
-    public class Dodge : ZombieBaseState<MonsterAIController>
-    {
-        private float timer;
-        public override void EnterState(MonsterAIController monster)
-        {
-            timer = 0f;
-            monster.SetAnimTrigger(monster.hashDodge);
-        }
-
-        public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
-        {
-            timer += Time.deltaTime;
-            monster.LookAt(monster.player.transform.position);
-
-            if (timer >= 1.0f)
-            {
-                var minoFsm = monster.fsm as MinotaurFSM;
-                MinotaurConfig mConfig = (MinotaurConfig)monster.config;
-
-                if (Random.value < mConfig.ramAfterDodgeChance)
-                    return minoFsm.RamAttackState;
-
-                return minoFsm.CombatIdleState;
-            }
-            return this;
-        }
-        public override void ExitState(MonsterAIController monster) { }
-    }
-
-    // =================================================================================
-    // 7. RamAttack (돌진 공격): 돌진 -> 충돌(플레이어/벽) -> 정지
-    // =================================================================================
-    public class RamAttack : ZombieBaseState<MonsterAIController>
-    {
-        private float timer;
-        private bool isFinished;
-        private bool isPreparing;
-        private MinotaurConfig mConfig;
-
-        public override void EnterState(MonsterAIController monster)
-        {
-            mConfig = monster.config as MinotaurConfig;
-            if (mConfig == null) return;
-
-            monster.StopMoving();
-            isFinished = false;
-            isPreparing = true;
-            timer = 0f;
-
-            monster.hasPerformedFirstCharge = true;
-        }
-
-        public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
-        {
-            var minoFsm = monster.fsm as MinotaurFSM;
-            if (minoFsm == null || mConfig == null) return monster.fsm.IdleState;
-            if (monster.player == null) return monster.fsm.IdleState;
-
-            // [단계 1] 준비 단계: 플레이어를 정면으로 볼 때까지 회전만 함
-            if (isPreparing)
-            {
-                monster.LookAt(monster.player.transform.position, monster.config.turnSpeed * 5f);
-
-                Vector3 dirToPlayer = (monster.player.transform.position - monster.transform.position).normalized;
-                float angle = Vector3.Angle(monster.transform.forward, dirToPlayer);
-
-                if (angle < 5.0f)
-                {
-                    isPreparing = false;
-                    monster.SetAnimTrigger(monster.hashRamStart);
-                }
-            }
-
-            // [단계 2] 돌진 단계: 실제로 이동하고 충돌 체크
-
-            if (isFinished)
-            {
-                timer += Time.deltaTime;
-                if (timer >= 2.0f)
-                {
-                    return minoFsm.CombatIdleState;
-                }
-                return this;
-            }
-
-            timer += Time.deltaTime;
-
-            // 1. 벽 충돌 감지
-            if (Physics.Raycast(monster.transform.position + Vector3.up, monster.transform.forward, out RaycastHit hit, mConfig.wallCheckDist))
-            {
-                if (!hit.collider.CompareTag("Player"))
-                {
-                    Debug.Log("벽 충돌!");
-                    monster.SetAnimTrigger(monster.hashRamWall);
-                    monster.StopMoving();
-                    isFinished = true;
-                    timer = 0f;
-                    return this;
-                }
-            }
-
-            // 2. 플레이어 충돌 감지
-            float dist = monster.GetDistanceToPlayer();
-            if (dist <= 1.5f)
-            {
-                Debug.Log("플레이어 충돌!");
-                monster.ApplyDamageToPlayer(mConfig.chargeDamage);
-                monster.SetAnimTrigger(monster.hashRamEnd);
-                monster.StopMoving();
-                isFinished = true;
-                timer = 0f;
-                return this;
-            }
-
-            // 3. 이동
-            monster.MoveTo(monster.player.transform.position, mConfig.chargeSpeed);
-
-            // 4. 시간 초과
-            if (timer >= mConfig.chargeMaxDuration)
-            {
-                monster.SetAnimTrigger(monster.hashRamEnd);
-                return minoFsm.CombatIdleState;
-            }
-
-            return this;
-        }
-
         public override void ExitState(MonsterAIController monster)
         {
-            monster.StopMoving();
         }
     }
 
-    // =================================================================================
-    // 8. Attack (일반 공격)
-    // =================================================================================
     public class Attack : ZombieBaseState<MonsterAIController>
     {
+        // 1. Hit 상태처럼, 공격이 지속되는 시간을 잴 타이머를 추가합니다.
         private float timer;
+        private bool hasAppliedDamage;
+
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
             monster.SetAnimFloat(monster.hashMoveSpeed, 0f);
 
-            int r = Random.Range(0, 3);
-            if (r == 0) monster.SetAnimTrigger(monster.hashAttack1);
-            else if (r == 1) monster.SetAnimTrigger(monster.hashAttack2);
-            else monster.SetAnimTrigger(monster.hashAttack3);
+            int attackIndex = Random.Range(0, 3);
+            if (attackIndex == 0)
+            {
+                monster.SetAnimTrigger(monster.hashAttack1);
+            }
+            else if (attackIndex == 1)
+            {
+                monster.SetAnimTrigger(monster.hashAttack2);
+            }
+            else
+            {
+                monster.SetAnimTrigger(monster.hashAttack3);
+            }
 
-            if (monster.player != null) monster.LookAt(monster.player.transform.position);
+            if (monster.player != null)
+            {
+                monster.LookAt(monster.player.transform.position);
+            }
             timer = 0f;
+            hasAppliedDamage = false;
         }
 
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
+            // 5. (유지) 공격 중에도 플레이어를 계속 바라봅니다.
+            monster.StopMoving();
+            if (monster.player != null)
+            {
+                monster.LookAt(monster.player.transform.position);
+            }
+
+            // 6. (추가) 타이머를 증가시킵니다.
             timer += Time.deltaTime;
-            if (timer < 0.5f && monster.player != null) monster.LookAt(monster.player.transform.position);
+
+            if (!hasAppliedDamage && timer >= monster.config.attackDelay)
+            {
+                hasAppliedDamage = true;
+                monster.ApplyDamageToPlayer();
+            }
 
             if (timer >= monster.config.attackCooldown)
             {
-                return ((MinotaurFSM)monster.fsm).CombatIdleState;
+                return monster.fsm.TraceState;
             }
+
+            // 8. 시간이 다 되기 전까지는 "Attack" 상태에 "잠겨" 있습니다.
             return this;
         }
-        public override void ExitState(MonsterAIController monster) { }
-    }
 
-    // =================================================================================
-    // 9. Hit (피격)
-    // =================================================================================
+        public override void ExitState(MonsterAIController monster)
+        {
+            // 9. (유지) 상태를 나갈 때 애니메이션을 끕니다.
+            monster.StopAttackRoutine(); // (호출한 적 없지만, 안전을 위해 놔둠)
+        }
+    }
     public class Hit : ZombieBaseState<MonsterAIController>
     {
-        private float hitStunDuration = 0.5f;
+        private float hitStunDuration = 0.5f; // 피격 경직 시간 (0.5초)
         private float timer;
 
         public override void EnterState(MonsterAIController monster)
@@ -391,6 +214,7 @@ namespace MinotaurStates
 
             if (monster.TryGetComponent<UnityEngine.AI.NavMeshAgent>(out var agent))
             {
+                // Trace 상태의 속도(runSpeed)를 기준으로 줄입니다.
                 agent.speed = monster.config.runSpeed * 0.3f;
             }
         }
@@ -404,25 +228,37 @@ namespace MinotaurStates
             }
             return this;
         }
-        public override void ExitState(MonsterAIController monster) { }
+        public override void ExitState(MonsterAIController monster)
+        {
+            //monster.SetAnimation(monster.hashHit, false);
+        }
     }
 
-    // =================================================================================
-    // 10. Die (사망)
-    // =================================================================================
     public class Die : ZombieBaseState<MonsterAIController>
     {
         public override void EnterState(MonsterAIController monster)
         {
             monster.StopMoving();
             monster.StopAllCoroutines();
+            //monster.SetAnimation(monster.hashDie, true); // Die 애니메이션 재생 -> Any State에서 처리
 
-            if (monster.TryGetComponent<Collider>(out var collider)) collider.enabled = false;
-            if (monster.TryGetComponent<UnityEngine.AI.NavMeshAgent>(out var agent)) agent.enabled = false;
+            // 1. 콜라이더 끄기 (다른 몬스터나 총알에 안 맞게)
+            if (monster.TryGetComponent<Collider>(out var collider))
+            {
+                collider.enabled = false;
+            }
+
+            // 2. NavMeshAgent 끄기
+            if (monster.TryGetComponent<UnityEngine.AI.NavMeshAgent>(out var agent))
+            {
+                agent.enabled = false;
+            }
 
             MonsterHealth health = monster.GetComponent<MonsterHealth>();
+
             if (health != null && monster.config.lootTable != null)
             {
+
                 health.SpawnLoot(monster.config.lootTable);
             }
 

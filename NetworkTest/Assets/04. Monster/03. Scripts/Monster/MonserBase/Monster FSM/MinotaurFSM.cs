@@ -1,4 +1,4 @@
-// MinotaurFSM.cs
+﻿// MinotaurFSM.cs
 using UnityEngine;
 using MinotaurStates;
 
@@ -14,10 +14,6 @@ public class MinotaurFSM : MonsterFSM
     private readonly Hit _hitState = new Hit();
     private readonly Die _dieState = new Die();
 
-    private readonly CombatIdle _combatIdleState = new CombatIdle();   // 좌우 무빙 & 간보기
-    private readonly Dodge _dodgeState = new Dodge();                  // 백스탭
-    private readonly RamAttack _ramAttackState = new RamAttack();
-
     // 3. FSM 슬롯에 상태들을 반환
     public override ZombieBaseState<MonsterAIController> IdleState => _idleState;
     public override ZombieBaseState<MonsterAIController> PatrolState => _patrolState;
@@ -28,7 +24,4 @@ public class MinotaurFSM : MonsterFSM
     public override ZombieBaseState<MonsterAIController> DieState => _dieState;
     public override ZombieBaseState<MonsterAIController> BlockState => null;
     public override ZombieBaseState<MonsterAIController> TauntState => null;
-    public ZombieBaseState<MonsterAIController> CombatIdleState => _combatIdleState;
-    public ZombieBaseState<MonsterAIController> DodgeState => _dodgeState; // 백스탭
-    public ZombieBaseState<MonsterAIController> RamAttackState => _ramAttackState;
 }
