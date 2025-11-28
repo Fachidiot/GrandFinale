@@ -103,7 +103,8 @@ public class ServerRoomManager : MonoBehaviour
             headIndex = localModelInfo.head,
             bodyIndex = localModelInfo.body,
             acc1Index = localModelInfo.acc1,
-            acc2Index = localModelInfo.acc2
+            acc2Index = localModelInfo.acc2,
+            IsReady = true // Single player is always ready
         };
 
         PlayerList.Add(playerInfo);
@@ -143,6 +144,22 @@ public class ServerRoomManager : MonoBehaviour
             case "player_customization":
                 HandlePlayerCustomization(sender, msg);
                 break;
+            case "player_ready":
+                HandlePlayerReady(sender, msg);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// (Host-only) Handles a client's ready status update.
+    /// </summary>
+    public void HandlePlayerReady(CSteamID sender, JObject data)
+    {
+        if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
+        {
+            playerInfo.IsReady = data["is_ready"]?.ToObject<bool>() ?? false;
+            Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ready status: {playerInfo.IsReady}. Broadcasting update.");
+            BroadcastRoomUpdate();
         }
     }
 
@@ -275,7 +292,8 @@ public class ServerRoomManager : MonoBehaviour
                 headIndex = localModelInfo.head,
                 bodyIndex = localModelInfo.body,
                 acc1Index = localModelInfo.acc1,
-                acc2Index = localModelInfo.acc2
+                acc2Index = localModelInfo.acc2,
+                IsReady = true // Host is always ready
             };
         }
         else
@@ -359,6 +377,21 @@ public class ServerRoomManager : MonoBehaviour
 
         Debug.Log($"[ServerRoomManager] Loading scene: {sceneToLoad}");
         SceneManager.LoadScene(sceneToLoad);
+    }
+
+    public void LaunchToPlanet(string planetId)
+    {
+        var mode = NetworkManager.Instance.Mode;
+        if (mode != NetworkMode.Host && mode != NetworkMode.SinglePlayer) return;
+
+        if (mode == NetworkMode.Host)
+        {
+            JObject message = new JObject { { "type", "load_scene" }, { "scene_name", planetId } };
+            NetworkManager.Instance.BroadcastJsonMessage(message);
+        }
+
+        Debug.Log($"[ServerRoomManager] Loading scene: {planetId}");
+        SceneManager.LoadScene(planetId);
     }
 
     /// <summary>

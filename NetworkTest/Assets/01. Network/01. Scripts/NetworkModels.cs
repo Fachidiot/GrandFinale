@@ -12,6 +12,7 @@ public class PlayerInfo
     public int bodyIndex;
     public int acc1Index;
     public int acc2Index;
+    public bool IsReady;
 }
 
 [Serializable]

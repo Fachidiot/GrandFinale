@@ -104,7 +104,7 @@ public class BulletNetwork : BulletBehaviour
                     }
                     else
                     {// 몬스터 공격시.
-                        var networkMonster = hit.transform.root.GetComponent<NetworkMonster>();
+                        var networkMonster = hit.transform.GetComponent<NetworkMonster>();
                         if (networkMonster != null)
                         {
                             float damage = PlayerDamage * (hit.collider.name == "Head" ? 2f : 1f);

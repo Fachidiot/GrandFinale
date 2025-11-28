@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Steamworks;
+using UnityEngine.SceneManagement;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -121,6 +122,13 @@ public class PlayerManager : MonoBehaviour
 
     public void UpdatePlayerList(JArray playerList)
     {
+        // Guard clause to prevent spawning players outside the main game scene
+        if (SceneManager.GetActiveScene().name != GameManager.Instance.GameSettings.spaceroomScene)
+        {
+            Debug.Log($"[PlayerManager] Skipping UpdatePlayerList because current scene is not the game scene.");
+            return;
+        }
+
         byteIdToSteamId.Clear();
         List<string> steamIdsInMessage = new List<string>();
 

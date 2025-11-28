@@ -378,7 +378,7 @@ public class NetworkManager : MonoBehaviour
         // Add the host player to the room immediately upon creation.
         ServerRoomManager.Instance.AddHostPlayer(selfSteamId, CustomSteamManager.Instance.PlayerName);
 
-        SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
+        // SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t pCallback)
@@ -438,7 +438,7 @@ public class NetworkManager : MonoBehaviour
         IsConnected = true;
         OnConnected?.Invoke();
 
-        SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
+        // SceneManager.LoadScene(GameManager.Instance.GameSettings.spaceroomScene);
     }
 
     private void OnLobbyChatUpdate(LobbyChatUpdate_t pCallback)

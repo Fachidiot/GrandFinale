@@ -178,8 +178,11 @@ public class PlayerInputs : MonoBehaviour
             return;
         }
 
-        HandleInteraction();
-        CheckForInteractableUI();
+        if (null != PlayerManager.Instance.LocalPlayer && PlayerManager.Instance.LocalPlayer.gameObject)
+        {
+            HandleInteraction();
+            CheckForInteractableUI();
+        }
 
         // Axis Raw
         float horizontalRaw = 0f;

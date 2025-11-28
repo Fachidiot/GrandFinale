@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class DungeonEntryAction : MonoBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private string interactPrompt = "Interact [F]";
+    // [SerializeField] private string interactPrompt = "Interact [F]";
 
     [Tooltip("Leave empty if moving within the current scene")]
     [SerializeField] private string targetSceneName;

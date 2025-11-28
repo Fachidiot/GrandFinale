@@ -105,3 +105,17 @@
     - `NetworkAnimatorSync.cs`에 `SetInteger` 메서드를 추가하고 `MeleeWeapon.cs`에서 `SetAnimatorParameter` 대신 호출하도록 수정하여 `CS1061` 오류를 해결.
     - `MeleeWeapon.cs`에서 제거되었던 `CollisionDetectionLength`와 `MaxZPositionOffsetCollision` 속성을 다시 추가하여 `WeaponCollision.cs`의 `CS1061` 오류를 해결.
     - `SFB_KnightLight.cs`와 `FlickeringLight.cs`에서 `light` 변수 선언에 `new` 키워드를 추가하여 `CS0108` 경고를 해결.
+    - `MainMenuUIManager.cs`에 `Newtonsoft.Json.Linq` 네임스페이스를 추가하여 `JObject`를 찾을 수 없던 `CS0246` 오류를 해결.
+- **플레이어 접속 및 커스터마이징 흐름 리팩토링**:
+    - `NetworkManager.cs`와 `GameManager.cs`에서 로비 접속 및 게임 시작 시 자동으로 씬을 로드하던 로직을 제거(주석 처리).
+    - `MainMenuUIManager.cs`를 수정하여, 네트워크 접속(`HandleConnection`) 또는 싱글 플레이어 시작(`OnSingleplayerButtonClicked`) 시, 게임 씬으로 바로 이동하는 대신 커스터마이징 룸 UI로 전환하도록 변경.
+    - `MainMenuUIManager.cs`에 `ServerRoomManager.OnRoomDataUpdated` 이벤트를 구독하여, 룸의 플레이어 목록이 변경될 때마다 `localCustomView`와 `clientCustomView` 프리팹을 `slotList`에 맞게 생성하고 업데이트하는 `UpdatePlayerSlots` 로직을 구현. 또한 `UpdatePlayerSlots` 메서드의 시그니처에서 `RoomData` 매개변수를 제거하고 `ServerRoomManager.Instance`에서 직접 데이터를 가져오도록 수정하여 `CS0246` 오류를 해결.
+    - `NetworkModels.cs`의 `PlayerInfo` 클래스에 `IsReady` 상태를 추적하기 위한 `public bool IsReady;` 속성을 추가.
+    - `ServerRoomManager.cs`에 플레이어의 준비 상태(`IsReady`)를 처리하는 로직을 추가하고, 이를 호스트와 클라이언트 간에 동기화하도록 `HandleHostJsonMessage`와 `BroadcastRoomUpdate`를 업데이트. 또한 싱글 플레이어의 경우 `AddSinglePlayer`에서 `IsReady`를 true로 자동 설정.
+    - `ServerRoomManager.cs`의 `HandlePlayerReady` 메서드를 `public`으로 변경하여 `MainMenuUIManager`에서 호출 가능하도록 수정하고, 중복된 정의를 제거하여 `CS0111` 오류를 해결.
+    - `ServerRoomManager.cs`에 매개변수 없이 현재 선택된 행성으로 게임 씬을 로드하는 `LaunchToPlanet()` 오버로드를 추가.
+    - `MainMenuUIManager.cs`에 "준비" 및 "게임 시작" 버튼 UI 요소를 추가하고, `OnReadyButtonClicked()` 및 `OnStartGameButtonClicked()` 메서드를 구현.
+    - `MainMenuUIManager.cs`의 `UpdatePlayerSlots` 메서드를 확장하여 플레이어의 준비 상태에 따라 "게임 시작" 버튼의 가시성을 제어하고, 각 플레이어 프리뷰에 "ReadyIndicator" (하위 GameObject 가정)를 활성화/비활성화하여 준비 상태를 시각적으로 표시.
+- **플레이어 생성 오류 수정**:
+    - `PlayerManager.cs`의 `UpdatePlayerList` 메서드에 현재 씬이 메인 게임 씬(`spaceroomScene`)인지 확인하는 가드 절을 추가하여, 메인 메뉴에서 플레이어 `GameObject`가 미리 생성되는 문제를 해결.
+    - `MainMenuUIManager.cs`의 이벤트 구독 로직을 수정하여, `ServerRoomManager` 인스턴스가 생성된 후에 `OnRoomDataUpdated` 이벤트가 구독되도록 보장함으로써 `CustomView` 프리팹이 생성되지 않던 문제를 해결.

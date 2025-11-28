@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
     // Button Methods.
     public void StartOffline()
     {
-        SceneManager.LoadScene(gameSettings.spaceroomScene);
+        // SceneManager.LoadScene(gameSettings.spaceroomScene);
     }
 
     // public void EndGame()

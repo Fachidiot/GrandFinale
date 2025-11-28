@@ -7,7 +7,9 @@ public class CustomizeManager : MonoBehaviour
 {
     [SerializeField] private GameObject customizePanel;
     [SerializeField] private ModelCustom fModel;
+    public ModelCustom FModel { set { fModel = value; } }
     [SerializeField] private ModelCustom mModel;
+    public ModelCustom MModel { set { mModel = value; } }
     [SerializeField] private List<GameObject> customizePreviewOffer;
 
     [SerializeField] private HorizontalSelector isMaleSelector;
@@ -57,6 +59,7 @@ public class CustomizeManager : MonoBehaviour
 
     public void TogglePanel()
     {
+        ModelApply();
         bool toggle = !customizePanel.activeSelf;
 
         customizePanel.SetActive(toggle);
