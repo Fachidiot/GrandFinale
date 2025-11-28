@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MoveState : StateMachineBase
@@ -51,6 +52,11 @@ public class MoveState : StateMachineBase
     public MoveState(CharacterMove characterMove) : base(characterMove)
     {
         GameManager.OnPauseStateChanged += OnPause;
+    }
+
+    void OnDestroy()
+    {
+        GameManager.OnPauseStateChanged -= OnPause;
     }
 
     public override void Tick()
