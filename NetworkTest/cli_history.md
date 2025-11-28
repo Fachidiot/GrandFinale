@@ -80,7 +80,7 @@
     - 플레이어의 기울이기 상태(`bending` 값)가 네트워크를 통해 동기화되지 않던 문제를 수정했습니다.
     - `GameStateModels.cs`의 `PlayerState` 및 `NetworkGameState` 데이터 구조에 `bending` 필드를 추가하고 직렬화/역직렬화 로직을 업데이트했습니다.
     - `NetworkManager.cs`가 로컬 플레이어의 `PlayerInputs`에서 `bending` 값을 수집하여 `PlayerState`에 포함하도록 수정했습니다.
-    - `BodySlope_Handler.cs`를 수정하여 로컬 플레이어와 원격 플레이어를 구분하고(`isMine` 플래그), 네트워크로부터 받은 값으로 기울기를 직접 설정하는 `SetSlopeFromNetwork` 메서드를 추가했습니다.
+    - `BodySlope_Handler.cs`를 수정하여 로컬 플레이어와 원격 플레이어를 구분하고(`isMine` 플그), 네트워크로부터 받은 값으로 기울기를 직접 설정하는 `SetSlopeFromNetwork` 메서드를 추가했습니다.
     - `NetworkPlayer.cs`가 생성될 때 `BodySlope_Handler`를 올바르게 초기화하도록 수정했습니다.
     - `PlayerManager.cs`의 `UpdateFromGameState` 메서드가 수신된 `bending` 값을 원격 플레이어의 `BodySlope_Handler`에 적용하여 기울임이 모든 클라이언트에게 동일하게 보이도록 수정했습니다.
 ## 2025년 11월 24일 월요일
@@ -100,3 +100,8 @@
 ## 2025년 11월 29일 토요일
 
 - `MeleeHitbox.cs` 스크립트에서 주석 처리된 몬스터 데미지 처리 로직을 주석 해제 및 `hit` 변수를 `other`로 수정.
+- `MeleeWeapon.cs` 스크립트를 `UnarmedWeapon.cs`의 구조를 참고하여 리팩토링. 애니메이터의 `twoHandAttack` 파라미터를 사용하여 콤보 공격을 처리하고, 애니메이션 이벤트를 통해 `MeleeHitbox`를 제어하도록 수정.
+- **컴파일 오류 및 경고 수정**:
+    - `NetworkAnimatorSync.cs`에 `SetInteger` 메서드를 추가하고 `MeleeWeapon.cs`에서 `SetAnimatorParameter` 대신 호출하도록 수정하여 `CS1061` 오류를 해결.
+    - `MeleeWeapon.cs`에서 제거되었던 `CollisionDetectionLength`와 `MaxZPositionOffsetCollision` 속성을 다시 추가하여 `WeaponCollision.cs`의 `CS1061` 오류를 해결.
+    - `SFB_KnightLight.cs`와 `FlickeringLight.cs`에서 `light` 변수 선언에 `new` 키워드를 추가하여 `CS0108` 경고를 해결.

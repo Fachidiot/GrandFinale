@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SFB_KnightLight : MonoBehaviour {
 
-    public Light light;
+    public new Light light;
     public float counter = 0f;
     public float fadeStart = 1.5f;
 

@@ -1,52 +1,56 @@
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 public class MeleeWeapon : BaseWeapon
 {
-    [Header("Weapon Stats")]
-    public float attackRange = 1.5f; // Used for visualization or AI, the collider is the authority
-
-    [Header("Internal References")]
-    [SerializeField] private Collider damageCollider;
+    [Header("Weapon Configuration")]
+    [SerializeField] private MeleeHitbox meleeHitbox;
+    [SerializeField] private float attackCooldown = 0.8f;
+    [SerializeField] private int maxCombo = 3;
 
     [Header("Position and Points")]
-    [SerializeField] private Vector3 inHandsPositionOffset; // offset in hands
+    [SerializeField] private Vector3 inHandsPositionOffset;
     public Vector3 InHandsPositionOffset => inHandsPositionOffset;
+
+    [SerializeField] private float collisionDetectionLength = 0.5f;
+    public float CollisionDetectionLength => collisionDetectionLength;
+
+    [SerializeField] private float maxZPositionOffsetCollision = 0.2f;
+    public float MaxZPositionOffsetCollision => maxZPositionOffsetCollision;
 
     [SerializeField] private WeaponPoint[] weaponPoints;
     public readonly Dictionary<WeaponPoint.PointType, Transform> WeaponPointsDict = new Dictionary<WeaponPoint.PointType, Transform>();
-
     [SerializeField] private WeaponPoint[] femaleWeaponPoints;
     public readonly Dictionary<WeaponPoint.PointType, Transform> FemaleWeaponPointsDict = new Dictionary<WeaponPoint.PointType, Transform>();
 
-    [SerializeField] private float collisionDetectionLength;
-    public float CollisionDetectionLength => collisionDetectionLength;
-
-    [SerializeField] private float maxZPositionOffsetCollision;
-    public float MaxZPositionOffsetCollision => maxZPositionOffsetCollision;
     [Header("Sound")]
-    [SerializeField] private AudioClip fireSound;
+    [SerializeField] private AudioClip[] fireSounds; // Array for combo sounds
     [SerializeField] private AudioClip emptySound;
 
-    // private bool _canShoot = true;
+    private float lastAttackTime = -1f;
+    private int attackCount = 0;
+
+    private Animator playerAnimator;
+    private NetworkAnimatorSync networkAnimatorSync;
     private AudioSource _audioSource;
-    private BoltAnimation boltAnimation;
 
+    private readonly int TwoHandAttackHash = Animator.StringToHash("twoHandAttack");
 
-    // A list to track which enemies have been hit during the current swing
-    // to prevent a single swing from hitting the same enemy multiple times.
-    private List<Collider> hitTargets;
-
-    private void Start()
+    private void Awake()
     {
-        if (damageCollider == null)
-        {
-            damageCollider = GetComponent<Collider>();
-        }
-        damageCollider.isTrigger = true;
-        damageCollider.enabled = false; // The collider should be disabled by default.
+        playerAnimator = GetComponentInParent<Animator>();
+        networkAnimatorSync = GetComponentInParent<NetworkAnimatorSync>();
+        _audioSource = GetComponent<AudioSource>();
+        if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
 
+        if (playerAnimator == null) Debug.LogError("MeleeWeapon: Animator not found on the same object.");
+        if (meleeHitbox == null) Debug.LogError("MeleeWeapon: MeleeHitbox is not assigned.");
+
+        InitializeWeaponPoints();
+    }
+
+    private void InitializeWeaponPoints()
+    {
         if (IsMale)
         {
             foreach (var point in weaponPoints)
@@ -67,65 +71,78 @@ public class MeleeWeapon : BaseWeapon
                 }
             }
         }
-
-        hitTargets = new List<Collider>();
     }
 
     public override bool Attack()
     {
-        hitTargets.Clear();
-        damageCollider.enabled = true;
-        Debug.Log($"[{gameObject.name}] Attack Begun. Collider enabled.");
-        return true;
-    }
+        if (playerAnimator == null || meleeHitbox == null) return false;
 
-    public void EndAttack()
-    {
-        damageCollider.enabled = false;
-        Debug.Log($"[{gameObject.name}] Attack Ended. Collider disabled.");
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        var player = GetComponentInParent<IPlayerControllable>();
-        if (player == null || !player.IsMine)
+        if (Time.time > lastAttackTime + attackCooldown)
         {
-            return;
+            attackCount = 0; // Reset combo if time is up
         }
 
-        // Check if we've already hit this target during this swing.
-        if (hitTargets.Contains(other))
+        if (Time.time >= lastAttackTime + 0.2f) // Allow next combo attack
         {
-            return;
-        }
+            lastAttackTime = Time.time;
+            attackCount = (attackCount % maxCombo) + 1;
 
-        // Check if the hit object is a monster.
-        var monsterHealth = other.GetComponent<MonsterHealth>();
-        if (monsterHealth == null) return;
-
-        hitTargets.Add(other); // Add to the list of hit targets for this swing.
-
-        var networkMonster = other.GetComponent<NetworkMonster>();
-        if (networkMonster != null && NetworkManager.Instance != null)
-        {
-            Debug.Log($"[{gameObject.name}] Hit monster {networkMonster.MonsterId} for {PlayerDamage} damage. Sending damage report.");
-
-            // If we are the host, apply damage directly.
-            if (NetworkManager.Instance.Mode == NetworkMode.Host)
+            if (networkAnimatorSync != null)
             {
-                monsterHealth.TakeDamage(PlayerDamage);
+                networkAnimatorSync.SetInteger(TwoHandAttackHash, attackCount);
             }
-            // If we are a client, send a message to the host.
             else
             {
-                JObject damageData = new JObject
-                {
-                    ["type"] = "player_dealt_damage",
-                    ["monsterId"] = networkMonster.MonsterId,
-                    ["damage"] = PlayerDamage
-                };
-                NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, damageData);
+                // Fallback for offline mode
+                playerAnimator.SetInteger(TwoHandAttackHash, attackCount);
             }
+
+            PlayAttackSound(attackCount - 1);
+
+            // The actual hitbox enabling/disabling will be done by animation events
+            return true;
         }
+
+        return false;
+    }
+
+    // Called by animation event
+    public void EnableDamageCollider()
+    {
+        if (meleeHitbox != null)
+        {
+            meleeHitbox.EnableHitbox(PlayerDamage);
+        }
+    }
+
+    // Called by animation event
+    public void DisableDamageCollider()
+    {
+        if (meleeHitbox != null)
+        {
+            meleeHitbox.DisableHitbox();
+        }
+    }
+
+    private void PlayAttackSound(int index)
+    {
+        if (fireSounds != null && fireSounds.Length > index && _audioSource != null)
+        {
+            _audioSource.PlayOneShot(fireSounds[index]);
+        }
+    }
+
+    // This method is called by an animation event when the attack animation finishes
+    // to allow another attack to start.
+    public void ResetAttack()
+    {
+        // Optionally reset combo counter here if desired by design
+        // attackCount = 0;
+        // playerAnimator.SetInteger(TwoHandAttackHash, 0);
+    }
+
+    public void EndAttack() // Kept for compatibility if called elsewhere
+    {
+        DisableDamageCollider();
     }
 }

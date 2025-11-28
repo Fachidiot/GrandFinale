@@ -102,6 +102,13 @@ public class NetworkAnimatorSync : MonoBehaviour
             }
         }
     
+        public void SetInteger(int hash, int value)
+        {
+            if (!isMine) return;
+            animator.SetInteger(hash, value);
+            // TODO: Need to network this value if it should be synced.
+        }
+    
         public void TriggerUnarmedAttack(bool isJab)
         {
             if (!isMine) return;
