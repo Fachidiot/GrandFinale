@@ -99,9 +99,7 @@ public class SpaceShipManager : MonoBehaviour
 
     public void ToggleDoor()
     {
-        isDoorOpen = !isDoorOpen;
-
-        if (isDoorOpen)
+        if (!isDoorOpen)
             OpenDoor();
         else
             CloseDoor();

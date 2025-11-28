@@ -39,7 +39,7 @@ public class StationaryBrain : NPCBrain, INpcInteractable
                 break;
 
             case NPCKind.Upgrade:
-                upgradeModule.ToggleUpgrade(interactor.transform);
+                upgradeModule.ToggleUpgrade(interactor);
                 break;
 
             case NPCKind.SimpleTalk:

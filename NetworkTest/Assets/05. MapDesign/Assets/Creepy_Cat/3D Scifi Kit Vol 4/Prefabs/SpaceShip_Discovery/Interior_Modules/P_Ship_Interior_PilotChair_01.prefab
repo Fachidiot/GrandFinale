@@ -9,7 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8675826351163511860}
-  m_Layer: 0
+  - component: {fileID: 451741032233411889}
+  - component: {fileID: 3474143085146704746}
+  - component: {fileID: 588258684557869617}
+  m_Layer: 9
   m_Name: P_Ship_Interior_PilotChair_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23,19 +26,84 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2528600309207733165}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6489358496216567371}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &451741032233411889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2528600309207733165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 0
+  interactionText: "\uC790\uB9AC \uC549\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 588258684557869617}
+        m_TargetAssemblyTypeName: SitChair, Assembly-CSharp
+        m_MethodName: PlayerSit
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!65 &3474143085146704746
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2528600309207733165}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!114 &588258684557869617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2528600309207733165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d23a660a9a9f1764595f926f891bd717, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6738630063062493600
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 8675826351163511860}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 0229d65820521ed4eb0eabdd7c78be36, type: 3}
@@ -119,6 +187,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 9d0271d3113e3484a99842ad8e4f75fc, type: 2}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0229d65820521ed4eb0eabdd7c78be36, type: 3}
 --- !u!4 &6489358496216567371 stripped
 Transform:

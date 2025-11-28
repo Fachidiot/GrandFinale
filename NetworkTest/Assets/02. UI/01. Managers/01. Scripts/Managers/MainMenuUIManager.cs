@@ -3,10 +3,36 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using Cinemachine;
 
 public class MainMenuUIManager : MonoBehaviour
 {
+    [SerializeField] private CinemachineVirtualCamera menuCamera;
+    [SerializeField] private CinemachineVirtualCamera roomCamera;
+
+    [SerializeField] private GameObject menuPanel;
+    [SerializeField] private GameObject roomPanel;
+
+    [SerializeField] private GameObject localCustomView;
+    [SerializeField] private GameObject clientCustomView;
+
     private OptionController optionController;
+
+    public void OnRoomButtonClicked()
+    {
+        menuCamera.Priority = 0;
+        roomCamera.Priority = 1;
+        menuPanel.SetActive(false);
+        roomPanel.SetActive(true);
+    }
+
+    public void OnMenuButtonClicked()
+    {
+        menuCamera.Priority = 1;
+        roomCamera.Priority = 0;
+        menuPanel.SetActive(true);
+        roomPanel.SetActive(false);
+    }
 
     public void OnMultiplayerButtonClicked()
     {

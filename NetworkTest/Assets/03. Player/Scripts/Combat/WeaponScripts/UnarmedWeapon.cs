@@ -33,13 +33,11 @@ public class UnarmedWeapon : BaseWeapon
             Debug.LogError("UnarmedWeapon: PlayerInputs not found in GameManager's Instance. Unarmed combat will not function.");
         if (playerAnimator == null)
             Debug.LogError("UnarmedWeapon: Animator not found in Model Prefab. Unarmed combat animations will not function.");
-        if (networkAnimatorSync == null)
-            Debug.LogError("UnarmedWeapon: NetworkAnimatorSync not found in parent. Unarmed combat animations will not be synced.");
     }
 
     public override bool Attack()
     {
-        if (playerInputs == null || playerAnimator == null || networkAnimatorSync == null) return false;
+        if (playerInputs == null || playerAnimator == null) return false;
 
         // Punching logic
         if (Time.time >= lastAttackTime + attackCooldown)

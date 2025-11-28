@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5614483923715734138}
   - component: {fileID: 4733842066667000963}
   - component: {fileID: 8270162074845995440}
+  - component: {fileID: 759152626249172858}
   m_Layer: 30
   m_Name: SpaceShip_Discovery
   m_TagString: Untagged
@@ -179,6 +180,27 @@ MonoBehaviour:
   disableEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!95 &759152626249172858
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 216085728529660424}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8f388ffb1294c43daba84f5b8d8fcbfb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &420717927029503928
 GameObject:
   m_ObjectHideFlags: 0
@@ -2107,7 +2129,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 0
   interactionText: "\uC2DC\uD000\uC2A4 \uC2DC\uC791"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -6131,7 +6155,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2528600309207733165, guid: 5deec5b66eb762f4ab3614a9c506c4f6, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2654893167364958035, guid: 5deec5b66eb762f4ab3614a9c506c4f6, type: 3}
       propertyPath: m_Layer
@@ -8954,7 +8978,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 0
   interactionText: "\uC0AC\uB2E4\uB9AC \uD0C0\uAE30"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -14833,7 +14859,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 0
   interactionText: "\uC0AC\uB2E4\uB9AC \uD0C0\uAE30"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -20359,7 +20387,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 0
   interactionText: "\uC0AC\uB2E4\uB9AC \uD0C0\uAE30"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -25449,7 +25479,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5471359943948069340, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5485766083324419362, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
@@ -29784,7 +29814,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 0
   interactionText: "\uC0AC\uB2E4\uB9AC \uD0C0\uAE30"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -44891,7 +44923,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5684669121018304688, guid: cef0f581f52db1649bf3d21b709e1280, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.0394
+      value: -1.7894
       objectReference: {fileID: 0}
     - target: {fileID: 5810260486075392929, guid: cef0f581f52db1649bf3d21b709e1280, type: 3}
       propertyPath: m_LocalPosition.y
@@ -45560,7 +45592,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 0
   interactionText: "\uD130\uBBF8\uB110 \uC785\uB825"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -47329,7 +47363,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5471359943948069340, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5485766083324419362, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
@@ -50883,7 +50917,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 1
   interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -57837,7 +57873,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1109435454413678963, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 1112528939807654471, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
@@ -58813,7 +58849,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5471359943948069340, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5485766083324419362, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
@@ -59868,6 +59904,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2958048462466595825, guid: 209c8662791d03741acf160b036c8260, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4811514195925821112}
+    - targetCorrespondingSourceObject: {fileID: 1109435454413678963, guid: 209c8662791d03741acf160b036c8260, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 305791715729629004}
     - targetCorrespondingSourceObject: {fileID: 239936327206071312, guid: 209c8662791d03741acf160b036c8260, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4218529525344543759}
@@ -60184,6 +60223,41 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &6147518363076486967 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1109435454413678963, guid: 209c8662791d03741acf160b036c8260, type: 3}
+  m_PrefabInstance: {fileID: 6500346603471130180}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &305791715729629004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6147518363076486967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 5
+  interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4733842066667000963}
+        m_TargetAssemblyTypeName: SpaceShipManager, Assembly-CSharp
+        m_MethodName: ToggleDoor
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6440624770462786132 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 239936327206071312, guid: 209c8662791d03741acf160b036c8260, type: 3}
@@ -66094,7 +66168,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2276097006263084481, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2285565530916284958, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
       propertyPath: m_Layer
@@ -77896,7 +77970,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2528600309207733165, guid: 5deec5b66eb762f4ab3614a9c506c4f6, type: 3}
       propertyPath: m_Layer
-      value: 30
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 2654893167364958035, guid: 5deec5b66eb762f4ab3614a9c506c4f6, type: 3}
       propertyPath: m_Layer
@@ -84984,7 +85058,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactType: 1
   interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
   onInteract:
     m_PersistentCalls:
       m_Calls:

@@ -111,6 +111,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6940371313096381276}
     m_Modifications:
+    - target: {fileID: 876098858387281104, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 1858897588671989328, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
       propertyPath: m_Name
       value: P_Wall_Door_Simple_02_LP
@@ -179,13 +183,23 @@ PrefabInstance:
       propertyPath: m_Center.z
       value: 2.6865074e-10
       objectReference: {fileID: 0}
+    - target: {fileID: 8095979219333745531, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8095979219333745531, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8960181384480424702}
     - targetCorrespondingSourceObject: {fileID: 6590917425264095733, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2066138955163589191}
+    - targetCorrespondingSourceObject: {fileID: 876098858387281104, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4084563593133214646}
     - targetCorrespondingSourceObject: {fileID: 876098858790661485, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7118762073712478328}
@@ -378,6 +392,87 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &4050758881731811143 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 876098858387281104, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+  m_PrefabInstance: {fileID: 3755906400076596119}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4084563593133214646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4050758881731811143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 1
+  interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4050758882367757542}
+        m_TargetAssemblyTypeName: creepycat.scifikitvol4.SmallDoorOpen, Assembly-CSharp
+        m_MethodName: Interact
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &4050758882367757542 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 876098860033204081, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+  m_PrefabInstance: {fileID: 3755906400076596119}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71e58a29423caf94f9e1f091d53ee364, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &4919367631573321964 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8095979219333745531, guid: 594fa71812b74554c9bf9483324688a8, type: 3}
+  m_PrefabInstance: {fileID: 3755906400076596119}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8960181384480424702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4919367631573321964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 1
+  interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4050758882367757542}
+        m_TargetAssemblyTypeName: creepycat.scifikitvol4.SmallDoorOpen, Assembly-CSharp
+        m_MethodName: Interact
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8027680091609952866 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6590917425264095733, guid: 594fa71812b74554c9bf9483324688a8, type: 3}

@@ -15,6 +15,7 @@ public class PlayerInputs : MonoBehaviour
     private Camera mainCamera;
     private Interactable lastInteractable;
     private bool isClimbing = false; // Add this variable
+    private IAction isAction;
 
     // Movement
     public float GetAxisHorizontal()
@@ -31,7 +32,6 @@ public class PlayerInputs : MonoBehaviour
         return bending;
     }
 
-    // Add this method
     public void SetClimbingState(bool climbing)
     {
         isClimbing = climbing;
@@ -41,6 +41,20 @@ public class PlayerInputs : MonoBehaviour
             horizontalInput = 0f;
             bending = 0f;
         }
+    }
+
+    public void SetActionState(IAction action)
+    {
+        isAction = action;
+        if (isAction.Value)
+        {
+            horizontalInput = 0f;
+            bending = 0f;
+        }
+    }
+    public IAction GetActionState()
+    {
+        return isAction;
     }
 
     private float CalculateAxis(float current, float raw)
@@ -171,13 +185,18 @@ public class PlayerInputs : MonoBehaviour
         float horizontalRaw = 0f;
         float bendingRaw = 0f;
 
+        float verticalRaw = Input.GetKey(keyData.m_KeyMoveDown) ? -1 : Input.GetKey(keyData.m_KeyMoveUp) ? 1 : 0;
+
         if (!isClimbing)
         {
             horizontalRaw = Input.GetKey(keyData.m_KeyMoveLeft) ? -1 : Input.GetKey(keyData.m_KeyMoveRight) ? 1 : 0;
             bendingRaw = Input.GetKey(keyData.m_BendingRight) ? -1 : Input.GetKey(keyData.m_BendingLeft) ? 1 : 0;
         }
-
-        float verticalRaw = Input.GetKey(keyData.m_KeyMoveDown) ? -1 : Input.GetKey(keyData.m_KeyMoveUp) ? 1 : 0;
+        if (null != isAction && isAction.Value)
+        {
+            verticalRaw = 0;
+            horizontalRaw = 0;
+        }
 
         horizontalInput = CalculateAxis(horizontalInput, horizontalRaw);
         verticalInput = CalculateAxis(verticalInput, verticalRaw);
@@ -207,7 +226,7 @@ public class PlayerInputs : MonoBehaviour
         {
             if (hit.collider.TryGetComponent<Interactable>(out var interactable))
             {
-                interactable.Interact();
+                interactable.Interact(PlayerManager.Instance.LocalPlayer.gameObject);
             }
         }
     }

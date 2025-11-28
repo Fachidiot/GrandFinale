@@ -11,6 +11,7 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private CameraSwitcher cameraSwitcher;
     [SerializeField] private BodyTiltInSprint bodyTiltInSprint;
     [SerializeField] private Animator playerAnimator; // Added reference to Animator
+    [SerializeField] private InventoryManager inventoryManager;
 
     private PlayerInputs playerInputs;
     private bool isPause = false;
@@ -45,12 +46,15 @@ public class InputHandler : MonoBehaviour
     {
         GameManager.OnPauseStateChanged += OnPause;
         GameManager.Instance.TryGetComponent<PlayerInputs>(out playerInputs);
+        inventoryManager = InventoryManager.Instance;
 
         InitialCheck();
     }
 
     void Update()
     {
+        Inventory();
+
         if (isPause)
             return;
 
@@ -78,6 +82,25 @@ public class InputHandler : MonoBehaviour
 
         UnarmedAim();
         ArmedAim();
+    }
+
+    void Inventory()
+    {
+        if (!inventoryManager)
+            return;
+
+        // if (!inventoryManager.isExternalInteractionActive && )
+        //     inventoryManager.ToggleSmallInventory();
+        if (playerInputs.GetInventory())
+            inventoryManager.ToggleFullInventory();
+        else if (playerInputs.GetInventory() && inventoryManager.IsFocused)
+            inventoryManager.CloseAllInventories();
+
+        // if (inventoryManager.IsFocused && !inventoryManager.isExternalInteractionActive && playerInputs.GetAttack())
+        // {
+        //     if (EventSystem.current != null && !EventSystem.current.IsPointerOverGameObject())
+        //         CloseAllInventories();
+        // }
     }
 
     void UnarmedAim()

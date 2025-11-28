@@ -1974,8 +1974,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4214125974011603530, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214125974011603530, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5079006009670762892, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5079006009670762892, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -2053,6 +2061,12 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4214125974011603530, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9205866847734145388}
+    - targetCorrespondingSourceObject: {fileID: 5079006009670762892, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2566723278166154695}
     - targetCorrespondingSourceObject: {fileID: 8281539093925163505, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8861720368704254649}
@@ -2062,6 +2076,47 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4214125974011603530, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
   m_PrefabInstance: {fileID: 3617202361773849992}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &9205866847734145388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597139666542434242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 2
+  interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2431366018030684045}
+        m_TargetAssemblyTypeName: creepycat.scifikitvol4.WardrobeOpen, Assembly-CSharp
+        m_MethodName: InteractLeft
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &2431366018030684045 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1409363766702193157, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
+  m_PrefabInstance: {fileID: 3617202361773849992}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c106fa5a8821f549bd492f3305ceaee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4674469849031806073 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8281539093925163505, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
@@ -2100,6 +2155,36 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5079006009670762892, guid: 991e86aa8edcd6f46aac1e311b50ec11, type: 3}
   m_PrefabInstance: {fileID: 3617202361773849992}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2566723278166154695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8380815641988037636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 3
+  interactionText: "\uBB38 \uC5F4\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2431366018030684045}
+        m_TargetAssemblyTypeName: creepycat.scifikitvol4.WardrobeOpen, Assembly-CSharp
+        m_MethodName: InteractRight
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &4073789341811827217
 PrefabInstance:
   m_ObjectHideFlags: 0

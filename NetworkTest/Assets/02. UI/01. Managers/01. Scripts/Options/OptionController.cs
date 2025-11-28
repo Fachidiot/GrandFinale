@@ -10,6 +10,9 @@ public class OptionController : MonoBehaviour
     [SerializeField] private GameObject[] uiPanels;
     private TerminalManager terminalManager;
 
+    private PlayerInputs playerInputs;
+    private IAction action;
+
     void Start()
     {
         foreach (var panel in uiPanels)
@@ -17,6 +20,7 @@ public class OptionController : MonoBehaviour
             panel.gameObject.SetActive(false);
         }
         optionPanel.SetActive(false);
+        playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
     }
 
     void Update()
@@ -24,6 +28,9 @@ public class OptionController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             TerminalCheck();
+            ActionCheck();
+
+            playerInputs.SetCursorState(true);
             // if (shortcutModal.isOn)
             //     shortcutModal.Close();
             if (-1 != IsOptionEnable())
@@ -40,12 +47,17 @@ public class OptionController : MonoBehaviour
             {
                 terminalManager.ToggleTerminal();
 
-                //  임시방편 마우스 focus해제되는 버그
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
+                // PlayerInputs.SetCursorState(true);
+            }
+            else if (null != action && action.Value)
+            {
+                action.ReleaseAction();
             }
             else
+            {
                 optionPanel.SetActive(true);
+                playerInputs.SetCursorState(false);
+            }
             OptionOn = optionPanel.activeSelf;
 
             GameManager.Instance.SetPause(OptionOn);
@@ -56,6 +68,11 @@ public class OptionController : MonoBehaviour
     {
         if (!terminalManager)
             terminalManager = FindObjectOfType<TerminalManager>();
+    }
+
+    private void ActionCheck()
+    {
+        action = playerInputs.GetActionState();
     }
 
     public void Toggle()

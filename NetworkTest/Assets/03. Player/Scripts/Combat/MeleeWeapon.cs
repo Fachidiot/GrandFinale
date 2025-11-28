@@ -29,7 +29,7 @@ public class MeleeWeapon : BaseWeapon
     [SerializeField] private AudioClip fireSound;
     [SerializeField] private AudioClip emptySound;
 
-    private bool _canShoot = true;
+    // private bool _canShoot = true;
     private AudioSource _audioSource;
     private BoltAnimation boltAnimation;
 

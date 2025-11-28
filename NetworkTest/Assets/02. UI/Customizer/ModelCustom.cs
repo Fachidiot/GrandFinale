@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class ModelCustom : MonoBehaviour
 {
+    public ModelInfo initInfo;
+
     public List<GameObject> headModels;
     public List<GameObject> bodyModels;
     public List<GameObject> acc1Models;
@@ -25,9 +27,7 @@ public class ModelCustom : MonoBehaviour
     private void Awake()
     {
         InitialCheck();
-
-        ModelInfo initialInfo = new ModelInfo(0, 0, 0, 0);
-        ApplyModelInfo(initialInfo);
+        ApplyModelInfo(initInfo);
     }
 
     public void ApplyModelInfo(ModelInfo info)

@@ -136,23 +136,6 @@ public class InventoryManager : MonoBehaviour
 
     #endregion
 
-    #region Input & Update
-
-    void Update()
-    {
-        if (!isExternalInteractionActive && Input.GetKeyDown(KeyCode.Tab)) ToggleSmallInventory();
-        if (Input.GetKeyDown(KeyCode.O)) ToggleFullInventory();
-        if (IsFocused && Input.GetKeyDown(KeyCode.Escape)) CloseAllInventories();
-
-        if (IsFocused && !isExternalInteractionActive && Input.GetMouseButtonDown(0))
-        {
-            if (EventSystem.current != null && !EventSystem.current.IsPointerOverGameObject())
-                CloseAllInventories();
-        }
-    }
-
-    #endregion
-
     #region Item Management (Add / Remove / Drop /Sort)
 
     public bool AddItem(RelicData newItem, int amount = 1)

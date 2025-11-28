@@ -4093,10 +4093,11 @@ GameObject:
   - component: {fileID: 1677862175900329692}
   - component: {fileID: 4731271200434011302}
   - component: {fileID: 813468427361064565}
+  - component: {fileID: 1319169344138541307}
   - component: {fileID: 4845007692660549952}
   - component: {fileID: 5488081820012010264}
   - component: {fileID: 3487588471762256729}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Store NPC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4169,6 +4170,36 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 2
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &1319169344138541307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018499316077444198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 0
+  interactionText: "\uC0C1\uC810 \uC774\uC6A9"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4845007692660549952}
+        m_TargetAssemblyTypeName: NpcInputSensor, Assembly-CSharp
+        m_MethodName: ToggleShop
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4845007692660549952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4181,11 +4212,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1224ba05ba06a114f8a1b2dcb6ce5307, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetTag: Player
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  interactKey: 102
   brain: {fileID: 5488081820012010264}
 --- !u!114 &5488081820012010264
 MonoBehaviour:

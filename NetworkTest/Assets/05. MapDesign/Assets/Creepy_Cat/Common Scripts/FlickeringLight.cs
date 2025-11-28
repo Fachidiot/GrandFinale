@@ -14,7 +14,7 @@ namespace creepycat.scifikitvol4
 {
      // A simple classs to make flickering light
     public class FlickeringLight : MonoBehaviour {
-        public new Light light;
+        public Light light;
 
         public float minIntensity = 0f;
         public float maxIntensity = 1f;

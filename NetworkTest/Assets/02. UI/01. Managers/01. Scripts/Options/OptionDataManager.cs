@@ -12,6 +12,8 @@ public class OptionDataManager : MonoBehaviour
     private static OptionDataManager m_Instance;
     public static OptionDataManager Instance { get { return m_Instance; } }
 
+    public GameObject inGameUIPanel;
+
     private string OptionDataFileName = "/Option.json";
     public OptionData OptionData;
 

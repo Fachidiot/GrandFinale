@@ -31,7 +31,7 @@ public class UpgradeModule : MonoBehaviour
     [SerializeField] private float autoCloseDistance = 5f;
 
     public bool IsOpen { get; private set; }
-    private Transform _opener;
+    private GameObject _opener;
     private const float MAX_CHANCE = 1.0f;
 
     private const float CHANCE_COMMON = 0.20f;
@@ -82,9 +82,9 @@ public class UpgradeModule : MonoBehaviour
         foreach (var slot in materialSlots) if (slot != null) slot._module = this;
     }
 
-    public void ToggleUpgrade(Transform player) { if (IsOpen) CloseUpgrade(); else OpenUpgrade(player); }
+    public void ToggleUpgrade(GameObject player) { if (IsOpen) CloseUpgrade(); else OpenUpgrade(player); }
 
-    public void OpenUpgrade(Transform player)
+    public void OpenUpgrade(GameObject player)
     {
         if (IsOpen) return;
         IsOpen = true;
@@ -369,6 +369,6 @@ public class UpgradeModule : MonoBehaviour
     {
         if (!IsOpen) return;
         if (Input.GetKeyDown(KeyCode.Escape)) CloseUpgrade();
-        if (_opener != null && Vector3.Distance(transform.position, _opener.position) > autoCloseDistance) CloseUpgrade();
+        if (_opener != null && Vector3.Distance(transform.position, _opener.transform.position) > autoCloseDistance) CloseUpgrade();
     }
 }

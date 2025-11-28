@@ -80,7 +80,7 @@ public class PlayerManager : MonoBehaviour
         singlePlayer.Initialize();
         DontDestroyOnLoad(playerObject);
 
-        OptionDataManager.Instance.GetComponentInChildren<InGameUIManager>().gameObject.SetActive(true);
+        OptionDataManager.Instance.inGameUIPanel.SetActive(true);
     }
 
     private void HandleServerJsonMessage(CSteamID sender, string jsonMsg)
@@ -190,7 +190,7 @@ public class PlayerManager : MonoBehaviour
         {
             LocalPlayer = networkPlayer;
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(PlayerCustomizer.Instance.GetLocalPlayerInfo());
-            OptionDataManager.Instance.GetComponentInChildren<InGameUIManager>().gameObject.SetActive(true);
+            OptionDataManager.Instance.inGameUIPanel.SetActive(true);
         }
         else
         {
@@ -281,12 +281,12 @@ public class PlayerManager : MonoBehaviour
                 if (networkPlayer.BodyTransformSync != null) networkPlayer.BodyTransformSync.OnTransformReceived(playerState.position, playerState.rotation);
                 if (networkPlayer.CameraTransformSync != null) networkPlayer.CameraTransformSync.OnTransformReceived(networkPlayer.CameraTransformSync.transform.position, playerState.cameraRotation);
                 if (networkPlayer.AnimatorSync != null) networkPlayer.AnimatorSync.OnAnimationDataReceived(
-                    playerState.moveX, 
-                    playerState.moveY, 
-                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk), 
-                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sprint), 
-                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Roll), 
-                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded), 
+                    playerState.moveX,
+                    playerState.moveY,
+                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Walk),
+                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sprint),
+                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Roll),
+                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded),
                     AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Crouch),
                     AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.UnarmedAttackJab),
                     AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.UnarmedAttackCross)
