@@ -7,10 +7,10 @@ public class Interactable : MonoBehaviour
     public string interactionText = "Interact";
 
     [Header("Events")]
-    [SerializeField] private UnityEvent onInteract;
+    [SerializeField] private UnityEvent<GameObject> onInteract;
 
-    public void Interact()
+    public void Interact(GameObject gameObject = null)
     {
-        onInteract.Invoke();
+        onInteract.Invoke(gameObject);
     }
 }

@@ -13,41 +13,55 @@ public class UnarmedWeapon : BaseWeapon
 
     private Animator playerAnimator;
     private PlayerInputs playerInputs;
+    private NetworkAnimatorSync networkAnimatorSync;
 
     // Animator Parameter Hashes
     private readonly int JabHash = Animator.StringToHash("Jab");
     private readonly int CrossHash = Animator.StringToHash("Cross");
+
+    // Animator Parameter Hashes are now handled in NetworkAnimatorSync
 
     private void Awake()
     {
         slotType = IWeapon.SlotType.unarmed;
         playerInputs = GameManager.Instance.GetComponent<PlayerInputs>();
         playerAnimator = GetComponent<Animator>();
+        networkAnimatorSync = GetComponentInParent<NetworkAnimatorSync>();
+
 
         if (playerInputs == null)
             Debug.LogError("UnarmedWeapon: PlayerInputs not found in GameManager's Instance. Unarmed combat will not function.");
         if (playerAnimator == null)
             Debug.LogError("UnarmedWeapon: Animator not found in Model Prefab. Unarmed combat animations will not function.");
+        if (networkAnimatorSync == null)
+            Debug.LogError("UnarmedWeapon: NetworkAnimatorSync not found in parent. Unarmed combat animations will not be synced.");
     }
 
     public override bool Attack()
     {
-        if (playerInputs == null || playerAnimator == null) return false;
+        if (playerInputs == null || playerAnimator == null || networkAnimatorSync == null) return false;
 
         // Punching logic
         if (Time.time >= lastAttackTime + attackCooldown)
         {
             lastAttackTime = Time.time;
-            if (isJab)
-            {
-                playerAnimator.SetTrigger(JabHash);
-                // leftForeArm의 collider 충돌 체크 및 데미지 넣기
-            }
+
+            if (networkAnimatorSync)
+                networkAnimatorSync.TriggerUnarmedAttack(isJab);
             else
             {
-                playerAnimator.SetTrigger(CrossHash);
-                // rightForeArm의 collider 충돌 체크 및 데미지 넣기
+                if (isJab)
+                {
+                    playerAnimator.SetTrigger(JabHash);
+                    // leftForeArm의 collider 충돌 체크 및 데미지 넣기
+                }
+                else
+                {
+                    playerAnimator.SetTrigger(CrossHash);
+                    // rightForeArm의 collider 충돌 체크 및 데미지 넣기
+                }
             }
+
             isJab = !isJab; // Toggle for next punch
             return true;
         }

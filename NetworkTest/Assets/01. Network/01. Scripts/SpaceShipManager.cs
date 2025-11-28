@@ -97,6 +97,16 @@ public class SpaceShipManager : MonoBehaviour
         // animator.SetBool(AnimDoorOpenHash, isDoorOpen);
     }
 
+    public void ToggleDoor()
+    {
+        isDoorOpen = !isDoorOpen;
+
+        if (isDoorOpen)
+            OpenDoor();
+        else
+            CloseDoor();
+    }
+
     public void OnLaunchGameClicked()
     {
         // if (NetworkManager.Instance.Mode == NetworkMode.Client)

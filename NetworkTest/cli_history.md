@@ -9,3 +9,8 @@
     - `TerminalManager`가 `SinglePlayer` 모드에서 행성 선택 시, 네트워크 통신 없이 `ServerRoomManager`의 상태를 직접 변경하도록 수정했습니다.
 - 싱글플레이어 모드에서 `ServerRoomManager`가 생성되지 않아 플레이어가 스폰되지 않는 문제를 해결했습니다.
     - `NetworkManager.cs`의 `SetMode` 메소드를 수정하여, `SinglePlayer` 모드로 설정될 때 `ServerRoomManager` 컴포넌트가 동적으로 추가되도록 변경했습니다. 이를 통해 기존의 `Host` 및 `Client` 모드와 유사하게 `ServerRoomManager` 인스턴스가 존재하도록 보장하여 싱글플레이어 로직이 정상적으로 실행될 수 있도록 수정했습니다.
+- 비무장(Unarmed) 공격 애니메이션이 네트워크 동기화되도록 수정했습니다.
+    - `GameStateModels.cs`의 `AnimationBitmask`에 비무장 공격(Jab, Cross) 상태를 추가했습니다.
+    - `NetworkAnimatorSync.cs`를 수정하여 `UnarmedWeapon` 스크립트에서 공격 신호를 받아 애니메이션 마스크에 포함시키고, 원격 클라이언트에서 해당 애니메이션을 재생하도록 로직을 추가했습니다.
+    - `UnarmedWeapon.cs`이 로컬 애니메이터를 직접 제어하는 대신 `NetworkAnimatorSync`를 통해 공격 애니메이션을 트리거하도록 변경했습니다.
+    - `PlayerManager.cs`가 네트워크로부터 받은 애니메이션 상태를 처리할 때, 비무장 공격 상태를 포함하여 전달하도록 수정했습니다.
