@@ -2,146 +2,174 @@
 using Cinemachine;
 using System.Collections;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
-public class DungeonEntryAction : MonoBehaviour, INpcInteractable
+public class DungeonEntryAction : MonoBehaviour
 {
-    [Header("Interaction Settings")]
-    [Tooltip("플레이어에게 보여질 상호작용 안내 문구입니다.")]
-    [SerializeField] private string interactPrompt = "던전 입장 [F(상호작용키)]";
-    [Tooltip("이동할 목적지(던전 내부 시작점)의 Transform입니다.")]
-    [SerializeField] private Transform destinationPoint;
+    [Header("Settings")]
+    [SerializeField] private string interactPrompt = "Interact [F]";
 
-    [Header("Camera & Sequence")]
+    [Tooltip("Leave empty if moving within the current scene")]
+    [SerializeField] private string targetSceneName;
+
+    [Tooltip("Name of the parent object to arrive at (e.g., Goto_stage2, DungeonEntrance)")]
+    [SerializeField] private string targetLocationName;
+
+    [Header("Cutscene (Optional)")]
     [SerializeField] private CinemachineVirtualCamera entryCamera;
-    [SerializeField] private int activePriority = 20;
-    [SerializeField] private float sequenceDuration = 2.0f;
-
-    [Header("Door Animation")]
     [SerializeField] private Transform leftDoor;
     [SerializeField] private Transform rightDoor;
-    [SerializeField] private Vector3 leftDoorOpenRot = new Vector3(0, -90, 0);
-    [SerializeField] private Vector3 rightDoorOpenRot = new Vector3(0, 90, 0);
+    [SerializeField] private float sequenceDuration = 2.0f;
 
-    private PlayerInputs _detectedPlayerInputs;
-    private int _originalCameraPriority;
-    private bool _isSequenceActive = false;
+    private bool isPlayerInZone = false;
+    private GameObject cachedPlayer;
+    private PlayerInputs cachedPlayerInputs;
+    private static string _pendingLocationName;
 
-    // 이벤트
+    private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
+    private void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    private void Update()
+    {
+        if (isPlayerInZone && cachedPlayerInputs != null)
+        {
+            if (cachedPlayerInputs.GetInteract())
+            {
+                Debug.Log($"[DungeonEntry] Interaction detected from {cachedPlayer.name}");
+                StartCoroutine(ProcessEntryRoutine(cachedPlayer));
+            }
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        // 플레이어 감지 및 상호작용 UI 표시 (멀티플레이어 환경에서는 로컬 플레이어만 감지)
-        if (_detectedPlayerInputs != null || _isSequenceActive) return;
-
-        PlayerInputs inputs = other.GetComponent<PlayerInputs>();
-
-        if (inputs != null && inputs.enabled /* && inputs.isLocalPlayer */)
+        if (other.CompareTag("Player") || LayerMask.LayerToName(other.gameObject.layer) == "Player")
         {
-            _detectedPlayerInputs = inputs;
-            UIEvents.FireInteractState(interactPrompt);
+            cachedPlayerInputs = other.GetComponent<PlayerInputs>();
+
+            if (cachedPlayerInputs != null)
+            {
+                isPlayerInZone = true;
+                cachedPlayer = other.gameObject;
+                Debug.Log("[DungeonEntry] Player entered trigger zone.");
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // 플레이어 감지 해제 및 상호작용 UI 숨김
-        if (_detectedPlayerInputs != null && other.gameObject == _detectedPlayerInputs.gameObject)
+        if (other.CompareTag("Player") || LayerMask.LayerToName(other.gameObject.layer) == "Player")
         {
-            if (!_isSequenceActive)
+            isPlayerInZone = false;
+            cachedPlayer = null;
+            cachedPlayerInputs = null;
+            Debug.Log("[DungeonEntry] Player exited trigger zone.");
+        }
+    }
+
+    private IEnumerator ProcessEntryRoutine(GameObject player)
+    {
+        isPlayerInZone = false;
+        cachedPlayerInputs = null;
+
+        bool useCutscene = (entryCamera != null);
+
+        if (useCutscene)
+        {
+            entryCamera.Priority = 20;
+            if (leftDoor) leftDoor.DOLocalRotate(new Vector3(0, -90, 0), 1.5f).SetEase(Ease.OutQuad);
+            if (rightDoor) rightDoor.DOLocalRotate(new Vector3(0, 90, 0), 1.5f).SetEase(Ease.OutQuad);
+            yield return new WaitForSeconds(sequenceDuration);
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        if (!string.IsNullOrEmpty(targetSceneName) && targetSceneName != SceneManager.GetActiveScene().name)
+        {
+            _pendingLocationName = targetLocationName;
+            SceneManager.LoadScene(targetSceneName);
+        }
+        else
+        {
+            TeleportPlayer(player, targetLocationName);
+
+            if (useCutscene)
             {
-                UIEvents.FireInteractState(null);
+                yield return new WaitForSeconds(0.5f);
+                entryCamera.Priority = 0;
+                CloseDoors();
             }
-            _detectedPlayerInputs = null;
         }
     }
 
-    private void Update()
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // 상호작용 입력 감지
-        if (_detectedPlayerInputs != null && !_isSequenceActive && _detectedPlayerInputs.GetInteract())
-        {
-            OnInteract(_detectedPlayerInputs.gameObject);
-        }
+        if (string.IsNullOrEmpty(_pendingLocationName)) return;
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player) StartCoroutine(WaitAndTeleport(player));
+
+        _pendingLocationName = null;
     }
 
-    // 인터페이스 구현
-    public string GetPrompt()
+    private IEnumerator WaitAndTeleport(GameObject player)
     {
-        return interactPrompt;
+        yield return null;
+        TeleportPlayer(player, _pendingLocationName);
     }
 
-    public void OnInteract(GameObject interactor)
+    private void TeleportPlayer(GameObject player, string rootName)
     {
-        // 상호작용 시작 (네트워크 메시지 전송 필요)
-        if (destinationPoint == null)
+        GameObject rootObj = GameObject.Find(rootName);
+        if (rootObj == null)
         {
-            Debug.LogError("[DungeonEntryAction] 목적지(Destination Point)가 설정되지 않았습니다!");
+            Debug.LogError($"[DungeonEntry] Destination root '{rootName}' not found in scene.");
             return;
         }
 
-        UIEvents.FireInteractState(null);
-        PlayerInputs inputsToDisable = _detectedPlayerInputs;
-        _detectedPlayerInputs = null;
+        int myId = 0;
+        if (NetworkManager.Instance != null && NetworkManager.Instance.IsConnected)
+            myId = NetworkManager.Instance.MyPlayerId;
 
-        StartCoroutine(ProcessEntryRoutine(interactor, inputsToDisable));
+        string targetSpawnName = rootName.Contains("DungeonEntrance") ? "DungeonEntrance_spawn" : $"Playerspawn{myId + 1}";
+
+        Transform targetPoint = FindChildByName(rootObj.transform, targetSpawnName);
+
+        if (targetPoint != null)
+        {
+            CharacterController cc = player.GetComponent<CharacterController>();
+            if (cc) cc.enabled = false;
+
+            player.transform.position = targetPoint.position;
+            player.transform.rotation = targetPoint.rotation;
+
+            if (cc) cc.enabled = true;
+
+            Debug.Log($"[DungeonEntry] Teleported {player.name} to {targetSpawnName} (ID: {myId})");
+        }
+        else
+        {
+            Debug.LogWarning($"[DungeonEntry] Spawn point '{targetSpawnName}' not found. Moving to root object position.");
+            player.transform.position = rootObj.transform.position;
+        }
     }
 
-
-    private IEnumerator ProcessEntryRoutine(GameObject player, PlayerInputs playerInputs)
+    private Transform FindChildByName(Transform parent, string name)
     {
-        // 던전 입장 연출 및 플레이어 이동
-        _isSequenceActive = true;
-        Debug.Log("[DungeonEntryAction] 던전 입장 시퀀스 시작");
-
-        CharacterController cc = player.GetComponent<CharacterController>();
-
-        // 0. 입력 비활성화 (로컬 플레이어만)
-        if (playerInputs) playerInputs.enabled = false;
-
-        // 1. 카메라 전환 (로컬 연출)
-        if (entryCamera != null)
+        foreach (Transform child in parent)
         {
-            _originalCameraPriority = entryCamera.Priority;
-            entryCamera.Priority = activePriority;
+            if (child.name == name) return child;
+            Transform result = FindChildByName(child, name);
+            if (result != null) return result;
         }
-
-        // 2. 문 열기 애니메이션 (네트워크 동기화 필요)
-        if (leftDoor) leftDoor.DOLocalRotate(leftDoorOpenRot, 1.5f).SetEase(Ease.InOutQuad);
-        if (rightDoor) rightDoor.DOLocalRotate(rightDoorOpenRot, 1.5f).SetEase(Ease.InOutQuad);
-
-        // 3. 연출 대기
-        yield return new WaitForSeconds(sequenceDuration);
-
-        Debug.Log("[DungeonEntryAction] 플레이어 이동 처리");
-
-        // 4. 플레이어 이동 (로컬 플레이어만, 네트워크 동기화 필요)
-        if (player != null && destinationPoint != null)
-        {
-            if (cc) cc.enabled = false;
-            player.transform.SetPositionAndRotation(destinationPoint.position, destinationPoint.rotation);
-            // 이동 후 즉시 네트워크 동기화
-            yield return null;
-            if (cc) cc.enabled = true;
-        }
-
-        // 5. 마무리 (카메라 복구, 문 닫기, 입력 활성화)
-        if (entryCamera != null)
-        {
-            yield return new WaitForSeconds(0.5f);
-            entryCamera.Priority = _originalCameraPriority;
-        }
-
-        CloseDoors();
-
-        if (playerInputs) playerInputs.enabled = true;
-
-        _isSequenceActive = false;
-        Debug.Log("[DungeonEntryAction] 던전 입장 시퀀스 종료");
+        return null;
     }
 
     private void CloseDoors()
     {
-        // 문 닫기 애니메이션 (네트워크 동기화 필요)
-        if (leftDoor) leftDoor.DOLocalRotate(Vector3.zero, 1.0f).SetEase(Ease.InOutQuad);
-        if (rightDoor) rightDoor.DOLocalRotate(Vector3.zero, 1.0f).SetEase(Ease.InOutQuad);
+        if (leftDoor) leftDoor.DOLocalRotate(Vector3.zero, 1f);
+        if (rightDoor) rightDoor.DOLocalRotate(Vector3.zero, 1f);
     }
 }
