@@ -38,7 +38,10 @@ public class SlotController : OnRig
             return;
         }
         else
+        {
             slotActive = true;
+            GetComponentInChildren<IWeapon>().SetOwnerGender(isMale);
+        }
     }
 
     private GameObject slotItem;

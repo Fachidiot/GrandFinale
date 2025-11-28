@@ -22,14 +22,6 @@ public class InGameUIManager : MonoBehaviour
         NetworkManager.OnDisconnected += HandleDisconnection;
     }
 
-    void Start()
-    {
-        if (null != GameObject.FindWithTag("Player"))
-        {
-            gameObject.SetActive(false);
-        }
-    }
-
     private void OnDestroy()
     {
         // Unsubscribe to prevent memory leaks
@@ -98,8 +90,8 @@ public class InGameUIManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // if (weaponController == null)
-        //     gameObject.SetActive(false);
+        if (weaponController == null)
+            gameObject.SetActive(false);
         if (weaponController == null)
         {
             if (ammoCountText != null && ammoCountText.enabled)

@@ -63,16 +63,16 @@ public class CrouchState : StateMachineBase
 
                 return;
             }
-            // // 일어서도 되는지 천장 체크
-            // if (Physics.SphereCast(characterMove.transform.position, characterMove.characterController.radius, Vector3.up, out RaycastHit hit2, characterMove.normalColliderHeight - characterMove.characterController.radius + characterMove.characterController.skinWidth, characterMove.groundCheckMask))
-            // {
-            //     Debug.Log("Can't get up");
-            //     return;
-            // }
-            // else
-            // {
-            //     characterMove.SetState(characterMove.moveState);
-            // }
+            // 일어서도 되는지 천장 체크
+            if (Physics.SphereCast(characterMove.transform.position, characterMove.characterController.radius, Vector3.up, out RaycastHit hit, characterMove.normalColliderHeight - characterMove.characterController.radius + characterMove.characterController.skinWidth, characterMove.groundCheckMask))
+            {
+                Debug.Log("Can't get up");
+                return;
+            }
+            else
+            {
+                characterMove.SetState(characterMove.moveState);
+            }
         }
 
         if (characterMove.Inputs.GetJump() || characterMove.Inputs.GetSprint())

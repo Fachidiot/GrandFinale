@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 public class MeleeHitbox : MonoBehaviour
 {
@@ -7,6 +8,12 @@ public class MeleeHitbox : MonoBehaviour
     private bool isAttack = false;
     [SerializeField] private LayerMask hitLayers;
     private List<GameObject> hitTargets = new List<GameObject>(); // 중복 타격 방지용
+    private NetworkAnimatorSync isNetworked;
+
+    void Start()
+    {
+        isNetworked = GetComponent<NetworkAnimatorSync>();
+    }
 
     // 공격 시작 시 외부(UnarmedWeapon)에서 호출
     public void EnableHitbox(int dmg)
@@ -34,10 +41,33 @@ public class MeleeHitbox : MonoBehaviour
         if (other.gameObject.CompareTag("HitBox"))
         {
             // 데미지 주기 (인터페이스나 컴포넌트 사용)
-            // 예: IDamageable target = other.GetComponent<IDamageable>();
-            // if (target != null) target.TakeDamage(damage);
-
             Debug.Log($"{other.gameObject.name}에게 {damage} 데미지!");
+
+            var networkMonster = other.transform.root.GetComponent<NetworkMonster>();
+            if (networkMonster != null)
+            {
+                float PlayerDamage = damage * (other.collider.name == "Head" ? 2f : 1f);
+
+                // 클라이언트는 직접 데미지를 주지 않고, 서버에 데미지 요청을 보냅니다.
+                if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Client)
+                {
+                    JObject damageData = new JObject();
+                    damageData["type"] = "player_dealt_damage";
+                    damageData["monsterId"] = networkMonster.MonsterId;
+                    damageData["damage"] = damage;
+
+                    NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, damageData);
+                }
+                else if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host || NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
+                {
+                    // 호스트는 직접 데미지를 처리합니다.
+                    var monsterHealth = other.transform.root.GetComponent<MonsterHealth>();
+                    if (monsterHealth != null)
+                    {
+                        monsterHealth.TakeDamage(PlayerDamage);
+                    }
+                }
+            }
 
             hitTargets.Add(other.gameObject); // 맞은 목록에 추가
         }

@@ -120,6 +120,11 @@ public class CharacterMove : MonoBehaviour
         SetState(inAirState);
     }
 
+    void OnDestroy()
+    {
+        moveState.OnDestroy();
+    }
+
     public void SetState(StateMachineBase state)
     {
         if (currentState != null)

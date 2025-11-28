@@ -106,6 +106,8 @@ public class PlayerStats : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망");
+        if (GetComponent<CharacterController>().enabled)
+            GetComponent<IPlayerControllable>().Die();
     }
 
     public void AddCurrency(int amount)

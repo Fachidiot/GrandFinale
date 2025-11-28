@@ -9,9 +9,10 @@ public class BulletOffline : BulletBehaviour
     public GameObject decalPrefab;
     public GameObject bloodPrefab;
     public LayerMask mask; // Raycast Ignored Layers;
+    public float PlayerDamage;
 
     private Rigidbody rb;
-    private bool _isPooled;
+    [SerializeField] private bool _isPooled;
 
     protected override void Awake()
     {
@@ -41,6 +42,7 @@ public class BulletOffline : BulletBehaviour
         var weap = bulletCreator.GetComponent<RangedWeapon>();
         force = weap.BulletForce;
         startSpeed = weap.BulletStartSpeed;
+        PlayerDamage = weap.PlayerDamage;
 
         if (rb != null)
         {
@@ -73,8 +75,20 @@ public class BulletOffline : BulletBehaviour
             if (bloodPrefab && hit.transform.CompareTag("HitBox"))
             {
                 SpawnEffect(bloodPrefab, hit, 3f);
-                if (hit.transform.root.GetComponentInChildren<PlayerHealth>())
-                    hit.transform.root.GetComponentInChildren<PlayerHealth>().SetDamage(30);
+
+                var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                if (monsterHealth != null)
+                {
+                    monsterHealth.TakeDamage(PlayerDamage);
+                }
+                else
+                {
+                    var playerHealth = hit.transform.root.GetComponentInChildren<PlayerHealth>();
+                    if (playerHealth != null)
+                    {
+                        playerHealth.SetDamage(30); // 기존 플레이어 데미지 로직 유지
+                    }
+                }
             }
 
             if (hit.rigidbody)

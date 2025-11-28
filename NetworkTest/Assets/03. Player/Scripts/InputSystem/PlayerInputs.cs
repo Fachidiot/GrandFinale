@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerInputs : MonoBehaviour
 {
     [SerializeField] private OptionKeyData keyData;
-    [SerializeField] private float interactionDistance = 8f;
+    [SerializeField] private float interactionDistance = 4f;
     [SerializeField] private LayerMask interactLayerMask;
 
     private float horizontalInput = 0f;

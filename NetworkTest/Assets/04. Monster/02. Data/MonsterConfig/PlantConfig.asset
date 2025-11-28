@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11ce14b82e61e7444bc6ca775a836287, type: 3}
   m_Name: PlantConfig
   m_EditorClassIdentifier: 
-  maxHP: 500
+  maxHP: 80
   attackDamage: 10
   defense: 0
   fovRange: 10
@@ -32,6 +32,7 @@ MonoBehaviour:
   turnSpeed: 5
   attackDelay: 0.5
   attackCooldown: 2
+  monsterFolderName: 
   idleSound: {fileID: 0}
   chaseSound: {fileID: 0}
   attackSound: {fileID: 0}
@@ -39,6 +40,7 @@ MonoBehaviour:
   dieSound: {fileID: 0}
   hitEffect: {fileID: 0}
   dieEffect: {fileID: 0}
+  experienceReward: 10
   lootTable: {fileID: 11400000, guid: 76fc19c5d3d505b4191c5140888ad440, type: 2}
   corpseDestroyDelay: 5
   activationRange: 15

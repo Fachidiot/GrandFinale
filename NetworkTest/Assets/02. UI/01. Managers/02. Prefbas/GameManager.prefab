@@ -45,13 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 271a6341a15815245a487ca8ab2e2e99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  titleScene: 
-  gameScene: 
-  stageInfo: {fileID: 0}
-  playerPrefab: {fileID: 0}
   gameSettings: {fileID: 11400000, guid: 7795b41ca5f48b948ba5e68bfc5ea337, type: 2}
   planetDatabase: {fileID: 11400000, guid: a9e7ff44d6aad874883a7204d50efc8f, type: 2}
-  gameState: 0
   initialKey:
     m_KeyMoveLeft: 97
     m_KeyMoveRight: 100
@@ -100,4 +95,7 @@ MonoBehaviour:
     m_KeyInteract: 101
     m_KeyInventory: 9
     m_KeyReload: 114
-  interactionDistance: 8
+  interactionDistance: 4
+  interactLayerMask:
+    serializedVersion: 2
+    m_Bits: 512

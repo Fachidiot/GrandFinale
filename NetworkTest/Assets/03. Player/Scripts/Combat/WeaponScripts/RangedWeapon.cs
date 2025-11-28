@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR.Haptics;
 
 public class RangedWeapon : BaseWeapon
 {
@@ -74,6 +75,7 @@ public class RangedWeapon : BaseWeapon
     [SerializeField] private float boltAnimationDelay = 0.05f;
 
     private bool _canShoot = true;
+    private bool isNetwork = false;
     private AudioSource _audioSource;
     private BoltAnimation boltAnimation;
 
@@ -81,6 +83,7 @@ public class RangedWeapon : BaseWeapon
     {
         _audioSource = GetComponent<AudioSource>();
         boltAnimation = GetComponent<BoltAnimation>();
+        isNetwork = GetComponentInParent<NetworkAnimatorSync>() != null;
     }
 
     void Start()
@@ -89,7 +92,7 @@ public class RangedWeapon : BaseWeapon
         // Initialize pools for all weapon effects
         if (PoolManager.Instance != null)
         {
-            if (bulletPrefab != null) PoolManager.Instance.CreatePool(bulletPrefab, 20);
+            if (networkBulletPrefab != null) PoolManager.Instance.CreatePool(networkBulletPrefab, 20);
             if (casingPrefab != null) PoolManager.Instance.CreatePool(casingPrefab, 20);
             if (muzzleFlash != null) PoolManager.Instance.CreatePool(muzzleFlash, 5);
         }
@@ -163,17 +166,24 @@ public class RangedWeapon : BaseWeapon
 
     private void BulletSpawn(float startSpeed, Quaternion bulletDirection)
     {
+        if (networkBulletPrefab == null) return;
         if (bulletPrefab == null) return;
 
         GameObject bulletGO;
 
         if (useObjectPooling && PoolManager.Instance != null)
         {
-            bulletGO = PoolManager.Instance.Spawn(bulletPrefab, bulletSpawnPoint.position, bulletDirection);
+            if (isNetwork)
+                bulletGO = PoolManager.Instance.Spawn(networkBulletPrefab, bulletSpawnPoint.position, bulletDirection);
+            else
+                bulletGO = PoolManager.Instance.Spawn(bulletPrefab, bulletSpawnPoint.position, bulletDirection);
         }
         else
         {
-            bulletGO = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletDirection);
+            if (isNetwork)
+                bulletGO = Instantiate(networkBulletPrefab, bulletSpawnPoint.position, bulletDirection);
+            else
+                bulletGO = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletDirection);
         }
 
         if (bulletGO == null) return;

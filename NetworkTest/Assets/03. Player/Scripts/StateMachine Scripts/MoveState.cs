@@ -54,7 +54,7 @@ public class MoveState : StateMachineBase
         GameManager.OnPauseStateChanged += OnPause;
     }
 
-    void OnDestroy()
+    public void OnDestroy()
     {
         GameManager.OnPauseStateChanged -= OnPause;
     }
