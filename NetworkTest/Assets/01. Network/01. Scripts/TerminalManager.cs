@@ -189,6 +189,7 @@ public class TerminalManager : MonoBehaviour
         AppendToLog("Available planets:");
         AppendToLog("  - Planet_1");
         AppendToLog("  - Planet_2");
+        AppendToLog("  - Station");
     }
 
     private void ExecuteGoto(string[] parts)
@@ -204,6 +205,7 @@ public class TerminalManager : MonoBehaviour
 
         switch (planetName)
         {
+            case "Station": case"station":planetId = 0; break;
             case "planet_1": case "Planet_1": planetId = 1; break;
             case "planet_2": case "Planet_2": planetId = 2; break;
             default: AppendToLog($"Unknown planet: '{planetName}'"); return;

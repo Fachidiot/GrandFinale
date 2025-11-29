@@ -90,10 +90,10 @@ public class InGameUIManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // if (weaponController == null)
-        // {
-        //     gameObject.SetActive(false);
-        // }
+         if (weaponController == null)
+        {
+            gameObject.SetActive(false);
+        }
         if (weaponController == null)
         {
             if (ammoCountText != null && ammoCountText.enabled)
