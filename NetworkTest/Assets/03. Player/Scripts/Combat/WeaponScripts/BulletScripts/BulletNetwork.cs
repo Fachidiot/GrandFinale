@@ -104,7 +104,9 @@ public class BulletNetwork : BulletBehaviour
                     }
                     else
                     {// 몬스터 공격시.
-                        var networkMonster = hit.transform.root.GetComponent<NetworkMonster>();
+                        //var networkMonster = hit.transform.root.GetComponent<NetworkMonster>();
+                        // 임시 코드
+                        var networkMonster = hit.transform.GetComponent<NetworkMonster>();
                         if (networkMonster != null)
                         {
                             float damage = PlayerDamage * (hit.collider.name == "Head" ? 2f : 1f);
@@ -122,7 +124,9 @@ public class BulletNetwork : BulletBehaviour
                             else if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host)
                             {
                                 // 호스트는 직접 데미지를 처리합니다.
-                                var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                                //var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                                // 임시코드
+                                var monsterHealth = hit.transform.GetComponent<MonsterHealth>();
                                 if (monsterHealth != null)
                                 {
                                     monsterHealth.TakeDamage(damage);

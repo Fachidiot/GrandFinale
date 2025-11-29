@@ -16510,11 +16510,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 945815276}
-  m_Father: {fileID: 1871917159}
+  m_Father: {fileID: 1395963981}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -285, y: 180}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &162639260
@@ -153302,6 +153302,7 @@ RectTransform:
   m_Children:
   - {fileID: 18979339}
   - {fileID: 252886426}
+  - {fileID: 162639259}
   - {fileID: 431390147}
   - {fileID: 871440471}
   m_Father: {fileID: 404823738}
@@ -204409,7 +204410,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1871917159
 RectTransform:
   m_ObjectHideFlags: 0
@@ -204422,7 +204423,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 162639259}
   - {fileID: 1317608653}
   m_Father: {fileID: 404823738}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -231591,6 +231591,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7864324960454551232, guid: 451f2883ad56eb04dbb089fbdeb7129c, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8456106667753621721, guid: 451f2883ad56eb04dbb089fbdeb7129c, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -233825,7 +233833,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5107405119717096264, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -6.300003
+      value: -6.2999954
       objectReference: {fileID: 0}
     - target: {fileID: 5107727217975670928, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMax.x
