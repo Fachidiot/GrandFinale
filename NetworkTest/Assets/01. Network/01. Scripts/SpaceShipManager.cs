@@ -44,12 +44,17 @@ public class SpaceShipManager : MonoBehaviour
         }
     }
 
-    void Start()
+    void Update()
     {
         if (null != GameObject.FindWithTag("Player"))
         {
             OpenDoor();
             Landing();
+        }
+        else
+        {
+            CloseDoor();
+            Launching();
         }
     }
 
