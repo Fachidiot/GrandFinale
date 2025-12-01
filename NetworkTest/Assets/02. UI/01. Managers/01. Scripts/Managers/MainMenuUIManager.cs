@@ -242,9 +242,13 @@ public class MainMenuUIManager : MonoBehaviour
             if (prefabToSpawn != null)
             {
                 GameObject view = Instantiate(prefabToSpawn, slotList[i]);
-                customizeManager.FModel = view.GetComponentsInChildren<ModelCustom>()[0];
-                customizeManager.MModel = view.GetComponentsInChildren<ModelCustom>()[1];
-                customizeManager.InitialCheck();
+                if (isLocalPlayer)
+                {
+                    customizeManager.FModel = view.GetComponentsInChildren<ModelCustom>()[0];
+                    customizeManager.MModel = view.GetComponentsInChildren<ModelCustom>()[1];
+                    customizeManager.InitialCheck();
+                }
+
                 var readyIndicator = view.transform.Find("ReadyIndicator");
                 if (readyIndicator != null)
                 {
