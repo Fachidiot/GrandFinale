@@ -12,7 +12,9 @@ public class NpcInputSensor : MonoBehaviour
         if (!brain) brain = GetComponentInParent<StationaryBrain>();
     }
 
-    public void ToggleShop(GameObject detectedPlayer)
+    // 이름 변경: ToggleShop -> InteractWithNPC
+    // 이제 상점뿐만 아니라 대화, 업그레이드 등 모든 상호작용의 입구 역할을 합니다.
+    public void InteractWithNPC(GameObject detectedPlayer)
     {
         if (InventoryManager.Instance != null
             && InventoryManager.Instance.IsUIOpen
@@ -21,6 +23,7 @@ public class NpcInputSensor : MonoBehaviour
             InventoryManager.Instance.ToggleInventory();
         }
 
+        // Brain에게 상호작용 신호 전달
         brain.OnInteract(detectedPlayer);
     }
 }

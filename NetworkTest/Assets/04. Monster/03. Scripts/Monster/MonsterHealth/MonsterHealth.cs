@@ -116,10 +116,13 @@ public class MonsterHealth : MonoBehaviour
     {
         if (IsDead) return;
 
+        // [로그] 데미지 받기 전 상태 기록
+        float previousHP = currentHP;
+
         float actualDamage = 0f;
         float currentDefense = 0f; // 기본 방어력 0
 
-        // --- 골렘 1. (수정) 골렘 방어 상태인지 체크 ---
+        // --- 골렘 1. 골렘 방어 상태인지 체크 ---
         if (ai != null && ai.fsm is GolemFSM && ai.CurrentState == ai.fsm.BlockState)
         {
             // Block 상태일때, 현재 '페이즈'를 가져옵니다.
@@ -128,32 +131,34 @@ public class MonsterHealth : MonoBehaviour
             {
                 // "방어 중" 페이즈일 때만 몬스터의 방어력(_defense)을 사용합니다.
                 currentDefense = _defense;
-                Debug.Log("GOLEM BLOCK: 방어 성공! 데미지 " + currentDefense + " 감소.");
+                Debug.Log($"[MonsterHealth] {gameObject.name} 방어 성공! (방어력 {_defense} 적용됨)");
             }
-
         }
-
-
 
         // 2. 최종 데미지 계산 (방어력 적용)
         actualDamage = Mathf.Max(damage - currentDefense, 0f);
         currentHP -= actualDamage;
 
-        // (상세한 로그 출력)
-        Debug.Log($"<color=orange>[{gameObject.name}] 피격! (들어온 데미지: {damage}, 현재 방어력: {currentDefense}, 실제 데미지: {actualDamage}) -> 남은 체력: {currentHP}/{_maxHP}</color>");
+        // 3. [로그] 데미지 연산 결과 상세 출력
+        //    (들어온 데미지, 방어력, 실제 감소량, 남은 체력 등)
+        Debug.Log($"<color=orange>[{gameObject.name} 피격 상세]</color>\n" +
+                  $"1. 이전 체력 : {previousHP}\n" +
+                  $"2. 입력 데미지 : {damage}\n" +
+                  $"3. 방어력 적용 : -{currentDefense}\n" +
+                  $"4. 최종 데미지 : {actualDamage}\n" +
+                  $"5. 현재 체력 : {currentHP} / {_maxHP}");
 
         if (currentHP <= 0)
         {
             currentHP = 0;
             IsDead = true;
             OnDeath?.Invoke();
-            Debug.Log("<color=red>사망 신호 발생!</color>");
+            Debug.Log($"<color=red>[MonsterHealth] {gameObject.name} 사망!</color>");
         }
         else
         {
             // (사망하지 않았다면 피격 신호 발생)
             OnHit?.Invoke();
-            Debug.Log("<color=yellow>피격 신호 발생!</color>");
 
             // (골렘 방어 카운터 로직 - 방어력과 무관)
             if (ai != null && ai.fsm is GolemFSM)
@@ -168,9 +173,11 @@ public class MonsterHealth : MonoBehaviour
                     hitCounter++;
                 }
 
+                Debug.Log($"[MonsterHealth] {gameObject.name} 피격 카운트: {hitCounter}/{blockTriggerHits} (남은 시간: {hitTimer:F1}초)");
+
                 if (hitCounter >= blockTriggerHits)
                 {
-                    Debug.Log($"[{gameObject.name}] 방어/반격 조건 충족!");
+                    Debug.Log($"<color=cyan>[{gameObject.name}] 반격 조건 충족! (Block Triggered)</color>");
                     OnBlock?.Invoke();
                     hitTimer = 0;
                     hitCounter = 0;

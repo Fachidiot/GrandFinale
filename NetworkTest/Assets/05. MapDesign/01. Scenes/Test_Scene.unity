@@ -2163,6 +2163,52 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4c06c304854994fca870059913bd78e6, type: 3}
+--- !u!1 &196526476 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9110926331411904015, guid: 626a85a4ba3955e41bcb9f20ff05693b, type: 3}
+  m_PrefabInstance: {fileID: 1043997182237584910}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &196526480 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1214369206407144229, guid: 626a85a4ba3955e41bcb9f20ff05693b, type: 3}
+  m_PrefabInstance: {fileID: 1043997182237584910}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196526476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1224ba05ba06a114f8a1b2dcb6ce5307, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &196526483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196526476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 0
+  interactionText: "\uAC15\uD654\uD558\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 196526480}
+        m_TargetAssemblyTypeName: NpcInputSensor, Assembly-CSharp
+        m_MethodName: InteractWithNPC
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &266469510
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2413,19 +2459,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1149935655614158610, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1149935655614158610, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1149935655614158610, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 960
       objectReference: {fileID: 0}
     - target: {fileID: 1149935655614158610, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -1250
       objectReference: {fileID: 0}
     - target: {fileID: 1156397123386000414, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2773,19 +2819,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4306696653137119793, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4306696653137119793, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4306696653137119793, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 960
       objectReference: {fileID: 0}
     - target: {fileID: 4306696653137119793, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -400
       objectReference: {fileID: 0}
     - target: {fileID: 4497908653689974619, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMax.y
@@ -4006,6 +4052,52 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &1592629907 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5506778235440531296, guid: 09d9fa1a2c4b354449600e89229cefde, type: 3}
+  m_PrefabInstance: {fileID: 3390686698204144947}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1592629911 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1994271965178088481, guid: 09d9fa1a2c4b354449600e89229cefde, type: 3}
+  m_PrefabInstance: {fileID: 3390686698204144947}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1592629907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1224ba05ba06a114f8a1b2dcb6ce5307, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1592629914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1592629907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30afa0f3064a73a47b7643ad1322d53d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactType: 0
+  interactionText: "\uB300\uD654\uD788\uAE30"
+  interactCode: 102
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1592629911}
+        m_TargetAssemblyTypeName: NpcInputSensor, Assembly-CSharp
+        m_MethodName: InteractWithNPC
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &1656612722
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4299,10 +4391,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: UpgradeStore
       objectReference: {fileID: 0}
+    - target: {fileID: 9110926331411904015, guid: 626a85a4ba3955e41bcb9f20ff05693b, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9110926331411904015, guid: 626a85a4ba3955e41bcb9f20ff05693b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 196526483}
   m_SourcePrefab: {fileID: 100100000, guid: 626a85a4ba3955e41bcb9f20ff05693b, type: 3}
 --- !u!1001 &2344161893503726773
 PrefabInstance:
@@ -4417,6 +4516,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SimpleTalk
       objectReference: {fileID: 0}
+    - target: {fileID: 5506778235440531296, guid: 09d9fa1a2c4b354449600e89229cefde, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 7982749228443790583, guid: 09d9fa1a2c4b354449600e89229cefde, type: 3}
       propertyPath: m_LocalPosition.x
       value: 7.55
@@ -4460,7 +4563,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5506778235440531296, guid: 09d9fa1a2c4b354449600e89229cefde, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1592629914}
   m_SourcePrefab: {fileID: 100100000, guid: 09d9fa1a2c4b354449600e89229cefde, type: 3}
 --- !u!1001 &8982974569005572752
 PrefabInstance:
