@@ -1,117 +1,101 @@
 // Code by Creepy Cat (C) 2021/2022
-// Modified for network synchronization
+// Code given for example! 
+// You need to modify by yourself for your needs...
+//
+// IF you improve the code, do not hesitate to send me! (credited to the updates) 
+// black.creepy.cat@gmail.com 
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Uween;
-using Newtonsoft.Json.Linq;
 
 namespace creepycat.scifikitvol4
 {
-    public class ContainerOpen : MonoBehaviour, IWorldInteractable
+
+    public class ContainerOpen : MonoBehaviour
     {
-        [Header("Door Objects")]
         public GameObject DoorLeft;
         public GameObject DoorRight;
-
-        [Header("Visual/Audio Feedback")]
         public GameObject DoorButton;
+
         public AudioClip DoorSound;
 
-        [Header("Animation Settings")]
         public float moveTimeA = 2.0f;
+        private bool SwitchAnimLeft = false;
+        
         private float rotateMax = 90f;
-
-        // Internal State
-        private bool isOpen = false;
-        private bool animationInProgress = false;
-
-        // Networking
-        private string uniqueId;
-
-        // Components
+        
         private Renderer buttonRenderer;
+
         private AudioSource audioSource;
 
-        void Start()
-        {
-            // Cache components
-            buttonRenderer = DoorButton?.GetComponent<Renderer>();
+        private bool AnimationFlagA = false;
+
+        void Start(){
+            buttonRenderer = DoorButton.GetComponent<Renderer>();
             audioSource = GetComponent<AudioSource>();
-            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-            // Set initial visual state
-            UpdateVisuals(isOpen);
+            buttonRenderer.material.SetColor("_EmissionColor", Color.white * 1.5f);
         }
 
-        #region IWorldInteractable Implementation
-
-        public void Initialize(string id)
-        {
-            this.uniqueId = id;
+        void EndAnimationFlagA(){
+            AnimationFlagA = false;
         }
 
-        public JToken GetState(string subId)
-        {
-            // This is called on the host. We toggle the state and return the new state.
-            bool nextState = !isOpen;
-            return new JObject { ["isOpen"] = isOpen };
-        }
 
-        public void SetState(string subId, JToken state)
-        {
-            if (state == null || state["isOpen"] == null) return;
+        // Update is called once per frame    
+        void Update(){
 
-            bool shouldBeOpen = state["isOpen"].Value<bool>();
-            if (isOpen == shouldBeOpen) return;
-
-            isOpen = shouldBeOpen;
-            PlayAnimation(isOpen);
-        }
-
-        #endregion
-
-        #region Public Interaction Methods
-        // Called by the Interactable component on the door button
-        public void Interact()
-        {
-            if (animationInProgress) return;
-            WorldInteractableManager.Instance.RequestStateChange(uniqueId);
-        }
-        #endregion
-
-        private void PlayAnimation(bool open)
-        {
-            if (animationInProgress) return;
-            animationInProgress = true;
-
-            if (open)
+            // If mouse click
+            if (Input.GetMouseButtonDown(0))
             {
-                TweenRY.Add(DoorLeft, moveTimeA, rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
-                TweenRY.Add(DoorRight, moveTimeA, -rotateMax).Relative().EaseInOutCubic();
+                // Get the gameobject clicked
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                // If something clicked
+                if (Physics.Raycast(ray, out hit))
+                {
+
+                    // If it's my button
+                    if (hit.transform == DoorButton.transform)
+                    {
+
+                        if (AnimationFlagA == false)
+                        {
+                            SwitchAnimLeft = !SwitchAnimLeft;
+                            AnimationFlagA = true;
+
+                            // Anim switch var
+                            switch (SwitchAnimLeft)
+                            {
+                                // If no we launch all the things needed
+                                case false:
+                                    TweenRY.Add(DoorLeft, moveTimeA, 0).From(rotateMax).EaseInOutCubic().Then(EndAnimationFlagA);
+                                    TweenRY.Add(DoorRight, moveTimeA, 0).From(-rotateMax).EaseInOutCubic().Then(EndAnimationFlagA);
+
+                                    buttonRenderer.material.SetColor("_EmissionColor", Color.white * 1.5f);
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+
+                                case true:
+                                    TweenRY.Add(DoorLeft, moveTimeA, rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlagA);
+                                    TweenRY.Add(DoorRight, moveTimeA, -rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlagA);
+
+                                    buttonRenderer.material.SetColor("_EmissionColor", Color.white / 3);
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+                            }
+                        }
+                    }
+
+                }
+
             }
-            else // Closing
-            {
-                TweenRY.Add(DoorLeft, moveTimeA, -rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
-                TweenRY.Add(DoorRight, moveTimeA, rotateMax).Relative().EaseInOutCubic();
-            }
-
-            UpdateVisuals(open);
-
-            if (audioSource != null && DoorSound != null)
-                audioSource.PlayOneShot(DoorSound, 1.0F);
-        }
-
-        private void UpdateVisuals(bool open)
-        {
-            if (buttonRenderer != null)
-            {
-                buttonRenderer.material.SetColor("_EmissionColor", open ? Color.white / 3 : Color.white * 1.5f);
-            }
-        }
-
-        private void EndAnimationFlag()
-        {
-            animationInProgress = false;
         }
     }
 }

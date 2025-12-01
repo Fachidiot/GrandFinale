@@ -1,154 +1,144 @@
 // Code by Creepy Cat (C) 2021/2022
-// Modified for network synchronization
+// Code given for example! 
+// You need to modify by yourself for your needs...
+//
+// IF you improve the code, do not hesitate to send me! (credited to the updates) 
+// black.creepy.cat@gmail.com 
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Uween;
-using Newtonsoft.Json.Linq;
 
 namespace creepycat.scifikitvol4
 {
-    public class CrateOpen : MonoBehaviour, IWorldInteractable
+
+    public class CrateOpen : MonoBehaviour
     {
-        [Header("Crate Objects")]
         public GameObject CrateTop;
         public GameObject CrateButton;
+ 
+         [SerializeField]
+        public Light[] lightList;
 
-        [Header("Visual/Audio Feedback")]
-        [SerializeField] private Light[] lightList;
         public AudioClip CrateSound;
 
-        [Header("Animation Settings")]
         public float OpenTime = 2.0f;
+
         public float EmissionIntensity = 1.2f;
+        
+        private  float fadeTime = 1.2f;
+        private bool SwitchAnim = false;
+        private bool SwitchLight = false;
         private float RotateMax = -90f;
 
-        // Internal State
-        private bool isOpen = false;
-        private bool animationInProgress = false;
-        private bool playerNearby = false;
-
-        // Networking
-        private string uniqueId;
-
-        // Components
         private Renderer ButtonRenderer;
         private AudioSource AudioSource;
 
-        void Start()
-        {
+        private float newIntensity;
+        private bool AnimationFlag = false;
+
+        void Start(){
             ButtonRenderer = CrateButton.GetComponent<Renderer>();
             AudioSource = GetComponent<AudioSource>();
-            if (AudioSource == null) AudioSource = gameObject.AddComponent<AudioSource>();
 
-            foreach (var light in lightList)
-            {
-                light.enabled = false;
-                light.intensity = 0.0f;
+            // 1.9 optimization
+            //LightFading();
+
+            for (int i = 0; i < lightList.Length; i++){
+                lightList[i].enabled = false;
+                lightList[i].intensity = 0.0f;
             }
-
-            UpdateVisuals(isOpen);
         }
 
-        #region IWorldInteractable Implementation
-
-        public void Initialize(string id)
-        {
-            this.uniqueId = id;
+        void EndAnimationFlag(){
+            AnimationFlag = false;
         }
 
-        public JToken GetState(string subId)
-        {
-            // This is called on the host. We toggle the state and return the new state.
-            bool nextState = !isOpen;
-            return new JObject { ["isOpen"] = nextState };
-        }
+        // 1.9 optimization
+        void OnTriggerEnter(Collider other){
+            if (other.gameObject.CompareTag("Player")  || other.gameObject.CompareTag("MainCamera") ) {
 
-        public void SetState(string subId, JToken state)
-        {
-            if (state == null || state["isOpen"] == null) return;
+                if (SwitchAnim == false){
+                SwitchLight = true;
+                }
 
-            bool shouldBeOpen = state["isOpen"].Value<bool>();
-            if (isOpen == shouldBeOpen) return;
-
-            isOpen = shouldBeOpen;
-            PlayAnimation(isOpen);
-        }
-
-        #endregion
-
-        #region Public Interaction Methods
-        // Called by the Interactable component
-        public void Interact()
-        {
-            if (animationInProgress) return;
-            WorldInteractableManager.Instance.RequestStateChange(uniqueId);
-        }
-        #endregion
-
-        private void PlayAnimation(bool open)
-        {
-            if (animationInProgress) return;
-            animationInProgress = true;
-
-            if (open)
-            {
-                TweenRX.Add(CrateTop, OpenTime, RotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
             }
-            else // Closing
-            {
-                TweenRX.Add(CrateTop, OpenTime, -RotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
+        }
+
+        void OnTriggerExit(Collider other){
+            if (other.gameObject.CompareTag("Player")  || other.gameObject.CompareTag("MainCamera") ) {
+                SwitchLight = false;
             }
-
-            UpdateVisuals(open);
-
-            if (AudioSource != null && CrateSound != null)
-                AudioSource.PlayOneShot(CrateSound, 1.0F);
         }
 
-        private void UpdateVisuals(bool open)
+        // 1.9 optimization
+        void LightFading()
         {
-            if (ButtonRenderer != null)
-                ButtonRenderer.material.SetColor("_EmissionColor", open ? Color.red * EmissionIntensity : Color.white * EmissionIntensity);
+            if (SwitchLight == true) newIntensity = 1.5f;
+            if (SwitchLight == false) newIntensity = 0.0f;
 
-            // The original script turned lights off when opening, and on when closing (if player is nearby)
-            playerNearby = !open;
-        }
+            for (int i = 0; i < lightList.Length; i++){
+                lightList[i].intensity = Mathf.Lerp(lightList[i].intensity, newIntensity, Time.deltaTime * fadeTime);
 
-        private void EndAnimationFlag()
-        {
-            animationInProgress = false;
-        }
-
-        // The light fading can remain a local, client-side effect based on proximity.
-        void OnTriggerEnter(Collider other)
-        {
-            if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("MainCamera"))
-            {
-                if (!isOpen) // Only trigger lights if the crate is closed
-                {
-                    playerNearby = true;
+                if (lightList[i].intensity <= 0.01f){
+                    lightList[i].enabled = false;
+                }else{
+                    lightList[i].enabled = true;
                 }
             }
         }
 
-        void OnTriggerExit(Collider other)
-        {
-            if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("MainCamera"))
+        // Update is called once per frame    
+        void Update(){
+            LightFading();
+
+            // If mouse click
+            if (Input.GetMouseButtonDown(0))
             {
-                playerNearby = false;
+                // Get the gameobject clicked
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                // If something clicked
+                if (Physics.Raycast(ray, out hit))
+                {
+
+                    // If it's my button
+                    if (hit.transform == CrateButton.transform)
+                    {
+                        if (AnimationFlag == false)
+                        {
+                            SwitchAnim = !SwitchAnim;
+                            AnimationFlag = true;
+
+                            // Anim switch var
+                            switch (SwitchAnim)
+                            {
+                                // If no we launch all the things needed
+                                case false:
+                                    TweenRX.Add(CrateTop, OpenTime, 0).From(RotateMax).EaseInOutCubic().Then(EndAnimationFlag);
+                                    ButtonRenderer.material.SetColor("_EmissionColor", Color.white * EmissionIntensity);
+
+                                    SwitchLight = true; // 1.9 optimization
+                                    AudioSource.PlayOneShot(CrateSound, 1.0F);
+                                    break;
+
+                                case true:
+                                    TweenRX.Add(CrateTop, OpenTime, RotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
+                                    ButtonRenderer.material.SetColor("_EmissionColor", Color.red * EmissionIntensity);
+
+                                    SwitchLight = false; // 1.9 optimization
+                                    AudioSource.PlayOneShot(CrateSound, 1.0F);
+                                    break;
+                            }
+                        }
+                    }
+
+                }
             }
         }
 
-        void Update()
-        {
-            // This locally-driven light effect is fine to keep.
-            float targetIntensity = playerNearby && !isOpen ? 1.5f : 0.0f;
-
-            foreach (var light in lightList)
-            {
-                light.intensity = Mathf.Lerp(light.intensity, targetIntensity, Time.deltaTime * 1.2f);
-                light.enabled = light.intensity > 0.01f;
-            }
-        }
     }
 }
