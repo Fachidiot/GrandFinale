@@ -168,6 +168,7 @@ public class TerminalManager : MonoBehaviour
             case "help": ExecuteHelp(); break;
             case "planets": ExecutePlanets(); break;
             case "goto": ExecuteGoto(parts); break;
+            case "launch": ExecuteLaunch(); break;
             case "clear": ExecuteClear(); break;
             case "exit": ToggleTerminal(); break;
             default: AppendToLog($"Unknown command: '{commandWord}'"); break;
@@ -180,6 +181,7 @@ public class TerminalManager : MonoBehaviour
         AppendToLog("  help - Shows this message.");
         AppendToLog("  planets - Lists available planets.");
         AppendToLog("  goto [planet-name] - Selects a planet for travel.");
+        AppendToLog("  launch - Initiates travel to the selected planet (Host/SinglePlayer only).");
         AppendToLog("  clear - Clears the terminal screen.");
         AppendToLog("  exit - Closes the terminal.");
     }
@@ -187,6 +189,7 @@ public class TerminalManager : MonoBehaviour
     private void ExecutePlanets()
     {
         AppendToLog("Available planets:");
+        AppendToLog("  - Station");
         AppendToLog("  - Planet_1");
         AppendToLog("  - Planet_2");
     }
@@ -202,10 +205,13 @@ public class TerminalManager : MonoBehaviour
         string planetName = parts[1];
         int planetId = -1;
 
+        // In a more complex system, this would come from the PlanetDatabase.
+        // For now, we hardcode.
         switch (planetName)
         {
-            case "planet_1": case "Planet_1": planetId = 1; break;
-            case "planet_2": case "Planet_2": planetId = 2; break;
+            case "station": case "Station": planetId = -1; break;
+            case "planet1": case "planet_1": case "Planet_1": planetId = 1; break;
+            case "planet2": case "planet_2": case "Planet_2": planetId = 2; break;
             default: AppendToLog($"Unknown planet: '{planetName}'"); return;
         }
 
@@ -246,7 +252,26 @@ public class TerminalManager : MonoBehaviour
 
     private void ExecuteLaunch()
     {
-        AppendToLog("Attempting to launch...");
+        if (NetworkManager.Instance == null || ServerRoomManager == null || GameManager.Instance == null)
+        {
+            AppendToLog("Error: Core systems not available.");
+            return;
+        }
+
+        var mode = NetworkManager.Instance.Mode;
+
+        if (mode == NetworkMode.Host || mode == NetworkMode.SinglePlayer)
+        {
+            AppendToLog("Initiating launch sequence...");
+            // This bypasses the ready system. In a full game, you'd integrate with ServerRoomManager's
+            // ready system and only allow launch when all players are ready.
+            ServerRoomManager.Instance.LaunchToPlanet(GameManager.Instance.GameSettings.spaceroomScene);
+        }
+        else // Client
+        {
+            AppendToLog("Only the host can initiate a launch.");
+            // In a full game, a client would send a request to the host to launch.
+        }
     }
 
     private void ExecuteClear()

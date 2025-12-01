@@ -78,7 +78,7 @@ public class MainMenuUIManager : MonoBehaviour
         if (ServerRoomManager.Instance != null)
         {
             // Use the planet ID already stored in the manager
-            ServerRoomManager.Instance.LaunchToPlanet(GameManager.Instance.GameSettings.spaceroomScene);
+            ServerRoomManager.Instance.LaunchToPlanet(GameManager.Instance.GameSettings.tutorialScene);
         }
     }
 
@@ -207,7 +207,7 @@ public class MainMenuUIManager : MonoBehaviour
 
         var playerList = ServerRoomManager.Instance.PlayerList;
         var hostId = ServerRoomManager.Instance.HostId;
-        
+
         // --- 1. Update Text-based Player List ---
         if (playerListContent != null && playerListItemPrefab != null)
         {
@@ -224,7 +224,7 @@ public class MainMenuUIManager : MonoBehaviour
             }
 
             // Populate new player list
-            if(playerList != null)
+            if (playerList != null)
             {
                 foreach (var playerInfo in playerList)
                 {
@@ -237,7 +237,7 @@ public class MainMenuUIManager : MonoBehaviour
                 }
             }
         }
-        
+
         // --- 2. Update 3D Player Models in Slots ---
         if (slotList != null)
         {

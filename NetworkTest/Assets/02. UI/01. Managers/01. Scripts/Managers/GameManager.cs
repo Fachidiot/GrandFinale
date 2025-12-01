@@ -46,8 +46,8 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Spawns player objects when entering the main game scene.
-        if (scene.name == gameSettings.spaceroomScene && NetworkManager.Instance != null)
+        // Spawns player objects when entering a playable game scene.
+        if (gameSettings.playableScenes.Contains(scene.name) && NetworkManager.Instance != null)
         {
             if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
             {

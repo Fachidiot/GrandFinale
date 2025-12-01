@@ -11,7 +11,7 @@ public class PlayerManager : MonoBehaviour
     private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
     private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
-    
+
     // Customization Data Storage
     private readonly Dictionary<byte, bool> _playerGenders = new Dictionary<byte, bool>();
     private readonly Dictionary<byte, ModelInfo> _playerModelInfos = new Dictionary<byte, ModelInfo>();
@@ -75,12 +75,12 @@ public class PlayerManager : MonoBehaviour
             Destroy(LocalPlayer.gameObject);
         }
 
-        GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetSinglePlayerPrefab(), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
+        GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetSinglePlayerPrefab(), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.tutorialSpawnPoint != null ? GameManager.Instance.GameSettings.tutorialSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = "SinglePlayer";
 
         ModelInfo modelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
         playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
-        
+
         // No network ID for single player, so we can't use the dictionaries.
         // But we set the LocalPlayer which is enough.
 
@@ -132,10 +132,10 @@ public class PlayerManager : MonoBehaviour
 
     public void UpdatePlayerList(JArray playerList)
     {
-        // Guard clause to prevent spawning players outside the main game scene
-        if (SceneManager.GetActiveScene().name != GameManager.Instance.GameSettings.spaceroomScene)
+        // Guard clause to prevent spawning players outside of designated playable scenes.
+        if (!GameManager.Instance.GameSettings.playableScenes.Contains(SceneManager.GetActiveScene().name))
         {
-            Debug.Log($"[PlayerManager] Skipping UpdatePlayerList because current scene is not the game scene.");
+            Debug.Log($"[PlayerManager] Skipping UpdatePlayerList because current scene '{SceneManager.GetActiveScene().name}' is not in the playableScenes list.");
             return;
         }
 
@@ -193,7 +193,7 @@ public class PlayerManager : MonoBehaviour
 
         bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
 
-        GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetNetworkPlayerPrefab(isMine, playerInfo.is_Male), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
+        GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetNetworkPlayerPrefab(isMine, playerInfo.is_Male), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.tutorialSpawnPoint != null ? GameManager.Instance.GameSettings.tutorialSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = $"Player_{playerInfo.nickname}";
         players.Add(playerInfo.steam_id, playerObject);
 
@@ -202,7 +202,7 @@ public class PlayerManager : MonoBehaviour
 
         if (networkPlayer.NicknameUI != null)
             networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
-        
+
         ModelInfo modelInfo;
         if (isMine)
         {
@@ -220,7 +220,7 @@ public class PlayerManager : MonoBehaviour
                 playerInfo.acc2Index);
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
         }
-        
+
         // Store initial customization
         if (byte.TryParse(playerInfo.player_id, out byte byteId))
         {
@@ -277,7 +277,7 @@ public class PlayerManager : MonoBehaviour
         }
         return NetworkManager.INVALID_PLAYER_ID;
     }
-    
+
     // --- Customization Management ---
 
     public bool GetPlayerGender(byte playerId)
@@ -289,7 +289,7 @@ public class PlayerManager : MonoBehaviour
     {
         return _playerModelInfos.TryGetValue(playerId, out ModelInfo modelInfo) ? modelInfo : new ModelInfo();
     }
-    
+
     public void UpdatePlayerCustomization(byte playerId, bool isMale, ModelInfo modelInfo)
     {
         if (_playerGenders.TryGetValue(playerId, out bool oldGender) && oldGender != isMale)
@@ -376,7 +376,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     bodySlopeHandler.SetSlopeFromNetwork(playerState.bending);
                 }
-                
+
                 // Apply customization updates
                 ModelInfo currentModelInfo = GetPlayerModelInfo(playerState.playerId);
                 if (currentModelInfo.head != playerState.modelInfo.head ||
