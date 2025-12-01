@@ -383,7 +383,8 @@ public class PlayerManager : MonoBehaviour
                     AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.IsGrounded),
                     AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Crouch),
                     AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.UnarmedAttackJab),
-                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.UnarmedAttackCross)
+                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.UnarmedAttackCross),
+                    AnimationBitmask.IsSet(playerState.animationMask, AnimationBitmask.Sit)
                     );
                 if (networkPlayer.WeaponController != null && networkPlayer.WeaponController.activeID != playerState.weaponId) networkPlayer.WeaponController.ToChange(playerState.weaponId);
 

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using FIMSpace;
 using FIMSpace.Generating.Planning.ModNodes.Transforming;
 using Newtonsoft.Json.Linq;
 using Steamworks;
@@ -34,9 +33,20 @@ public class SpaceShipManager : MonoBehaviour
     public bool IsDoorOpen { get; private set; } = false;
     public bool IsLanded { get; private set; } = false;
 
-    void Update()
+    private int CurrentScenePlanetId
     {
-        if (!IsDoorOpen && null != GameObject.FindWithTag("Player"))
+        get
+        {
+            if (GameManager.Instance == null || GameManager.Instance.PlanetDatabase == null) return -1;
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            PlanetData planet = GameManager.Instance.PlanetDatabase.allPlanets.Find(p => p.sceneName == currentSceneName);
+            return planet != null ? planet.planetId : -1;
+        }
+    }
+
+    void Start()
+    {
+        if (null != GameObject.FindWithTag("Player"))
         {
             OpenDoor();
             Landing();
@@ -64,7 +74,7 @@ public class SpaceShipManager : MonoBehaviour
         LegAnimation(AnimShipLandHash, IsLanded);
         WingAnimation(AnimShipLandHash, IsLanded);
         ReactorAnimation(AnimShipLandHash, IsLanded);
-        Debug.Log("Lading...");
+        Debug.Log("[SpaceShipManager] Landing...");
     }
 
     public void Launching()
@@ -76,7 +86,7 @@ public class SpaceShipManager : MonoBehaviour
         LegAnimation(AnimShipLandHash, IsLanded);
         WingAnimation(AnimShipLandHash, IsLanded);
         ReactorAnimation(AnimShipLandHash, IsLanded);
-        Debug.Log("Launching...");
+        Debug.Log("[SpaceShipManager] Launching...");
     }
 
     private float cooltime = 0f;
@@ -90,7 +100,7 @@ public class SpaceShipManager : MonoBehaviour
         cooltime = Time.time;
         IsDoorOpen = true;
         doorAnimator.SetBool(AnimDoorOpenHash, IsDoorOpen);
-        Debug.Log("Openning...");
+        Debug.Log("[SpaceShipManager] Opening...");
     }
 
     public void CloseDoor()
@@ -103,7 +113,7 @@ public class SpaceShipManager : MonoBehaviour
         cooltime = Time.time;
         IsDoorOpen = false;
         doorAnimator.SetBool(AnimDoorOpenHash, IsDoorOpen);
-        Debug.Log("Closing...");
+        Debug.Log("[SpaceShipManager] Closing...");
     }
 
     public void ToggleDoor()
@@ -116,13 +126,24 @@ public class SpaceShipManager : MonoBehaviour
 
     public void OnLaunchGameClicked()
     {
-        Debug.Log($"[RoomUIManager] Clicked launch for planet {ServerRoomManager.Instance.SelectedPlanetId}.");
-        ServerRoomManager.Instance.LaunchToPlanet(ServerRoomManager.Instance.SelectedPlanetId);
-    }
+        // if (NetworkManager.Instance.Mode == NetworkMode.Client)
+        //     return;
+        if (ServerRoomManager.Instance.SelectedPlanetId == -1)
+        {
+            Debug.LogWarning("[SpaceShipManager] Cannot launch, no planet selected.");
+            return;
+        }
 
-    public void OnBackToSpaceClicked()
-    {
-        ServerRoomManager.Instance.LaunchToPlanet(-1);
+        // --- New logic for preventing unnecessary scene loading ---
+        if (CurrentScenePlanetId != -1 && ServerRoomManager.Instance.SelectedPlanetId == CurrentScenePlanetId)
+        {
+            Debug.Log($"[SpaceShipManager] Already on planet ID {ServerRoomManager.Instance.SelectedPlanetId}. Not reloading scene.");
+            return;
+        }
+        // --------------------------------------------------------
+
+        Debug.Log($"[SpaceShipManager] Host clicked launch for planet ID {ServerRoomManager.Instance.SelectedPlanetId}.");
+        ServerRoomManager.Instance.LaunchToPlanet(ServerRoomManager.Instance.SelectedPlanetId);
     }
 
     public void OnInviteFriends()

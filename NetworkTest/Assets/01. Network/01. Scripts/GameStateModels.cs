@@ -23,6 +23,7 @@ public static class AnimationBitmask
     public const byte Crouch = 1 << 4;     // 16
     public const byte UnarmedAttackJab = 1 << 5; // 32
     public const byte UnarmedAttackCross = 1 << 6; // 64
+    public const byte Sit = 1 << 7; // 128
 
     public static bool IsSet(byte mask, byte flag) => (mask & flag) == flag;
 }
