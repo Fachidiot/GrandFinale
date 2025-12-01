@@ -104,23 +104,24 @@ public class MainMenuUIManager : MonoBehaviour
         roomCamera.Priority = 0;
         menuPanel.SetActive(true);
         roomPanel.SetActive(false);
-        if (NetworkManager.Instance != null && NetworkManager.Instance.IsConnected)
+
+        // if (NetworkManager.Instance != null && NetworkManager.Instance.IsConnected)
+        // {
+        //     NetworkManager.Instance.Disconnect(); // This will trigger HandleDisconnection
+        // }
+        // else // Handle leaving single player room
+        // {
+        if (PlayerManager.Instance != null)
         {
-            NetworkManager.Instance.Disconnect(); // This will trigger HandleDisconnection
+            PlayerManager.Instance.ClearAllNetworkEntities();
         }
-        else // Handle leaving single player room
+        if (ServerRoomManager.Instance != null)
         {
-            if (PlayerManager.Instance != null)
-            {
-                PlayerManager.Instance.ClearAllNetworkEntities();
-            }
-            if (ServerRoomManager.Instance != null)
-            {
-                // Unsubscribe first to prevent UI updates while we are cleaning up.
-                ServerRoomManager.OnRoomDataUpdated -= UpdatePlayerSlots;
-                ServerRoomManager.Instance.ClearRoom();
-            }
+            // Unsubscribe first to prevent UI updates while we are cleaning up.
+            ServerRoomManager.OnRoomDataUpdated -= UpdatePlayerSlots;
+            ServerRoomManager.Instance.ClearRoom();
         }
+        // }
     }
 
     public void OnMultiplayerButtonClicked()
@@ -241,8 +242,9 @@ public class MainMenuUIManager : MonoBehaviour
             if (prefabToSpawn != null)
             {
                 GameObject view = Instantiate(prefabToSpawn, slotList[i]);
-                customizeManager.FModel = view.GetComponent<ModelSelector>().FModel.GetComponent<ModelCustom>();
-                customizeManager.MModel = view.GetComponent<ModelSelector>().MModel.GetComponent<ModelCustom>();
+                customizeManager.FModel = view.GetComponentsInChildren<ModelCustom>()[0];
+                customizeManager.MModel = view.GetComponentsInChildren<ModelCustom>()[1];
+                customizeManager.InitialCheck();
                 var readyIndicator = view.transform.Find("ReadyIndicator");
                 if (readyIndicator != null)
                 {

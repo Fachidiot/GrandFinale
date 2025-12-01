@@ -26,7 +26,7 @@ public class CustomizeManager : MonoBehaviour
         return isMale ? mModel : fModel;
     }
 
-    private void InitialCheck()
+    public void InitialCheck()
     {
         // Check prefabs
         if (customizePanel == null) Debug.LogError("CustomizeManager: NetworkLocal_M prefab not assigned.");
@@ -40,15 +40,14 @@ public class CustomizeManager : MonoBehaviour
 
         fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
         mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
-    }
-
-    void Start()
-    {
-        customizer = PlayerCustomizer.Instance;
 
         ActiveMale();
         ModelApply();
-        InitialCheck();
+    }
+
+    void Awake()
+    {
+        customizer = PlayerCustomizer.Instance;
     }
 
     private void ModelApply()
@@ -64,12 +63,14 @@ public class CustomizeManager : MonoBehaviour
 
         customizePanel.SetActive(toggle);
 
-        fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
-        mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
-        fModel.transform.parent.localRotation = Quaternion.Euler(0, 180, 0);
-        mModel.transform.parent.localRotation = Quaternion.Euler(0, 180, 0);
         for (int i = 0; i < customizePreviewOffer.Count; ++i)
             customizePreviewOffer[i].SetActive(!toggle);
+
+        fModel.transform.parent.localRotation = Quaternion.Euler(0, 180, 0);
+        mModel.transform.parent.localRotation = Quaternion.Euler(0, 180, 0);
+
+        fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
+        mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
     }
 
     public void ChangeMale(int isMale)
