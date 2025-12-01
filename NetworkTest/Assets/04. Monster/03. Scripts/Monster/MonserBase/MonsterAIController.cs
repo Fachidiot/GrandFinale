@@ -326,7 +326,25 @@ public class MonsterAIController : MonoBehaviour
 
     private void HandleHit()
     {
+        // 0. 죽었으면 무시
         if (health.IsDead) return;
+
+        // [핵심 수정] 네트워크 환경 대비: 플레이어가 늦게 접속해서 player 변수가 비어있다면, 
+        // 맞은 이 시점에 다시 한번 찾아봅니다.
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+
+            if (player != null)
+            {
+                Debug.Log($"[AI] {gameObject.name}: 피격 후 플레이어 재탐색 성공!");
+            }
+            else
+            {
+                // 여전히 못 찾았다면 태그 문제거나 진짜 없는 것
+                Debug.LogWarning($"[AI] {gameObject.name}: 피격되었으나 Player 태그를 가진 대상을 찾을 수 없습니다.");
+            }
+        }
 
         // 1. Gazer (원거리) 피격 로직
         if (fsm is GazerFSM gazerFSM)
@@ -367,7 +385,7 @@ public class MonsterAIController : MonoBehaviour
             // Block 유도 (카운터)
             if (health.hitCounter >= health.blockTriggerHits) return;
 
-            // 원거리 피격
+            // 원거리 피격 시 반응
             float distance = GetDistanceToPlayer();
             if (distance > (config.attackRange * 2) && !golemFSM.HasPlayedRangedHitAnim)
             {
@@ -383,13 +401,13 @@ public class MonsterAIController : MonoBehaviour
         // 3. Minotaur 피격 로직 (슈퍼아머 느낌)
         else if (fsm is MinotaurFSM)
         {
-            // 돌진 중이 아닐 때만 HitState 전환 (필요시 조건 추가)
+            // 돌진 중이 아닐 때만 HitState 전환
             ChangeState(fsm.HitState);
         }
-
-        // 4. 그 외 (기본)
+        // 4. 그 외 (슬라임, 일반 좀비 등 기본 몬스터)
         else
         {
+            // [핵심 수정] 플레이어가 있다면 위치를 강제로 센서에 주입하여 추적 시작
             if (player != null)
             {
                 sensor.ForceDetection(player.transform.position);
