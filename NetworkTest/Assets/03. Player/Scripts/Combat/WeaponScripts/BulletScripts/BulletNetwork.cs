@@ -122,7 +122,7 @@ public class BulletNetwork : BulletBehaviour
                             else if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host)
                             {
                                 // 호스트는 직접 데미지를 처리합니다.
-                                var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                                var monsterHealth = hit.transform.GetComponent<MonsterHealth>();
                                 if (monsterHealth != null)
                                 {
                                     monsterHealth.TakeDamage(damage);

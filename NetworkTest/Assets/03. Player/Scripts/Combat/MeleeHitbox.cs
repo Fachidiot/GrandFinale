@@ -43,7 +43,7 @@ public class MeleeHitbox : MonoBehaviour
             // 데미지 주기 (인터페이스나 컴포넌트 사용)
             Debug.Log($"{other.gameObject.name}에게 {damage} 데미지!");
 
-            var networkMonster = other.transform.root.GetComponent<NetworkMonster>();
+            var networkMonster = other.transform.GetComponent<NetworkMonster>();
             if (networkMonster != null)
             {
                 float PlayerDamage = damage * (other.collider.name == "Head" ? 2f : 1f);
@@ -61,7 +61,7 @@ public class MeleeHitbox : MonoBehaviour
                 else if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host || NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
                 {
                     // 호스트는 직접 데미지를 처리합니다.
-                    var monsterHealth = other.transform.root.GetComponent<MonsterHealth>();
+                    var monsterHealth = other.transform.GetComponent<MonsterHealth>();
                     if (monsterHealth != null)
                     {
                         monsterHealth.TakeDamage(PlayerDamage);

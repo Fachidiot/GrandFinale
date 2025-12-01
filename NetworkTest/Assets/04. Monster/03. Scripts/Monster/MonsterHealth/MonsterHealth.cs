@@ -76,7 +76,7 @@ public class MonsterHealth : MonoBehaviour
         _defense = config.defense;
         currentHP = _maxHP;
         IsDead = false;
-        Debug.Log($"[{gameObject.name}] Health 초기화 완료: HP={_maxHP}, DEF={_defense}");
+        // Debug.Log($"[{gameObject.name}] Health 초기화 완료: HP={_maxHP}, DEF={_defense}");
     }
 
     /// <summary>

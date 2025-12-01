@@ -22,13 +22,14 @@ public class MonsterSensor : MonoBehaviour
     private GameObject player;
     private WaitForSeconds checkDelay = new WaitForSeconds(0.2f);
 
-    private void Awake()
-    {
-        player = GameObject.FindGameObjectWithTag("Player");
-    }
+    // private void Awake()
+    // {
+    //     player = GameObject.FindGameObjectWithTag("Player");
+    // }
 
     private void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         // 스크립트가 활성화되면 감지 루틴을 시작합니다.
         StartCoroutine(CheckFovRoutine());
     }
@@ -86,7 +87,7 @@ public class MonsterSensor : MonoBehaviour
                 {
                     playerDetected = true;
                     TargetLastPosition = target.position;
-                    // Debug.Log("<color=cyan>캬캬캬 플레이어 발견! 캬캬캬</color>");
+                    Debug.Log("<color=cyan>캬캬캬 플레이어 발견! 캬캬캬</color>");
                 }
             }
         }

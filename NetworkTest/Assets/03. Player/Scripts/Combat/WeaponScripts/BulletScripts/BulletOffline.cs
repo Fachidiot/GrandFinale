@@ -76,14 +76,14 @@ public class BulletOffline : BulletBehaviour
             {
                 SpawnEffect(bloodPrefab, hit, 3f);
 
-                var monsterHealth = hit.transform.root.GetComponent<MonsterHealth>();
+                var monsterHealth = hit.transform.GetComponent<MonsterHealth>();
                 if (monsterHealth != null)
                 {
                     monsterHealth.TakeDamage(PlayerDamage);
                 }
                 else
                 {
-                    var playerHealth = hit.transform.root.GetComponentInChildren<PlayerHealth>();
+                    var playerHealth = hit.transform.GetComponentInChildren<PlayerHealth>();
                     if (playerHealth != null)
                     {
                         playerHealth.SetDamage(30); // 기존 플레이어 데미지 로직 유지
