@@ -119,3 +119,52 @@
 - **플레이어 생성 오류 수정**:
     - `PlayerManager.cs`의 `UpdatePlayerList` 메서드에 현재 씬이 메인 게임 씬(`spaceroomScene`)인지 확인하는 가드 절을 추가하여, 메인 메뉴에서 플레이어 `GameObject`가 미리 생성되는 문제를 해결.
     - `MainMenuUIManager.cs`의 이벤트 구독 로직을 수정하여, `ServerRoomManager` 인스턴스가 생성된 후에 `OnRoomDataUpdated` 이벤트가 구독되도록 보장함으로써 `CustomView` 프리팹이 생성되지 않던 문제를 해결.
+
+## 2025년 12월 1일 월요일
+
+- **캐릭터 커스터마이징 동기화**:
+    - `GameStateModels.cs`를 수정하여 `PlayerState`에 `isMale`과 `ModelInfo`를 포함하고 직렬화/역직렬화 로직을 업데이트했습니다.
+    - `PlayerManager.cs`를 수정하여 커스터마이징 데이터를 저장하고 원격 플레이어에게 적용하는 `UpdatePlayerCustomization` 메서드를 추가했습니다. 플레이어 생성 및 제거 시 커스터마이징 데이터도 함께 관리됩니다.
+    - `NetworkManager.cs`를 수정하여 클라이언트(`OnLobbyEnter`)에서 호스트로 커스터마이징 데이터를 전송하고, 호스트(`GatherPlayerStates`)가 권위 있는 데이터를 브로드캐스트하도록 했습니다.
+    - `ServerRoomManager.cs`를 수정하여 클라이언트의 커스터마이징 메시지를 처리하고 권위 있는 플레이어 목록을 업데이트했습니다.
+    - `CustomizeManager.cs`를 수정하여 플레이어가 커스터마이징 저장 시 호스트에게 업데이트 메시지를 전송하도록 했습니다.
+
+- **로비 UI 통합 및 정리**:
+    - `RoomUIManager.cs`의 플레이어 목록 UI 로직을 `MainMenuUIManager.cs`로 병합했습니다.
+    - `MainMenuUIManager.cs`는 이제 `UpdatePlayerSlots` 메서드를 통해 로비에서 3D 플레이어 모델과 텍스트 기반 `PlayerListItem` 디스플레이를 모두 처리합니다.
+    - 중복되는 `RoomUIManager.cs` 파일을 삭제했습니다.
+
+- **TerminalManager에서 씬 전환 로직 추가**:
+    - `TerminalManager.cs`에 "launch" 명령을 추가하여 호스트 또는 싱글 플레이어 모드에서 `SpaceShipScene`으로 직접 씬 전환을 할 수 있도록 구현했습니다.
+
+- **플레이 가능한 씬에서의 유연한 플레이어 스폰**:
+    - `GameSettings.cs`에 `playableScenes` (초기값: "SpaceShipScene", "TutorialScene") 목록을 추가했습니다.
+    - `GameManager.cs`와 `PlayerManager.cs`를 수정하여 이 `playableScenes` 목록을 사용하여 플레이어 스폰이 허용되는 씬을 유연하게 관리하도록 했습니다.
+
+- **지연된 플레이어 객체 파괴**:
+    - `PlayerManager.cs`를 수정하여 플레이어 `GameObject`를 즉시 파괴하지 않고 `_playersToDestroy` 목록에 추가하도록 변경했습니다.
+    - `GameManager.cs`를 수정하여 `MainMenuScene`이 로드될 때 `PlayerManager.Instance.DestroyPendingPlayers()`를 호출하여 이전 세션의 플레이어 객체를 정리하고, `AudioListener`로 인한 음악 끊김 문제를 해결했습니다.
+
+- **InventoryManager 영구화**:
+    - `InventoryManager.cs`의 `Awake()` 메서드에 `DontDestroyOnLoad(gameObject);`를 추가하여 씬 전환 시에도 파괴되지 않는 영구적인 싱글톤으로 만들었습니다.
+
+- **싱글 플레이어 중복 생성 버그 수정**:
+    - `GameManager.cs`의 `OnSceneLoaded` 메서드에서 싱글 플레이어 모드일 때 `PlayerManager.Instance.LocalPlayer`가 `null`인 경우에만 `SpawnInitialPlayer()`를 호출하도록 수정하여, 씬 전환 시 플레이어가 중복 생성되는 문제를 해결했습니다.
+
+- **FlyState 구현**:
+    - `Assets/03. Player/Scripts/StateMachine Scripts/FlyState.cs` 파일을 새로 생성하여 무중력 상태에서의 이동 로직을 구현했습니다. (바라보는 방향 이동, 점프/웅크리기로 상하 이동, 중력 무시)
+    - `CharacterMove.cs`에 `flySpeed` 변수, `flyState` 인스턴스, `EnterFlyMode` 메서드를 추가하여 `FlyState`를 통합했습니다.
+    - `CharacterMove.isGrounded` 프로퍼티와 `GroundCheck` 메서드의 버그를 수정하여 `FlyState` 중에는 `inAirState`로 자동 전환되지 않도록 했습니다.
+
+- **SpaceShipManager 애니메이션 동기화**:
+    - `SpaceShipManager.cs`를 수정하여 `IsLanded` 및 `IsDoorOpen` 상태를 public 프로퍼티로 노출하고, `UpdateStateFromNetwork` 메서드를 추가하여 네트워크 상태를 적용할 수 있도록 했습니다.
+    - `GameStateModels.cs`의 `NetworkGameState`에 `isShipLanded` 및 `isShipDoorOpen` 필드를 추가하고 비트마스크를 사용하여 효율적으로 직렬화/역직렬화하도록 했습니다.
+    - `NetworkManager.cs`를 수정하여 호스트가 `SpaceShipManager`의 상태를 수집하여 브로드캐스트하고, 클라이언트가 이를 수신하여 `SpaceShipManager.UpdateStateFromNetwork`를 통해 애니메이션을 동기화하도록 했습니다.
+    - `GameStateModels.cs`의 `AnimationBitmask`에 `Sit` 플래그를 추가했습니다.
+    - `NetworkAnimatorSync.cs`를 수정하여 "sit" 애니메이터 파라미터를 마스크에 포함시키고 네트워크 데이터에서 이를 적용하도록 했습니다.
+    - `PlayerManager.cs`를 수정하여 "sit" 상태를 `NetworkAnimatorSync`의 `OnAnimationDataReceived` 메서드로 전달하도록 했습니다.
+
+- **SpaceShipManager 불필요한 씬 로드 방지**:
+    - `SpaceShipManager.cs`에 `CurrentScenePlanetId` 프로퍼티를 추가하여 현재 씬의 행성 ID를 동적으로 가져오도록 했습니다.
+    - `SpaceShipManager.OnLaunchGameClicked` 메서드를 수정하여 `ServerRoomManager.Instance.SelectedPlanetId`가 `CurrentScenePlanetId`와 동일할 경우 불필요한 씬 재로드를 방지하도록 했습니다.
+    - `Debug.Log` 메시지의 컨텍스트를 `[SpaceShipManager]`로 변경했습니다.
