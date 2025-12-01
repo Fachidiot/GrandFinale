@@ -11,7 +11,8 @@ public class PlayerManager : MonoBehaviour
     private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
     private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
-
+    private readonly List<GameObject> _playersToDestroy = new List<GameObject>();
+    
     // Customization Data Storage
     private readonly Dictionary<byte, bool> _playerGenders = new Dictionary<byte, bool>();
     private readonly Dictionary<byte, ModelInfo> _playerModelInfos = new Dictionary<byte, ModelInfo>();
@@ -54,6 +55,18 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void DestroyPendingPlayers()
+    {
+        foreach (var playerGO in _playersToDestroy)
+        {
+            if (playerGO != null)
+            {
+                Destroy(playerGO);
+            }
+        }
+        _playersToDestroy.Clear();
+    }
+
     public void SpawnInitialPlayer()
     {
         if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
@@ -72,7 +85,7 @@ public class PlayerManager : MonoBehaviour
         }
         if (LocalPlayer != null && LocalPlayer.gameObject != null)
         {
-            Destroy(LocalPlayer.gameObject);
+            _playersToDestroy.Add(LocalPlayer.gameObject);
         }
 
         GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetSinglePlayerPrefab(), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.tutorialSpawnPoint != null ? GameManager.Instance.GameSettings.tutorialSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
@@ -80,7 +93,7 @@ public class PlayerManager : MonoBehaviour
 
         ModelInfo modelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
         playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
-
+        
         // No network ID for single player, so we can't use the dictionaries.
         // But we set the LocalPlayer which is enough.
 
@@ -105,24 +118,27 @@ public class PlayerManager : MonoBehaviour
 
     public void ClearAllNetworkEntities()
     {
-        // Destroy all remote player objects
+        // Mark all remote player objects for destruction
         foreach (var player in players.Values)
         {
-            if (player != null) Destroy(player);
+            if (player != null)
+            {
+                _playersToDestroy.Add(player);
+            }
         }
         players.Clear();
         byteIdToSteamId.Clear();
         _playerGenders.Clear();
         _playerModelInfos.Clear();
 
-        // Destroy the local player object (which could be a SinglePlayer or a NetworkPlayer)
+        // Mark the local player object for destruction
         if (LocalPlayer != null && LocalPlayer.gameObject != null)
         {
-            Destroy(LocalPlayer.gameObject);
+            _playersToDestroy.Add(LocalPlayer.gameObject);
             LocalPlayer = null;
         }
 
-        // Destroy all monster objects
+        // Destroy all monster objects immediately as they don't have audio listeners.
         foreach (var monster in monsters.Values)
         {
             if (monster != null) Destroy(monster);
@@ -188,7 +204,7 @@ public class PlayerManager : MonoBehaviour
 
         if (players.ContainsKey(playerInfo.steam_id))
         {
-            players.Remove(playerInfo.steam_id);
+            RemovePlayer(playerInfo.steam_id);
         }
 
         bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
@@ -202,7 +218,7 @@ public class PlayerManager : MonoBehaviour
 
         if (networkPlayer.NicknameUI != null)
             networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
-
+        
         ModelInfo modelInfo;
         if (isMine)
         {
@@ -220,7 +236,7 @@ public class PlayerManager : MonoBehaviour
                 playerInfo.acc2Index);
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
         }
-
+        
         // Store initial customization
         if (byte.TryParse(playerInfo.player_id, out byte byteId))
         {
@@ -257,8 +273,8 @@ public class PlayerManager : MonoBehaviour
             {
                 LocalPlayer = null;
             }
-            Debug.Log($"[PlayerManager] Removing player {steamId}.");
-            Destroy(playerToDestroy);
+            Debug.Log($"[PlayerManager] Marking player {steamId} for destruction.");
+            _playersToDestroy.Add(playerToDestroy);
             players.Remove(steamId);
         }
     }
@@ -277,7 +293,7 @@ public class PlayerManager : MonoBehaviour
         }
         return NetworkManager.INVALID_PLAYER_ID;
     }
-
+    
     // --- Customization Management ---
 
     public bool GetPlayerGender(byte playerId)
@@ -289,7 +305,7 @@ public class PlayerManager : MonoBehaviour
     {
         return _playerModelInfos.TryGetValue(playerId, out ModelInfo modelInfo) ? modelInfo : new ModelInfo();
     }
-
+    
     public void UpdatePlayerCustomization(byte playerId, bool isMale, ModelInfo modelInfo)
     {
         if (_playerGenders.TryGetValue(playerId, out bool oldGender) && oldGender != isMale)
@@ -376,7 +392,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     bodySlopeHandler.SetSlopeFromNetwork(playerState.bending);
                 }
-
+                
                 // Apply customization updates
                 ModelInfo currentModelInfo = GetPlayerModelInfo(playerState.playerId);
                 if (currentModelInfo.head != playerState.modelInfo.head ||

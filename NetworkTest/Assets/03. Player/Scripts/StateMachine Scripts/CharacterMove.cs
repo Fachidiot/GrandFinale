@@ -26,12 +26,13 @@ public class CharacterMove : MonoBehaviour
 
             _isGrounded = value;
 
-            if (!_isGrounded && currentState != inAirState)
+            if (!_isGrounded && currentState != inAirState && currentState != flyState)
                 SetState(inAirState);
 
             animator.SetBool("isGrounded", value);
 
-            OnGroundedValueChange.Invoke(value);
+            if (OnGroundedValueChange != null)
+                OnGroundedValueChange.Invoke(value);
         }
     }
     public LayerMask groundCheckMask;
@@ -46,6 +47,7 @@ public class CharacterMove : MonoBehaviour
     public float walkSpeed = 2;
     public float sprintSpeed = 5;
     public float crouchSpeed = 1;
+    public float flySpeed = 10f;
 
     public float jumpHeight = 1f;
 
@@ -63,6 +65,7 @@ public class CharacterMove : MonoBehaviour
     public RollState rollState { get; private set; }
     public JumpState jumpState { get; private set; }
     public InAirState inAirState { get; private set; }
+    public FlyState flyState { get; private set; }
 
     // animator ids
     public int horizontalInputID { get; private set; }
@@ -112,6 +115,7 @@ public class CharacterMove : MonoBehaviour
         rollState = new RollState(this);
         jumpState = new JumpState(this);
         inAirState = new InAirState(this);
+        flyState = new FlyState(this);
     }
 
     private void Start()
@@ -123,6 +127,7 @@ public class CharacterMove : MonoBehaviour
     void OnDestroy()
     {
         moveState.OnDestroy();
+        flyState.OnDestroy();
     }
 
     public void SetState(StateMachineBase state)
@@ -191,7 +196,31 @@ public class CharacterMove : MonoBehaviour
             groundNormal = Vector3.up;
             edgeSlipVelocity = Vector3.zero;
         }
+    }
 
+    [ContextMenu("Fly Mode")]
+    public void Fly()
+    {
+        EnterFlyMode(true);
+    }
+
+    [ContextMenu("UnFly Mode")]
+    public void UnFly()
+    {
+        EnterFlyMode(false);
+    }
+
+    public void EnterFlyMode(bool enter)
+    {
+        if (enter)
+        {
+            SetState(flyState);
+        }
+        else
+        {
+            // Fallback to grounded or in-air state
+            SetState(isGrounded ? moveState : inAirState);
+        }
     }
 
     IEnumerator ColliderSizeChangeSmooth(bool reduce)
@@ -270,3 +299,4 @@ public class CharacterMove : MonoBehaviour
         }
     }
 }
+

@@ -82,8 +82,8 @@ public class InventoryManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else { Destroy(gameObject); return; }
+        if (Instance == null)
+            Instance = this;
 
         if (characterMove != null) playerAnimator = characterMove.GetComponent<Animator>();
 

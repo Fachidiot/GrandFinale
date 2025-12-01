@@ -76,6 +76,11 @@ public class TerminalManager : MonoBehaviour
 
     public void ToggleTerminal()
     {
+        activePlayer = PlayerManager.Instance.LocalPlayer;
+        Animator playerAnimator = activePlayer.GetComponentInChildren<Animator>();
+        if (!playerAnimator.GetBool("sit"))
+            return; // Player가 자리에 앉아있을때만 Terminal을 사용할 수 있게 함.
+
         inputField.text = string.Empty;
         inputField.ForceLabelUpdate();
         isTerminalActive = !isTerminalActive;
@@ -88,7 +93,6 @@ public class TerminalManager : MonoBehaviour
             // Clear the interact text when the terminal is activated
             UIEvents.InteractableFocusChanged("");
 
-            activePlayer = PlayerManager.Instance.LocalPlayer;
             if (activePlayer == null || activePlayer.gameObject == null)
             {
                 Debug.LogError("Terminal cannot be activated: Local player not found.");
@@ -105,10 +109,8 @@ public class TerminalManager : MonoBehaviour
                 activeCameraSwitcher.enabled = false;
             }
 
-            activePlayer.transform.position = playerStandPosition.position;
-
-            Animator playerAnimator = activePlayer.GetComponentInChildren<Animator>();
-            playerAnimator.SetBool("useTerminal", isTerminalActive);
+            // activePlayer.transform.position = playerStandPosition.position;
+            // playerAnimator.SetBool("useTerminal", isTerminalActive);
 
             // Animator playerAnimator = activePlayer.GetComponentInChildren<Animator>();
             // CharacterMove playerCharacterMove = activePlayer.GetComponent<CharacterMove>();

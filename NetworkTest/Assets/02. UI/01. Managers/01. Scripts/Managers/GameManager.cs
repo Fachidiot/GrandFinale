@@ -46,8 +46,16 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // When returning to the main menu, destroy any player objects from the previous session.
+        if (scene.name == gameSettings.mainmenuScene)
+        {
+            if (PlayerManager.Instance != null)
+            {
+                PlayerManager.Instance.DestroyPendingPlayers();
+            }
+        }
         // Spawns player objects when entering a playable game scene.
-        if (gameSettings.playableScenes.Contains(scene.name) && NetworkManager.Instance != null)
+        else if (gameSettings.playableScenes.Contains(scene.name) && NetworkManager.Instance != null)
         {
             if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
             {

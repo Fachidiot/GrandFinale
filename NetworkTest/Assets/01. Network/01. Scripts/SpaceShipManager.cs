@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using FIMSpace;
 using FIMSpace.Generating.Planning.ModNodes.Transforming;
 using Newtonsoft.Json.Linq;
 using Steamworks;
@@ -30,8 +31,8 @@ public class SpaceShipManager : MonoBehaviour
     private readonly string AnimDoorOpenHash = "isOpened";
     private readonly string AnimShipLandHash = "isLanded";
 
-    private bool isDoorOpen = false;
-    private bool isLanded = false;
+    public bool IsDoorOpen { get; private set; } = false;
+    public bool IsLanded { get; private set; } = false;
 
     void Start()
     {
@@ -42,64 +43,65 @@ public class SpaceShipManager : MonoBehaviour
         }
     }
 
-    // private Animator animator;
-
-    // void Start()
-    // {
-    //     animator = GetComponent<Animator>();
-    // }
+    public void UpdateStateFromNetwork(bool landed, bool doorOpen)
+    {
+        if (landed != IsLanded)
+        {
+            if (landed) Landing(); else Launching();
+        }
+        if (doorOpen != IsDoorOpen)
+        {
+            if (doorOpen) OpenDoor(); else CloseDoor();
+        }
+    }
 
     public void Landing()
     {
-        if (isLanded)
+        if (IsLanded)
             return;
 
-        isLanded = true;
-        LegAnimation(AnimShipLandHash, isLanded);
-        WingAnimation(AnimShipLandHash, isLanded);
-        ReactorAnimation(AnimShipLandHash, isLanded);
+        IsLanded = true;
+        LegAnimation(AnimShipLandHash, IsLanded);
+        WingAnimation(AnimShipLandHash, IsLanded);
+        ReactorAnimation(AnimShipLandHash, IsLanded);
         Debug.Log("Lading...");
-        // animator.SetBool(AnimShipLandHash, isLanded);
     }
 
     public void Launching()
     {
-        if (!isLanded)
+        if (!IsLanded)
             return;
 
-        isLanded = false;
-        LegAnimation(AnimShipLandHash, isLanded);
-        WingAnimation(AnimShipLandHash, isLanded);
-        ReactorAnimation(AnimShipLandHash, isLanded);
+        IsLanded = false;
+        LegAnimation(AnimShipLandHash, IsLanded);
+        WingAnimation(AnimShipLandHash, IsLanded);
+        ReactorAnimation(AnimShipLandHash, IsLanded);
         Debug.Log("Launching...");
-        // animator.SetBool(AnimShipLandHash, isLanded);
     }
 
     public void OpenDoor()
     {
-        if (isDoorOpen)
+        if (IsDoorOpen && doorAnimator.CheckAnimationEnd())
             return;
 
-        isDoorOpen = true;
-        doorAnimator.SetBool(AnimDoorOpenHash, isDoorOpen);
+        IsDoorOpen = true;
+        doorAnimator.SetBool(AnimDoorOpenHash, IsDoorOpen);
         Debug.Log("Openning...");
-        // animator.SetBool(AnimDoorOpenHash, isDoorOpen);
     }
 
     public void CloseDoor()
     {
-        if (!isDoorOpen)
+        if (!IsDoorOpen && doorAnimator.CheckAnimationEnd())
             return;
 
-        isDoorOpen = false;
-        doorAnimator.SetBool(AnimDoorOpenHash, isDoorOpen);
+        IsDoorOpen = false;
+        doorAnimator.SetBool(AnimDoorOpenHash, IsDoorOpen);
         Debug.Log("Closing...");
-        // animator.SetBool(AnimDoorOpenHash, isDoorOpen);
     }
 
     public void ToggleDoor()
     {
-        if (!isDoorOpen)
+        if (!IsDoorOpen)
             OpenDoor();
         else
             CloseDoor();
@@ -109,12 +111,6 @@ public class SpaceShipManager : MonoBehaviour
     {
         // if (NetworkManager.Instance.Mode == NetworkMode.Client)
         //     return;
-        if (ServerRoomManager.Instance.SelectedPlanetId == -1)
-        {
-            Debug.LogWarning("[RoomUIManager] Cannot launch, no planet selected.");
-            return;
-        }
-
         Debug.Log($"[RoomUIManager] Host clicked launch for planet {ServerRoomManager.Instance.SelectedPlanetId}.");
         ServerRoomManager.Instance.LaunchToPlanet(ServerRoomManager.Instance.SelectedPlanetId);
     }

@@ -176,6 +176,16 @@ public class NetworkGameState
 {
     public List<PlayerState> players = new List<PlayerState>();
     public int selectedPlanetId = -1; // Default to -1, indicating no planet is selected
+    public bool isShipLanded;
+    public bool isShipDoorOpen;
+
+    private byte GetShipStateMask()
+    {
+        byte mask = 0;
+        if (isShipLanded) mask |= 1 << 0;
+        if (isShipDoorOpen) mask |= 1 << 1;
+        return mask;
+    }
 
     // --- Serialization (Host) ---
     public byte[] ToByteArray()
@@ -213,6 +223,7 @@ public class NetworkGameState
             
             // Write game-level state
             writer.Write(selectedPlanetId);
+            writer.Write(GetShipStateMask());
 
             return stream.ToArray();
         }
@@ -257,6 +268,12 @@ public class NetworkGameState
             if (reader.BaseStream.Position < reader.BaseStream.Length)
             {
                 gameState.selectedPlanetId = reader.ReadInt32();
+            }
+            if (reader.BaseStream.Position < reader.BaseStream.Length)
+            {
+                byte shipStateMask = reader.ReadByte();
+                gameState.isShipLanded = (shipStateMask & (1 << 0)) != 0;
+                gameState.isShipDoorOpen = (shipStateMask & (1 << 1)) != 0;
             }
         }
         return gameState;

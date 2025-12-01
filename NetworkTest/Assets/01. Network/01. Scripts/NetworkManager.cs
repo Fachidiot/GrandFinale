@@ -60,6 +60,17 @@ public class NetworkManager : MonoBehaviour
     private CSteamID lobbyHostID;
     private List<CSteamID> lobbyMembers = new List<CSteamID>();
 
+    // --- Cached Manager References ---
+    private SpaceShipManager _spaceShipManager;
+    private SpaceShipManager SpaceShipManager
+    {
+        get
+        {
+            if (_spaceShipManager == null) _spaceShipManager = FindObjectOfType<SpaceShipManager>();
+            return _spaceShipManager;
+        }
+    }
+
     // --- Steam Callbacks ---
     private Callback<LobbyCreated_t> m_LobbyCreated;
     private Callback<GameLobbyJoinRequested_t> m_GameLobbyJoinRequested;
@@ -133,7 +144,11 @@ public class NetworkManager : MonoBehaviour
     {
         // Guard clauses to prevent sending updates when not in a valid state
         if (!IsConnected || MyPlayerId == INVALID_PLAYER_ID || PlayerManager.Instance == null) return;
-        if (!PlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo)) return;
+        
+        // This check is problematic if the player hasn't been spawned yet.
+        // Let's refine it to only check for the player GO if we are a client.
+        if (Mode == NetworkMode.Client && !PlayerManager.Instance.Players.ContainsKey(PlayerId)) return;
+
 
         if (Mode == NetworkMode.Host)
         {
@@ -141,7 +156,10 @@ public class NetworkManager : MonoBehaviour
         }
         else // Client
         {
-            SendClientUpdates(myPlayerGo);
+            if(PlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo))
+            {
+                SendClientUpdates(myPlayerGo);
+            }
         }
     }
 
@@ -156,21 +174,34 @@ public class NetworkManager : MonoBehaviour
     {
         if (ServerRoomManager.Instance == null) return;
 
-        // 1. Send Player States
-        var authoritativeState = new NetworkGameState { players = GatherPlayerStates() };
+        // 1. Create and populate the game state
+        var authoritativeState = new NetworkGameState 
+        { 
+            players = GatherPlayerStates() 
+        };
+
+        if (SpaceShipManager != null)
+        {
+            authoritativeState.isShipLanded = SpaceShipManager.IsLanded;
+            authoritativeState.isShipDoorOpen = SpaceShipManager.IsDoorOpen;
+        }
+
+
+        // 2. Send Player and Game States
         byte[] playerStateBytes = authoritativeState.ToByteArray();
         byte[] playerMessage = new byte[playerStateBytes.Length + 1];
         playerMessage[0] = (byte)NetworkMessageType.GameState;
         Buffer.BlockCopy(playerStateBytes, 0, playerMessage, 1, playerStateBytes.Length);
         BroadcastP2PMessage(playerMessage, EP2PSend.k_EP2PSendUnreliable);
 
-        // 2. Send Monster States
+        // 3. Send Monster States
         var monsterUpdateState = new NetworkMonsterUpdateState { monsters = GatherMonsterStates() };
         byte[] monsterStateBytes = monsterUpdateState.ToByteArray();
         byte[] monsterMessage = new byte[monsterStateBytes.Length + 1];
         monsterMessage[0] = (byte)NetworkMessageType.MonsterUpdate;
         Buffer.BlockCopy(monsterStateBytes, 0, monsterMessage, 1, monsterStateBytes.Length);
         BroadcastP2PMessage(monsterMessage, EP2PSend.k_EP2PSendUnreliable);
+
         // The host is the authority, but it still needs to update its local representation
         // of other players based on the state it has received and is broadcasting.
         if (PlayerManager.Instance != null)
@@ -189,6 +220,8 @@ public class NetworkManager : MonoBehaviour
 
         foreach (var playerEntry in PlayerManager.Instance.Players)
         {
+            if (playerEntry.Value == null) continue; // Skip if player object has been destroyed
+
             string steamIdStr = playerEntry.Key;
             CSteamID steamId = new CSteamID(ulong.Parse(steamIdStr));
             string byteIdStr = ServerRoomManager.Instance.GetPlayerId(steamId);
@@ -563,6 +596,10 @@ public class NetworkManager : MonoBehaviour
             case NetworkMessageType.GameState:
                 var gameState = NetworkGameState.FromBytes(content);
                 if (PlayerManager.Instance != null) PlayerManager.Instance.UpdateFromGameState(gameState);
+                if (SpaceShipManager != null)
+                {
+                    SpaceShipManager.UpdateStateFromNetwork(gameState.isShipLanded, gameState.isShipDoorOpen);
+                }
                 break;
             case NetworkMessageType.MonsterSpawn:
                 var monsterState = MonsterState.FromBytes(content);
