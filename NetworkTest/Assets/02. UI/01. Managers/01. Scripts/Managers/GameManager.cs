@@ -59,13 +59,10 @@ public class GameManager : MonoBehaviour
         {
             if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
             {
-                if (PlayerManager.Instance != null)
+                // Only spawn a new single player if one doesn't already exist.
+                if (PlayerManager.Instance != null && PlayerManager.Instance.LocalPlayer == null)
                 {
                     PlayerManager.Instance.SpawnInitialPlayer();
-                }
-                else
-                {
-                    Debug.LogError("PlayerManager instance not found! Cannot start single player game.");
                 }
             }
             else if (NetworkManager.Instance.Mode == NetworkMode.Host)

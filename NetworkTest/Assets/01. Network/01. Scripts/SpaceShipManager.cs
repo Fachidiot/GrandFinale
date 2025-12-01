@@ -34,9 +34,9 @@ public class SpaceShipManager : MonoBehaviour
     public bool IsDoorOpen { get; private set; } = false;
     public bool IsLanded { get; private set; } = false;
 
-    void Start()
+    void Update()
     {
-        if (null != GameObject.FindWithTag("Player"))
+        if (IsDoorOpen && null != GameObject.FindWithTag("Player"))
         {
             OpenDoor();
             Landing();
@@ -79,11 +79,15 @@ public class SpaceShipManager : MonoBehaviour
         Debug.Log("Launching...");
     }
 
+    private float cooltime = 0f;
     public void OpenDoor()
     {
-        if (IsDoorOpen && doorAnimator.CheckAnimationEnd())
+        if (IsDoorOpen)
+            return;
+        if (4f + cooltime > Time.time)
             return;
 
+        cooltime = Time.time;
         IsDoorOpen = true;
         doorAnimator.SetBool(AnimDoorOpenHash, IsDoorOpen);
         Debug.Log("Openning...");
@@ -91,9 +95,12 @@ public class SpaceShipManager : MonoBehaviour
 
     public void CloseDoor()
     {
-        if (!IsDoorOpen && doorAnimator.CheckAnimationEnd())
+        if (!IsDoorOpen)
+            return;
+        if (4f + cooltime > Time.time)
             return;
 
+        cooltime = Time.time;
         IsDoorOpen = false;
         doorAnimator.SetBool(AnimDoorOpenHash, IsDoorOpen);
         Debug.Log("Closing...");
@@ -109,10 +116,13 @@ public class SpaceShipManager : MonoBehaviour
 
     public void OnLaunchGameClicked()
     {
-        // if (NetworkManager.Instance.Mode == NetworkMode.Client)
-        //     return;
-        Debug.Log($"[RoomUIManager] Host clicked launch for planet {ServerRoomManager.Instance.SelectedPlanetId}.");
+        Debug.Log($"[RoomUIManager] Clicked launch for planet {ServerRoomManager.Instance.SelectedPlanetId}.");
         ServerRoomManager.Instance.LaunchToPlanet(ServerRoomManager.Instance.SelectedPlanetId);
+    }
+
+    public void OnBackToSpaceClicked()
+    {
+        ServerRoomManager.Instance.LaunchToPlanet(-1);
     }
 
     public void OnInviteFriends()

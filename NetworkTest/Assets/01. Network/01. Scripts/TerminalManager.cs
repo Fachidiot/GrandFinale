@@ -211,9 +211,9 @@ public class TerminalManager : MonoBehaviour
         // For now, we hardcode.
         switch (planetName)
         {
-            case "station": case "Station": planetId = -1; break;
             case "planet1": case "planet_1": case "Planet_1": planetId = 1; break;
             case "planet2": case "planet_2": case "Planet_2": planetId = 2; break;
+            case "station": case "Station": planetId = 3; break;
             default: AppendToLog($"Unknown planet: '{planetName}'"); return;
         }
 

@@ -75,7 +75,7 @@ public class Interactable : MonoBehaviour
                     interactionText = "상자 닫기" + $"\n[{interactCode}]";
                 break;
             case InteractType.ShipDoor:
-                if (!toggle)
+                if (toggle)
                     interactionText = "함선 문 열기" + $"\n[{interactCode}]";
                 else
                     interactionText = "함선 문 닫기" + $"\n[{interactCode}]";
