@@ -1,163 +1,174 @@
 // Code by Creepy Cat (C) 2021/2022
-// Modified for network synchronization
+// Code given for example! 
+// You need to modify by yourself for your needs...
+//
+// IF you improve the code, do not hesitate to send me! (credited to the updates) 
+// black.creepy.cat@gmail.com 
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Uween;
-using Newtonsoft.Json.Linq;
 
 namespace creepycat.scifikitvol4
 {
-    public class WardrobeOpen : MonoBehaviour, IWorldInteractable
+
+    public class WardrobeOpen : MonoBehaviour
     {
-        [Header("Door Objects")]
         public GameObject DoorLeftA;
         public GameObject DoorRightA;
+
         public GameObject DoorLeftB;
         public GameObject DoorRightB;
 
-        [Header("Visual/Audio Feedback")]
         public GameObject DoorLeftButton;
         public GameObject DoorRightButton;
+
         public Light CaseLightLeft;
         public Light CaseLightRight;
+
         public AudioClip DoorSound;
 
-        [Header("Animation Settings")]
         public float moveTimeA = 2.0f;
+
         public float emissionIntensity = 3.0f;
+
+        private bool SwitchAnimLeft = false;
+        private bool SwitchAnimRight = false;
+
         private float rotateMax = 90f;
+        private float newIntensityA = 0.0f;
+        private float newIntensityB = 0.0f;
 
-        // Internal State
-        private bool isLeftOpen = false;
-        private bool isRightOpen = false;
-        private bool animationInProgress = false;
-
-        // Networking
-        private string uniqueId;
-
-        // Components
         private Renderer buttonRendererLeft;
         private Renderer buttonRendererRight;
         private AudioSource audioSource;
 
+        private bool AnimationFlagA = false;
+        private bool AnimationFlagB = false;
+
         void Start()
         {
-            // Cache components
-            buttonRendererLeft = DoorLeftButton?.GetComponent<Renderer>();
-            buttonRendererRight = DoorRightButton?.GetComponent<Renderer>();
+            buttonRendererLeft = DoorLeftButton.GetComponent<Renderer>();
+            buttonRendererRight = DoorRightButton.GetComponent<Renderer>();
             audioSource = GetComponent<AudioSource>();
-            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-
-            // Set initial visual state based on internal state
-            UpdateVisuals(isLeftOpen, true);
-            UpdateVisuals(isRightOpen, false);
+            buttonRendererLeft.material.SetColor("_EmissionColor", Color.white * 1.5f);
+            buttonRendererRight.material.SetColor("_EmissionColor", Color.white * 1.5f);
         }
 
-        #region IWorldInteractable Implementation
-
-        public void Initialize(string id)
+        void EndAnimationFlagA()
         {
-            this.uniqueId = id;
+            AnimationFlagA = false;
         }
 
-        public JToken GetState(string subId)
+        void EndAnimationFlagB()
         {
-            if (subId == "left")
-            {
-                return new JObject { ["isOpen"] = !isLeftOpen };
-            }
-            if (subId == "right")
-            {
-                return new JObject { ["isOpen"] = !isRightOpen };
-            }
-            return null;
+            AnimationFlagB = false;
         }
 
-        public void SetState(string subId, JToken state)
+        void LightFading()
         {
-            if (state == null || state["isOpen"] == null) return;
-            bool shouldBeOpen = state["isOpen"].Value<bool>();
+            if (SwitchAnimLeft == true) newIntensityA = emissionIntensity;
+            if (SwitchAnimLeft == false) newIntensityA = 0.0f;
 
-            if (subId == "left")
-            {
-                if (isLeftOpen == shouldBeOpen) return;
-                isLeftOpen = shouldBeOpen;
-                PlayAnimation(true, isLeftOpen);
-            }
-            else if (subId == "right")
-            {
-                if (isRightOpen == shouldBeOpen) return;
-                isRightOpen = shouldBeOpen;
-                PlayAnimation(false, isRightOpen);
-            }
+            if (SwitchAnimRight == true) newIntensityB = emissionIntensity;
+            if (SwitchAnimRight == false) newIntensityB = 0.0f;
+
+            CaseLightLeft.intensity = Mathf.Lerp(CaseLightLeft.intensity, newIntensityA, Time.deltaTime * 0.2f);
+            CaseLightRight.intensity = Mathf.Lerp(CaseLightRight.intensity, newIntensityB, Time.deltaTime * 0.2f);
         }
 
-        #endregion
-
-        #region Public Interaction Methods
-
-        // Called by the Interactable component on the left door button
-        public void InteractLeft()
+        // Update is called once per frame    
+        void Update()
         {
-            if (animationInProgress) return;
-            WorldInteractableManager.Instance.RequestStateChange(uniqueId + "_left");
-        }
 
-        // Called by the Interactable component on the right door button
-        public void InteractRight()
-        {
-            if (animationInProgress) return;
-            WorldInteractableManager.Instance.RequestStateChange(uniqueId + "_right");
-        }
+            LightFading();
 
-        #endregion
-
-        private void PlayAnimation(bool isLeft, bool open)
-        {
-            if (animationInProgress) return;
-            animationInProgress = true;
-
-            GameObject doorA = isLeft ? DoorLeftA : DoorLeftB;
-            GameObject doorB = isLeft ? DoorRightA : DoorRightB;
-            
-            if (open)
+            // If mouse click
+            if (Input.GetMouseButtonDown(0))
             {
-                TweenRY.Add(doorA, moveTimeA, rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
-                TweenRY.Add(doorB, moveTimeA, -rotateMax).Relative().EaseInOutCubic();
-            }
-            else // Closing
-            {
-                TweenRY.Add(doorA, moveTimeA, -rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
-                TweenRY.Add(doorB, moveTimeA, rotateMax).Relative().EaseInOutCubic();
-            }
-            
-            UpdateVisuals(open, isLeft);
+                // Get the gameobject clicked
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
 
-            if (audioSource != null && DoorSound != null)
-                audioSource.PlayOneShot(DoorSound, 1.0F);
-        }
+                // If something clicked
+                if (Physics.Raycast(ray, out hit))
+                {
 
-        private void UpdateVisuals(bool isOpen, bool isLeft)
-        {
-            Renderer buttonRenderer = isLeft ? buttonRendererLeft : buttonRendererRight;
-            Light caseLight = isLeft ? CaseLightLeft : CaseLightRight;
+                    // If it's my button
+                    if (hit.transform == DoorLeftButton.transform)
+                    {
 
-            if (buttonRenderer != null)
-            {
-                buttonRenderer.material.SetColor("_EmissionColor", isOpen ? Color.white / 3 : Color.white * 1.5f);
+                        if (AnimationFlagA == false)
+                        {
+                            SwitchAnimLeft = !SwitchAnimLeft;
+                            AnimationFlagA = true;
+
+                            // Anim switch var
+                            switch (SwitchAnimLeft)
+                            {
+                                // If no we launch all the things needed
+                                case false:
+                                    TweenRY.Add(DoorLeftA, moveTimeA, 0).From(rotateMax).EaseInOutCubic().Then(EndAnimationFlagA);
+                                    TweenRY.Add(DoorRightA, moveTimeA, 0).From(-rotateMax).EaseInOutCubic().Then(EndAnimationFlagA);
+
+                                    buttonRendererLeft.material.SetColor("_EmissionColor", Color.white * 1.5f);
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+
+                                case true:
+                                    TweenRY.Add(DoorLeftA, moveTimeA, rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlagA);
+                                    TweenRY.Add(DoorRightA, moveTimeA, -rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlagA);
+
+                                    buttonRendererLeft.material.SetColor("_EmissionColor", Color.white / 3);
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+                            }
+                        }
+                    }
+
+                    // If it's my button
+                    if (hit.transform == DoorRightButton.transform)
+                    {
+
+                        if (AnimationFlagB == false)
+                        {
+                            SwitchAnimRight = !SwitchAnimRight;
+                            AnimationFlagB = true;
+
+                            // Anim switch var
+                            switch (SwitchAnimRight)
+                            {
+                                // If no we launch all the things needed
+                                case false:
+                                    TweenRY.Add(DoorLeftB, moveTimeA, 0).From(rotateMax).EaseInOutCubic().Then(EndAnimationFlagB);
+                                    TweenRY.Add(DoorRightB, moveTimeA, 0).From(-rotateMax).EaseInOutCubic().Then(EndAnimationFlagB);
+
+                                    buttonRendererRight.material.SetColor("_EmissionColor", Color.white * 1.5f);
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+
+                                case true:
+                                    TweenRY.Add(DoorLeftB, moveTimeA, rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlagB);
+                                    TweenRY.Add(DoorRightB, moveTimeA, -rotateMax).Relative().EaseInOutCubic().Then(EndAnimationFlagB);
+
+                                    buttonRendererRight.material.SetColor("_EmissionColor", Color.white / 3);
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+                            }
+                        }
+
+                    }
+
+                }
+
             }
-            if (caseLight != null)
-            {
-                // Light fading can be a simple lerp in Update if desired, or just set directly.
-                caseLight.enabled = isOpen;
-                caseLight.intensity = isOpen ? emissionIntensity : 0f;
-            }
-        }
-
-        private void EndAnimationFlag()
-        {
-            animationInProgress = false;
         }
     }
 }

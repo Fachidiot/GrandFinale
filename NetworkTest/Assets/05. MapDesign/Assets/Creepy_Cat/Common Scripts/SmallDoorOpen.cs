@@ -1,140 +1,149 @@
 // Code by Creepy Cat (C) 2021/2022
-// Modified for network synchronization
+// Code given for example! 
+// You need to modify by yourself for your needs...
+//
+// IF you improve the code, do not hesitate to send me! (credited to the updates) 
+// black.creepy.cat@gmail.com 
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Uween;
-using Newtonsoft.Json.Linq;
 
 namespace creepycat.scifikitvol4
 {
-    public class SmallDoorOpen : MonoBehaviour, IWorldInteractable
+
+    public class SmallDoorOpen : MonoBehaviour
     {
-        [Header("Door Objects")]
         public GameObject DoorLeftA;
 
-        [Header("Visual/Audio Feedback")]
-        [SerializeField] private GameObject[] emissiveList;
+        [SerializeField]
+        public GameObject[] emissiveList;
+
         public GameObject DoorButtonA;
         public GameObject DoorButtonB;
+
         public Light SpotLightA;
         public Light SpotLightB;
+
         public AudioClip DoorSound;
 
-        [Header("Animation Settings")]
         public float moveTimeA = 2.0f;
         public float emissionIntensity = 3.0f;
         public float moveMax = 0.6f;
 
-        // Internal State
-        private bool isOpen = false;
-        private bool animationInProgress = false;
+        private bool SwitchAnimLeft = false;
+        private float newIntensityA = 0.0f;
 
-        // Networking
-        private string uniqueId;
-
-        // Components
         private Renderer buttonRendererA;
         private Renderer buttonRendererB;
+        private Renderer emissiveRenderer;
         private AudioSource audioSource;
-        private Renderer[] emissiveRenderers;
 
-        void Start()
-        {
-            // Cache components
-            buttonRendererA = DoorButtonA?.GetComponent<Renderer>();
-            buttonRendererB = DoorButtonB?.GetComponent<Renderer>();
+        private bool AnimationFlag = false;
+
+        void Start(){
+            buttonRendererA = DoorButtonA.GetComponent<Renderer>();
+            buttonRendererB = DoorButtonB.GetComponent<Renderer>();
+
             audioSource = GetComponent<AudioSource>();
-            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-            emissiveRenderers = new Renderer[emissiveList.Length];
+            buttonRendererA.material.SetColor("_EmissionColor", Color.white * 1.0f);
+            buttonRendererB.material.SetColor("_EmissionColor", Color.white * 1.0f);
+
+            illumValueDec();
+        }
+
+        void EndAnimationFlag(){
+            AnimationFlag = false;
+        }
+
+        // Fading light/illum procedures
+        void LightFading()
+        {
+            if (SpotLightA != null && SpotLightB != null){
+                if (SwitchAnimLeft == true) newIntensityA = emissionIntensity;
+                if (SwitchAnimLeft == false) newIntensityA = 0.0f;
+
+                SpotLightA.intensity = Mathf.Lerp(SpotLightA.intensity, newIntensityA, Time.deltaTime * 0.4f);
+                SpotLightB.intensity = SpotLightA.intensity;
+            }
+        }
+
+        void illumValueInc(){
+            buttonRendererA.material.SetColor("_EmissionColor", Color.white / 2);
+            buttonRendererB.material.SetColor("_EmissionColor", Color.white / 2);
+
             for (int i = 0; i < emissiveList.Length; i++)
             {
-                emissiveRenderers[i] = emissiveList[i]?.GetComponent<Renderer>();
+                emissiveRenderer = emissiveList[i].GetComponent<Renderer>();
+                emissiveRenderer.material.SetColor("_EmissionColor", Color.white * 1.5f);
             }
-
-            // Set initial visual state
-            UpdateVisuals(isOpen);
         }
 
-        #region IWorldInteractable Implementation
+        void illumValueDec(){
+            buttonRendererA.material.SetColor("_EmissionColor", Color.white * 1.5f);
+            buttonRendererB.material.SetColor("_EmissionColor", Color.white * 1.5f);
 
-        public void Initialize(string id)
-        {
-            this.uniqueId = id;
-        }
-
-        public JToken GetState(string subId)
-        {
-            // This is called on the host. We toggle the state and return the new state.
-            bool nextState = !isOpen;
-            return new JObject { ["isOpen"] = nextState };
-        }
-
-        public void SetState(string subId, JToken state)
-        {
-            if (state == null || state["isOpen"] == null) return;
-
-            bool shouldBeOpen = state["isOpen"].Value<bool>();
-            if (isOpen == shouldBeOpen) return;
-
-            isOpen = shouldBeOpen;
-            PlayAnimation(isOpen);
-        }
-
-        #endregion
-
-        #region Public Interaction Methods
-        // Called by the Interactable component on the door buttons
-        public void Interact()
-        {
-            if (animationInProgress) return;
-            WorldInteractableManager.Instance.RequestStateChange(uniqueId);
-        }
-        #endregion
-
-        private void PlayAnimation(bool open)
-        {
-            if (animationInProgress) return;
-            animationInProgress = true;
-
-            if (open)
+            for (int i = 0; i < emissiveList.Length; i++)
             {
-                TweenX.Add(DoorLeftA, moveTimeA, moveMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
-            }
-            else // Closing
-            {
-                TweenX.Add(DoorLeftA, moveTimeA, -moveMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
-            }
-
-            UpdateVisuals(open);
-
-            if (audioSource != null && DoorSound != null)
-                audioSource.PlayOneShot(DoorSound, 1.0F);
-        }
-
-        private void UpdateVisuals(bool open)
-        {
-            if (buttonRendererA != null)
-                buttonRendererA.material.SetColor("_EmissionColor", open ? Color.white / 2 : Color.white * 1.5f);
-            if (buttonRendererB != null)
-                buttonRendererB.material.SetColor("_EmissionColor", open ? Color.white / 2 : Color.white * 1.5f);
-
-            if (SpotLightA != null) SpotLightA.enabled = open;
-            if (SpotLightB != null) SpotLightB.enabled = open;
-            if (SpotLightA != null) SpotLightA.intensity = open ? emissionIntensity : 0f;
-            if (SpotLightB != null) SpotLightB.intensity = open ? emissionIntensity : 0f;
-
-            if (emissiveRenderers == null) return;
-            foreach (var emissiveRenderer in emissiveRenderers)
-            {
-                if (emissiveRenderer != null)
-                    emissiveRenderer.material.SetColor("_EmissionColor", open ? Color.white * 1.5f : Color.white / 3.0f);
+                emissiveRenderer = emissiveList[i].GetComponent<Renderer>();
+                emissiveRenderer.material.SetColor("_EmissionColor", Color.white / 3.0f);
             }
         }
 
-        private void EndAnimationFlag()
+        // Update is called once per frame    
+        void Update()
         {
-            animationInProgress = false;
+
+            LightFading();
+
+            // If mouse click
+            if (Input.GetMouseButtonDown(0))
+            {
+                // Get the gameobject clicked
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                // If something clicked
+                if (Physics.Raycast(ray, out hit))
+                {
+
+                    // If it's my button
+                    if (hit.transform == DoorButtonA.transform || hit.transform == DoorButtonB.transform)
+                    {
+
+                        if (AnimationFlag == false)
+                        {
+                            SwitchAnimLeft = !SwitchAnimLeft;
+                            AnimationFlag = true;
+
+                            // Anim switch var
+                            switch (SwitchAnimLeft)
+                            {
+                                // If no we launch all the things needed
+                                case false:
+                                    TweenX.Add(DoorLeftA, moveTimeA, -moveMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
+
+                                    illumValueDec();
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+
+                                case true:
+                                    TweenX.Add(DoorLeftA, moveTimeA, moveMax).Relative().EaseInOutCubic().Then(EndAnimationFlag);
+
+                                    illumValueInc();
+
+                                    audioSource.PlayOneShot(DoorSound, 1.0F);
+                                    break;
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 }

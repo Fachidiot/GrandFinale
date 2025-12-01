@@ -156,6 +156,16 @@ public class MonsterAIController : MonoBehaviour
 
     void Update()
     {
+        if (player == null)
+        {
+            if (sensor.CanSeePlayer)
+            {
+                player = GameObject.FindGameObjectWithTag("Player");
+            }
+
+            if (player == null) return;
+        }
+
         if (CurrentState == null || health.IsDead) return;
 
         ZombieBaseState<MonsterAIController> nextState = CurrentState.UpdateState(this);
@@ -376,9 +386,15 @@ public class MonsterAIController : MonoBehaviour
             // 돌진 중이 아닐 때만 HitState 전환 (필요시 조건 추가)
             ChangeState(fsm.HitState);
         }
+
         // 4. 그 외 (기본)
         else
         {
+            if (player != null)
+            {
+                sensor.ForceDetection(player.transform.position);
+            }
+
             SetAnimTrigger(hashHit);
             ChangeState(fsm.HitState);
         }

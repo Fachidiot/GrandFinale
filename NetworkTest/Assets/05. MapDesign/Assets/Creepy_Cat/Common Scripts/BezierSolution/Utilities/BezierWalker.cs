@@ -11,13 +11,13 @@ namespace BezierSolution
 		public abstract bool MovingForward { get; }
 		public abstract float NormalizedT { get; set; }
 
-		public abstract void Execute(float deltaTime);
+		public abstract void Execute( float deltaTime );
 
 		public static readonly ExtraDataLerpFunction extraDataLerpAsQuaternionFunction = InterpolateExtraDataAsQuaternion;
 
-		private static BezierPoint.ExtraData InterpolateExtraDataAsQuaternion(BezierPoint.ExtraData data1, BezierPoint.ExtraData data2, float normalizedT)
+		private static BezierPoint.ExtraData InterpolateExtraDataAsQuaternion( BezierPoint.ExtraData data1, BezierPoint.ExtraData data2, float normalizedT )
 		{
-			return Quaternion.LerpUnclamped(data1, data2, normalizedT);
+			return Quaternion.LerpUnclamped( data1, data2, normalizedT );
 		}
 	}
 }
