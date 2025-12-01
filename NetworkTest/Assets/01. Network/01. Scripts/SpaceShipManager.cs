@@ -36,7 +36,7 @@ public class SpaceShipManager : MonoBehaviour
 
     void Update()
     {
-        if (IsDoorOpen && null != GameObject.FindWithTag("Player"))
+        if (!IsDoorOpen && null != GameObject.FindWithTag("Player"))
         {
             OpenDoor();
             Landing();
