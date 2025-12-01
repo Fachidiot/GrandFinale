@@ -71,6 +71,11 @@ public class CustomizeManager : MonoBehaviour
 
         fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
         mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", !toggle);
+
+        if (this.isMale)
+            ActiveMale();
+        else
+            ActiveFemale();
     }
 
     public void ChangeMale(int isMale)
@@ -163,7 +168,7 @@ public class CustomizeManager : MonoBehaviour
 
             // Send customization data to the host
             NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, customizationMessage);
-            
+
             Debug.Log("Sent customization update to host.");
         }
     }
