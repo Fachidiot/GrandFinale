@@ -185,6 +185,8 @@ public class NetworkManager : MonoBehaviour
     private List<PlayerState> GatherPlayerStates()
     {
         var playerStates = new List<PlayerState>();
+        if (PlayerManager.Instance == null || ServerRoomManager.Instance == null) return playerStates;
+
         foreach (var playerEntry in PlayerManager.Instance.Players)
         {
             string steamIdStr = playerEntry.Key;
@@ -194,17 +196,22 @@ public class NetworkManager : MonoBehaviour
             if (!byte.TryParse(byteIdStr, out byte playerId)) continue;
 
             PlayerState playerState;
-            if (playerId == 0) // Host's own state
+            if (playerId == MyPlayerId) // Host's own state
             {
                 playerState = GetPlayerStateFromGameObject(playerEntry.Value);
             }
-            else // Client's state
+            else // Client's state from the last packet we received
             {
                 if (!receivedPlayerStates.TryGetValue(playerId, out playerState))
                 {
                     continue; // Skip if we haven't received an update from this client yet
                 }
             }
+            
+            // Overwrite customization with authoritative data from PlayerManager
+            playerState.isMale = PlayerManager.Instance.GetPlayerGender(playerId);
+            playerState.modelInfo = PlayerManager.Instance.GetPlayerModelInfo(playerId);
+            
             playerStates.Add(playerState);
         }
         return playerStates;
@@ -284,12 +291,12 @@ public class NetworkManager : MonoBehaviour
     private PlayerState GetPlayerStateFromGameObject(GameObject playerGo)
     {
         var networkPlayer = playerGo.GetComponent<NetworkPlayer>();
-        if (networkPlayer == null || networkPlayer.CharacterMove == null || networkPlayer.CharacterMove.Inputs == null)
+        if (networkPlayer == null || networkPlayer.CharacterMove == null || networkPlayer.CharacterMove.Inputs == null || PlayerManager.Instance == null)
         {
             return new PlayerState { playerId = INVALID_PLAYER_ID };
         }
 
-        return new PlayerState
+        var playerState = new PlayerState
         {
             playerId = MyPlayerId,
             position = playerGo.transform.position,
@@ -301,6 +308,13 @@ public class NetworkManager : MonoBehaviour
             weaponId = networkPlayer.WeaponController != null ? networkPlayer.WeaponController.activeID : 0,
             bending = networkPlayer.CharacterMove.Inputs.GetBending()
         };
+
+        // Also include the current customization. This is used by the client to send its info to the host.
+        // The host will then use its authoritative version when broadcasting the game state.
+        playerState.isMale = PlayerManager.Instance.GetPlayerGender(MyPlayerId);
+        playerState.modelInfo = PlayerManager.Instance.GetPlayerModelInfo(MyPlayerId);
+
+        return playerState;
     }
 
     #endregion
@@ -412,13 +426,13 @@ public class NetworkManager : MonoBehaviour
 
             // Get local player customization info
             ModelInfo localModelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
-            bool isLocalMale = PlayerCustomizer.Instance.IsLocalPlayerMale;
+            bool isLocalMale = PlayerCustomizer.Instance.IsMale;
 
             // Create JSON message for customization
             JObject customizationMessage = new JObject
             {
                 { "type", "player_customization" },
-                { "is_Male", isLocalMale },
+                { "isMale", isLocalMale },
                 { "head", localModelInfo.head },
                 { "body", localModelInfo.body },
                 { "acc1", localModelInfo.acc1 },
@@ -426,7 +440,7 @@ public class NetworkManager : MonoBehaviour
             };
 
             // Send customization data to the host
-            NetworkManager.Instance.SendJsonMessage(lobbyHostID, customizationMessage);
+            SendJsonMessage(lobbyHostID, customizationMessage);
         }
         else
         {

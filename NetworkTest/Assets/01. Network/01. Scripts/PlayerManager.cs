@@ -11,6 +11,10 @@ public class PlayerManager : MonoBehaviour
     private readonly Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
     private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
+    
+    // Customization Data Storage
+    private readonly Dictionary<byte, bool> _playerGenders = new Dictionary<byte, bool>();
+    private readonly Dictionary<byte, ModelInfo> _playerModelInfos = new Dictionary<byte, ModelInfo>();
 
     public IReadOnlyDictionary<string, GameObject> Players => players;
     public IReadOnlyDictionary<ushort, GameObject> Monsters => monsters;
@@ -74,7 +78,11 @@ public class PlayerManager : MonoBehaviour
         GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetSinglePlayerPrefab(), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.spacestationSpawnPoint != null ? GameManager.Instance.GameSettings.spacestationSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = "SinglePlayer";
 
-        playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(PlayerCustomizer.Instance.GetLocalPlayerInfo());
+        ModelInfo modelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
+        playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
+        
+        // No network ID for single player, so we can't use the dictionaries.
+        // But we set the LocalPlayer which is enough.
 
         var singlePlayer = playerObject.GetComponent<SinglePlayer>();
         LocalPlayer = singlePlayer;
@@ -104,6 +112,8 @@ public class PlayerManager : MonoBehaviour
         }
         players.Clear();
         byteIdToSteamId.Clear();
+        _playerGenders.Clear();
+        _playerModelInfos.Clear();
 
         // Destroy the local player object (which could be a SinglePlayer or a NetworkPlayer)
         if (LocalPlayer != null && LocalPlayer.gameObject != null)
@@ -190,24 +200,32 @@ public class PlayerManager : MonoBehaviour
         var networkPlayer = playerObject.GetComponent<NetworkPlayer>();
         networkPlayer.Initialize(playerInfo.steam_id, isMine);
 
-
         if (networkPlayer.NicknameUI != null)
             networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
-
+        
+        ModelInfo modelInfo;
         if (isMine)
         {
             LocalPlayer = networkPlayer;
-            playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(PlayerCustomizer.Instance.GetLocalPlayerInfo());
+            modelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
+            playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
             OptionDataManager.Instance.inGameUIPanel.SetActive(true);
         }
         else
         {
-            ModelInfo modelInfo = new ModelInfo(
+            modelInfo = new ModelInfo(
                 playerInfo.headIndex,
                 playerInfo.bodyIndex,
                 playerInfo.acc1Index,
                 playerInfo.acc2Index);
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
+        }
+        
+        // Store initial customization
+        if (byte.TryParse(playerInfo.player_id, out byte byteId))
+        {
+            _playerGenders[byteId] = playerInfo.is_Male;
+            _playerModelInfos[byteId] = modelInfo;
         }
 
         DontDestroyOnLoad(playerObject);
@@ -218,6 +236,23 @@ public class PlayerManager : MonoBehaviour
     {
         if (players.TryGetValue(steamId, out GameObject playerToDestroy))
         {
+            byte playerId = NetworkManager.INVALID_PLAYER_ID;
+            foreach (var entry in byteIdToSteamId)
+            {
+                if (entry.Value == steamId)
+                {
+                    playerId = entry.Key;
+                    break;
+                }
+            }
+
+            if (playerId != NetworkManager.INVALID_PLAYER_ID)
+            {
+                byteIdToSteamId.Remove(playerId);
+                _playerGenders.Remove(playerId);
+                _playerModelInfos.Remove(playerId);
+            }
+
             if (LocalPlayer != null && playerToDestroy == LocalPlayer.gameObject)
             {
                 LocalPlayer = null;
@@ -242,6 +277,41 @@ public class PlayerManager : MonoBehaviour
         }
         return NetworkManager.INVALID_PLAYER_ID;
     }
+    
+    // --- Customization Management ---
+
+    public bool GetPlayerGender(byte playerId)
+    {
+        return _playerGenders.TryGetValue(playerId, out bool isMale) ? isMale : true;
+    }
+
+    public ModelInfo GetPlayerModelInfo(byte playerId)
+    {
+        return _playerModelInfos.TryGetValue(playerId, out ModelInfo modelInfo) ? modelInfo : new ModelInfo();
+    }
+    
+    public void UpdatePlayerCustomization(byte playerId, bool isMale, ModelInfo modelInfo)
+    {
+        if (_playerGenders.TryGetValue(playerId, out bool oldGender) && oldGender != isMale)
+        {
+            Debug.LogWarning($"Player {playerId} changed gender. Prefab swapping is not implemented yet. Re-spawning player might be required.");
+            // Here you would need logic to destroy the old player object and spawn a new one with the correct prefab.
+            // This is complex and deferred for now.
+        }
+
+        _playerGenders[playerId] = isMale;
+        _playerModelInfos[playerId] = modelInfo;
+
+        if (byteIdToSteamId.TryGetValue(playerId, out string steamId) && players.TryGetValue(steamId, out GameObject playerObject))
+        {
+            var modelCustom = playerObject.GetComponentInChildren<ModelCustom>();
+            if (modelCustom != null)
+            {
+                modelCustom.ApplyModelInfo(modelInfo);
+            }
+        }
+    }
+
 
     // Monster Management and State Updates remain largely the same
     #region Monster Management
@@ -305,6 +375,16 @@ public class PlayerManager : MonoBehaviour
                 if (bodySlopeHandler != null)
                 {
                     bodySlopeHandler.SetSlopeFromNetwork(playerState.bending);
+                }
+                
+                // Apply customization updates
+                ModelInfo currentModelInfo = GetPlayerModelInfo(playerState.playerId);
+                if (currentModelInfo.head != playerState.modelInfo.head ||
+                    currentModelInfo.body != playerState.modelInfo.body ||
+                    currentModelInfo.acc1 != playerState.modelInfo.acc1 ||
+                    currentModelInfo.acc2 != playerState.modelInfo.acc2)
+                {
+                    UpdatePlayerCustomization(playerState.playerId, playerState.isMale, playerState.modelInfo);
                 }
             }
         }

@@ -46,18 +46,34 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Spawns the player object only when entering the game scene in single-player mode.
-        // In multiplayer, player spawning is handled by NetworkPlayerManager based on lobby events.
-        if (scene.name == gameSettings.spaceroomScene && NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
+        // Spawns player objects when entering the main game scene.
+        if (scene.name == gameSettings.spaceroomScene && NetworkManager.Instance != null)
         {
-            if (PlayerManager.Instance != null && ServerRoomManager.Instance != null)
+            if (NetworkManager.Instance.Mode == NetworkMode.SinglePlayer)
             {
-                PlayerManager.Instance.SpawnInitialPlayer();
-                ServerRoomManager.Instance.AddSinglePlayer(); // Add the single player to the room
+                if (PlayerManager.Instance != null)
+                {
+                    PlayerManager.Instance.SpawnInitialPlayer();
+                }
+                else
+                {
+                    Debug.LogError("PlayerManager instance not found! Cannot start single player game.");
+                }
             }
-            else
+            else if (NetworkManager.Instance.Mode == NetworkMode.Host)
             {
-                Debug.LogError("A manager instance is not found! Cannot start single player game.");
+                // After the game scene loads, the host needs to re-trigger the player spawning process.
+                // Broadcasting the room update will cause all clients (and the host itself)
+                // to call PlayerManager.UpdatePlayerList, which will now proceed to spawn
+                // the player prefabs because the active scene is correct.
+                if (ServerRoomManager.Instance != null)
+                {
+                    ServerRoomManager.Instance.BroadcastRoomUpdate();
+                }
+                else
+                {
+                    Debug.LogError("ServerRoomManager instance not found! Cannot spawn players for host.");
+                }
             }
         }
     }

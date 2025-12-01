@@ -26,7 +26,7 @@ public class CustomizeManager : MonoBehaviour
         return isMale ? mModel : fModel;
     }
 
-    public void InitialCheck()
+    public void LocalPlayerSet()
     {
         // Check prefabs
         if (customizePanel == null) Debug.LogError("CustomizeManager: NetworkLocal_M prefab not assigned.");
@@ -143,6 +143,29 @@ public class CustomizeManager : MonoBehaviour
     public void SaveData()
     {
         customizer.SaveModelInfo();
+
+        // If we are a client in a network game, send an update to the host.
+        if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Client)
+        {
+            ModelInfo localModelInfo = customizer.GetLocalPlayerInfo();
+            bool isLocalMale = customizer.IsMale;
+
+            // Create JSON message for customization
+            Newtonsoft.Json.Linq.JObject customizationMessage = new Newtonsoft.Json.Linq.JObject
+            {
+                { "type", "player_customization" },
+                { "isMale", isLocalMale },
+                { "head", localModelInfo.head },
+                { "body", localModelInfo.body },
+                { "acc1", localModelInfo.acc1 },
+                { "acc2", localModelInfo.acc2 }
+            };
+
+            // Send customization data to the host
+            NetworkManager.Instance.SendJsonMessage(NetworkManager.Instance.LobbyHostID, customizationMessage);
+            
+            Debug.Log("Sent customization update to host.");
+        }
     }
 
     private void ActiveFemale()

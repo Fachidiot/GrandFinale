@@ -2,6 +2,17 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+// JSON message for customization updates
+[System.Serializable]
+public class PlayerCustomizationMessage
+{
+    public string type = "player_customization";
+    public byte playerId;
+    public bool isMale;
+    public ModelInfo modelInfo;
+}
+
+
 // Helper for packing boolean values into a single byte
 public static class AnimationBitmask
 {
@@ -38,6 +49,8 @@ public struct PlayerState
     public float moveY;
     public int weaponId;
     public float bending;
+    public bool isMale;
+    public ModelInfo modelInfo;
 
     public byte[] ToByteArray()
     {
@@ -61,6 +74,11 @@ public struct PlayerState
             writer.Write(moveY);
             writer.Write(weaponId);
             writer.Write(bending);
+            writer.Write(isMale);
+            writer.Write(modelInfo.head);
+            writer.Write(modelInfo.body);
+            writer.Write(modelInfo.acc1);
+            writer.Write(modelInfo.acc2);
             return stream.ToArray();
         }
     }
@@ -79,10 +97,14 @@ public struct PlayerState
             state.moveX = reader.ReadSingle();
             state.moveY = reader.ReadSingle();
             state.weaponId = reader.ReadInt32();
-            if (reader.BaseStream.Position < reader.BaseStream.Length)
-            {
-                state.bending = reader.ReadSingle();
-            }
+            state.bending = reader.ReadSingle();
+            state.isMale = reader.ReadBoolean();
+            state.modelInfo = new ModelInfo(
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32()
+            );
         }
         return state;
     }
@@ -182,6 +204,11 @@ public class NetworkGameState
                 writer.Write(p.moveY);
                 writer.Write(p.weaponId);
                 writer.Write(p.bending);
+                writer.Write(p.isMale);
+                writer.Write(p.modelInfo.head);
+                writer.Write(p.modelInfo.body);
+                writer.Write(p.modelInfo.acc1);
+                writer.Write(p.modelInfo.acc2);
             }
             
             // Write game-level state
@@ -202,18 +229,27 @@ public class NetworkGameState
             byte playerCount = reader.ReadByte();
             for (int i = 0; i < playerCount; i++)
             {
-                var p = new PlayerState
+                var p = new PlayerState();
+                p.playerId = reader.ReadByte();
+                p.position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                p.rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                p.cameraRotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                p.animationMask = reader.ReadByte();
+                p.moveX = reader.ReadSingle();
+                p.moveY = reader.ReadSingle();
+                p.weaponId = reader.ReadInt32();
+                p.bending = reader.ReadSingle();
+
+                if (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
-                    playerId = reader.ReadByte(),
-                    position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    cameraRotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                    animationMask = reader.ReadByte(),
-                    moveX = reader.ReadSingle(),
-                    moveY = reader.ReadSingle(),
-                    weaponId = reader.ReadInt32(),
-                    bending = reader.ReadSingle()
-                };
+                    p.isMale = reader.ReadBoolean();
+                    p.modelInfo = new ModelInfo(
+                        reader.ReadInt32(),
+                        reader.ReadInt32(),
+                        reader.ReadInt32(),
+                        reader.ReadInt32()
+                    );
+                }
                 gameState.players.Add(p);
             }
             

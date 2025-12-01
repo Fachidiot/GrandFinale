@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using Cinemachine;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using Michsky.MUIP;
 
 public class MainMenuUIManager : MonoBehaviour
 {
@@ -15,10 +16,15 @@ public class MainMenuUIManager : MonoBehaviour
     [SerializeField] private GameObject menuPanel;
     [SerializeField] private GameObject roomPanel;
 
+    [Header("Lobby 3D View")]
     [SerializeField] private GameObject localCustomView;
     [SerializeField] private GameObject clientCustomView;
-
     [SerializeField] private List<Transform> slotList;
+
+    [Header("Lobby UI List")]
+    [SerializeField] private Transform playerListContent;
+    [SerializeField] private GameObject playerListItemPrefab;
+    [SerializeField] private TextMeshProUGUI roomNameText;
 
     [Header("Room Buttons")]
     [SerializeField] private GameObject startButton;
@@ -198,20 +204,57 @@ public class MainMenuUIManager : MonoBehaviour
     {
         if (ServerRoomManager.Instance == null)
             return;
-        var playerList = ServerRoomManager.Instance.PlayerList;
 
-        // Clear all existing custom views
-        foreach (Transform slot in slotList)
+        var playerList = ServerRoomManager.Instance.PlayerList;
+        var hostId = ServerRoomManager.Instance.HostId;
+        
+        // --- 1. Update Text-based Player List ---
+        if (playerListContent != null && playerListItemPrefab != null)
         {
-            foreach (Transform child in slot)
+            // Clear old list
+            foreach (Transform child in playerListContent)
             {
                 Destroy(child.gameObject);
+            }
+
+            // Update Room Name
+            if (roomNameText != null)
+            {
+                roomNameText.text = ServerRoomManager.Instance.RoomName;
+            }
+
+            // Populate new player list
+            if(playerList != null)
+            {
+                foreach (var playerInfo in playerList)
+                {
+                    GameObject itemGO = Instantiate(playerListItemPrefab, playerListContent);
+                    PlayerListItem item = itemGO.GetComponent<PlayerListItem>();
+                    if (item != null)
+                    {
+                        item.Setup(playerInfo, playerInfo.player_id == hostId);
+                    }
+                }
+            }
+        }
+        
+        // --- 2. Update 3D Player Models in Slots ---
+        if (slotList != null)
+        {
+            // Clear all existing 3D custom views
+            foreach (Transform slot in slotList)
+            {
+                foreach (Transform child in slot)
+                {
+                    Destroy(child.gameObject);
+                }
             }
         }
 
         if (playerList == null)
             return;
 
+        // --- 3. Update Ready/Start Button States ---
         bool allPlayersReady = playerList.Count > 0 && playerList.All(p => p.IsReady);
 
         if (NetworkManager.Instance != null)
@@ -226,33 +269,62 @@ public class MainMenuUIManager : MonoBehaviour
             }
         }
 
-        // Re-populate slots
-        for (int i = 0; i < playerList.Count; i++)
+        // --- 4. Re-populate 3D Player Models ---
+        // Only run this logic in the MainMenuScene
+        if (SceneManager.GetActiveScene().name == GameManager.Instance.GameSettings.mainmenuScene)
         {
-            if (i >= slotList.Count)
-                break; // Do not exceed available slots
-
-            var player = playerList[i];
-            GameObject prefabToSpawn = null;
-
-            bool isLocalPlayer = (NetworkManager.Instance != null && player.steam_id == NetworkManager.Instance.selfSteamId.m_SteamID.ToString()) || NetworkManager.Instance.Mode == NetworkMode.SinglePlayer;
-
-            prefabToSpawn = isLocalPlayer ? localCustomView : clientCustomView;
-
-            if (prefabToSpawn != null)
+            for (int i = 0; i < playerList.Count; i++)
             {
-                GameObject view = Instantiate(prefabToSpawn, slotList[i]);
-                if (isLocalPlayer)
-                {
-                    customizeManager.FModel = view.GetComponentsInChildren<ModelCustom>()[0];
-                    customizeManager.MModel = view.GetComponentsInChildren<ModelCustom>()[1];
-                    customizeManager.InitialCheck();
-                }
+                if (i >= slotList.Count)
+                    break; // Do not exceed available slots
 
-                var readyIndicator = view.transform.Find("ReadyIndicator");
-                if (readyIndicator != null)
+                var player = playerList[i];
+                GameObject prefabToSpawn = null;
+
+                bool isLocalPlayer = (NetworkManager.Instance != null && player.steam_id == NetworkManager.Instance.selfSteamId.m_SteamID.ToString()) || (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.SinglePlayer && player.steam_id == "0");
+
+                prefabToSpawn = isLocalPlayer ? localCustomView : clientCustomView;
+
+                if (prefabToSpawn != null)
                 {
-                    readyIndicator.gameObject.SetActive(player.IsReady);
+                    GameObject view = Instantiate(prefabToSpawn, slotList[i]);
+
+                    if (isLocalPlayer)
+                    {
+                        customizeManager.FModel = view.GetComponentsInChildren<ModelCustom>(true)[0];
+                        customizeManager.MModel = view.GetComponentsInChildren<ModelCustom>(true)[1];
+                        customizeManager.LocalPlayerSet();
+                    }
+                    else
+                    {
+                        ModelCustom[] models = view.GetComponentsInChildren<ModelCustom>(true);
+                        ModelCustom fModel = models[0];
+                        ModelCustom mModel = models[1];
+
+                        bool isMale = player.is_Male;
+
+                        mModel.transform.parent.gameObject.SetActive(isMale);
+                        fModel.transform.parent.gameObject.SetActive(!isMale);
+
+                        ModelInfo modelInfo = new ModelInfo(player.headIndex, player.bodyIndex, player.acc1Index, player.acc2Index);
+
+                        if (isMale)
+                        {
+                            mModel.ApplyModelInfo(modelInfo);
+                            mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
+                        }
+                        else
+                        {
+                            fModel.ApplyModelInfo(modelInfo);
+                            fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
+                        }
+                    }
+
+                    var readyIndicator = view.transform.Find("ReadyIndicator");
+                    if (readyIndicator != null)
+                    {
+                        readyIndicator.gameObject.SetActive(player.IsReady);
+                    }
                 }
             }
         }

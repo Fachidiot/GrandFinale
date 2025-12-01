@@ -191,11 +191,25 @@ public class ServerRoomManager : MonoBehaviour
     {
         if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
         {
-            playerInfo.is_Male = data["is_Male"]?.ToObject<bool>() ?? playerInfo.is_Male;
-            playerInfo.headIndex = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
-            playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
-            playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
-            playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
+            // Update the PlayerInfo for the lobby UI
+            bool isMale = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
+            int head = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
+            int body = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
+            int acc1 = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
+            int acc2 = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
+
+            playerInfo.is_Male = isMale;
+            playerInfo.headIndex = head;
+            playerInfo.bodyIndex = body;
+            playerInfo.acc1Index = acc1;
+            playerInfo.acc2Index = acc2;
+            
+            // Also update the authoritative data in PlayerManager for in-game visuals
+            if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
+            {
+                ModelInfo modelInfo = new ModelInfo(head, body, acc1, acc2);
+                PlayerManager.Instance.UpdatePlayerCustomization(byteId, isMale, modelInfo);
+            }
 
             Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
             BroadcastRoomUpdate();
