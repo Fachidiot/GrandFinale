@@ -16,10 +16,10 @@ public class SpawnManager : MonoBehaviour
     public static SpawnManager Instance { get; private set; }
 
     [Header("Spawning Configuration")]
-    public int maxEntity = 30;
+    public int globalMaxMonsters = 50;
+    public List<SpawnSector> sectors;
     public List<MonsterPrefabMapping> monsterPrefabs;
     public List<MonsterPrefabMapping> NetworkedMonsterPrefabs;
-    public Transform spawnPoint;
     public int initialPoolSize = 10; // Number of each monster type to pre-spawn
 
     [Header("Wave Settings")]
@@ -29,6 +29,7 @@ public class SpawnManager : MonoBehaviour
 
     private int currentWave = 0;
     private ushort nextMonsterId = 0;
+    private int currentGlobalMonsters = 0;
 
     private readonly List<GameObject> spawnedMonsters = new List<GameObject>();
     public IReadOnlyList<GameObject> SpawnedMonsters => spawnedMonsters;
@@ -56,9 +57,10 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        if (monsterPrefabs == null || monsterPrefabs.Count == 0 || spawnPoint == null)
+        if (monsterPrefabs == null || monsterPrefabs.Count == 0 || sectors == null || sectors.Count == 0)
         {
-            Debug.LogError("SpawnManager is not configured correctly.");
+            Debug.LogError("SpawnManager is not configured correctly. Check monster prefabs and sectors.");
+            enabled = false;
             return;
         }
 
@@ -82,14 +84,11 @@ public class SpawnManager : MonoBehaviour
                 monsterPools.Add(mapping.type, pool);
                 for (int i = 0; i < initialPoolSize; i++)
                 {
-                    GameObject monsterGO = Instantiate(mapping.prefab, spawnPoint.position, spawnPoint.rotation);
+                    // Instantiate at own position and disable, ready for spawning.
+                    GameObject monsterGO = Instantiate(mapping.prefab, transform.position, transform.rotation);
                     monsterGO.SetActive(false);
                     pool.Enqueue(monsterGO);
                 }
-            }
-            else
-            {
-                Debug.LogWarning($"SpawnManager: Duplicate monster type '{mapping.type}' found in prefab list. Ignoring duplicate.");
             }
         }
     }
@@ -100,7 +99,6 @@ public class SpawnManager : MonoBehaviour
         {
             yield return new WaitForSeconds(timeBetweenWaves);
             currentWave++;
-            // Debug.Log($"[SpawnManager] Starting Wave {currentWave}");
             yield return StartCoroutine(SpawnWave());
         }
     }
@@ -109,21 +107,41 @@ public class SpawnManager : MonoBehaviour
     {
         for (int i = 0; i < monstersPerWave; i++)
         {
-            if (monsterPrefabs.Count > 0)
+            // Find all sectors that are not full
+            List<SpawnSector> availableSectors = sectors.Where(s => s.currentMonsters < s.sectorMaxMonsters).ToList();
+
+            if (availableSectors.Count > 0 && monsterPrefabs.Count > 0)
             {
-                int randomIndex = Random.Range(0, monsterPrefabs.Count);
-                MonsterType randomType = monsterPrefabs[randomIndex].type;
-                SpawnMonster(randomType);
+                // Choose a random sector from the available ones
+                SpawnSector chosenSector = availableSectors[Random.Range(0, availableSectors.Count)];
+
+                // Choose a random monster type
+                MonsterType randomType = monsterPrefabs[Random.Range(0, monsterPrefabs.Count)].type;
+                
+                SpawnMonster(randomType, chosenSector);
+            }
+            else
+            {
+                // Optional: Log that no available sectors were found
+                // Debug.Log("[SpawnManager] No available sectors to spawn in. Skipping spawn.");
             }
             yield return new WaitForSeconds(spawnInterval);
         }
-        // Debug.Log($"[SpawnManager] Wave {currentWave} finished spawning.");
     }
 
-    GameObject SpawnMonster(MonsterType monsterType)
+    GameObject SpawnMonster(MonsterType monsterType, SpawnSector sector)
     {
+        // Check global and sector limits before spawning
+        if (currentGlobalMonsters >= globalMaxMonsters || sector.currentMonsters >= sector.sectorMaxMonsters)
+        {
+            return null;
+        }
+
         GameObject monsterPrefab = GetPrefab(monsterType);
         if (monsterPrefab == null) return null;
+
+        // Select a random spawn point from the chosen sector
+        Transform spawnPoint = sector.spawnPoints[Random.Range(0, sector.spawnPoints.Count)];
 
         GameObject monsterGO = null;
         if (monsterPools.TryGetValue(monsterType, out Queue<GameObject> pool) && pool.Count > 0)
@@ -148,11 +166,13 @@ public class SpawnManager : MonoBehaviour
 
         ushort newId = nextMonsterId++;
         networkMonster.Initialize(newId, monsterType);
+        networkMonster.Sector = sector; // Assign sector to the monster
         monsterGO.name = $"{monsterPrefab.name}_{newId}";
 
         spawnedMonsters.Add(monsterGO);
-        // Debug.Log($"[SpawnManager] Spawned monster {monsterGO.name} of type {monsterType}");
-
+        currentGlobalMonsters++;
+        sector.currentMonsters++;
+        
         // Broadcast the spawn event to all clients
         var monsterState = new MonsterState
         {
@@ -160,7 +180,7 @@ public class SpawnManager : MonoBehaviour
             monsterType = monsterType,
             position = monsterGO.transform.position,
             rotation = monsterGO.transform.rotation,
-            animationData = null // Animation data will be sent in the regular game state updates
+            animationData = null
         };
         NetworkManager.Instance.BroadcastMonsterSpawn(monsterState);
 
@@ -178,10 +198,17 @@ public class SpawnManager : MonoBehaviour
 
         if (monsterPools.TryGetValue(networkMonster.MonsterType, out Queue<GameObject> pool))
         {
-            // Only the host should broadcast despawn messages
+            // Only the host should broadcast despawn messages and manage counts
             if (NetworkManager.Instance.Mode == NetworkMode.Host)
             {
                 NetworkManager.Instance.BroadcastMonsterDespawn(networkMonster.MonsterId);
+                
+                // Decrement counts
+                currentGlobalMonsters--;
+                if (networkMonster.Sector != null)
+                {
+                    networkMonster.Sector.currentMonsters--;
+                }
             }
 
             monsterGO.SetActive(false);

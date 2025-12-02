@@ -35,7 +35,8 @@ public enum MonsterType : byte // Use byte for network efficiency
     GellySphere,
     Golem,
     Minotaur,
-    PlantMonster
+    PlantMonster,
+    Gazer
 }
 
 // Optimized data structure for a single player's state
@@ -161,7 +162,7 @@ public struct MonsterState
             state.rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             state.currentHP = reader.ReadSingle();
             state.maxHP = reader.ReadSingle();
-            
+
             byte dataLength = reader.ReadByte();
             if (dataLength > 0)
             {
@@ -221,7 +222,7 @@ public class NetworkGameState
                 writer.Write(p.modelInfo.acc1);
                 writer.Write(p.modelInfo.acc2);
             }
-            
+
             // Write game-level state
             writer.Write(selectedPlanetId);
             writer.Write(GetShipStateMask());
@@ -264,7 +265,7 @@ public class NetworkGameState
                 }
                 gameState.players.Add(p);
             }
-            
+
             // Read game-level state
             if (reader.BaseStream.Position < reader.BaseStream.Length)
             {
