@@ -444,7 +444,16 @@ public class PlayerManager : MonoBehaviour
         {
             if (monsters.TryGetValue(monsterState.monsterId, out GameObject monsterGO))
             {
-                monsterGO.transform.position = monsterState.position;
+                if (monsterGO.TryGetComponent<NavMeshAgent>(out var agent))
+                {
+                    if (!agent.enabled) agent.enabled = true;
+                    agent.Warp(monsterState.position);
+                }
+                else
+                {
+                    monsterGO.transform.position = monsterState.position;
+                }
+
                 monsterGO.transform.rotation = monsterState.rotation;
                 var monsterHealth = monsterGO.GetComponent<MonsterHealth>();
                 if (monsterHealth != null) monsterHealth.SetHealthFromNetwork(monsterState.currentHP, monsterState.maxHP);
