@@ -193,13 +193,27 @@ public class PlayerManager : MonoBehaviour
 
             if (players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) && playerGO != null)
             {
-                // Player exists, check for gender mismatch which requires a re-spawn
-                if (byte.TryParse(playerInfo.player_id, out byte byteId) && 
-                    _playerGenders.TryGetValue(byteId, out bool oldGender) && 
-                    oldGender != playerInfo.is_Male)
+                // Player exists.
+                if (byte.TryParse(playerInfo.player_id, out byte byteId))
                 {
-                    RemovePlayer(playerInfo.steam_id);
-                    needsSpawn = true;
+                    // Check for gender mismatch (requires re-spawn)
+                    if (_playerGenders.TryGetValue(byteId, out bool oldGender) && oldGender != playerInfo.is_Male)
+                    {
+                        RemovePlayer(playerInfo.steam_id);
+                        needsSpawn = true;
+                    }
+                    else
+                    {
+                        // Gender is the same, check for model part changes.
+                        ModelInfo currentModelInfo = GetPlayerModelInfo(byteId);
+                        ModelInfo newModelInfo = new ModelInfo(playerInfo.headIndex, playerInfo.bodyIndex, playerInfo.acc1Index, playerInfo.acc2Index);
+
+                        if (!currentModelInfo.Equals(newModelInfo))
+                        {
+                            // Apply updated model info to existing GameObject.
+                            UpdatePlayerCustomization(byteId, playerInfo.is_Male, newModelInfo);
+                        }
+                    }
                 }
             }
             else
