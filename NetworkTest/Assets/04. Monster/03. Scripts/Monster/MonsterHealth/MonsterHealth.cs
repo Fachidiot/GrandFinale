@@ -47,6 +47,8 @@ public class MonsterHealth : MonoBehaviour
     [Header("--- DEBUG TOOLS ---")]
     public bool _DEBUG_ForceHit = false;
     public bool _DEBUG_ForceDie = false;
+
+    public System.Action<float> OnHealthChanged; // 체력 변경 알림 이벤트
     #endregion
 
     private void Awake()
@@ -138,6 +140,7 @@ public class MonsterHealth : MonoBehaviour
         // 2. 최종 데미지 계산 (방어력 적용)
         actualDamage = Mathf.Max(damage - currentDefense, 0f);
         currentHP -= actualDamage;
+        OnHealthChanged?.Invoke(currentHP);
 
         // 3. [로그] 데미지 연산 결과 상세 출력
         //    (들어온 데미지, 방어력, 실제 감소량, 남은 체력 등)

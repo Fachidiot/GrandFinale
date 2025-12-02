@@ -238,7 +238,8 @@ public class PlayerInputs : MonoBehaviour
     {
         if (mainCamera == null)
         {
-            mainCamera = Camera.main;
+            var cams = PlayerManager.Instance.LocalPlayer.gameObject.GetComponentsInChildren<Camera>();
+            mainCamera = cams[1];
             return;
         }
 
