@@ -452,16 +452,32 @@ public class ServerRoomManager : MonoBehaviour
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
 
+        JArray playersArray = new JArray();
+        foreach (PlayerInfo p in playersInRoom.Values)
+        {
+            JObject playerObj = new JObject
+            {
+                { "steam_id", p.steam_id },
+                { "player_id", p.player_id },
+                { "nickname", p.nickname },
+                { "is_Male", p.is_Male },
+                { "headIndex", p.headIndex },
+                { "bodyIndex", p.bodyIndex },
+                { "acc1Index", p.acc1Index },
+                { "acc2Index", p.acc2Index },
+                { "IsReady", p.IsReady }
+            };
+            playersArray.Add(playerObj);
+        }
+
         JObject roomInfo = new JObject
         {
             { "type", "update_room_info" },
             { "room_name", GameManager.Instance.GameSettings.defaultRoomName },
             { "host_id", steamIdToByteId[NetworkManager.Instance.selfSteamId].ToString() },
-            { "selected_planet_id", SelectedPlanetId }
+            { "selected_planet_id", SelectedPlanetId },
+            { "players", playersArray }
         };
-
-        JArray playersArray = new JArray(playersInRoom.Values.Select(p => JObject.FromObject(p)).ToList());
-        roomInfo["players"] = playersArray;
 
         NetworkManager.Instance.BroadcastJsonMessage(roomInfo);
 
