@@ -155,40 +155,77 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("--- Client Received UpdatePlayerList ---");
-        foreach (JObject playerInfoJson in playerList)
-        {
-            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            Debug.Log($"[Received] Player: {playerInfo.nickname}, is_Male: {playerInfo.is_Male}");
-        }
-        Debug.Log("------------------------------------");
-
-        // --- Debugging: Dumb Respawn Logic ---
-        // To ensure state correctness, we remove all players and respawn them from the list.
-        
-        List<string> currentPlayers = new List<string>(players.Keys);
-        foreach (string steamId in currentPlayers)
-        {
-            RemovePlayer(steamId);
-        }
-
-        // Repopulate ID map and respawn everyone.
+        // Step 1: Update ID mappings and get a set of current steam IDs
         byteIdToSteamId.Clear();
+        HashSet<string> steamIdsInMessage = new HashSet<string>();
         foreach (JObject playerInfoJson in playerList)
         {
             PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            steamIdsInMessage.Add(playerInfo.steam_id);
             if (byte.TryParse(playerInfo.player_id, out byte byteId))
             {
                 byteIdToSteamId[byteId] = playerInfo.steam_id;
             }
-            SpawnNetworkPlayer(playerInfo);
         }
 
-        // Set our own player ID from the list
+        // Step 2: Remove players who are no longer in the list
+        List<string> currentPlayers = new List<string>(players.Keys);
+        foreach (string steamId in currentPlayers)
+        {
+            if (!steamIdsInMessage.Contains(steamId))
+            {
+                RemovePlayer(steamId);
+            }
+        }
+        
+        // Step 3: Set our own player ID from the list
         byte myId = FindMyPlayerId();
         if (myId != NetworkManager.INVALID_PLAYER_ID)
         {
             NetworkManager.Instance.SetMyPlayerId(myId);
+        }
+
+        // Step 4: Update and spawn players
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            bool needsSpawn = false;
+
+            if (players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) && playerGO != null)
+            {
+                // Player exists.
+                if (byte.TryParse(playerInfo.player_id, out byte byteId))
+                {
+                    // Check for gender mismatch (requires re-spawn)
+                    if (_playerGenders.TryGetValue(byteId, out bool oldGender) && oldGender != playerInfo.is_Male)
+                    {
+                        RemovePlayer(playerInfo.steam_id);
+                        needsSpawn = true;
+                    }
+                    else
+                    {
+                        // Gender is the same, check for model part changes.
+                        ModelInfo currentModelInfo = GetPlayerModelInfo(byteId);
+                        ModelInfo newModelInfo = new ModelInfo(playerInfo.headIndex, playerInfo.bodyIndex, playerInfo.acc1Index, playerInfo.acc2Index);
+
+                        if (!currentModelInfo.Equals(newModelInfo))
+                        {
+                            // Apply updated model info to existing GameObject.
+                            UpdatePlayerCustomization(byteId, playerInfo.is_Male, newModelInfo);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Player does not exist, needs to be spawned
+                needsSpawn = true;
+            }
+
+            if (needsSpawn)
+            {
+                SpawnNetworkPlayer(playerInfo);
+            }
         }
     }
 
@@ -202,7 +239,6 @@ public class PlayerManager : MonoBehaviour
 
         bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
 
-        Debug.Log($"Spawning player {playerInfo.nickname} (isMine: {isMine}) with is_Male = {playerInfo.is_Male}");
         GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetNetworkPlayerPrefab(isMine, playerInfo.is_Male), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.tutorialSpawnPoint != null ? GameManager.Instance.GameSettings.tutorialSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = $"Player_{playerInfo.nickname}";
         players.Add(playerInfo.steam_id, playerObject);
@@ -306,13 +342,8 @@ public class PlayerManager : MonoBehaviour
     
     public void UpdatePlayerCustomization(byte playerId, bool isMale, ModelInfo modelInfo)
     {
-        if (_playerGenders.TryGetValue(playerId, out bool oldGender) && oldGender != isMale)
-        {
-            Debug.LogWarning($"Player {playerId} changed gender. Prefab swapping is not implemented yet. Re-spawning player might be required.");
-            // Here you would need logic to destroy the old player object and spawn a new one with the correct prefab.
-            // This is complex and deferred for now.
-        }
-
+        // This method applies model changes to an existing GameObject.
+        // Gender changes are handled by re-spawning in UpdatePlayerList.
         _playerGenders[playerId] = isMale;
         _playerModelInfos[playerId] = modelInfo;
 
