@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public class PlayerInfo
+public struct PlayerInfo
 {
     public string steam_id; // The CSteamID as a string
     public string player_id; // The internal byte ID (0, 1, 2...) as a string

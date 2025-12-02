@@ -171,6 +171,14 @@ public class CustomizeManager : MonoBehaviour
 
             Debug.Log("Sent customization update to host.");
         }
+        // If we are the host, update our own data directly and broadcast.
+        else if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host)
+        {
+            ModelInfo localModelInfo = customizer.GetLocalPlayerInfo();
+            bool isLocalMale = customizer.IsMale;
+            ServerRoomManager.Instance.UpdateHostCustomization(localModelInfo, isLocalMale);
+            Debug.Log("Host updated own customization and broadcasted.");
+        }
     }
 
     private void ActiveFemale()

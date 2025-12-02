@@ -186,6 +186,7 @@ public class ServerRoomManager : MonoBehaviour
         if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
         {
             playerInfo.IsReady = data["is_ready"]?.ToObject<bool>() ?? false;
+            playersInRoom[sender] = playerInfo; // Write the modified struct back
             Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ready status: {playerInfo.IsReady}. Broadcasting update.");
             BroadcastRoomUpdate();
         }
@@ -215,36 +216,49 @@ public class ServerRoomManager : MonoBehaviour
     /// <summary>
     /// (Host-only) Handles a client's customization data and updates the room state.
     /// </summary>
-    private void HandlePlayerCustomization(CSteamID sender, JObject data)
-    {
-        if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
+        private void HandlePlayerCustomization(CSteamID sender, JObject data)
         {
-            // Update the PlayerInfo for the lobby UI
-            bool isMale = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
-            int head = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
-            int body = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
-            int acc1 = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
-            int acc2 = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
-
-            playerInfo.is_Male = isMale;
-            playerInfo.headIndex = head;
-            playerInfo.bodyIndex = body;
-            playerInfo.acc1Index = acc1;
-            playerInfo.acc2Index = acc2;
-
-            // Also update the authoritative data in PlayerManager for in-game visuals
-            if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
+            if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
             {
-                ModelInfo modelInfo = new ModelInfo(head, body, acc1, acc2);
-                PlayerManager.Instance.UpdatePlayerCustomization(byteId, isMale, modelInfo);
+                // Update the PlayerInfo for the lobby UI
+                playerInfo.is_Male = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
+                playerInfo.headIndex = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
+                playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
+                playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
+                playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
+                
+                playersInRoom[sender] = playerInfo; // Write the modified struct back
+    
+                // Also update the authoritative data in PlayerManager for in-game visuals
+                if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
+                {
+                    ModelInfo modelInfo = new ModelInfo(playerInfo.headIndex, playerInfo.bodyIndex, playerInfo.acc1Index, playerInfo.acc2Index);
+                    PlayerManager.Instance.UpdatePlayerCustomization(byteId, playerInfo.is_Male, modelInfo);
+                }
+    
+                Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
+                BroadcastRoomUpdate();
             }
+    /// <summary>
+    /// (Host-only) Updates the host's own customization data and broadcasts the change.
+    /// </summary>
+    public void UpdateHostCustomization(ModelInfo modelInfo, bool isMale)
+    {
+        if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
 
-            Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
-            BroadcastRoomUpdate();
-        }
-        else
+        CSteamID hostSteamId = NetworkManager.Instance.selfSteamId;
+        if (playersInRoom.TryGetValue(hostSteamId, out PlayerInfo playerInfo))
         {
-            Debug.LogWarning($"[ServerRoomManager] Received customization for unknown player: {sender}");
+            playerInfo.is_Male = isMale;
+            playerInfo.headIndex = modelInfo.head;
+            playerInfo.bodyIndex = modelInfo.body;
+            playerInfo.acc1Index = modelInfo.acc1;
+            playerInfo.acc2Index = modelInfo.acc2;
+
+            playersInRoom[hostSteamId] = playerInfo; // Write the modified struct back
+
+            Debug.Log($"[ServerRoomManager] Host customization updated. Broadcasting room update.");
+            BroadcastRoomUpdate();
         }
     }
 
