@@ -129,16 +129,13 @@ public class SpaceShipManager : MonoBehaviour
             CloseDoor();
     }
 
+    public void OnBackToSpaceClicked()
+    {
+        ServerRoomManager.Instance.LaunchToPlanet(-1);
+    }
+
     public void OnLaunchGameClicked()
     {
-        // if (NetworkManager.Instance.Mode == NetworkMode.Client)
-        //     return;
-        if (ServerRoomManager.Instance.SelectedPlanetId == -1)
-        {
-            Debug.LogWarning("[SpaceShipManager] Cannot launch, no planet selected.");
-            return;
-        }
-
         // --- New logic for preventing unnecessary scene loading ---
         if (CurrentScenePlanetId != -1 && ServerRoomManager.Instance.SelectedPlanetId == CurrentScenePlanetId)
         {
