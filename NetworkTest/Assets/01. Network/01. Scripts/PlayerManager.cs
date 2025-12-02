@@ -223,7 +223,11 @@ public class PlayerManager : MonoBehaviour
         if (isMine)
         {
             LocalPlayer = networkPlayer;
-            modelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
+            modelInfo = new ModelInfo(
+                playerInfo.headIndex,
+                playerInfo.bodyIndex,
+                playerInfo.acc1Index,
+                playerInfo.acc2Index);
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
             OptionDataManager.Instance.inGameUIPanel.SetActive(true);
         }

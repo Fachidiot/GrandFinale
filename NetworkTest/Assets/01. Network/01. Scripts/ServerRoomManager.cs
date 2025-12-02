@@ -92,7 +92,7 @@ public class ServerRoomManager : MonoBehaviour
         ClearRoom(); // Ensure we're starting fresh
 
         ModelInfo localModelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
-        bool isLocalMale = PlayerCustomizer.Instance.IsLocalPlayerMale;
+        bool isLocalMale = PlayerCustomizer.Instance.IsMale;
 
         var playerInfo = new PlayerInfo
         {
@@ -295,7 +295,7 @@ public class ServerRoomManager : MonoBehaviour
         if (isHost)
         {
             ModelInfo localModelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
-            bool isLocalMale = PlayerCustomizer.Instance.IsLocalPlayerMale;
+            bool isLocalMale = PlayerCustomizer.Instance.IsMale;
 
             playerInfo = new PlayerInfo
             {

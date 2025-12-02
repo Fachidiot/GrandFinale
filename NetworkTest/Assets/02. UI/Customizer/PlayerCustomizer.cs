@@ -113,7 +113,7 @@ public class PlayerCustomizer : MonoBehaviour
     {
         if (isLocal) // Network Local Player (Local Prefab)
         {
-            return IsMale ? NetworkLocal_M : NetworkLocal_F;
+            return isMale ? NetworkLocal_M : NetworkLocal_F;
         }
         else // Network Client Player (Client Prefab)
         {
