@@ -331,9 +331,23 @@ namespace PlantMonsterStates
                 health.SpawnLoot(monster.config.lootTable);
             if (MonsterManager.Instance != null)
                 MonsterManager.Instance.RegisterMonsterDied();
-            Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
+            
+            monster.StartCoroutine(DieRoutine(monster));
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController m) { return this; }
         public override void ExitState(MonsterAIController m) { }
+        
+        private System.Collections.IEnumerator DieRoutine(MonsterAIController monster)
+        {
+            yield return new WaitForSeconds(monster.config.corpseDestroyDelay);
+            if (SpawnManager.Instance != null)
+            {
+                SpawnManager.Instance.ReturnMonsterToPool(monster.gameObject);
+            }
+            else
+            {
+                Object.Destroy(monster.gameObject);
+            }
+        }
     }
 }
