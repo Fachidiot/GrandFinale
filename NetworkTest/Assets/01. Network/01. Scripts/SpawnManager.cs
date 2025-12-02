@@ -86,9 +86,9 @@ public class SpawnManager : MonoBehaviour
                 for (int i = 0; i < initialPoolSize; i++)
                 {
                     // Instantiate at own position and disable, ready for spawning.
-                    GameObject monsterGO = Instantiate(mapping.prefab, transform.position, transform.rotation);
-                    monsterGO.SetActive(false);
-                    pool.Enqueue(monsterGO);
+                    GameObject monster = Instantiate(mapping.prefab, new Vector3(-1000f, -1000f, -1000f), Quaternion.identity);
+                    monster.SetActive(false);
+                    pool.Enqueue(monster);
                 }
             }
         }

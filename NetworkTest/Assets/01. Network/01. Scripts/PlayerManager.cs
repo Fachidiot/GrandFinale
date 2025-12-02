@@ -446,8 +446,8 @@ public class PlayerManager : MonoBehaviour
             {
                 if (monsterGO.TryGetComponent<NavMeshAgent>(out var agent))
                 {
-                    if (!agent.enabled) agent.enabled = true;
-                    agent.Warp(monsterState.position);
+                    if (agent.enabled) agent.enabled = false; // 클라이언트에서는 NavMeshAgent 비활성화
+                    monsterGO.transform.position = monsterState.position; // 직접 위치 설정
                 }
                 else
                 {
