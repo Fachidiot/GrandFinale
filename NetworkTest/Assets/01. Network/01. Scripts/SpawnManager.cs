@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.AI;
 
 // A helper class to map a MonsterType enum to a GameObject prefab in the Inspector
 [System.Serializable]
@@ -142,18 +143,26 @@ public class SpawnManager : MonoBehaviour
 
         // Select a random spawn point from the chosen sector
         Transform spawnPoint = sector.spawnPoints[Random.Range(0, sector.spawnPoints.Count)];
+        
+        // Find a valid position on the NavMesh near the spawn point
+        if (!NavMesh.SamplePosition(spawnPoint.position, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
+        {
+            Debug.LogError($"[SpawnManager] Could not find a valid NavMesh position near spawn point {spawnPoint.name} in sector {sector.sectorName}. Monster not spawned.");
+            return null;
+        }
+        Vector3 spawnPosition = hit.position;
 
         GameObject monsterGO = null;
         if (monsterPools.TryGetValue(monsterType, out Queue<GameObject> pool) && pool.Count > 0)
         {
             monsterGO = pool.Dequeue();
-            monsterGO.transform.position = spawnPoint.position;
+            monsterGO.transform.position = spawnPosition;
             monsterGO.transform.rotation = spawnPoint.rotation;
             monsterGO.SetActive(true);
         }
         else
         {
-            monsterGO = Instantiate(monsterPrefab, spawnPoint.position, spawnPoint.rotation);
+            monsterGO = Instantiate(monsterPrefab, spawnPosition, spawnPoint.rotation);
         }
 
         NetworkMonster networkMonster = monsterGO.GetComponent<NetworkMonster>();
