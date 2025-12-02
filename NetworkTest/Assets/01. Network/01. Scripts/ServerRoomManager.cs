@@ -33,7 +33,7 @@ public class ServerRoomManager : MonoBehaviour
     private readonly Dictionary<CSteamID, byte> steamIdToByteId = new Dictionary<CSteamID, byte>();
     private readonly Dictionary<byte, CSteamID> byteIdToSteamId = new Dictionary<byte, CSteamID>();
     private byte nextPlayerId = 0; // Simple counter for assigning player IDs. Host is always 0.
-    private JObject _cachedRoomData; // Cache for room data received before scene was ready.
+    private bool _needsPlayerSpawn = false; // Flag to check if we need to spawn players when the scene loads.
 
     #region Unity Lifecycle & Initialization
 
@@ -96,16 +96,19 @@ public class ServerRoomManager : MonoBehaviour
     }
 
     /// <summary>
-    /// When a scene is loaded, check if we have pending room data to process.
+    /// When a scene is loaded, check if we have a pending player spawn action.
     /// </summary>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // If we've loaded into the lobby and have cached data waiting, process it now.
-        if (scene.name == "SpaceShipScene" && _cachedRoomData != null)
+        // If we've loaded into the lobby and have a pending spawn, execute it now.
+        if (scene.name == "SpaceShipScene" && _needsPlayerSpawn)
         {
-            Debug.Log("[ServerRoomManager] Scene loaded, processing cached room data.");
-            UpdateLocalRoomData(_cachedRoomData);
-            _cachedRoomData = null; // Clear the cache after processing
+            Debug.Log("[ServerRoomManager] Scene loaded, processing pending player spawns.");
+            if (PlayerManager.Instance != null)
+            {
+                PlayerManager.Instance.UpdatePlayerList(JArray.FromObject(PlayerList));
+            }
+            _needsPlayerSpawn = false; // Reset the flag
         }
     }
 
@@ -228,7 +231,7 @@ public class ServerRoomManager : MonoBehaviour
             playerInfo.bodyIndex = body;
             playerInfo.acc1Index = acc1;
             playerInfo.acc2Index = acc2;
-            
+
             // Also update the authoritative data in PlayerManager for in-game visuals
             if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
             {
@@ -501,16 +504,6 @@ public class ServerRoomManager : MonoBehaviour
     /// </summary>
     private void UpdateLocalRoomData(JObject data)
     {
-        // --- Race Condition Guard ---
-        // If we receive room data before the lobby scene is loaded, cache it and wait.
-        // OnSceneLoaded will process the cached data once the scene is ready.
-        if (SceneManager.GetActiveScene().name != "SpaceShipScene")
-        {
-            Debug.Log($"[ServerRoomManager] Received room data but scene is not ready. Caching data.");
-            _cachedRoomData = data;
-            return;
-        }
-
         RoomName = data["room_name"]?.ToString() ?? RoomName;
         HostId = data["host_id"]?.ToString() ?? HostId;
         SelectedPlanetId = data["selected_planet_id"]?.ToObject<int>() ?? -1;
@@ -519,12 +512,21 @@ public class ServerRoomManager : MonoBehaviour
         if (players != null)
         {
             PlayerList = players.ToObject<List<PlayerInfo>>();
+        }
 
-            // Trigger the NetworkPlayerManager to sync player GameObjects with this new list.
+        // --- Player Spawning Logic ---
+        // If we are in the correct scene, spawn players immediately.
+        // Otherwise, flag that we need to spawn them when the scene loads.
+        if (SceneManager.GetActiveScene().name == "SpaceShipScene")
+        {
             if (PlayerManager.Instance != null)
             {
                 PlayerManager.Instance.UpdatePlayerList(players);
             }
+        }
+        else
+        {
+            _needsPlayerSpawn = true;
         }
 
         Debug.Log($"[ServerRoomManager] Local room data updated. Players: {PlayerList.Count}, Planet: {SelectedPlanetId}");
