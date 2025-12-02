@@ -155,20 +155,20 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
+        // Step 1: Update ID mappings and get a set of current steam IDs
         byteIdToSteamId.Clear();
-        List<string> steamIdsInMessage = new List<string>();
-
+        HashSet<string> steamIdsInMessage = new HashSet<string>();
         foreach (JObject playerInfoJson in playerList)
         {
             PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
             steamIdsInMessage.Add(playerInfo.steam_id);
-
             if (byte.TryParse(playerInfo.player_id, out byte byteId))
             {
                 byteIdToSteamId[byteId] = playerInfo.steam_id;
             }
         }
 
+        // Step 2: Remove players who are no longer in the list
         List<string> currentPlayers = new List<string>(players.Keys);
         foreach (string steamId in currentPlayers)
         {
@@ -177,17 +177,38 @@ public class PlayerManager : MonoBehaviour
                 RemovePlayer(steamId);
             }
         }
-
+        
+        // Step 3: Set our own player ID from the list
         byte myId = FindMyPlayerId();
         if (myId != NetworkManager.INVALID_PLAYER_ID)
         {
             NetworkManager.Instance.SetMyPlayerId(myId);
         }
 
+        // Step 4: Update and spawn players
         foreach (JObject playerInfoJson in playerList)
         {
             PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            if (!players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) || playerGO == null)
+            bool needsSpawn = false;
+
+            if (players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) && playerGO != null)
+            {
+                // Player exists, check for gender mismatch which requires a re-spawn
+                if (byte.TryParse(playerInfo.player_id, out byte byteId) && 
+                    _playerGenders.TryGetValue(byteId, out bool oldGender) && 
+                    oldGender != playerInfo.is_Male)
+                {
+                    RemovePlayer(playerInfo.steam_id);
+                    needsSpawn = true;
+                }
+            }
+            else
+            {
+                // Player does not exist, needs to be spawned
+                needsSpawn = true;
+            }
+
+            if (needsSpawn)
             {
                 SpawnNetworkPlayer(playerInfo);
             }
@@ -200,11 +221,6 @@ public class PlayerManager : MonoBehaviour
         {
             Debug.LogError("[PlayerManager] Player Prefab is not assigned!");
             return null;
-        }
-
-        if (players.ContainsKey(playerInfo.steam_id))
-        {
-            RemovePlayer(playerInfo.steam_id);
         }
 
         bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
