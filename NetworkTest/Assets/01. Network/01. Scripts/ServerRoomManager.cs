@@ -216,29 +216,31 @@ public class ServerRoomManager : MonoBehaviour
     /// <summary>
     /// (Host-only) Handles a client's customization data and updates the room state.
     /// </summary>
-        private void HandlePlayerCustomization(CSteamID sender, JObject data)
+    private void HandlePlayerCustomization(CSteamID sender, JObject data)
+    {
+        if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
         {
-            if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
+            // Update the PlayerInfo for the lobby UI
+            playerInfo.is_Male = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
+            playerInfo.headIndex = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
+            playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
+            playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
+            playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
+            
+            playersInRoom[sender] = playerInfo; // Write the modified struct back
+
+            // Also update the authoritative data in PlayerManager for in-game visuals
+            if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
             {
-                // Update the PlayerInfo for the lobby UI
-                playerInfo.is_Male = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
-                playerInfo.headIndex = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
-                playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
-                playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
-                playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
-                
-                playersInRoom[sender] = playerInfo; // Write the modified struct back
-    
-                // Also update the authoritative data in PlayerManager for in-game visuals
-                if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
-                {
-                    ModelInfo modelInfo = new ModelInfo(playerInfo.headIndex, playerInfo.bodyIndex, playerInfo.acc1Index, playerInfo.acc2Index);
-                    PlayerManager.Instance.UpdatePlayerCustomization(byteId, playerInfo.is_Male, modelInfo);
-                }
-    
-                Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
-                BroadcastRoomUpdate();
+                ModelInfo modelInfo = new ModelInfo(playerInfo.headIndex, playerInfo.bodyIndex, playerInfo.acc1Index, playerInfo.acc2Index);
+                PlayerManager.Instance.UpdatePlayerCustomization(byteId, playerInfo.is_Male, modelInfo);
             }
+
+            Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
+            BroadcastRoomUpdate();
+        }
+    }
+
     /// <summary>
     /// (Host-only) Updates the host's own customization data and broadcasts the change.
     /// </summary>
