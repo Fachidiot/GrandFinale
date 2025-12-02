@@ -189,6 +189,7 @@ public class ServerRoomManager : MonoBehaviour
             playersInRoom[sender] = playerInfo; // Write the modified struct back
             Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ready status: {playerInfo.IsReady}. Broadcasting update.");
             BroadcastRoomUpdate();
+            SyncLocalPlayerManager();
         }
     }
 
@@ -231,6 +232,7 @@ public class ServerRoomManager : MonoBehaviour
 
             Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
             BroadcastRoomUpdate();
+            SyncLocalPlayerManager();
         }
     }
 
@@ -254,6 +256,7 @@ public class ServerRoomManager : MonoBehaviour
 
             Debug.Log($"[ServerRoomManager] Host customization updated. Broadcasting room update.");
             BroadcastRoomUpdate();
+            SyncLocalPlayerManager();
         }
     }
 
@@ -379,6 +382,7 @@ public class ServerRoomManager : MonoBehaviour
             byteIdToSteamId.Remove(id);
             Debug.Log($"[ServerRoomManager] Player {steamId} removed.");
             BroadcastRoomUpdate();
+            SyncLocalPlayerManager();
         }
     }
 
@@ -466,7 +470,19 @@ public class ServerRoomManager : MonoBehaviour
         NetworkManager.Instance.BroadcastJsonMessage(roomInfo);
 
         // The host also needs to process this message to update its own local state (e.g., PlayerList).
-        UpdateLocalRoomData(roomInfo);
+        // UpdateLocalRoomData(roomInfo); // No longer called, host updates itself directly.
+    }
+
+    /// <summary>
+    /// (Host-only) Directly syncs the local PlayerManager with the current authoritative room state.
+    /// </summary>
+    private void SyncLocalPlayerManager()
+    {
+        if (PlayerManager.Instance != null)
+        {
+            JArray playersArray = new JArray(playersInRoom.Values.Select(p => JObject.FromObject(p)).ToList());
+            PlayerManager.Instance.UpdatePlayerList(playersArray);
+        }
     }
 
     // Waits until the end of the frame to broadcast. This can prevent race conditions
@@ -475,6 +491,7 @@ public class ServerRoomManager : MonoBehaviour
     {
         yield return new WaitForEndOfFrame();
         BroadcastRoomUpdate();
+        SyncLocalPlayerManager();
     }
 
     #endregion
