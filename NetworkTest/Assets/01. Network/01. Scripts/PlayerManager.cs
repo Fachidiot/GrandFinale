@@ -155,6 +155,14 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
+        Debug.Log("--- Client Received UpdatePlayerList ---");
+        foreach (JObject playerInfoJson in playerList)
+        {
+            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
+            Debug.Log($"[Received] Player: {playerInfo.nickname}, is_Male: {playerInfo.is_Male}");
+        }
+        Debug.Log("------------------------------------");
+
         // --- Debugging: Dumb Respawn Logic ---
         // To ensure state correctness, we remove all players and respawn them from the list.
         
@@ -194,6 +202,7 @@ public class PlayerManager : MonoBehaviour
 
         bool isMine = (playerInfo.steam_id == NetworkManager.Instance.selfSteamId.ToString());
 
+        Debug.Log($"Spawning player {playerInfo.nickname} (isMine: {isMine}) with is_Male = {playerInfo.is_Male}");
         GameObject playerObject = Instantiate(PlayerCustomizer.Instance.GetNetworkPlayerPrefab(isMine, playerInfo.is_Male), GameManager.Instance != null && GameManager.Instance.GameSettings != null && GameManager.Instance.GameSettings.tutorialSpawnPoint != null ? GameManager.Instance.GameSettings.tutorialSpawnPoint.position : new Vector3(0, 1.4f, 0), Quaternion.identity);
         playerObject.name = $"Player_{playerInfo.nickname}";
         players.Add(playerInfo.steam_id, playerObject);

@@ -187,7 +187,7 @@ public class ServerRoomManager : MonoBehaviour
         {
             playerInfo.IsReady = data["is_ready"]?.ToObject<bool>() ?? false;
             playersInRoom[sender] = playerInfo; // Write the modified struct back
-            Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ready status: {playerInfo.IsReady}. Broadcasting update.");
+            Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} set ready status to: {playerInfo.IsReady}. Broadcasting update.");
             BroadcastRoomUpdate();
         }
     }
@@ -220,14 +220,18 @@ public class ServerRoomManager : MonoBehaviour
     {
         if (playersInRoom.TryGetValue(sender, out PlayerInfo playerInfo))
         {
+            bool incomingIsMale = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
+            Debug.Log($"[ServerRoomManager] Handling Customization for {sender}. Incoming isMale: {incomingIsMale}.");
+
             // Update the PlayerInfo for the lobby UI
-            playerInfo.is_Male = data["isMale"]?.ToObject<bool>() ?? playerInfo.is_Male;
+            playerInfo.is_Male = incomingIsMale;
             playerInfo.headIndex = data["head"]?.ToObject<int>() ?? playerInfo.headIndex;
             playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
             playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
             playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
             
             playersInRoom[sender] = playerInfo; // Write the modified struct back
+            Debug.Log($"[ServerRoomManager] PlayerInfo for {playerInfo.nickname} is now: is_Male={playerInfo.is_Male}");
 
             // Also update the authoritative data in PlayerManager for in-game visuals
             if (PlayerManager.Instance != null && byte.TryParse(playerInfo.player_id, out byte byteId))
@@ -458,6 +462,13 @@ public class ServerRoomManager : MonoBehaviour
     public void BroadcastRoomUpdate()
     {
         if (NetworkManager.Instance.Mode != NetworkMode.Host) return;
+
+        Debug.Log("--- Broadcasting Room Update ---");
+        foreach (var player in playersInRoom.Values)
+        {
+            Debug.Log($"[Broadcast] Player: {player.nickname}, is_Male: {player.is_Male}");
+        }
+        Debug.Log("-----------------------------");
 
         JObject roomInfo = new JObject
         {
