@@ -100,10 +100,10 @@ public class ServerRoomManager : MonoBehaviour
     /// </summary>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // If we've loaded into the lobby and have a pending spawn, execute it now.
-        if (scene.name == "SpaceShipScene" && _needsPlayerSpawn)
+        // If we've loaded into a playable scene and have a pending spawn, execute it now.
+        if (GameManager.Instance.GameSettings.playableScenes.Contains(scene.name) && _needsPlayerSpawn)
         {
-            Debug.Log("[ServerRoomManager] Scene loaded, processing pending player spawns.");
+            Debug.Log($"[ServerRoomManager] Scene {scene.name} loaded, processing pending player spawns.");
             if (PlayerManager.Instance != null)
             {
                 PlayerManager.Instance.UpdatePlayerList(JArray.FromObject(PlayerList));
@@ -517,7 +517,7 @@ public class ServerRoomManager : MonoBehaviour
         // --- Player Spawning Logic ---
         // If we are in the correct scene, spawn players immediately.
         // Otherwise, flag that we need to spawn them when the scene loads.
-        if (SceneManager.GetActiveScene().name == "SpaceShipScene")
+        if (GameManager.Instance.GameSettings.playableScenes.Contains(SceneManager.GetActiveScene().name))
         {
             if (PlayerManager.Instance != null)
             {
