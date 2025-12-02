@@ -557,14 +557,30 @@ public class ServerRoomManager : MonoBehaviour
         }
 
         // --- Player Spawning Logic ---
-        // If we are in the correct scene, spawn players immediately.
-        // Otherwise, flag that we need to spawn them when the scene loads.
         if (GameManager.Instance.GameSettings.playableScenes.Contains(SceneManager.GetActiveScene().name))
         {
             if (PlayerManager.Instance != null)
             {
-                // We pass the original JArray to avoid re-serializing
-                PlayerManager.Instance.UpdatePlayerList(players);
+                // For maximum safety, create a brand new JArray for the player manager
+                // to ensure no references are shared with the JArray used for UI.
+                JArray playersArrayForManager = new JArray();
+                foreach (PlayerInfo p in PlayerList)
+                {
+                    JObject playerObj = new JObject
+                    {
+                        { "steam_id", p.steam_id },
+                        { "player_id", p.player_id },
+                        { "nickname", p.nickname },
+                        { "is_Male", p.is_Male },
+                        { "headIndex", p.headIndex },
+                        { "bodyIndex", p.bodyIndex },
+                        { "acc1Index", p.acc1Index },
+                        { "acc2Index", p.acc2Index },
+                        { "IsReady", p.IsReady }
+                    };
+                    playersArrayForManager.Add(playerObj);
+                }
+                PlayerManager.Instance.UpdatePlayerList(playersArrayForManager);
             }
         }
         else
