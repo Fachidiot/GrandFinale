@@ -155,77 +155,32 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        // Step 1: Update ID mappings and get a set of current steam IDs
+        // --- Debugging: Dumb Respawn Logic ---
+        // To ensure state correctness, we remove all players and respawn them from the list.
+        
+        List<string> currentPlayers = new List<string>(players.Keys);
+        foreach (string steamId in currentPlayers)
+        {
+            RemovePlayer(steamId);
+        }
+
+        // Repopulate ID map and respawn everyone.
         byteIdToSteamId.Clear();
-        HashSet<string> steamIdsInMessage = new HashSet<string>();
         foreach (JObject playerInfoJson in playerList)
         {
             PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            steamIdsInMessage.Add(playerInfo.steam_id);
             if (byte.TryParse(playerInfo.player_id, out byte byteId))
             {
                 byteIdToSteamId[byteId] = playerInfo.steam_id;
             }
+            SpawnNetworkPlayer(playerInfo);
         }
 
-        // Step 2: Remove players who are no longer in the list
-        List<string> currentPlayers = new List<string>(players.Keys);
-        foreach (string steamId in currentPlayers)
-        {
-            if (!steamIdsInMessage.Contains(steamId))
-            {
-                RemovePlayer(steamId);
-            }
-        }
-        
-        // Step 3: Set our own player ID from the list
+        // Set our own player ID from the list
         byte myId = FindMyPlayerId();
         if (myId != NetworkManager.INVALID_PLAYER_ID)
         {
             NetworkManager.Instance.SetMyPlayerId(myId);
-        }
-
-        // Step 4: Update and spawn players
-        foreach (JObject playerInfoJson in playerList)
-        {
-            PlayerInfo playerInfo = playerInfoJson.ToObject<PlayerInfo>();
-            bool needsSpawn = false;
-
-            if (players.TryGetValue(playerInfo.steam_id, out GameObject playerGO) && playerGO != null)
-            {
-                // Player exists.
-                if (byte.TryParse(playerInfo.player_id, out byte byteId))
-                {
-                    // Check for gender mismatch (requires re-spawn)
-                    if (_playerGenders.TryGetValue(byteId, out bool oldGender) && oldGender != playerInfo.is_Male)
-                    {
-                        RemovePlayer(playerInfo.steam_id);
-                        needsSpawn = true;
-                    }
-                    else
-                    {
-                        // Gender is the same, check for model part changes.
-                        ModelInfo currentModelInfo = GetPlayerModelInfo(byteId);
-                        ModelInfo newModelInfo = new ModelInfo(playerInfo.headIndex, playerInfo.bodyIndex, playerInfo.acc1Index, playerInfo.acc2Index);
-
-                        if (!currentModelInfo.Equals(newModelInfo))
-                        {
-                            // Apply updated model info to existing GameObject.
-                            UpdatePlayerCustomization(byteId, playerInfo.is_Male, newModelInfo);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // Player does not exist, needs to be spawned
-                needsSpawn = true;
-            }
-
-            if (needsSpawn)
-            {
-                SpawnNetworkPlayer(playerInfo);
-            }
         }
     }
 
