@@ -536,7 +536,24 @@ public class ServerRoomManager : MonoBehaviour
         JArray players = data["players"] as JArray;
         if (players != null)
         {
-            PlayerList = players.ToObject<List<PlayerInfo>>();
+            List<PlayerInfo> newPlayerList = new List<PlayerInfo>();
+            foreach (JObject playerObj in players)
+            {
+                PlayerInfo playerInfo = new PlayerInfo
+                {
+                    steam_id = playerObj["steam_id"]?.ToString(),
+                    player_id = playerObj["player_id"]?.ToString(),
+                    nickname = playerObj["nickname"]?.ToString(),
+                    is_Male = playerObj["is_Male"]?.ToObject<bool>() ?? true,
+                    headIndex = playerObj["headIndex"]?.ToObject<int>() ?? 0,
+                    bodyIndex = playerObj["bodyIndex"]?.ToObject<int>() ?? 0,
+                    acc1Index = playerObj["acc1Index"]?.ToObject<int>() ?? 0,
+                    acc2Index = playerObj["acc2Index"]?.ToObject<int>() ?? 0,
+                    IsReady = playerObj["IsReady"]?.ToObject<bool>() ?? false
+                };
+                newPlayerList.Add(playerInfo);
+            }
+            PlayerList = newPlayerList;
         }
 
         // --- Player Spawning Logic ---
@@ -546,6 +563,7 @@ public class ServerRoomManager : MonoBehaviour
         {
             if (PlayerManager.Instance != null)
             {
+                // We pass the original JArray to avoid re-serializing
                 PlayerManager.Instance.UpdatePlayerList(players);
             }
         }
