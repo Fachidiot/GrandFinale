@@ -6,6 +6,9 @@ public class NpcInputSensor : MonoBehaviour
     [Header("Reference")]
     [SerializeField] private StationaryBrain brain;
 
+    private bool isActive = false;
+    public bool IsActive { get { return isActive; } }
+
     private void Awake()
     {
         GetComponent<SphereCollider>().isTrigger = true;
@@ -25,5 +28,18 @@ public class NpcInputSensor : MonoBehaviour
 
         // Brain에게 상호작용 신호 전달
         brain.OnInteract(detectedPlayer);
+    }
+
+    public void ToggleNPC(GameObject detectedPlayer)
+    {
+        if (InventoryManager.Instance != null && InventoryManager.Instance.IsUIOpen && !InventoryManager.Instance.IsExternalInteractionActive)
+        {
+            InventoryManager.Instance.ToggleInventory();
+        }
+
+        // Brain에게 상호작용 신호 전달
+        if (detectedPlayer)
+            brain.OnInteract(detectedPlayer);
+        isActive = !isActive;
     }
 }

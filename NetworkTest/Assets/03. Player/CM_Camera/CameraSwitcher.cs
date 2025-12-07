@@ -31,6 +31,7 @@ public class CameraSwitcher : MonoBehaviour
     // --- 프로퍼티 ---
     public bool IsFirstPersonView => currentState == CameraState.FPV || currentState == CameraState.FPV_Aim;
     public bool IsAiming => currentState == CameraState.TPV_Aim || currentState == CameraState.FPV_Aim;
+    public bool IsShortFpv = false;
 
     // --- 상태 변수 (이벤트 수신용) ---
     private bool isGrounded;
@@ -100,11 +101,18 @@ public class CameraSwitcher : MonoBehaviour
         // if (currentState == CameraState.FPV && CanAimCheck())
         if (currentState != CameraState.FPV_Aim && CanAimCheck())
         {
+            if (currentState == CameraState.TPV)
+                IsShortFpv = true;
             SwitchState(CameraState.FPV_Aim);
         }
-        else if (currentState == CameraState.FPV_Aim)
+        else if (!IsShortFpv && currentState == CameraState.FPV_Aim)
         {
             SwitchState(CameraState.FPV);
+        }
+        else
+        {
+            SwitchState(CameraState.TPV);
+            IsShortFpv = false;
         }
     }
 

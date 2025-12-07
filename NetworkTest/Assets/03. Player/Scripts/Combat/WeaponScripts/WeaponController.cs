@@ -149,16 +149,16 @@ public class WeaponController : MonoBehaviour
         }
     }
 
-    private float lastChangeDebugTime = 0f;
+    // private float lastChangeDebugTime = 0f;
     void Update()
     {
         // Temp Code : 추후에 고쳐야함!!!
         // 고쳐야할 요소 : 장비 스왑키를 연타하다 보면 애니메이션 끝나기도 전에 스왑이 되면서 changed가 true상태가 됨.
-        if (changed && lastChangeDebugTime + 3 < Time.time)
-        {
-            Debug.LogWarning("WeaponController: GunChange_SMB 실행전 애니메이션 중복 실행 오류 발생. 임시방편 완화 실행.");
-            changed = false;
-        }
+        // if (changed && lastChangeDebugTime + 2 < Time.time)
+        // {
+        //     Debug.LogWarning("WeaponController: GunChange_SMB 실행전 애니메이션 중복 실행 오류 발생. 임시방편 완화 실행.");
+        //     // changed = false;
+        // }
 
         if (!isEquipmentInit && EquipmentManager.Instance != null)
         {
@@ -227,7 +227,6 @@ public class WeaponController : MonoBehaviour
         {
             // ToChange(0);
             animator.CrossFadeInFixedTime("UnArmIdle", 0.25f, 3);
-            animator.SetBool("isArmed", false);
 
             slots[slotIndex - 1].DeleteSlot();
             _weaponCache.Remove(slotIndex);
@@ -263,7 +262,7 @@ public class WeaponController : MonoBehaviour
         this.nextID = nextGunSlotID;
 
         animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
-        lastChangeDebugTime = Time.time;
+        // lastChangeDebugTime = Time.time;
     }
 
     public void ToGetSlot(int nextGunSlotID)
@@ -280,7 +279,7 @@ public class WeaponController : MonoBehaviour
         this.activeID = nextGunSlotID;
 
         animator.CrossFadeInFixedTime(animationHash, 0.25f, 1);
-        animator.SetBool("isArmed", true);
+        // animator.SetBool("isArmed", true);
     }
 
     public void RemoteToChange(int nextGunSlotID)

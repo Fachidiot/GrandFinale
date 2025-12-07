@@ -20,6 +20,7 @@ public class CustomizeManager : MonoBehaviour
 
     private PlayerCustomizer customizer;
     private bool isMale = true;
+    public bool IsMale { get { return isMale; } }
 
     public ModelCustom GetCurrentModel()
     {
@@ -41,7 +42,6 @@ public class CustomizeManager : MonoBehaviour
         fModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
         mModel.transform.parent.GetComponent<Animator>().SetBool("Sit", true);
 
-        ActiveMale();
         ModelApply();
     }
 
@@ -181,7 +181,7 @@ public class CustomizeManager : MonoBehaviour
         }
     }
 
-    private void ActiveFemale()
+    public void ActiveFemale()
     {
         mModel.transform.parent.gameObject.SetActive(false);
         fModel.transform.parent.gameObject.SetActive(true);
@@ -231,7 +231,7 @@ public class CustomizeManager : MonoBehaviour
         acce2Selector.UpdateUI();
     }
 
-    private void ActiveMale()
+    public void ActiveMale()
     {
         mModel.transform.parent.gameObject.SetActive(true);
         fModel.transform.parent.gameObject.SetActive(false);

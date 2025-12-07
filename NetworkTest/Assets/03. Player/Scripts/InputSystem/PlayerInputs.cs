@@ -166,6 +166,7 @@ public class PlayerInputs : MonoBehaviour
     void OnPause(bool pause)
     {
         isPaused = pause;
+        SetCursorState(isPaused);
     }
 
     void Update()
@@ -178,7 +179,7 @@ public class PlayerInputs : MonoBehaviour
             return;
         }
 
-        if (null != PlayerManager.Instance.LocalPlayer && PlayerManager.Instance.LocalPlayer.gameObject)
+        if (PlayerManager.Instance && null != PlayerManager.Instance.LocalPlayer && PlayerManager.Instance.LocalPlayer.gameObject)
         {
             HandleInteraction();
             CheckForInteractableUI();
@@ -221,6 +222,8 @@ public class PlayerInputs : MonoBehaviour
         }
     }
 
+    private NpcInputSensor npcInputSensor;
+    public NpcInputSensor GetNPCSensor { get { return npcInputSensor; } }
     private void TryInteract()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -229,6 +232,8 @@ public class PlayerInputs : MonoBehaviour
         {
             if (hit.collider.TryGetComponent<Interactable>(out var interactable))
             {
+                if (interactable.GetComponent<NpcInputSensor>())
+                    npcInputSensor = interactable.GetComponent<NpcInputSensor>();
                 interactable.Interact(PlayerManager.Instance.LocalPlayer.gameObject);
             }
         }

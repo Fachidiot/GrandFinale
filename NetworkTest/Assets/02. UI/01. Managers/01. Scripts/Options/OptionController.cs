@@ -9,6 +9,7 @@ public class OptionController : MonoBehaviour
 
     [SerializeField] private GameObject[] uiPanels;
     private TerminalManager terminalManager;
+    private NpcInputSensor npcInputSensor;
 
     private PlayerInputs playerInputs;
     private IAction action;
@@ -25,12 +26,12 @@ public class OptionController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (playerInputs.GetEscape())
         {
             TerminalCheck();
             ActionCheck();
+            ShopCheck();
 
-            playerInputs.SetCursorState(true);
             // if (shortcutModal.isOn)
             //     shortcutModal.Close();
             if (-1 != IsOptionEnable())
@@ -40,14 +41,16 @@ public class OptionController : MonoBehaviour
             // else if (inEndGameModal.isOn)
             //     inEndGameModal.Close();
             else if (optionPanel.activeSelf)
+            {
                 optionPanel.SetActive(false);
-            // else if (inventoryUI.activeSelf)
-            //     inventoryUI.SetActive(false);
+            }
+            else if (npcInputSensor && npcInputSensor.IsActive)
+            {
+                npcInputSensor.ToggleNPC(null);
+            }
             else if (terminalManager && terminalManager.IsTerminalActive)
             {
                 terminalManager.ToggleTerminal();
-
-                // PlayerInputs.SetCursorState(true);
             }
             else if (null != action && action.Value)
             {
@@ -56,11 +59,10 @@ public class OptionController : MonoBehaviour
             else
             {
                 optionPanel.SetActive(true);
-                playerInputs.SetCursorState(false);
             }
             OptionOn = optionPanel.activeSelf;
 
-            GameManager.Instance.SetPause(OptionOn);
+            GameManager.Instance.SetPause(!OptionOn && !GameManager.Instance.isMainMenu);
         }
     }
 
@@ -68,6 +70,12 @@ public class OptionController : MonoBehaviour
     {
         if (!terminalManager)
             terminalManager = FindObjectOfType<TerminalManager>();
+    }
+
+    private void ShopCheck()
+    {
+        if (!npcInputSensor)
+            npcInputSensor = playerInputs.GetNPCSensor;
     }
 
     private void ActionCheck()
@@ -105,5 +113,6 @@ public class OptionController : MonoBehaviour
         }
 
         SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
+        GameManager.Instance.isMainMenu = true;
     }
 }

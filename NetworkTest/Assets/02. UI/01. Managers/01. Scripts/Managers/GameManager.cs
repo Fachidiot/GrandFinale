@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private OptionKeyData initialKey;
     public OptionKeyData GetInitialKeys { get { return initialKey; } }
 
-    private bool optionOn;
+    public bool isMainMenu;
 
     private void Awake()
     {
@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
 
         playerInputs = GetComponent<PlayerInputs>();
         SceneManager.sceneLoaded += OnSceneLoaded;
+        isMainMenu = true;
     }
 
     private void OnDestroy()

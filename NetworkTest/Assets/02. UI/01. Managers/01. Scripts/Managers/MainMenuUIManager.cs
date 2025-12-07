@@ -80,6 +80,7 @@ public class MainMenuUIManager : MonoBehaviour
             // Use the planet ID already stored in the manager
             ServerRoomManager.Instance.LaunchToPlanet(GameManager.Instance.GameSettings.tutorialScene);
         }
+        GameManager.Instance.isMainMenu = false;
     }
 
     public void OnRoomButtonClicked()
@@ -294,6 +295,10 @@ public class MainMenuUIManager : MonoBehaviour
                         customizeManager.FModel = view.GetComponentsInChildren<ModelCustom>(true)[0];
                         customizeManager.MModel = view.GetComponentsInChildren<ModelCustom>(true)[1];
                         customizeManager.LocalPlayerSet();
+                        if (customizeManager.IsMale)
+                            customizeManager.ActiveMale();
+                        else
+                            customizeManager.ActiveFemale();
                     }
                     else
                     {

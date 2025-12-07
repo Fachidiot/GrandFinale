@@ -22,6 +22,13 @@ public class InGameUIManager : MonoBehaviour
         NetworkManager.OnDisconnected += HandleDisconnection;
     }
 
+    void Start()
+    {
+#if UNITY_EDITOR
+        weaponController = GameObject.FindObjectOfType<WeaponController>();
+#endif
+    }
+
     private void OnDestroy()
     {
         // Unsubscribe to prevent memory leaks

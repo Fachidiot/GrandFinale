@@ -226,7 +226,7 @@ public class ServerRoomManager : MonoBehaviour
             playerInfo.bodyIndex = data["body"]?.ToObject<int>() ?? playerInfo.bodyIndex;
             playerInfo.acc1Index = data["acc1"]?.ToObject<int>() ?? playerInfo.acc1Index;
             playerInfo.acc2Index = data["acc2"]?.ToObject<int>() ?? playerInfo.acc2Index;
-            
+
             playersInRoom[sender] = playerInfo; // Write the modified struct back
 
             Debug.Log($"[ServerRoomManager] Player {playerInfo.nickname} ({sender}) customization updated. Broadcasting room update.");
@@ -519,6 +519,7 @@ public class ServerRoomManager : MonoBehaviour
                 {
                     Debug.Log($"[ServerRoomManager] Received command to load scene: {sceneToLoad}");
                     SceneManager.LoadScene(sceneToLoad);
+                    GameManager.Instance.isMainMenu = false;
                 }
                 break;
         }
