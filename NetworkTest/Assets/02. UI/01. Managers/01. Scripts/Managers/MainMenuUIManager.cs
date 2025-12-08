@@ -81,6 +81,7 @@ public class MainMenuUIManager : MonoBehaviour
             ServerRoomManager.Instance.LaunchToPlanet(GameManager.Instance.GameSettings.tutorialScene);
         }
         GameManager.Instance.isMainMenu = false;
+        GameManager.Instance.SetPause(false);
     }
 
     public void OnRoomButtonClicked()
@@ -136,6 +137,7 @@ public class MainMenuUIManager : MonoBehaviour
         if (GameManager.Instance != null) GameManager.Instance.SetPause(false);
         // The new flow is to create a Steam lobby, which then handles connection and scene loading.
         NetworkManager.Instance.CreateSteamLobby();
+        GameManager.Instance.SetPause(true);
     }
 
     public void OnSingleplayerButtonClicked()
@@ -165,6 +167,7 @@ public class MainMenuUIManager : MonoBehaviour
         {
             Debug.LogError("GameManager.Instance is null in MainMenuUIManager.OnSingleplayerButtonClicked()");
         }
+        GameManager.Instance.SetPause(true);
     }
 
     public void OnSettingsButtonClicked()

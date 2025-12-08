@@ -117,6 +117,8 @@ public class NetworkPlayer : MonoBehaviour, IPlayerControllable
 
         foreach (var slot in slots)
         {
+            if (slot.transform.childCount <= 0)
+                continue;
             Transform weapon = slot.transform.GetChild(0);
             weapon.parent = null;
             weapon.GetComponent<Collider>().enabled = true;

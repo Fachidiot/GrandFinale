@@ -520,6 +520,7 @@ public class ServerRoomManager : MonoBehaviour
                     Debug.Log($"[ServerRoomManager] Received command to load scene: {sceneToLoad}");
                     SceneManager.LoadScene(sceneToLoad);
                     GameManager.Instance.isMainMenu = false;
+                    GameManager.Instance.SetPause(false);
                 }
                 break;
         }

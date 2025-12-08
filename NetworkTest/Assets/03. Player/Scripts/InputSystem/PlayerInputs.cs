@@ -166,7 +166,7 @@ public class PlayerInputs : MonoBehaviour
     void OnPause(bool pause)
     {
         isPaused = pause;
-        SetCursorState(isPaused);
+        SetCursorState(!isPaused);
     }
 
     void Update()
