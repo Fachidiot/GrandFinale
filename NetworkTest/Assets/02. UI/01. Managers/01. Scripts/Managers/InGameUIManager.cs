@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class InGameUIManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text ammoCountText;
-    [SerializeField] private TMP_Text healthText;
+    [SerializeField] private TMP_Text playerNameText;
+    [SerializeField] private Slider healthSlider;
     [SerializeField] private TMP_Text interactText;
-    [SerializeField] private TMP_Text cashText;
+    // [SerializeField] private TMP_Text cashText;
 
     private WeaponController weaponController;
     private PlayerStats playerStats;
@@ -38,7 +40,7 @@ public class InGameUIManager : MonoBehaviour
         {
             NetworkManager.OnDisconnected -= HandleDisconnection;
         }
-        if (playerStats != null) playerStats.OnStatsChanged -= UpdateCashText;
+        // if (playerStats != null) playerStats.OnStatsChanged -= UpdateCashText;
     }
 
     private void HandleDisconnection()
@@ -57,8 +59,8 @@ public class InGameUIManager : MonoBehaviour
         if (playerStats != null)
         {
             // 돈이 바뀌면 UI도 바뀌도록 이벤트 연결
-            playerStats.OnStatsChanged += UpdateCashText;
-            UpdateCashText();
+            // playerStats.OnStatsChanged += UpdateCashText;
+            // UpdateCashText();
         }
         else
         {
@@ -68,9 +70,9 @@ public class InGameUIManager : MonoBehaviour
 
     public void SetHealthValue(float value)
     {
-        if (!healthText)
+        if (!healthSlider)
             return;
-        healthText.text = value.ToString();
+        healthSlider.value = (value / 100);
     }
 
     public void SetInteractText(string _text)
@@ -88,11 +90,11 @@ public class InGameUIManager : MonoBehaviour
         }
     }
 
-    public void UpdateCashText()
-    {
-        if (cashText == null || playerStats == null) return;
-        cashText.text = $"{playerStats.CurrentCurrency:N0} G";
-    }
+    // public void UpdateCashText()
+    // {
+    //     if (cashText == null || playerStats == null) return;
+    //     cashText.text = $"{playerStats.CurrentCurrency:N0} G";
+    // }
 
     // Update is called once per frame
     void Update()
@@ -117,15 +119,15 @@ public class InGameUIManager : MonoBehaviour
 
         if (playerStats == null)
         {
-            if (healthText != null && healthText.enabled)
+            if (healthSlider != null && healthSlider.enabled)
             {
-                healthText.enabled = false;
+                healthSlider.enabled = false;
             }
             return;
         }
-        if (!healthText.enabled)
+        if (!healthSlider.enabled)
         {
-            healthText.enabled = true;
+            healthSlider.enabled = true;
         }
         PlayerStatsUI();
     }
@@ -153,11 +155,11 @@ public class InGameUIManager : MonoBehaviour
     {
         if (0 >= playerStats.CurrentHealth)
         {
-            healthText.text = "0";
+            healthSlider.value = 0;
         }
         else
         {
-            healthText.text = playerStats.CurrentHealth.ToString();
+            healthSlider.value = (playerStats.CurrentHealth / 100);
         }
     }
 }

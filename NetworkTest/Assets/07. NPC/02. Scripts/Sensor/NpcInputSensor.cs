@@ -34,7 +34,7 @@ public class NpcInputSensor : MonoBehaviour
     {
         if (InventoryManager.Instance != null && InventoryManager.Instance.IsUIOpen && !InventoryManager.Instance.IsExternalInteractionActive)
         {
-            InventoryManager.Instance.ToggleInventory();
+            InventoryManager.Instance.ToggleSmallInventory();
         }
 
         // Brain에게 상호작용 신호 전달

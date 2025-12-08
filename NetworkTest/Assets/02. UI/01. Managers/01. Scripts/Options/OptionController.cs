@@ -62,7 +62,10 @@ public class OptionController : MonoBehaviour
             }
             OptionOn = optionPanel.activeSelf;
 
-            GameManager.Instance.SetPause(!OptionOn && !GameManager.Instance.isMainMenu);
+            if (GameManager.Instance.isMainMenu)
+                GameManager.Instance.SetPause(!OptionOn && !GameManager.Instance.isMainMenu);
+            else
+                GameManager.Instance.SetPause(!OptionOn);
         }
     }
 
