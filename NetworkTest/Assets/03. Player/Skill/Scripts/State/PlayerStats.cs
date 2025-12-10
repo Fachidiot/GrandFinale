@@ -15,7 +15,6 @@ public class PlayerStats : MonoBehaviour
     public float baseMaxHealth = 100f;
     public float baseDamageModifier = 1.0f;
     public float baseDefense = 10f;
-
     public float basePower = 10f;
     public float baseCritChance = 5.0f;
     public int baseCurrency = 1500;
