@@ -13,7 +13,7 @@ public class PlayerManager : MonoBehaviour
     private readonly Dictionary<ushort, GameObject> monsters = new Dictionary<ushort, GameObject>();
     private readonly Dictionary<byte, string> byteIdToSteamId = new Dictionary<byte, string>();
     private readonly List<GameObject> _playersToDestroy = new List<GameObject>();
-    
+
     // Customization Data Storage
     private readonly Dictionary<byte, bool> _playerGenders = new Dictionary<byte, bool>();
     private readonly Dictionary<byte, ModelInfo> _playerModelInfos = new Dictionary<byte, ModelInfo>();
@@ -36,16 +36,19 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
+#if UNITY_EDITOR    // Fast Debug Needs it
+        if (FindObjectOfType<CharacterMove>())
+            LocalPlayer = FindObjectOfType<CharacterMove>().GetComponent<IPlayerControllable>();
+#endif
+    }
+
+    void Start()
+    {
         if (NetworkManager.Instance)
         {
             NetworkManager.OnJsonMessageReceived -= HandleServerJsonMessage;
             NetworkManager.OnJsonMessageReceived += HandleServerJsonMessage;
         }
-
-#if UNITY_EDITOR    // Fast Debug Needs it
-        if (FindObjectOfType<CharacterMove>())
-            LocalPlayer = FindObjectOfType<CharacterMove>().GetComponent<IPlayerControllable>();
-#endif
     }
 
     private void OnDestroy()
@@ -94,7 +97,7 @@ public class PlayerManager : MonoBehaviour
 
         ModelInfo modelInfo = PlayerCustomizer.Instance.GetLocalPlayerInfo();
         playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
-        
+
         // No network ID for single player, so we can't use the dictionaries.
         // But we set the LocalPlayer which is enough.
 
@@ -178,7 +181,7 @@ public class PlayerManager : MonoBehaviour
                 RemovePlayer(steamId);
             }
         }
-        
+
         // Step 3: Set our own player ID from the list
         byte myId = FindMyPlayerId();
         if (myId != NetworkManager.INVALID_PLAYER_ID)
@@ -249,7 +252,7 @@ public class PlayerManager : MonoBehaviour
 
         if (networkPlayer.NicknameUI != null)
             networkPlayer.NicknameUI.SetNickname(playerInfo.nickname);
-        
+
         ModelInfo modelInfo;
         if (isMine)
         {
@@ -271,7 +274,7 @@ public class PlayerManager : MonoBehaviour
                 playerInfo.acc2Index);
             playerObject.GetComponentInChildren<ModelCustom>().ApplyModelInfo(modelInfo);
         }
-        
+
         // Store initial customization
         if (byte.TryParse(playerInfo.player_id, out byte byteId))
         {
@@ -328,7 +331,7 @@ public class PlayerManager : MonoBehaviour
         }
         return NetworkManager.INVALID_PLAYER_ID;
     }
-    
+
     // --- Customization Management ---
 
     public bool GetPlayerGender(byte playerId)
@@ -340,7 +343,7 @@ public class PlayerManager : MonoBehaviour
     {
         return _playerModelInfos.TryGetValue(playerId, out ModelInfo modelInfo) ? modelInfo : new ModelInfo();
     }
-    
+
     public void UpdatePlayerCustomization(byte playerId, bool isMale, ModelInfo modelInfo)
     {
         // This method applies model changes to an existing GameObject.
@@ -423,7 +426,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     bodySlopeHandler.SetSlopeFromNetwork(playerState.bending);
                 }
-                
+
                 // Apply customization updates
                 ModelInfo currentModelInfo = GetPlayerModelInfo(playerState.playerId);
                 if (currentModelInfo.head != playerState.modelInfo.head ||
