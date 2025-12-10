@@ -181,6 +181,11 @@ public class WeaponController : MonoBehaviour
     {
         var currentWeapon = GETCurrentWeapon;
         currentWeapon?.Attack();
+        if (currentWeapon is RangedWeapon)
+        {
+            var rangedWeapon = currentWeapon as RangedWeapon;
+            rangedWeapon.InfiniteAmmo();
+        }
     }
 
     public void PrintInventoryLog()
