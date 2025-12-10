@@ -121,30 +121,6 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!114 &-8802036443985058522
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cfc6e1cadb360d4d81ced8dc01f7504, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  endTime: 0
-  weaponController: {fileID: 0}
-  curveEvents: []
-  enterEvents:
-  - funcId: 7
-    funcName: OnWeaponChange
-    parameters:
-    - changed|System.Boolean|False
-    time: 0
-    done: 0
-  updateEvents: []
-  exitEvents: []
 --- !u!1107 &-8508186381238472189
 AnimatorStateMachine:
   serializedVersion: 6
@@ -916,7 +892,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -6520880558266426542, guid: 08ae9e580977e514fbff3ebf952b6247, type: 3}
+  m_Motion: {fileID: 7400000, guid: 11de9cda65b543a4080ef5ab52b857a0, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1178,7 +1154,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 864b51950b8ebf94cb8aba86a50b55b5, type: 2}
+    m_Motion: {fileID: 6564411413370888346, guid: 22ec13f88178f0648b220b25ac159daa, type: 3}
     m_Threshold: 0
     m_Position: {x: 1, y: 1}
     m_TimeScale: 1
@@ -1186,7 +1162,7 @@ BlendTree:
     m_DirectBlendParameter: x
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 864b51950b8ebf94cb8aba86a50b55b5, type: 2}
+    m_Motion: {fileID: 6564411413370888346, guid: 22ec13f88178f0648b220b25ac159daa, type: 3}
     m_Threshold: 0.5
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -1194,7 +1170,7 @@ BlendTree:
     m_DirectBlendParameter: x
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 864b51950b8ebf94cb8aba86a50b55b5, type: 2}
+    m_Motion: {fileID: 6564411413370888346, guid: 22ec13f88178f0648b220b25ac159daa, type: 3}
     m_Threshold: 1
     m_Position: {x: -1, y: 1}
     m_TimeScale: 1
@@ -1835,7 +1811,7 @@ AnimatorStateMachine:
     m_Position: {x: 260, y: 360, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -94639576406955764}
-    m_Position: {x: 20, y: 440, z: 0}
+    m_Position: {x: 20, y: 400, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -5384630099438658897}
     m_Position: {x: -230, y: 170, z: 0}
@@ -2229,8 +2205,7 @@ AnimatorState:
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
-  m_StateMachineBehaviours:
-  - {fileID: -8802036443985058522}
+  m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -2625,7 +2600,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PutSlot1
-  m_Speed: 1.8
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -5746169560469836939}
@@ -3507,8 +3482,7 @@ AnimatorState:
   - {fileID: 1408876402315087778}
   - {fileID: 5852239460035428063}
   - {fileID: -3922043664442652336}
-  m_StateMachineBehaviours:
-  - {fileID: 9108692821740092149}
+  m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -4193,7 +4167,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Roll
+  m_Name: Slide
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -4597,7 +4571,7 @@ MonoBehaviour:
     funcName: OnWeaponChange
     parameters:
     - changed|System.Boolean|False
-    time: 0
+    time: 1
     done: 0
 --- !u!1102 &3485696179778158368
 AnimatorState:
@@ -6433,30 +6407,6 @@ AnimatorStateMachine:
   m_ExitPosition: {x: 950, y: 10, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: -22106045127086668}
---- !u!114 &9108692821740092149
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cfc6e1cadb360d4d81ced8dc01f7504, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  endTime: 0
-  weaponController: {fileID: 0}
-  curveEvents: []
-  enterEvents: []
-  updateEvents: []
-  exitEvents:
-  - funcId: 7
-    funcName: OnWeaponChange
-    parameters:
-    - changed|System.Boolean|False
-    time: 0
-    done: 0
 --- !u!206 &9153504890414068376
 BlendTree:
   m_ObjectHideFlags: 1
@@ -6466,7 +6416,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: -203655887218126122, guid: df986dc9640aeea4bad16420ee8b1e1d, type: 3}
+    m_Motion: {fileID: 7400000, guid: d6007a66b3cae254b872a46b5fcceabe, type: 2}
     m_Threshold: -1
     m_Position: {x: 0, y: -1}
     m_TimeScale: -1
@@ -6482,7 +6432,7 @@ BlendTree:
     m_DirectBlendParameter: x
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: -203655887218126122, guid: df986dc9640aeea4bad16420ee8b1e1d, type: 3}
+    m_Motion: {fileID: 7400000, guid: d6007a66b3cae254b872a46b5fcceabe, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1

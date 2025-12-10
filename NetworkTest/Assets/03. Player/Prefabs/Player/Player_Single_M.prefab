@@ -2496,7 +2496,6 @@ GameObject:
   - component: {fileID: 2687584018851201579}
   - component: {fileID: 3076007734620071475}
   - component: {fileID: 1872567068398045373}
-  - component: {fileID: 1585581120018433825}
   m_Layer: 2
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -2656,28 +2655,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!114 &1585581120018433825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7121807643687313995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f114969c0a750443bd3de60e999d4f3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  guiFont: {fileID: 12800000, guid: e602b892b37196841a368a5707d6cfb5, type: 3}
-  message: 
-  TextColor: {r: 1, g: 1, b: 1, a: 1}
-  DisplayInfo: 0
-  CrosshairImage: {fileID: 2800000, guid: b9792685301d72746aef409f696096ad, type: 3}
-  CrosshairColor: {r: 1, g: 0.84203076, b: 0.5990566, a: 1}
-  CrosshairSize: 64
-  CrosshairRotAngle: 30
-  VisorImage: {fileID: 2800000, guid: 7021ae80ac715054fa75425b354b2b26, type: 3}
-  VisorColor: {r: 1, g: 0.43618035, b: 0, a: 1}
 --- !u!1 &7380696596639863300
 GameObject:
   m_ObjectHideFlags: 0
@@ -4077,6 +4054,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8911519984254419884, guid: b9e53d6d3e60a19419f250123a96ad91, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8544365437630784935}
+    - targetCorrespondingSourceObject: {fileID: 8911519984254419884, guid: b9e53d6d3e60a19419f250123a96ad91, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6176508843479533887}
     - targetCorrespondingSourceObject: {fileID: 1258626103459880926, guid: b9e53d6d3e60a19419f250123a96ad91, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5634404015927131439}
@@ -5519,6 +5499,31 @@ MonoBehaviour:
   leftFistBoxArm: {fileID: 1295470707246503386}
   rightFistBoxArm: {fileID: 8204013597060511719}
   attackCooldown: 0.8
+--- !u!114 &6176508843479533887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8683405735910424943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba3035786acb334292cd5b9b6e1e000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FootstepAudioClips:
+  - {fileID: 8300000, guid: fb6950b407cc66a4e9bc8fe56d8e8732, type: 3}
+  - {fileID: 8300000, guid: fdfec419278146545bba1033701fa1cb, type: 3}
+  - {fileID: 8300000, guid: ffc53d8713d233943b48fe70e0298518, type: 3}
+  - {fileID: 8300000, guid: 3a4b770e3eb295e4794dfbb88a1a28f0, type: 3}
+  - {fileID: 8300000, guid: 601de5cc6e3c6b245ab34ba989d79764, type: 3}
+  - {fileID: 8300000, guid: b2a36e0531096d84ea5d208e1f3ea94a, type: 3}
+  - {fileID: 8300000, guid: 26c7e29e68a99be4d95458988ac04a8f, type: 3}
+  - {fileID: 8300000, guid: dac77430dd6867f439e58fa94487cb84, type: 3}
+  - {fileID: 8300000, guid: e3f09767dbba18c47804fd685d711f57, type: 3}
+  - {fileID: 8300000, guid: 82654161739a6c540bd7f842bb147d35, type: 3}
+  JumpLand: {fileID: 8300000, guid: e595d1461901d9342949694338c86cec, type: 3}
+  UseLadder: {fileID: 8300000, guid: 157d63ea00af724448cd70de51922bd6, type: 3}
 --- !u!137 &8849728533925239308 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 8790250775503755471, guid: b9e53d6d3e60a19419f250123a96ad91, type: 3}

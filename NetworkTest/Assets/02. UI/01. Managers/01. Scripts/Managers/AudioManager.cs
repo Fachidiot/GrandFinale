@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.VisualScripting;
+using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
@@ -96,11 +97,18 @@ public class AudioManager : MonoBehaviour
         Debug.Log("[AudioManager] Resources/Sound 폴더에서 사운드 연결 완료!");
     }
 
+    private string prevClip;
+    private float prevTime = 0f;
     public void PlaySFX(AudioClip clip)
     {
         if (clip != null && sfxSource != null)
         {
+            if (sfxSource.isPlaying && prevClip == clip.name.Split('_')[1] && prevTime + 0.1 > Time.time)
+                return;
+
             sfxSource.PlayOneShot(clip, m_effectVolume * m_masterVolume);
+            prevClip = clip.name.Split('_')[1];
+            prevTime = Time.time;
         }
     }
 

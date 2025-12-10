@@ -39,6 +39,12 @@ public class GunChange_SMB : StateMachineBehaviour, IEventCenterComponent, ICurv
         {
             // invoke enterEvents
             EventsCenter.EventInvoke(eventModel.funcName, EventParameterConverter.ConvertParametersToObjectType(eventModel.parameters));
+
+            //if nextID != 0 then transition to grab animation
+            if (weaponController.GETCurrentWeapon is UnarmedWeapon)
+                animator.SetBool("isArmed", false);
+            else
+                animator.SetBool("isArmed", true);
         }
     }
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

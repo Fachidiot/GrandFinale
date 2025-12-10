@@ -25721,7 +25721,6 @@ Transform:
   - {fileID: 1551116957}
   - {fileID: 1027697443}
   - {fileID: 121598718}
-  - {fileID: 1284761244}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &410878883
@@ -27049,7 +27048,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5107405119717096264, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -6.2999954
+      value: -6.300003
       objectReference: {fileID: 0}
     - target: {fileID: 5107727217975670928, guid: 79d8f81b10e95264aa484c279a8fb79d, type: 3}
       propertyPath: m_AnchorMax.x
@@ -83248,11 +83247,15 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 410090721}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 216085728529660424, guid: dfdc55b0b782e1743abbbfa1831c9bb1, type: 3}
       propertyPath: m_Name
       value: SpaceShip_Discovery
+      objectReference: {fileID: 0}
+    - target: {fileID: 4733842066667000963, guid: dfdc55b0b782e1743abbbfa1831c9bb1, type: 3}
+      propertyPath: initLanding
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5614483923715734138, guid: dfdc55b0b782e1743abbbfa1831c9bb1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -83307,11 +83310,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dfdc55b0b782e1743abbbfa1831c9bb1, type: 3}
---- !u!4 &1284761244 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5614483923715734138, guid: dfdc55b0b782e1743abbbfa1831c9bb1, type: 3}
-  m_PrefabInstance: {fileID: 1284761243}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1287023301
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -143673,6 +143671,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1005839675}
   - {fileID: 2047801116}
+  - {fileID: 1284761243}
   - {fileID: 410090721}
   - {fileID: 857758006}
   - {fileID: 878667623}

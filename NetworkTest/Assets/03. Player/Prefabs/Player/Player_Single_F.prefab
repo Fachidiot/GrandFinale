@@ -945,7 +945,7 @@ Camera:
   m_GameObject: {fileID: 3606684320079019100}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 2
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -2706,7 +2706,6 @@ GameObject:
   - component: {fileID: 2687584018851201579}
   - component: {fileID: 3076007734620071475}
   - component: {fileID: 1872567068398045373}
-  - component: {fileID: 2447578087309924689}
   m_Layer: 2
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -2866,28 +2865,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!114 &2447578087309924689
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7121807643687313995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f114969c0a750443bd3de60e999d4f3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  guiFont: {fileID: 12800000, guid: e602b892b37196841a368a5707d6cfb5, type: 3}
-  message: 
-  TextColor: {r: 1, g: 1, b: 1, a: 1}
-  DisplayInfo: 0
-  CrosshairImage: {fileID: 2800000, guid: b9792685301d72746aef409f696096ad, type: 3}
-  CrosshairColor: {r: 1, g: 0.84203076, b: 0.5990566, a: 1}
-  CrosshairSize: 64
-  CrosshairRotAngle: 30
-  VisorImage: {fileID: 2800000, guid: 7021ae80ac715054fa75425b354b2b26, type: 3}
-  VisorColor: {r: 1, g: 0.43618035, b: 0, a: 1}
 --- !u!1 &7380696596639863300
 GameObject:
   m_ObjectHideFlags: 0
@@ -3970,6 +3947,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2699170413284247070, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9027176309782996533}
+    - targetCorrespondingSourceObject: {fileID: 2699170413284247070, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8880486963218003739}
     - targetCorrespondingSourceObject: {fileID: 6001944596003477202, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6103097212156669756}
@@ -5296,6 +5276,31 @@ MonoBehaviour:
   leftFistBoxArm: {fileID: 7851904656207288314}
   rightFistBoxArm: {fileID: 5313350748091238678}
   attackCooldown: 0.8
+--- !u!114 &8880486963218003739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7613203203886053497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba3035786acb334292cd5b9b6e1e000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FootstepAudioClips:
+  - {fileID: 8300000, guid: fb6950b407cc66a4e9bc8fe56d8e8732, type: 3}
+  - {fileID: 8300000, guid: fdfec419278146545bba1033701fa1cb, type: 3}
+  - {fileID: 8300000, guid: ffc53d8713d233943b48fe70e0298518, type: 3}
+  - {fileID: 8300000, guid: 3a4b770e3eb295e4794dfbb88a1a28f0, type: 3}
+  - {fileID: 8300000, guid: 601de5cc6e3c6b245ab34ba989d79764, type: 3}
+  - {fileID: 8300000, guid: b2a36e0531096d84ea5d208e1f3ea94a, type: 3}
+  - {fileID: 8300000, guid: 26c7e29e68a99be4d95458988ac04a8f, type: 3}
+  - {fileID: 8300000, guid: dac77430dd6867f439e58fa94487cb84, type: 3}
+  - {fileID: 8300000, guid: e3f09767dbba18c47804fd685d711f57, type: 3}
+  - {fileID: 8300000, guid: 82654161739a6c540bd7f842bb147d35, type: 3}
+  JumpLand: {fileID: 8300000, guid: e595d1461901d9342949694338c86cec, type: 3}
+  UseLadder: {fileID: 8300000, guid: 157d63ea00af724448cd70de51922bd6, type: 3}
 --- !u!1 &8443444547211463512 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4179273238084105535, guid: f2b49e599133a5043b07406a7d7bfe1f, type: 3}

@@ -16,7 +16,8 @@ public class InAirState : StateMachineBase
 
         characterMove.velocity.y += characterMove.gravity * Time.deltaTime;
 
-        characterController.Move(characterMove.velocity * Time.deltaTime);
+        if (characterController)
+            characterController.Move(characterMove.velocity * Time.deltaTime);
 
         if (characterMove.isGrounded)
             characterMove.SetState(characterMove.moveState);

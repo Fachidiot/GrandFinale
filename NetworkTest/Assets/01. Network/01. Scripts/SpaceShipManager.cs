@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using FIMSpace.Generating.Planning.ModNodes.Transforming;
 using Newtonsoft.Json.Linq;
 using Steamworks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SpaceShipManager : MonoBehaviour
 {
+    [SerializeField] private bool initLanding;
     [SerializeField] private Animator doorAnimator;
     [SerializeField] private List<Animator> legAnimator;
     private void LegAnimation(string hash, bool value)
@@ -44,17 +46,17 @@ public class SpaceShipManager : MonoBehaviour
         }
     }
 
-    void Update()
+    private void Start()
     {
-        if (null != GameObject.FindWithTag("Player"))
+        if (initLanding)
         {
-            OpenDoor();
             Landing();
+            OpenDoor();
         }
         else
         {
-            CloseDoor();
             Launching();
+            CloseDoor();
         }
     }
 

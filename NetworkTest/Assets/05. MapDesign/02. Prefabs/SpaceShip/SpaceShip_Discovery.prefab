@@ -93,6 +93,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dedc11b8b106a5344afbb8efbd9b4dfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  initLanding: 0
   doorAnimator: {fileID: 6872225932950222123}
   legAnimator:
   - {fileID: 2109109341752424016}
@@ -2657,11 +2658,11 @@ Transform:
   m_GameObject: {fileID: 9083306563976405588}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 0.00000005543744}
-  m_LocalScale: {x: 0.5, y: 0.3, z: 0.2}
+  m_LocalPosition: {x: -0, y: 0.157, z: 0.027}
+  m_LocalScale: {x: 0.6, y: 0.2, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7001478456867087418}
+  m_Father: {fileID: 8429197260699611284}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6095380004760907797
 MonoBehaviour:
@@ -60497,6 +60498,14 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 6976254342190479424, guid: 209c8662791d03741acf160b036c8260, type: 3}
+      propertyPath: offset.x
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6976254342190479424, guid: 209c8662791d03741acf160b036c8260, type: 3}
+      propertyPath: offset.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6985372718017354299, guid: 209c8662791d03741acf160b036c8260, type: 3}
       propertyPath: m_Layer
       value: 30
@@ -66900,9 +66909,17 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 1380329186850720447, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1380329188066343789, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
       propertyPath: m_Layer
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 1380329188066343789, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1383026083313389952, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
       propertyPath: m_Layer
@@ -70479,7 +70496,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 4320759752610536489, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 3325580302382336135, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8946927920049148986}
     m_AddedComponents:
@@ -71317,11 +71334,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!4 &7001478456867087418 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4320759752610536489, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
-  m_PrefabInstance: {fileID: 6547199861500622867}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7202715308109229612 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4118960759674066495, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
@@ -71378,6 +71390,11 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!4 &8429197260699611284 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3325580302382336135, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
+  m_PrefabInstance: {fileID: 6547199861500622867}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8490128839121532786 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3390837405720792929, guid: 2c57f551a2269484ea3107dbc452bf80, type: 3}
