@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace SlimeStates
 {
@@ -120,7 +120,7 @@ namespace SlimeStates
             }
 
             if (monster.GetDistanceToPlayer() <= monster.config.attackRange) return monster.fsm.AttackState;
-            if (monster.player != null) monster.MoveTo(monster.player.transform.position);
+            if (monster.TargetPlayer != null) monster.MoveTo(monster.TargetPlayer.transform.position);
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination) return monster.fsm.LookAroundState;
             return this;
         }
@@ -148,7 +148,7 @@ namespace SlimeStates
         {
             monster.StopMoving();
             monster.SetAnimFloat(monster.hashMoveSpeed, 0f);
-            if (monster.player != null) monster.LookAt(monster.player.transform.position);
+            if (monster.TargetPlayer != null) monster.LookAt(monster.TargetPlayer.transform.position);
 
             int attackIndex = Random.Range(0, 3);
             if (attackIndex == 0) monster.SetAnimTrigger(monster.hashAttack1);
@@ -261,7 +261,8 @@ namespace SlimeStates
             if (MonsterManager.Instance != null)
                 MonsterManager.Instance.RegisterMonsterDied();
 
-            Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
+            // Object.Destroy는 MonsterAIController의 DespawnRoutine에서 중앙 관리됩니다.
+            // Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController m) { return this; }
 

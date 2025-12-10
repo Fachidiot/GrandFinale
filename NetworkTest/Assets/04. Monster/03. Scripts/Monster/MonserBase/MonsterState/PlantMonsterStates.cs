@@ -71,8 +71,8 @@ namespace PlantMonsterStates
 
             checkTimer += Time.deltaTime;
 
-            if (monster.player != null)
-                monster.LookAt(monster.player.transform.position);
+            if (monster.TargetPlayer != null)
+                monster.LookAt(monster.TargetPlayer.transform.position);
 
             // 플레이어 감지 체크
             if (monster.sensor.CanSeePlayer)
@@ -136,8 +136,8 @@ namespace PlantMonsterStates
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
             // (Root Motion이 없다면 NavMesh로 이동)
-            if (monster.player != null)
-                monster.MoveTo(monster.player.transform.position);
+            if (monster.TargetPlayer != null)
+                monster.MoveTo(monster.TargetPlayer.transform.position);
 
             // (요청) "Jump -> Attack" 연계
             // 점프 공격 도중에라도 가까워지면 '숨기 상태'가 아닌 '근접 공격' 상태로 바로 전환
@@ -174,8 +174,8 @@ namespace PlantMonsterStates
             else if (attackIndex == 1)
                 monster.SetAnimTrigger(monster.hashAttack2);
 
-            if (monster.player != null)
-                monster.LookAt(monster.player.transform.position);
+            if (monster.TargetPlayer != null)
+                monster.LookAt(monster.TargetPlayer.transform.position);
             timer = 0f;
             hasAppliedDamage = false;
         }
@@ -257,7 +257,7 @@ namespace PlantMonsterStates
         {
             monster.SetAnimTrigger(PlantAnimHashes.castEnd);
 
-            if (plantConfig.projectilePrefab == null || monster.firePoint == null || monster.player == null)
+            if (plantConfig.projectilePrefab == null || monster.firePoint == null || monster.TargetPlayer == null)
             {
                 Debug.LogError("Projectile Fire Failed: Config, FirePoint, or Player is missing!");
                 return;
@@ -269,7 +269,7 @@ namespace PlantMonsterStates
                 Quaternion.identity
             );
 
-            Vector3 targetPosition = monster.player.transform.position;
+            Vector3 targetPosition = monster.TargetPlayer.transform.position;
             Projectile_Arc arcScript = projectile.GetComponent<Projectile_Arc>();
 
             if (arcScript != null)
@@ -332,22 +332,24 @@ namespace PlantMonsterStates
             if (MonsterManager.Instance != null)
                 MonsterManager.Instance.RegisterMonsterDied();
             
-            monster.StartCoroutine(DieRoutine(monster));
+            // The DespawnRoutine in MonsterAIController now handles destroying the monster.
+            // monster.StartCoroutine(DieRoutine(monster));
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController m) { return this; }
         public override void ExitState(MonsterAIController m) { }
         
-        private System.Collections.IEnumerator DieRoutine(MonsterAIController monster)
-        {
-            yield return new WaitForSeconds(monster.config.corpseDestroyDelay);
-            if (SpawnManager.Instance != null)
-            {
-                SpawnManager.Instance.ReturnMonsterToPool(monster.gameObject);
-            }
-            else
-            {
-                Object.Destroy(monster.gameObject);
-            }
-        }
+        // This routine is now centralized in MonsterAIController.
+        // private System.Collections.IEnumerator DieRoutine(MonsterAIController monster)
+        // {
+        //     yield return new WaitForSeconds(monster.config.corpseDestroyDelay);
+        //     if (SpawnManager.Instance != null)
+        //     {
+        //         SpawnManager.Instance.ReturnMonsterToPool(monster.gameObject);
+        //     }
+        //     else
+        //     {
+        //         Object.Destroy(monster.gameObject);
+        //     }
+        // }
     }
 }

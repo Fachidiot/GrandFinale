@@ -103,8 +103,8 @@ namespace GazerStates
                 return monster.fsm.AttackState; // -> MeleeAttackState
             }
 
-            if (monster.player != null)
-                monster.MoveTo(monster.player.transform.position);
+            if (monster.TargetPlayer != null)
+                monster.MoveTo(monster.TargetPlayer.transform.position);
 
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
@@ -124,7 +124,7 @@ namespace GazerStates
         {
             monster.StopMoving();
             monster.SetAnimFloat(monster.hashMoveSpeed, 0f);
-            if (monster.player != null) monster.LookAt(monster.player.transform.position);
+            if (monster.TargetPlayer != null) monster.LookAt(monster.TargetPlayer.transform.position);
 
             int attackIndex = Random.Range(0, 4); // 0, 1, 2, 3
             if (attackIndex == 0) monster.SetAnimTrigger(monster.hashAttack1);
@@ -173,7 +173,7 @@ namespace GazerStates
             if (gazerFSM == null) gazerFSM = monster.fsm as GazerFSM;
 
             monster.StopMoving();
-            if (monster.player != null) monster.LookAt(monster.player.transform.position);
+            if (monster.TargetPlayer != null) monster.LookAt(monster.TargetPlayer.transform.position);
 
             monster.SetAnimTrigger(GazerAnimHashes.Cast3Start);
             timer = 0f;
@@ -184,9 +184,9 @@ namespace GazerStates
 
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
-            if (monster.player != null && !hasStoppedBeam)
+            if (monster.TargetPlayer != null && !hasStoppedBeam)
             {
-                if (monster.player != null) monster.LookAt(monster.player.transform.position, 1.5f);
+                if (monster.TargetPlayer != null) monster.LookAt(monster.TargetPlayer.transform.position, 1.5f);
             }
 
 
@@ -343,7 +343,8 @@ namespace GazerStates
                 health.SpawnLoot(monster.config.lootTable);
             if (MonsterManager.Instance != null)
                 MonsterManager.Instance.RegisterMonsterDied();
-            Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
+            // Object.Destroy는 MonsterAIController의 DespawnRoutine에서 중앙 관리됩니다.
+            // Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController m) { return this; }
         public override void ExitState(MonsterAIController m) { }

@@ -116,6 +116,6 @@ public class OptionController : MonoBehaviour
         }
 
         SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
-        GameManager.Instance.isMainMenu = true;
+        // GameManager.Instance.isMainMenu = true;
     }
 }

@@ -51,7 +51,7 @@ public class InventoryManager : MonoBehaviour
 
     public static event Action OnInventoryChanged;
     public static event Action<bool> OnInventoryToggle;
-    public static event Action OnCloseExternalUI;
+    // public static event Action OnCloseExternalUI;
 
     #endregion
 
@@ -107,7 +107,7 @@ public class InventoryManager : MonoBehaviour
         }
 
 
-            InitCanvasGroup(fullInventoryUI, ref fullCanvasGroup);
+        InitCanvasGroup(fullInventoryUI, ref fullCanvasGroup);
         InitCanvasGroup(smallInventoryUI, ref smallCanvasGroup);
 
         InitializeInventorySlots();

@@ -47,6 +47,8 @@ public class InGameUIManager : MonoBehaviour
     {
         Debug.Log($"[InGameUIManager] Disconnected. Returning to main menu.");
         SceneManager.LoadScene(GameManager.Instance.GameSettings.mainmenuScene);
+
+        GameManager.Instance.isMainMenu = true;
         Destroy(NetworkManager.Instance.GetComponent<ServerRoomManager>());
     }
 

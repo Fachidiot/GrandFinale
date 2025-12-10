@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 namespace MinotaurStates
@@ -78,9 +78,9 @@ namespace MinotaurStates
         {
             monster.SetAnimFloat(monster.hashMoveSpeed, 2f);
 
-            if (monster.player != null)
+            if (monster.TargetPlayer != null)
             {
-                monster.MoveTo(monster.player.transform.position);
+                monster.MoveTo(monster.TargetPlayer.transform.position);
             }
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
@@ -89,7 +89,7 @@ namespace MinotaurStates
             {
                 return monster.fsm.AttackState;
             }
-            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
+            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.TargetPlayer.transform.position : monster.sensor.TargetLastPosition;
             monster.MoveTo(targetPosition);
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
@@ -162,9 +162,9 @@ namespace MinotaurStates
                 monster.SetAnimTrigger(monster.hashAttack3);
             }
 
-            if (monster.player != null)
+            if (monster.TargetPlayer != null)
             {
-                monster.LookAt(monster.player.transform.position);
+                monster.LookAt(monster.TargetPlayer.transform.position);
             }
             timer = 0f;
             hasAppliedDamage = false;
@@ -174,9 +174,9 @@ namespace MinotaurStates
         {
             // 5. (유지) 공격 중에도 플레이어를 계속 바라봅니다.
             monster.StopMoving();
-            if (monster.player != null)
+            if (monster.TargetPlayer != null)
             {
-                monster.LookAt(monster.player.transform.position);
+                monster.LookAt(monster.TargetPlayer.transform.position);
             }
 
             // 6. (추가) 타이머를 증가시킵니다.
@@ -267,7 +267,8 @@ namespace MinotaurStates
                 MonsterManager.Instance.RegisterMonsterDied();
             }
 
-            Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
+            // Object.Destroy는 MonsterAIController의 DespawnRoutine에서 중앙 관리됩니다.
+            // Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {

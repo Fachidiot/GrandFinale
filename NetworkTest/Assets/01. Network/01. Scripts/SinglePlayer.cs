@@ -12,6 +12,7 @@ public class SinglePlayer : MonoBehaviour, IPlayerControllable
     public new GameObject gameObject => base.gameObject;
     public new Transform transform => base.transform;
 
+    public string Id => "SinglePlayer";
     private HitBoxColidersList hitBoxColidersList;
     private CharacterController characterController;
     private InputHandler input_Handler;

@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class MonsterSensor : MonoBehaviour
 {
     [Header("감지 설정")]
     public MonsterConfig config;
-    public LayerMask targetMask;
+    public LayerMask targetMask; // Should be the Player layer
     public LayerMask obstructionMask;
 
     [Tooltip("레이캐스트를 시작할 '눈' 높이")]
@@ -15,30 +17,39 @@ public class MonsterSensor : MonoBehaviour
     public float proximityRange = 3.0f;
 
     [Tooltip("강제 감지(피격 등) 시 유지되는 기억 시간")]
-    public float memoryDuration = 3.0f; // 피격당하면 3초간은 안 보여도 쫓아옴
+    public float memoryDuration = 3.0f;
 
-    // 감지 결과 프로퍼티
+    // --- 감지 결과 프로퍼티 ---
     public bool CanSeePlayer { get; private set; }
     public Vector3 TargetLastPosition { get; private set; }
+    public GameObject Target { get; private set; }
 
-    private GameObject player;
+    // --- 내부 참조 ---
     private MonsterHealth health;
     private WaitForSeconds checkDelay = new WaitForSeconds(0.2f);
-
-    // 남은 기억 시간 (피격 시 일정 시간 동안 추적 유지용)
     private float currentMemoryTime = 0f;
+    private bool isHost;
 
     private void Start()
     {
-        // 싱글 플레이에선 여기서 찾아지지만, 멀티에선 못 찾을 수도 있음
-        player = GameObject.FindGameObjectWithTag("Player");
+        isHost = NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host;
         health = GetComponent<MonsterHealth>();
+
+        // 센서 로직은 오직 호스트에서만 실행됩니다.
+        if (!isHost)
+        {
+            this.enabled = false;
+            return;
+        }
+
         StartCoroutine(CheckFovRoutine());
     }
 
     private void Update()
     {
-        // 기억 시간 감소 (매 프레임)
+        // 호스트에서만 기억 시간을 관리합니다.
+        if (!isHost) return;
+
         if (currentMemoryTime > 0)
         {
             currentMemoryTime -= Time.deltaTime;
@@ -49,100 +60,167 @@ public class MonsterSensor : MonoBehaviour
     {
         while (true)
         {
-            // 죽었으면 센서 중지
-            if (health != null && health.IsDead) yield break;
+            if (health != null && health.IsDead)
+            {
+                // 몬스터가 죽으면 타겟을 초기화하고 루틴을 종료합니다.
+                ClearTarget();
+                yield break;
+            }
 
-            CheckFov();
+            FindBestTarget();
             yield return checkDelay;
         }
     }
 
-    private void CheckFov()
+    private void FindBestTarget()
     {
-        // [네트워크 안전장치] 플레이어가 처음에 없었다면, 매번 다시 찾아본다.
-        if (player == null)
+        // PlayerManager에 접근할 수 없으면 탐색을 중단합니다.
+        if (PlayerManager.Instance == null) return;
+
+        // PlayerManager.Instance.Players는 Dictionary 형태일 가능성이 높으므로, .Values로 접근합니다.
+        var players = PlayerManager.Instance.Players.Values;
+        if (players == null || players.Count() == 0)
         {
-            player = GameObject.FindGameObjectWithTag("Player");
-            if (player == null) return; // 아직도 없으면 이번 턴은 패스
+            ClearTarget();
+            return;
         }
 
-        bool isPhysicallyDetected = false;
-        float distToPlayer = Vector3.Distance(transform.position, player.transform.position);
+        GameObject bestTarget = null;
+        float minDistanceSqr = float.MaxValue;
 
-        // 1. 근접 감지 (등 뒤여도 감지)
-        if (distToPlayer <= proximityRange)
+        // 모든 플레이어를 순회하며 최고의 타겟을 찾습니다.
+        foreach (var player in players)
         {
-            isPhysicallyDetected = true;
-        }
-        // 2. 시야각 감지 (Config 범위 내)
-        else if (distToPlayer <= config.fovRange)
-        {
-            Vector3 eyePos = transform.position + Vector3.up * eyeHeight;
-            Vector3 dirToTarget = (player.transform.position - eyePos).normalized;
+            // IPlayerControllable 인터페이스는 gameObject 프로퍼티를 가집니다.
+            if (player.gameObject == null) continue;
 
-            Vector3 forward2D = transform.forward; forward2D.y = 0;
-            Vector3 targetDir2D = dirToTarget; targetDir2D.y = 0;
+            Vector3 playerPosition = player.gameObject.transform.position;
+            float distSqr = (transform.position - playerPosition).sqrMagnitude;
 
-            if (Vector3.Angle(forward2D, targetDir2D) < config.fovAngle / 2)
+            // 이미 더 가까운 타겟이 있다면 건너뜁니다.
+            if (distSqr > minDistanceSqr) continue;
+
+            // 시야 검사를 통과하는지 확인합니다.
+            if (IsPlayerInSight(player.gameObject))
             {
-                // 장애물(벽) 체크
-                if (!Physics.Raycast(eyePos, dirToTarget, distToPlayer, obstructionMask))
-                {
-                    isPhysicallyDetected = true;
-                }
+                minDistanceSqr = distSqr;
+                bestTarget = player.gameObject;
             }
         }
 
-        // 3. 결과 처리 (물리적 감지 OR 기억력)
-        if (isPhysicallyDetected)
+        // 결과 처리
+        if (bestTarget != null)
         {
-            // 실제로 봤으니 기억 시간 리셋 (추적 모드 갱신)
-            currentMemoryTime = 0f;
-
-            CanSeePlayer = true;
-            TargetLastPosition = player.transform.position;
-
-             Debug.Log("<color=cyan>캬캬캬 플레이어 발견! 캬캬캬</color>");
+            // 새로운 타겟을 감지했습니다.
+            currentMemoryTime = 0f; // 실제로 봤으므로 기억 시간 리셋
+            SetTarget(bestTarget);
         }
         else
         {
-            // 물리적으로는 안 보이지만, 기억 시간(피격 버프)이 남아있다면 '감지 중'으로 처리
-            if (currentMemoryTime > 0)
+            // 물리적으로 보이는 타겟이 없습니다.
+            // 기억 시간이 남아있고, 기존 타겟이 유효하다면 타겟을 유지합니다.
+            if (currentMemoryTime > 0 && Target != null)
             {
-                CanSeePlayer = true;
-                // 기억 중일 때는 위치를 계속 갱신해줘야 벽 뒤로 숨어도 끝까지 쫓아감
-                TargetLastPosition = player.transform.position;
+                // 타겟이 비활성화되거나 파괴되었는지 확인합니다.
+                if (Target.activeInHierarchy)
+                {
+                    // 기억에 의존하여 타겟 위치를 계속 업데이트합니다.
+                    TargetLastPosition = Target.transform.position;
+                }
+                else
+                {
+                    // 기억에 의존하던 타겟이 사라졌으므로 초기화합니다.
+                    ClearTarget();
+                }
             }
             else
             {
-                CanSeePlayer = false;
+                // 기억 시간도 없고, 보이는 플레이어도 없으므로 타겟을 완전히 잃습니다.
+                ClearTarget();
             }
         }
     }
 
-    /// <summary>
-    /// 피격 시 호출: 일정 시간 동안 강제로 추적 모드 활성화
-    /// </summary>
-    public void ForceDetection(Vector3 targetPos)
+    private bool IsPlayerInSight(GameObject player)
     {
-        // 강제 감지 시에도 플레이어 참조가 필요할 수 있으므로 안전장치
-        if (player == null) player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return false;
 
+        Vector3 eyePos = transform.position + Vector3.up * eyeHeight;
+        Vector3 playerPos = player.transform.position;
+        float distToPlayer = Vector3.Distance(transform.position, playerPos);
+
+        // 1. 근접 감지 (360도)
+        if (distToPlayer <= proximityRange)
+        {
+            // 근접 범위에서는 장애물만 체크합니다.
+            if (!Physics.Raycast(eyePos, (playerPos - eyePos).normalized, distToPlayer, obstructionMask))
+            {
+                return true;
+            }
+        }
+
+        // 2. 시야각 감지 (FOV)
+        if (distToPlayer <= config.fovRange)
+        {
+            Vector3 dirToTarget = (playerPos - eyePos).normalized;
+
+            // y축을 무시한 2D 각도 계산
+            Vector3 forward2D = transform.forward;
+            forward2D.y = 0;
+            Vector3 targetDir2D = dirToTarget;
+            targetDir2D.y = 0;
+
+            if (Vector3.Angle(forward2D.normalized, targetDir2D.normalized) < config.fovAngle / 2)
+            {
+                // 시야각 내에 있고, 장애물이 없는지 최종 확인합니다.
+                if (!Physics.Raycast(eyePos, dirToTarget, distToPlayer, obstructionMask))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 피격 시 외부에서 호출되어 타겟을 강제로 설정하고 기억 시간을 부여합니다.
+    /// </summary>
+    public void ForceDetection(GameObject attacker)
+    {
+        if (!isHost || attacker == null) return;
+
+        // 공격자가 유효한 플레이어인지 확인합니다. (옵션)
+        if (attacker.TryGetComponent<IPlayerControllable>(out _))
+        {
+            SetTarget(attacker);
+            currentMemoryTime = memoryDuration; // 기억 시간 충전
+        }
+    }
+    
+    private void SetTarget(GameObject newTarget)
+    {
+        Target = newTarget;
         CanSeePlayer = true;
-        TargetLastPosition = targetPos;
-        currentMemoryTime = memoryDuration; // 기억 시간 충전
-        Debug.LogWarning($"<color=orange>[Sensor] 피격 감지! {memoryDuration}초간 강제 추적.</color>");
+        if(Target != null)
+        {
+            TargetLastPosition = Target.transform.position;
+        }
+    }
+
+    private void ClearTarget()
+    {
+        Target = null;
+        CanSeePlayer = false;
     }
 
     private void OnDrawGizmosSelected()
     {
         if (config == null) return;
 
-        // 시야각 (파랑)
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, config.fovRange);
 
-        // 근접 감지 (빨강)
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, proximityRange);
 
@@ -150,5 +228,11 @@ public class MonsterSensor : MonoBehaviour
         Vector3 fovLine2 = Quaternion.AngleAxis(-config.fovAngle / 2, transform.up) * transform.forward * config.fovRange;
         Gizmos.DrawRay(transform.position, fovLine1);
         Gizmos.DrawRay(transform.position, fovLine2);
+
+        if (Target != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position + Vector3.up * eyeHeight, Target.transform.position);
+        }
     }
 }

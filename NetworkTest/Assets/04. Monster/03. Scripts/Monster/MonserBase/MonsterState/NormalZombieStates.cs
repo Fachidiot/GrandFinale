@@ -78,9 +78,9 @@ namespace NormalZombieStates
         {
             monster.SetAnimBool(monster.hashIsRunning, true);
 
-            if (monster.player != null)
+            if (monster.TargetPlayer != null)
             {
-                monster.MoveTo(monster.player.transform.position);
+                monster.MoveTo(monster.TargetPlayer.transform.position);
             }
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
@@ -90,7 +90,7 @@ namespace NormalZombieStates
                 // (수정) monster.fsm 사용
                 return monster.fsm.AttackState;
             }
-            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
+            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.TargetPlayer.transform.position : monster.sensor.TargetLastPosition;
             monster.MoveTo(targetPosition);
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
@@ -145,9 +145,9 @@ namespace NormalZombieStates
         {
             monster.StopMoving();
             monster.SetAnimTrigger(monster.hashAttack1);
-            if (monster.player != null)
+            if (monster.TargetPlayer != null)
             {
-                monster.LookAt(monster.player.transform.position);
+                monster.LookAt(monster.TargetPlayer.transform.position);
             }
             timer = 0f;
         }
@@ -155,9 +155,9 @@ namespace NormalZombieStates
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {
             monster.StopMoving();
-            if (monster.player != null)
+            if (monster.TargetPlayer != null)
             {
-                monster.LookAt(monster.player.transform.position);
+                monster.LookAt(monster.TargetPlayer.transform.position);
             }
 
             timer += Time.deltaTime;
@@ -217,7 +217,8 @@ namespace NormalZombieStates
                 MonsterManager.Instance.RegisterMonsterDied();
             }
 
-            Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
+            // Object.Destroy는 MonsterAIController의 DespawnRoutine에서 중앙 관리됩니다.
+            // Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {

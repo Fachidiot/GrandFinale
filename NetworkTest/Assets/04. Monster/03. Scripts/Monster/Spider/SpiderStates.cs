@@ -70,7 +70,7 @@ namespace SpiderStates
                 // (수정) monster.fsm 사용
                 return monster.fsm.AttackState;
             }
-            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.player.transform.position : monster.sensor.TargetLastPosition;
+            Vector3 targetPosition = monster.sensor.CanSeePlayer ? monster.TargetPlayer.transform.position : monster.sensor.TargetLastPosition;
             monster.MoveTo(targetPosition);
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
@@ -106,7 +106,7 @@ namespace SpiderStates
             // 처럼 사용하는 것을 권장합니다.
 
 
-            if (monster.player != null) { monster.LookAt(monster.player.transform.position); }
+            if (monster.TargetPlayer != null) { monster.LookAt(monster.TargetPlayer.transform.position); }
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController monster)
         {

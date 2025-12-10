@@ -22,6 +22,7 @@ public class NetworkPlayer : MonoBehaviour, IPlayerControllable
     private HitBoxColidersList hitBoxColidersList;
     private CharacterController characterController;
 
+    public string Id { get; private set; }
     public bool IsMine { get; private set; }
 
     public void Awake()
@@ -48,6 +49,7 @@ public class NetworkPlayer : MonoBehaviour, IPlayerControllable
 
     public void Initialize(string steamId, bool isMine)
     {
+        this.Id = steamId;
         this.IsMine = isMine;
 
         if (BodyTransformSync != null) BodyTransformSync.Initialize(steamId, isMine);

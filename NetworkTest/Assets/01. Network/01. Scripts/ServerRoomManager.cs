@@ -81,6 +81,46 @@ public class ServerRoomManager : MonoBehaviour
         // In SinglePlayer mode, we don't handle any network messages.
     }
 
+    /// <summary>
+    /// (Host-only) Called by monster AI to deal damage to a specific player.
+    /// This method will send a command to the corresponding client to apply the damage locally.
+    /// </summary>
+    public void HandleMonsterDamage(string steamId, float damage)
+    {
+        if (NetworkManager.Instance.Mode != NetworkMode.Host || damage <= 0) return;
+
+        // Find the CSteamID for the given string steamId.
+        var playerInfo = PlayerList.FirstOrDefault(p => p.steam_id == steamId);
+        if (string.IsNullOrEmpty(playerInfo.steam_id))
+        {
+            Debug.LogWarning($"[ServerRoomManager] HandleMonsterDamage: Could not find player with Steam ID {steamId}.");
+            return;
+        }
+
+        CSteamID targetSteamId = new CSteamID(ulong.Parse(playerInfo.steam_id));
+        if (!targetSteamId.IsValid()) return;
+        
+        // If the target is the host itself, apply damage directly without sending a message.
+        if (targetSteamId == NetworkManager.Instance.selfSteamId)
+        {
+            PlayerManager.Instance.LocalPlayer?.GetComponent<PlayerStats>()?.TakeDamage(damage);
+            Debug.Log($"[ServerRoomManager] Applied {damage} damage to host.");
+        }
+        else
+        {
+            // Create the damage message for the client.
+            JObject damageMsg = new JObject
+            {
+                ["type"] = "player_took_damage",
+                ["damage"] = damage
+            };
+
+            // Send the message to the specific client.
+            NetworkManager.Instance.SendJsonMessage(targetSteamId, damageMsg);
+            Debug.Log($"[ServerRoomManager] Sent 'player_took_damage' message ({damage} damage) to player {playerInfo.nickname} ({targetSteamId}).");
+        }
+    }
+
     private void OnDestroy()
     {
         if (Instance == this)
@@ -521,6 +561,15 @@ public class ServerRoomManager : MonoBehaviour
                     SceneManager.LoadScene(sceneToLoad);
                     GameManager.Instance.isMainMenu = false;
                     GameManager.Instance.SetPause(false);
+                }
+                break;
+            
+            case "player_took_damage":
+                float damage = response["damage"]?.ToObject<float>() ?? 0f;
+                if (damage > 0 && PlayerManager.Instance != null && PlayerManager.Instance.LocalPlayer != null)
+                {
+                    PlayerManager.Instance.LocalPlayer.GetComponent<PlayerStats>()?.TakeDamage(damage);
+                    Debug.Log($"[ServerRoomManager] Received damage from host: {damage}");
                 }
                 break;
         }

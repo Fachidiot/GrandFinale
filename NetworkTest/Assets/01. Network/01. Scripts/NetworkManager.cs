@@ -396,9 +396,6 @@ public class NetworkManager : MonoBehaviour
         lobbyMembers.Clear();
         receivedPlayerStates.Clear();
 
-        GameManager.Instance.isMainMenu = true;
-        Destroy(NetworkManager.Instance.GetComponent<ServerRoomManager>());
-
         Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
     }

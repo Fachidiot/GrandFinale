@@ -80,8 +80,8 @@ namespace GolemStates
                 return monster.fsm.AttackState;
             }
 
-            if (monster.player != null)
-                monster.MoveTo(monster.player.transform.position);
+            if (monster.TargetPlayer != null)
+                monster.MoveTo(monster.TargetPlayer.transform.position);
 
             if (!monster.sensor.CanSeePlayer && monster.arrivedAtDestination)
             {
@@ -109,8 +109,8 @@ namespace GolemStates
             monster.StopMoving();
             monster.SetAnimFloat(monster.hashMoveSpeed, 0f);
 
-            if (monster.player != null)
-                monster.LookAt(monster.player.transform.position);
+            if (monster.TargetPlayer != null)
+                monster.LookAt(monster.TargetPlayer.transform.position);
 
             // (요청) Attack 1~4 중 하나를 랜덤으로 실행
             int attackIndex = Random.Range(0, 4); // 0, 1, 2, 3
@@ -204,8 +204,8 @@ namespace GolemStates
             // 3. "반격 돌진" 단계
             else if (CurrentPhase == Phase.CounterRush)
             {
-                if (monster.player != null)
-                    monster.MoveTo(monster.player.transform.position);
+                if (monster.TargetPlayer != null)
+                    monster.MoveTo(monster.TargetPlayer.transform.position);
 
                 // 공격 범위에 도착하면 공격 상태로
                 if (monster.GetDistanceToPlayer() <= monster.config.attackRange)
@@ -294,7 +294,8 @@ namespace GolemStates
                 health.SpawnLoot(monster.config.lootTable);
             if (MonsterManager.Instance != null)
                 MonsterManager.Instance.RegisterMonsterDied();
-            Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
+            // Object.Destroy는 MonsterAIController의 DespawnRoutine에서 중앙 관리됩니다.
+            // Object.Destroy(monster.gameObject, monster.config.corpseDestroyDelay);
         }
         public override ZombieBaseState<MonsterAIController> UpdateState(MonsterAIController m) { return this; }
         public override void ExitState(MonsterAIController m) { }

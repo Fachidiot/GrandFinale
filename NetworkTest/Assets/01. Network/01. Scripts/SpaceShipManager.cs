@@ -96,7 +96,7 @@ public class SpaceShipManager : MonoBehaviour
         Debug.Log("[SpaceShipManager] Launching...");
     }
 
-    private float cooltime = 0f;
+    private float cooltime = -4f;
     public void OpenDoor()
     {
         if (IsDoorOpen)

@@ -15,7 +15,9 @@ public class MonsterAIController : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     public MonsterFSM fsm { get; private set; }
-    public GameObject player { get; private set; }
+    public GameObject TargetPlayer { get; private set; }
+
+    private bool isHost;
 
     [Header("설정")]
     public MonsterConfig config;
@@ -89,7 +91,6 @@ public class MonsterAIController : MonoBehaviour
         sensor = GetComponent<MonsterSensor>();
         animator = GetComponentInChildren<Animator>();
         fsm = GetComponent<MonsterFSM>();
-        player = GameObject.FindGameObjectWithTag("Player");
         TryGetComponent<NavMeshAgent>(out agent);
 
         if (animConfig == null || config == null || fsm == null)
@@ -104,6 +105,18 @@ public class MonsterAIController : MonoBehaviour
 
     void Start()
     {
+        isHost = NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host;
+
+        if (!isHost)
+        {
+            // 클라이언트인 경우, 행동을 제어하는 AI 컴포넌트를 비활성화합니다.
+            // 몬스터는 NetworkMonsterTransformSync와 NetworkMonsterAnimatorSync에 의해 제어됩니다.
+            if (agent != null) agent.enabled = false;
+            if (sensor != null) sensor.enabled = false;
+            return; // AI 로직을 실행하지 않고 종료
+        }
+        
+        // --- 호스트만 실행하는 로직 ---
         health.OnHit.AddListener(HandleHit);
         health.OnDeath.AddListener(HandleDeath);
         health.OnBlock.AddListener(HandleBlock);
@@ -156,15 +169,11 @@ public class MonsterAIController : MonoBehaviour
 
     void Update()
     {
-        if (player == null)
-        {
-            if (sensor.CanSeePlayer)
-            {
-                player = GameObject.FindGameObjectWithTag("Player");
-            }
+        // AI 업데이트 루프는 호스트에서만 실행됩니다.
+        if (!isHost) return;
 
-            if (player == null) return;
-        }
+        // 센서로부터 현재 타겟을 받아옵니다.
+        TargetPlayer = sensor.Target;
 
         if (CurrentState == null || health.IsDead) return;
 
@@ -260,10 +269,10 @@ public class MonsterAIController : MonoBehaviour
 
     public float GetDistanceToPlayer()
     {
-        if (player == null) return Mathf.Infinity;
+        if (TargetPlayer == null) return Mathf.Infinity;
         // y축 차이 무시하고 수평 거리만 계산
         Vector3 monsterPos = new Vector3(transform.position.x, 0, transform.position.z);
-        Vector3 playerPos = new Vector3(player.transform.position.x, 0, player.transform.position.z);
+        Vector3 playerPos = new Vector3(TargetPlayer.transform.position.x, 0, TargetPlayer.transform.position.z);
         return Vector3.Distance(monsterPos, playerPos);
     }
 
@@ -289,18 +298,19 @@ public class MonsterAIController : MonoBehaviour
     // 기본 공격 데미지 적용
     public void ApplyDamageToPlayer()
     {
-        if (player == null || health.IsDead) return;
+        if (TargetPlayer == null || health.IsDead || !isHost) return;
 
         if (GetDistanceToPlayer() <= config.attackRange)
         {
-            if (player.TryGetComponent<PlayerStats>(out PlayerStats playerStats))
+            if (TargetPlayer.TryGetComponent<IPlayerControllable>(out IPlayerControllable playerControllable))
             {
-                playerStats.TakeDamage(config.attackDamage);
-            }
-            else
-            {
-                // PlayerStats가 없을 경우 대비
-                player.SendMessage("TakeDamage", config.attackDamage, SendMessageOptions.DontRequireReceiver);
+                // 서버 권위적 데미지 처리:
+                // 호스트는 데미지를 직접 적용하는 대신, 중앙 관리자(ServerRoomManager)에게 데미지 처리를 요청합니다.
+                // ServerRoomManager는 해당 플레이어 클라이언트에게 데미지를 입으라는 메시지를 보냅니다.
+                if (ServerRoomManager.Instance != null)
+                {
+                    ServerRoomManager.Instance.HandleMonsterDamage(playerControllable.Id, config.attackDamage);
+                }
             }
         }
     }
@@ -308,15 +318,14 @@ public class MonsterAIController : MonoBehaviour
     // [신규] 커스텀 데미지 적용 (돌진 공격용)
     public void ApplyDamageToPlayer(float customDamage)
     {
-        if (player == null || health.IsDead) return;
+        if (TargetPlayer == null || health.IsDead || !isHost) return;
 
-        if (player.TryGetComponent<PlayerStats>(out PlayerStats playerStats))
+        if (TargetPlayer.TryGetComponent<IPlayerControllable>(out IPlayerControllable playerControllable))
         {
-            playerStats.TakeDamage(customDamage);
-        }
-        else
-        {
-            player.SendMessage("TakeDamage", customDamage, SendMessageOptions.DontRequireReceiver);
+            if (ServerRoomManager.Instance != null)
+            {
+                ServerRoomManager.Instance.HandleMonsterDamage(playerControllable.Id, customDamage);
+            }
         }
     }
 
@@ -326,32 +335,21 @@ public class MonsterAIController : MonoBehaviour
 
     private void HandleHit()
     {
+        // 이벤트 핸들러는 호스트에서만 실행되어야 합니다.
+        if (!isHost) return;
+
         // 0. 죽었으면 무시
         if (health.IsDead) return;
-
-        // [핵심 수정] 네트워크 환경 대비: 플레이어가 늦게 접속해서 player 변수가 비어있다면, 
-        // 맞은 이 시점에 다시 한번 찾아봅니다.
-        if (player == null)
-        {
-            player = GameObject.FindGameObjectWithTag("Player");
-
-            if (player != null)
-            {
-                Debug.Log($"[AI] {gameObject.name}: 피격 후 플레이어 재탐색 성공!");
-            }
-            else
-            {
-                // 여전히 못 찾았다면 태그 문제거나 진짜 없는 것
-                Debug.LogWarning($"[AI] {gameObject.name}: 피격되었으나 Player 태그를 가진 대상을 찾을 수 없습니다.");
-            }
-        }
+        
+        // 참고: ForceDetection은 이제 공격자 정보를 받아 처리해야 이상적입니다.
+        // 현재는 공격자 정보를 알 수 없으므로, 피격 시의 반응은 FSM 상태 변화에 의존합니다.
+        // sensor는 다음 프레임에 공격자를 자동으로 감지할 것입니다.
 
         // 1. Gazer (원거리) 피격 로직
         if (fsm is GazerFSM gazerFSM)
         {
             if (CurrentState == fsm.IdleState || CurrentState == fsm.PatrolState)
             {
-                if (player != null) sensor.ForceDetection(player.transform.position);
                 SetAnimTrigger(hashHit);
                 ChangeState(fsm.HitState);
                 return;
@@ -362,7 +360,6 @@ public class MonsterAIController : MonoBehaviour
             float hpPercent = health.CurrentHP / health._maxHP;
             if (gazerFSM.CheckAndTriggerThreshold(hpPercent))
             {
-                if (!sensor.CanSeePlayer && player != null) sensor.ForceDetection(player.transform.position);
                 SetAnimTrigger(Random.value > 0.5f ? hashHit : hashHit2);
                 ChangeState(fsm.HitState);
             }
@@ -407,12 +404,6 @@ public class MonsterAIController : MonoBehaviour
         // 4. 그 외 (슬라임, 일반 좀비 등 기본 몬스터)
         else
         {
-            // [핵심 수정] 플레이어가 있다면 위치를 강제로 센서에 주입하여 추적 시작
-            if (player != null)
-            {
-                sensor.ForceDetection(player.transform.position);
-            }
-
             SetAnimTrigger(hashHit);
             ChangeState(fsm.HitState);
         }
@@ -420,6 +411,9 @@ public class MonsterAIController : MonoBehaviour
 
     private void HandleBlock()
     {
+        // 이벤트 핸들러는 호스트에서만 실행되어야 합니다.
+        if (!isHost) return;
+        
         if (health.IsDead) return;
 
         var golemFSM = fsm as GolemFSM;
@@ -432,6 +426,9 @@ public class MonsterAIController : MonoBehaviour
 
     private void HandleDeath()
     {
+        // 이벤트 핸들러는 호스트에서만 실행되어야 합니다.
+        if (!isHost) return;
+        
         StopAllCoroutines();
 
         if (string.IsNullOrEmpty(animConfig.dieTrigger2))
@@ -444,6 +441,26 @@ public class MonsterAIController : MonoBehaviour
         }
 
         ChangeState(fsm.DieState);
+
+        // 호스트만 네트워크를 통해 몬스터를 제거하는 로직을 시작합니다.
+        StartCoroutine(DespawnRoutine());
+    }
+
+    private IEnumerator DespawnRoutine()
+    {
+        // 죽음 애니메이션이 끝날 때까지 대기 (시간은 애니메이션 길이에 맞게 조절)
+        yield return new WaitForSeconds(5.0f); 
+
+        // 스폰 매니저를 통해 몬스터를 풀에 반환하고 모든 클라이언트에게 despawn 메시지를 보냅니다.
+        if (SpawnManager.Instance != null)
+        {
+            SpawnManager.Instance.ReturnMonsterToPool(gameObject);
+        }
+        else
+        {
+            // 폴백: 스폰 매니저가 없을 경우 그냥 파괴
+            Destroy(gameObject);
+        }
     }
 
     #endregion
