@@ -45,11 +45,13 @@ public class InventoryManager : MonoBehaviour
     [Header("Data Storage")]
     public List<InventoryItem> allItems = new List<InventoryItem>();
     public List<InventoryItem> allTabDisplayList = new List<InventoryItem>();
+    private PlayerInputs playerInputs;
 
     public InventoryFilterType currentFilter { get; private set; } = InventoryFilterType.All;
 
     public static event Action OnInventoryChanged;
     public static event Action<bool> OnInventoryToggle;
+    public static event Action OnCloseExternalUI;
 
     #endregion
 
@@ -58,6 +60,11 @@ public class InventoryManager : MonoBehaviour
     [Header("UI Reference")]
     [SerializeField] private GameObject smallInventoryUI;
     [SerializeField] private GameObject fullInventoryUI;
+
+    [Header("UI Positioning")]
+    [SerializeField] private Vector2 defaultSmallPos = Vector2.zero;
+    [SerializeField] private Vector2 shopSmallPos = new Vector2(-600f, 0f);
+    private RectTransform smallInventoryRect;
 
     [Header("Components")]
     [SerializeField] private CharacterMove characterMove;
@@ -76,6 +83,8 @@ public class InventoryManager : MonoBehaviour
     public bool IsUIOpen => (smallInventoryUI != null && smallInventoryUI.activeSelf) ||
                             (fullInventoryUI != null && fullInventoryUI.activeSelf);
 
+    public bool IsFullInventoryOpen => fullInventoryUI != null && fullInventoryUI.activeSelf;
+
     #endregion
 
     #region Initialization
@@ -84,14 +93,33 @@ public class InventoryManager : MonoBehaviour
     {
         if (Instance == null)
             Instance = this;
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         if (characterMove != null) playerAnimator = characterMove.GetComponent<Animator>();
+        if (smallInventoryUI != null) smallInventoryRect = smallInventoryUI.GetComponent<RectTransform>();
+        if (playerInputs != null)
+        {
+            playerInputs = FindObjectOfType<PlayerInputs>();
+        }
 
-        InitCanvasGroup(fullInventoryUI, ref fullCanvasGroup);
+
+            InitCanvasGroup(fullInventoryUI, ref fullCanvasGroup);
         InitCanvasGroup(smallInventoryUI, ref smallCanvasGroup);
 
         InitializeInventorySlots();
         CleanUpGhostItems();
+    }
+
+    private void Update()
+    {
+        if (playerInputs != null && IsFullInventoryOpen && playerInputs.GetEscape())
+        {
+            CloseAllInventories();
+        }
     }
 
     private void InitializeInventorySlots()
@@ -99,18 +127,15 @@ public class InventoryManager : MonoBehaviour
         int total = TotalCapacity;
         while (allItems.Count < total) allItems.Add(null);
         while (allTabDisplayList.Count < total) allTabDisplayList.Add(null);
-        Debug.Log($"[Inventory Init] Dual List Created (Total: {total})");
     }
 
     private void CleanUpGhostItems()
     {
-        int cleanCount = 0;
         for (int i = 0; i < allItems.Count; i++)
         {
             if (allItems[i] != null && allItems[i].item == null)
             {
                 allItems[i] = null;
-                cleanCount++;
             }
         }
         for (int i = 0; i < allTabDisplayList.Count; i++)
@@ -120,7 +145,6 @@ public class InventoryManager : MonoBehaviour
                 allTabDisplayList[i] = null;
             }
         }
-        if (cleanCount > 0) Debug.Log($"[System] Ghost Items Cleaned: {cleanCount}");
     }
 
     private void InitCanvasGroup(GameObject obj, ref CanvasGroup cg)
@@ -145,7 +169,6 @@ public class InventoryManager : MonoBehaviour
         InventoryFilterType type = GetFilterFromItem(newItem);
         var (startIndex, count) = GetCategoryRange(type);
 
-        // 1. Stacking Check
         if (newItem.maxStack > 1)
         {
             for (int i = startIndex; i < startIndex + count; i++)
@@ -160,7 +183,6 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        // 2. Find Empty Slot in Storage
         int realIndex = -1;
         for (int i = startIndex; i < startIndex + count; i++)
         {
@@ -174,11 +196,9 @@ public class InventoryManager : MonoBehaviour
 
         if (realIndex == -1)
         {
-            Debug.LogWarning($"[Inventory Full] {type} Capacity Reached.");
             return false;
         }
 
-        // 3. Find Empty Slot in Display List
         int displayIndex = -1;
         for (int i = 0; i < allTabDisplayList.Count; i++)
         {
@@ -191,12 +211,10 @@ public class InventoryManager : MonoBehaviour
 
         if (displayIndex == -1) displayIndex = realIndex;
 
-        // 4. Create & Assign
         InventoryItem newInvItem = new InventoryItem(newItem, amount);
         allItems[realIndex] = newInvItem;
         allTabDisplayList[displayIndex] = newInvItem;
 
-        // Debug.Log($"[Item Added] {newItem.itemName} (Slot {realIndex})");
         OnInventoryChanged?.Invoke();
         return true;
     }
@@ -246,20 +264,17 @@ public class InventoryManager : MonoBehaviour
 
         RemoveItem(itemToDrop, 1);
     }
+
     public void SortItems()
     {
-        // [CASE A] 전체(All) 탭 정렬 -> 뷰어 리스트(allTabDisplayList)만 정렬
         if (currentFilter == InventoryFilterType.All)
         {
-            // 1. 빈칸과 껍데기를 제외한 알맹이만 추출
             var validItems = allTabDisplayList
                 .Where(x => x != null && x.item != null)
                 .ToList();
 
-            // 2. 정렬 로직 실행 (등급 내림차순 -> 이름 오름차순)
             validItems.Sort(CompareItems);
 
-            // 3. 리스트 재구성 (앞에서부터 채우고 나머지는 null)
             for (int i = 0; i < allTabDisplayList.Count; i++)
             {
                 if (i < validItems.Count)
@@ -268,12 +283,10 @@ public class InventoryManager : MonoBehaviour
                     allTabDisplayList[i] = null;
             }
         }
-        // [CASE B] 개별 카테고리 탭 정렬 -> 실제 저장소(allItems)의 해당 구역만 정렬
         else
         {
             var (startIndex, count) = GetCategoryRange(currentFilter);
 
-            // 1. 해당 구역의 아이템 추출
             List<InventoryItem> rangeItems = new List<InventoryItem>();
             for (int i = startIndex; i < startIndex + count; i++)
             {
@@ -283,36 +296,31 @@ public class InventoryManager : MonoBehaviour
                 }
             }
 
-            // 2. 정렬 로직 실행
             rangeItems.Sort(CompareItems);
 
-            // 3. 해당 구역 덮어쓰기
             for (int i = 0; i < count; i++)
             {
                 int targetIndex = startIndex + i;
                 if (i < rangeItems.Count)
                     allItems[targetIndex] = rangeItems[i];
                 else
-                    allItems[targetIndex] = null; // 나머지는 빈칸
+                    allItems[targetIndex] = null;
             }
         }
 
-        Debug.Log("[Inventory] 아이템 정렬 완료");
         OnInventoryChanged?.Invoke();
     }
+
     private int CompareItems(InventoryItem a, InventoryItem b)
     {
-        // 1. 아이템 타입 우선 (무기 > 장비 > ...)
         if (a.item.itemTypeEnum != b.item.itemTypeEnum)
         {
             return a.item.itemTypeEnum.CompareTo(b.item.itemTypeEnum);
         }
 
-        // 2. 등급 비교 (높은 등급이 먼저 오게: 내림차순)
         int gradeCompare = String.Compare(b.item.grade, a.item.grade, StringComparison.Ordinal);
         if (gradeCompare != 0) return gradeCompare;
 
-        // 3. 이름 비교 (가나다순)
         return String.Compare(a.item.itemName, b.item.itemName, StringComparison.Ordinal);
     }
 
@@ -324,7 +332,6 @@ public class InventoryManager : MonoBehaviour
     {
         if (itemToMove == null) return;
 
-        // Case A: All Tab (Modify Display List Only)
         if (currentFilter == InventoryFilterType.All)
         {
             if (targetLocalIndex < 0 || targetLocalIndex >= allTabDisplayList.Count) return;
@@ -346,7 +353,6 @@ public class InventoryManager : MonoBehaviour
                 allTabDisplayList[currentIndex] = null;
             }
         }
-        // Case B: Category Tab (Modify Storage List)
         else
         {
             var (offset, count) = GetCategoryRange(currentFilter);
@@ -404,12 +410,9 @@ public class InventoryManager : MonoBehaviour
     #endregion
 
     #region Relic
-    /// <summary>
-    /// 특정 ID의 아이템을 특정 개수만큼 가지고 있는지 확인
-    /// </summary>
+
     public bool HasItem(string itemID, int count)
     {
-        // allItems 리스트에서 ID가 같고, 수량이 충분한지 체크
         int totalCount = 0;
         foreach (var slot in allItems)
         {
@@ -421,14 +424,10 @@ public class InventoryManager : MonoBehaviour
         return totalCount >= count;
     }
 
-    /// <summary>
-    /// 특정 ID의 아이템을 개수만큼 제거 (마법실 소모용)
-    /// </summary>
     public void RemoveItemByID(string itemID, int count)
     {
         int remainingToRemove = count;
 
-        // 뒤에서부터 검색하여 제거 (리스트 인덱스 문제 방지)
         for (int i = allItems.Count - 1; i >= 0; i--)
         {
             var slot = allItems[i];
@@ -438,7 +437,7 @@ public class InventoryManager : MonoBehaviour
                 {
                     slot.quantity -= remainingToRemove;
                     remainingToRemove = 0;
-                    OnInventoryChanged?.Invoke(); // UI 갱신
+                    OnInventoryChanged?.Invoke();
                     break;
                 }
                 else
@@ -448,12 +447,8 @@ public class InventoryManager : MonoBehaviour
                 }
             }
         }
-
-        if (remainingToRemove > 0)
-        {
-            Debug.LogWarning($"[Inventory] 아이템({itemID})을 {count}개 삭제하려 했으나 {remainingToRemove}개가 부족했습니다.");
-        }
     }
+
     #endregion
 
     #region Data Retrieval & Helpers
@@ -508,24 +503,49 @@ public class InventoryManager : MonoBehaviour
 
     #region UI Toggle Logic
 
+
     public void ToggleFullInventory()
     {
-        if (!fullInventoryUI) return;
-        if (smallInventoryUI.activeSelf) ToggleSmallInventory();
+        if (IsFullInventoryOpen)
+        {
+            CloseAllInventories();
+        }
+        else
+        {
+            OpenFullInventory();
+        }
+    }
 
-        bool isOpen = !fullInventoryUI.activeSelf;
-        // GameManager.Instance.SetPause(isOpen);
-        SetUIState(fullInventoryUI, fullCanvasGroup, isOpen);
+    private void OpenFullInventory()
+    {
+        if (fullInventoryUI == null) return;
+
+        if (smallInventoryUI != null && smallInventoryUI.activeSelf)
+        {
+            SetUIState(smallInventoryUI, smallCanvasGroup, false);
+        }
+
+        SetUIState(fullInventoryUI, fullCanvasGroup, true);
     }
 
     public void ToggleSmallInventory()
     {
-        if (!smallInventoryUI) return;
-        if (fullInventoryUI.activeSelf) ToggleFullInventory();
+        if (smallInventoryUI == null) return;
 
-        bool isOpen = !smallInventoryUI.activeSelf;
-        // GameManager.Instance.SetPause(isOpen);
-        SetUIState(smallInventoryUI, smallCanvasGroup, isOpen);
+        bool isSmallOpen = smallInventoryUI.activeSelf;
+
+        if (isSmallOpen)
+        {
+            SetUIState(smallInventoryUI, smallCanvasGroup, false);
+        }
+        else
+        {
+            if (IsFullInventoryOpen)
+            {
+                SetUIState(fullInventoryUI, fullCanvasGroup, false);
+            }
+            SetUIState(smallInventoryUI, smallCanvasGroup, true);
+        }
     }
 
     private void SetUIState(GameObject ui, CanvasGroup cg, bool isOpen)
@@ -534,7 +554,13 @@ public class InventoryManager : MonoBehaviour
         {
             PlaySFX("Open");
             ui.SetActive(true);
-            if (cg != null) { cg.alpha = 0f; cg.blocksRaycasts = true; cg.interactable = true; cg.DOFade(1f, fadeDuration); }
+            if (cg != null)
+            {
+                cg.alpha = 0f;
+                cg.blocksRaycasts = true;
+                cg.interactable = true;
+                cg.DOFade(1f, fadeDuration);
+            }
             SetFocusState(true);
         }
         else
@@ -542,7 +568,8 @@ public class InventoryManager : MonoBehaviour
             PlaySFX("Close");
             if (cg != null)
             {
-                cg.blocksRaycasts = false; cg.interactable = false;
+                cg.blocksRaycasts = false;
+                cg.interactable = false;
                 cg.DOFade(0f, fadeDuration).OnComplete(() => ui.SetActive(false));
             }
             SetFocusState(false);
@@ -551,8 +578,15 @@ public class InventoryManager : MonoBehaviour
 
     public void CloseAllInventories()
     {
-        if (fullInventoryUI && fullInventoryUI.activeSelf) ToggleFullInventory();
-        else if (smallInventoryUI && smallInventoryUI.activeSelf) ToggleSmallInventory();
+        if (IsFullInventoryOpen)
+        {
+            SetUIState(fullInventoryUI, fullCanvasGroup, false);
+        }
+
+        if (smallInventoryUI != null && smallInventoryUI.activeSelf)
+        {
+            SetUIState(smallInventoryUI, smallCanvasGroup, false);
+        }
     }
 
     public void ToggleInventory() => ToggleFullInventory();
@@ -560,12 +594,41 @@ public class InventoryManager : MonoBehaviour
     public void SetExternalInteractionActive(bool isActive)
     {
         this.isExternalInteractionActive = isActive;
-        if (!isActive) CloseAllInventories();
+
+        if (isActive)
+        {
+            SetFocusState(true);
+        }
+        else
+        {
+            CloseAllInventories();
+            if (!IsUIOpen) SetFocusState(false);
+        }
+    }
+
+    public void SetShopModeUI(bool isShopMode)
+    {
+        if (smallInventoryRect == null) return;
+
+        smallInventoryRect.DOKill();
+
+        if (isShopMode)
+        {
+            OpenSmallInventory();
+            smallInventoryRect.DOAnchorPos(shopSmallPos, 0.3f).SetEase(Ease.OutBack);
+        }
+        else
+        {
+            smallInventoryRect.DOAnchorPos(defaultSmallPos, 0.3f).SetEase(Ease.OutBack);
+        }
     }
 
     public void OpenSmallInventory()
     {
-        if (smallInventoryUI != null && !smallInventoryUI.activeSelf) ToggleSmallInventory();
+        if (smallInventoryUI != null && !smallInventoryUI.activeSelf)
+        {
+            SetUIState(smallInventoryUI, smallCanvasGroup, true);
+        }
     }
 
     #endregion
@@ -585,10 +648,26 @@ public class InventoryManager : MonoBehaviour
     {
         if (this.IsFocused == isFocused) return;
         this.IsFocused = isFocused;
+
         if (GameManager.Instance != null) GameManager.Instance.SetPause(isFocused);
 
-        if (isFocused) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; StopPlayerAnimation(); }
-        else { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; ResumePlayerAnimation(); }
+        if (isFocused)
+        {
+            PlayerInputs.CurrentFocus = PlayerInputs.InputFocusState.UI_Inventory;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            StopPlayerAnimation();
+        }
+        else
+        {
+            if (!isExternalInteractionActive)
+            {
+                PlayerInputs.CurrentFocus = PlayerInputs.InputFocusState.Game;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                ResumePlayerAnimation();
+            }
+        }
 
         OnInventoryToggle?.Invoke(isFocused);
     }
