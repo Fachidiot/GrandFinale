@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using FIMSpace.Generating.Planning.ModNodes.Transforming;
 using Newtonsoft.Json.Linq;
@@ -94,7 +94,7 @@ public class SpaceShipManager : MonoBehaviour
         Debug.Log("[SpaceShipManager] Launching...");
     }
 
-    private float cooltime = 0f;
+    private float cooltime = -4f;
     public void OpenDoor()
     {
         if (IsDoorOpen)

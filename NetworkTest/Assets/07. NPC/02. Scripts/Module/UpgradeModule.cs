@@ -238,7 +238,6 @@ public class UpgradeModule : MonoBehaviour
         currentEquipment = item;
         InventoryManager.Instance.RemoveItemFromSlot(sourceSlotIndex, 1);
 
-        CheckMaterialCompatibility();
         UpdateUIState();
         return true;
     }
@@ -264,9 +263,6 @@ public class UpgradeModule : MonoBehaviour
         return true;
     }
 
-    private void CheckMaterialCompatibility()
-    {
-    }
 
     private void UpdateUIState()
     {
