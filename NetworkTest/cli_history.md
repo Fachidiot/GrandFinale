@@ -168,3 +168,18 @@
     - `SpaceShipManager.cs`에 `CurrentScenePlanetId` 프로퍼티를 추가하여 현재 씬의 행성 ID를 동적으로 가져오도록 했습니다.
     - `SpaceShipManager.OnLaunchGameClicked` 메서드를 수정하여 `ServerRoomManager.Instance.SelectedPlanetId`가 `CurrentScenePlanetId`와 동일할 경우 불필요한 씬 재로드를 방지하도록 했습니다.
     - `Debug.Log` 메시지의 컨텍스트를 `[SpaceShipManager]`로 변경했습니다.
+
+## 2025년 12월 10일 수요일
+
+- `NetworkAnimatorSync.cs`와 `NetworkMonsterAnimatorSync.cs`의 차이점 분석
+- `NetworkTransformSync.cs`를 기반으로 `NetworkMonsterTransformSync.cs` 파일 생성
+- **몬스터 네트워크 동기화 문제 해결**:
+    - **클라이언트 몬스터 움직임 이상 현상 해결**: `MonsterAIController.cs`를 수정하여 클라이언트에서는 AI 로직과 `NavMeshAgent`를 비활성화하고, 네트워크 데이터에 의해서만 움직이도록 했습니다.
+    - **클라이언트에서 몬스터 시체 미처리 문제 해결**: `MonsterAIController.cs`를 수정하여 몬스터의 죽음 처리와 소멸(`Despawn`) 로직이 호스트에서만 실행되도록 했습니다. 또한, 모든 `...States.cs` 파일에서 직접적인 `Object.Destroy` 호출을 제거했습니다.
+    - **클라이언트 플레이어 감지 실패 문제 해결**: `MonsterSensor.cs`를 호스트 전용으로 리팩토링하여 `NetworkPlayerManager`의 모든 플레이어를 감지하도록 수정했으며, `MonsterAIController.cs`가 이 새로운 센서 데이터를 사용하도록 업데이트했습니다.
+    - **클라이언트 데미지 처리 실패 문제 해결**: `IPlayerControllable.cs`와 `NetworkPlayer.cs`에 `Id` 속성을 추가하여 플레이어 식별자를 명확히 했습니다. `ServerRoomManager.cs`에 `HandleMonsterDamage` 메소드를 구현하여 서버 권위적인 데미지 처리를 시작하고, 클라이언트 측 `ServerRoomManager.cs`에 데미지 수신 핸들러를 추가하여 데미지 루프를 완성했습니다.
+- **컴파일 오류 수정**:
+    - `MonsterAIController.cs`의 `player` 속성 이름을 `TargetPlayer`로 변경함에 따라 발생한 모든 `...States.cs` 파일의 오류를 `controller.TargetPlayer`로 변경하여 해결했습니다.
+    - `MonsterSensor.cs`에서 `PlayerManager.Instance.Players.Values`의 `.Count` 속성 오류를 `.Count()` LINQ 확장 메소드 사용으로 해결하고 `using System.Linq;`를 추가했습니다.
+    - `MonsterAIController.cs`에서 `ServerRoomManager.HandleMonsterDamage` 호출부의 주석을 해제하고 `IPlayerControllable.Id`를 사용하도록 수정했습니다.
+    - `ServerRoomManager.cs`에서 `PlayerInfo` 구조체와 `null`을 비교하여 발생한 오류를 `string.IsNullOrEmpty(playerInfo.steam_id)` 검사로 대체하여 해결했습니다.

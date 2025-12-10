@@ -23,6 +23,13 @@ public class NetworkMonsterAnimatorSync : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         monsterAIController = GetComponent<MonsterAIController>();
+
+        // 클라이언트에서는 루트 모션을 비활성화하여 위치 동기화 스크립트와의 충돌을 방지합니다.
+        // 위치는 NetworkMonsterTransformSync가 전적으로 제어해야 합니다.
+        if (NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Client)
+        {
+            animator.applyRootMotion = false;
+        }
     }
 
     void OnEnable()
