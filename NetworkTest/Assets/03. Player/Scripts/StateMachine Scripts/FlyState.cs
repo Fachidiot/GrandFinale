@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class FlyState : StateMachineBase
 {
-    private float flySpeed = 10f; // Or get from CharacterMove
     private bool isPause = false;
 
     public FlyState(CharacterMove characterMove) : base(characterMove)
@@ -41,19 +40,19 @@ public class FlyState : StateMachineBase
 
         // 3. Calculate move direction
         Vector3 moveDirection = (cameraTransform.forward * inputVector.y + cameraTransform.right * inputVector.x);
-        
+
         // Add vertical movement
         moveDirection += Vector3.up * verticalMovementInput;
 
 
         // 4. Apply movement
         // No gravity, no extra velocities. Just direct movement.
-        characterController.Move(moveDirection.normalized * flySpeed * Time.deltaTime);
+        characterController.Move(moveDirection.normalized * characterMove.flySpeed * Time.deltaTime);
 
         // 5. Animator (optional, for now just set to a generic flying blend tree)
         characterMove.animator.SetFloat(characterMove.horizontalInputID, inputVector.x);
         characterMove.animator.SetFloat(characterMove.verticalInputID, inputVector.y);
-        
+
         // No transitions out for now, user needs to call a method to exit fly mode.
     }
 
@@ -62,7 +61,7 @@ public class FlyState : StateMachineBase
         // Zero out any existing velocity from other states
         characterMove.velocity = Vector3.zero;
         characterMove.moveVelocity = Vector3.zero;
-        
+
         // Set animator to a flying state if it exists
         // characterMove.animator.SetBool("isFlying", true);
     }
@@ -77,8 +76,8 @@ public class FlyState : StateMachineBase
         isPause = pause;
         if (isPause)
         {
-             characterMove.animator.SetFloat(characterMove.horizontalInputID, 0f);
-             characterMove.animator.SetFloat(characterMove.verticalInputID, 0f);
+            characterMove.animator.SetFloat(characterMove.horizontalInputID, 0f);
+            characterMove.animator.SetFloat(characterMove.verticalInputID, 0f);
         }
     }
 }

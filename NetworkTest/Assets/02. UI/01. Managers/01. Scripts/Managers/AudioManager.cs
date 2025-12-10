@@ -1,5 +1,4 @@
-﻿using Unity.VisualScripting;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
@@ -37,11 +36,11 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioSource sfxSource;
 
     private float m_masterVolume = 1f;
-    public float MasterVolume { set { m_masterVolume = value; VolumeUpdate(); } }
+    public float MasterVolume { get { return m_masterVolume; } set { m_masterVolume = value; VolumeUpdate(); } }
     private float m_bgmVolume = 1f;
-    public float BGMVolume { set { m_bgmVolume = value; VolumeUpdate(); } }
+    public float BGMVolume { get { return m_bgmVolume; } set { m_bgmVolume = value; VolumeUpdate(); } }
     private float m_effectVolume = 1f;
-    public float EffectVolume { set { m_effectVolume = value; VolumeUpdate(); } }
+    public float EffectVolume { get { return m_effectVolume; } set { m_effectVolume = value; VolumeUpdate(); } }
 
     void Awake()
     {
@@ -97,18 +96,11 @@ public class AudioManager : MonoBehaviour
         Debug.Log("[AudioManager] Resources/Sound 폴더에서 사운드 연결 완료!");
     }
 
-    private string prevClip;
-    private float prevTime = 0f;
     public void PlaySFX(AudioClip clip)
     {
         if (clip != null && sfxSource != null)
         {
-            if (sfxSource.isPlaying && prevClip == clip.name.Split('_')[1] && prevTime + 0.1 > Time.time)
-                return;
-
             sfxSource.PlayOneShot(clip, m_effectVolume * m_masterVolume);
-            prevClip = clip.name.Split('_')[1];
-            prevTime = Time.time;
         }
     }
 

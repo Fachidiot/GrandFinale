@@ -144,7 +144,7 @@ public class NetworkManager : MonoBehaviour
     {
         // Guard clauses to prevent sending updates when not in a valid state
         if (!IsConnected || MyPlayerId == INVALID_PLAYER_ID || PlayerManager.Instance == null) return;
-        
+
         // This check is problematic if the player hasn't been spawned yet.
         // Let's refine it to only check for the player GO if we are a client.
         if (Mode == NetworkMode.Client && !PlayerManager.Instance.Players.ContainsKey(PlayerId)) return;
@@ -156,7 +156,7 @@ public class NetworkManager : MonoBehaviour
         }
         else // Client
         {
-            if(PlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo))
+            if (PlayerManager.Instance.Players.TryGetValue(PlayerId, out GameObject myPlayerGo))
             {
                 SendClientUpdates(myPlayerGo);
             }
@@ -175,9 +175,9 @@ public class NetworkManager : MonoBehaviour
         if (ServerRoomManager.Instance == null) return;
 
         // 1. Create and populate the game state
-        var authoritativeState = new NetworkGameState 
-        { 
-            players = GatherPlayerStates() 
+        var authoritativeState = new NetworkGameState
+        {
+            players = GatherPlayerStates()
         };
 
         if (SpaceShipManager != null)
@@ -240,11 +240,11 @@ public class NetworkManager : MonoBehaviour
                     continue; // Skip if we haven't received an update from this client yet
                 }
             }
-            
+
             // Overwrite customization with authoritative data from PlayerManager
             playerState.isMale = PlayerManager.Instance.GetPlayerGender(playerId);
             playerState.modelInfo = PlayerManager.Instance.GetPlayerModelInfo(playerId);
-            
+
             playerStates.Add(playerState);
         }
         return playerStates;
@@ -395,6 +395,9 @@ public class NetworkManager : MonoBehaviour
 
         lobbyMembers.Clear();
         receivedPlayerStates.Clear();
+
+        GameManager.Instance.isMainMenu = true;
+        Destroy(NetworkManager.Instance.GetComponent<ServerRoomManager>());
 
         Debug.Log("[NetworkManager] Disconnected.");
         OnDisconnected?.Invoke();
