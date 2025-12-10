@@ -1,9 +1,18 @@
-using System;
+﻿using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerInputs : MonoBehaviour
 {
+    public enum InputFocusState
+    {
+        Game,           // 평상시 (이동, 공격 가능)
+        UI_Inventory,   // 인벤토리, 상점 등 (ESC로 닫음)
+        UI_Pause        // 일시정지 (최우선)
+    }
+
+    public static InputFocusState CurrentFocus = InputFocusState.Game;
+
     [SerializeField] private OptionKeyData keyData;
     [SerializeField] private float interactionDistance = 4f;
     [SerializeField] private LayerMask interactLayerMask;
