@@ -13,8 +13,8 @@ public class NetworkMonsterTransformSync : MonoBehaviour
     // --- Interpolation targets for clients ---
     private Vector3 targetPosition;
     private Quaternion targetRotation;
-    private float positionSmoothingFactor = 15.0f;
-    private float rotationSmoothingFactor = 15.0f;
+    private float positionSmoothingFactor = 10.0f;
+    private float rotationSmoothingFactor = 10.0f;
 
     // --- Caching for performance ---
     private Transform myTransform;
@@ -34,13 +34,14 @@ public class NetworkMonsterTransformSync : MonoBehaviour
         isHost = NetworkManager.Instance != null && NetworkManager.Instance.Mode == NetworkMode.Host;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Clients smoothly interpolate to the target transform received from the host.
+        // Using FixedUpdate for frame-rate independent smoothing.
         if (!isHost)
         {
-            myTransform.position = Vector3.Lerp(myTransform.position, targetPosition, Time.deltaTime * positionSmoothingFactor);
-            myTransform.rotation = Quaternion.Slerp(myTransform.rotation, targetRotation, Time.deltaTime * rotationSmoothingFactor);
+            myTransform.position = Vector3.Lerp(myTransform.position, targetPosition, Time.fixedDeltaTime * positionSmoothingFactor);
+            myTransform.rotation = Quaternion.Slerp(myTransform.rotation, targetRotation, Time.fixedDeltaTime * rotationSmoothingFactor);
         }
     }
 

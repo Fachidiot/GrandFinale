@@ -447,17 +447,23 @@ public class PlayerManager : MonoBehaviour
         {
             if (monsters.TryGetValue(monsterState.monsterId, out GameObject monsterGO))
             {
-                if (monsterGO.TryGetComponent<NavMeshAgent>(out var agent))
+                // Use the interpolator component to smoothly update the transform.
+                var transformSync = monsterGO.GetComponent<NetworkMonsterTransformSync>();
+                if (transformSync != null)
                 {
-                    if (agent.enabled) agent.enabled = false; // 클라이언트에서는 NavMeshAgent 비활성화
-                    monsterGO.transform.position = monsterState.position; // 직접 위치 설정
+                    var transformData = new NetworkMonsterTransformSync.MonsterTransformData
+                    {
+                        position = monsterState.position,
+                        rotation = monsterState.rotation
+                    };
+                    transformSync.OnTransformDataReceived(transformData);
                 }
-                else
+                else // Fallback for safety, though every monster should have the sync component.
                 {
                     monsterGO.transform.position = monsterState.position;
+                    monsterGO.transform.rotation = monsterState.rotation;
                 }
 
-                monsterGO.transform.rotation = monsterState.rotation;
                 var monsterHealth = monsterGO.GetComponent<MonsterHealth>();
                 if (monsterHealth != null) monsterHealth.SetHealthFromNetwork(monsterState.currentHP, monsterState.maxHP);
                 var monsterAnimSync = monsterGO.GetComponent<NetworkMonsterAnimatorSync>();

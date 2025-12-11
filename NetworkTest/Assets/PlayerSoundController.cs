@@ -7,6 +7,7 @@ public class PlayerSoundController : MonoBehaviour
     public AudioClip[] FootstepAudioClips;
     public AudioClip JumpLand;
     public AudioClip UseLadder;
+    public AudioClip Slide;
 
     [SerializeField] private AudioSource playerSource;
 
@@ -28,7 +29,7 @@ public class PlayerSoundController : MonoBehaviour
         }
         UseLadder = Resources.Load<AudioClip>(path + "metal_ladder");
         JumpLand = Resources.Load<AudioClip>(path + "Ground/Player_Land");
-        // uiTabSwapClip = Resources.Load<AudioClip>(path + "UI_Tab");
+        Slide = Resources.Load<AudioClip>(path + "Slide");
         // uiHoverClip = Resources.Load<AudioClip>(path + "UI_Hover");
         // uiErrorClip = Resources.Load<AudioClip>(path + "UI_Error");
 
@@ -65,9 +66,14 @@ public class PlayerSoundController : MonoBehaviour
         PlaySFX(JumpLand);
     }
 
+    public void PlaySlide()
+    {
+        PlaySFX(Slide);
+    }
+
     string prevClip;
     float prevTime;
-    public void PlaySFX(AudioClip clip)
+    private void PlaySFX(AudioClip clip)
     {
         if (clip != null && playerSource != null)
         {
