@@ -56,7 +56,7 @@ public class MonsterHPBar : MonoBehaviour
         if (alwaysFaceCamera && mainCam != null)
         {
             // 카메라와 똑같은 회전값을 가짐 (가장 깔끔한 빌보드 방식)
-            transform.rotation = mainCam.rotation;
+            transform.parent.rotation = mainCam.rotation;
         }
 
         // 2. 체력 업데이트

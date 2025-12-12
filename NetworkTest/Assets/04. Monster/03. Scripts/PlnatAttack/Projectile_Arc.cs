@@ -20,6 +20,8 @@ public class Projectile_Arc : MonoBehaviour
     public GameObject poisonPrefab;
     [Tooltip("땅(Ground)으로 인식할 LayerMask")]
     public LayerMask groundLayer;
+    [Tooltip("몬스터(Monster)으로 인식할 LayerMask")]
+    public LayerMask monsterLayer;
 
     // [추가] 독 이펙트 인스턴스를 저장할 변수
     private GameObject poisonInstance;
@@ -71,6 +73,7 @@ public class Projectile_Arc : MonoBehaviour
         Debug.Log($"[Projectile] 트리거 감지! 대상: {other.gameObject.name}, 레이어: {LayerMask.LayerToName(other.gameObject.layer)}");
 
         bool isGround = ((1 << other.gameObject.layer) & groundLayer) != 0;
+        bool isMonster = ((1 << other.gameObject.layer) & monsterLayer) != 0;
         bool isPlayer = other.CompareTag("Player");
 
         if (isGround)
@@ -82,6 +85,11 @@ public class Projectile_Arc : MonoBehaviour
         {
             Debug.Log($"[Projectile] 'Player'에 충돌.");
             HandlePlayerHit(other.gameObject);
+        }
+        else if (isMonster)
+        {
+            Debug.Log($"[Projectile] 'Monster' 레이어에 충돌.");
+            HandleGroundHit(other.transform.position);
         }
         else
         {
