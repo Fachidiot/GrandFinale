@@ -1,56 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-1420240871190481013
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d65e486e4de6e5448a8fbb43dc8756a0, type: 3}
-  m_Name: Grain
-  m_EditorClassIdentifier: 
-  active: 1
-  enabled:
-    overrideState: 1
-    value: 1
-  colored:
-    overrideState: 0
-    value: 1
-  intensity:
-    overrideState: 1
-    value: 0.119
-  size:
-    overrideState: 1
-    value: 2.21
-  lumContrib:
-    overrideState: 0
-    value: 0.8
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e6292b2c06870d4495f009f912b9600, type: 3}
-  m_Name: PostProcessVolumeForVideos
-  m_EditorClassIdentifier: 
-  settings:
-  - {fileID: 114015055215414410}
-  - {fileID: 114895797164154850}
-  - {fileID: 114926529047624142}
-  - {fileID: 114766690986127606}
-  - {fileID: 114365610642768532}
-  - {fileID: 114629677100311380}
-  - {fileID: 114416150543908578}
-  - {fileID: 114256969386981804}
-  - {fileID: -1420240871190481013}
---- !u!114 &114015055215414410
+--- !u!114 &-8468076701359932373
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,7 +25,7 @@ MonoBehaviour:
     defaultState: 1
   tonemapper:
     overrideState: 1
-    value: 2
+    value: 1
   toneCurveToeStrength:
     overrideState: 0
     value: 0
@@ -120,11 +70,11 @@ MonoBehaviour:
     overrideState: 0
     value: 0
   postExposure:
-    overrideState: 1
-    value: 1
+    overrideState: 0
+    value: 0
   contrast:
-    overrideState: 1
-    value: 12
+    overrideState: 0
+    value: 0
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -154,13 +104,13 @@ MonoBehaviour:
     value: 100
   lift:
     overrideState: 0
-    value: {x: 1, y: 1, z: 1, w: 0.039551824}
+    value: {x: 1, y: 0.9371241, z: 0.9455257, w: 0}
   gamma:
-    overrideState: 1
-    value: {x: 1, y: 0.95335174, z: 0.9192326, w: 0.01999337}
+    overrideState: 0
+    value: {x: 1, y: 0.7875557, z: 0.11395025, w: 0}
   gain:
-    overrideState: 1
-    value: {x: 1, y: 1, z: 1, w: 0.36709216}
+    overrideState: 0
+    value: {x: 1, y: 1, z: 1, w: 0}
   masterCurve:
     overrideState: 0
     value:
@@ -174,8 +124,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         - serializedVersion: 3
           time: 1
           value: 1
@@ -183,8 +133,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -333,8 +283,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         - serializedVersion: 3
           time: 1
           value: 1
@@ -342,8 +292,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -492,8 +442,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         - serializedVersion: 3
           time: 1
           value: 1
@@ -501,8 +451,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -651,8 +601,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         - serializedVersion: 3
           time: 1
           value: 1
@@ -660,8 +610,8 @@ MonoBehaviour:
           outSlope: 1
           tangentMode: 0
           weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
+          inWeight: 0
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -805,7 +755,7 @@ MonoBehaviour:
         m_Curve: []
         m_PreInfinity: 2
         m_PostInfinity: 2
-        m_RotationOrder: 0
+        m_RotationOrder: 4
       m_Loop: 1
       m_ZeroValue: 0.5
       m_Range: 1
@@ -1361,183 +1311,7 @@ MonoBehaviour:
       - 0.5
       - 0.5
       - 0.5
---- !u!114 &114256969386981804
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a34fa72bd4185749832024e9c8010bf, type: 3}
-  m_Name: ScreenSpaceReflections
-  m_EditorClassIdentifier: 
-  active: 0
-  enabled:
-    overrideState: 1
-    value: 1
-  preset:
-    overrideState: 1
-    value: 4
-  maximumIterationCount:
-    overrideState: 1
-    value: 256
-  resolution:
-    overrideState: 1
-    value: 2
-  thickness:
-    overrideState: 1
-    value: 64
-  maximumMarchDistance:
-    overrideState: 1
-    value: 30
-  distanceFade:
-    overrideState: 1
-    value: 0.11
-  vignette:
-    overrideState: 1
-    value: 0.5
---- !u!114 &114365610642768532
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b94fcd11afffcb142908bfcb1e261fba, type: 3}
-  m_Name: MotionBlur
-  m_EditorClassIdentifier: 
-  active: 1
-  enabled:
-    overrideState: 1
-    value: 1
-  shutterAngle:
-    overrideState: 0
-    value: 270
-  sampleCount:
-    overrideState: 0
-    value: 10
---- !u!114 &114416150543908578
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3f6f3f7c722b4544b97e3c75840aa33, type: 3}
-  m_Name: AutoExposure
-  m_EditorClassIdentifier: 
-  active: 1
-  enabled:
-    overrideState: 1
-    value: 1
-  filtering:
-    overrideState: 1
-    value: {x: 1, y: 99}
-  minLuminance:
-    overrideState: 0
-    value: -6.6
-  maxLuminance:
-    overrideState: 0
-    value: 2.8
-  keyValue:
-    overrideState: 1
-    value: 2
-  eyeAdaptation:
-    overrideState: 1
-    value: 0
-  speedUp:
-    overrideState: 1
-    value: 1
-  speedDown:
-    overrideState: 1
-    value: 1
---- !u!114 &114629677100311380
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 556797029e73b2347956b6579e77e05b, type: 3}
-  m_Name: DepthOfField
-  m_EditorClassIdentifier: 
-  active: 1
-  enabled:
-    overrideState: 1
-    value: 1
-  focusDistance:
-    overrideState: 1
-    value: 5.25
-  aperture:
-    overrideState: 1
-    value: 1.5
-  focalLength:
-    overrideState: 1
-    value: 40
-  kernelSize:
-    overrideState: 0
-    value: 1
---- !u!114 &114766690986127606
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1cb7e9e120078f43bce4f0b1be547a7, type: 3}
-  m_Name: AmbientOcclusion
-  m_EditorClassIdentifier: 
-  active: 1
-  enabled:
-    overrideState: 1
-    value: 1
-  mode:
-    overrideState: 1
-    value: 1
-  intensity:
-    overrideState: 1
-    value: 0.72
-  color:
-    overrideState: 1
-    value: {r: 0, g: 0, b: 0, a: 1}
-  ambientOnly:
-    overrideState: 0
-    value: 0
-  noiseFilterTolerance:
-    overrideState: 1
-    value: 0
-  blurTolerance:
-    overrideState: 1
-    value: -4.6
-  upsampleTolerance:
-    overrideState: 1
-    value: -12
-  thicknessModifier:
-    overrideState: 1
-    value: 1
-  zBias:
-    overrideState: 0
-    value: 0.0001
-  directLightingStrength:
-    overrideState: 1
-    value: 0
-  radius:
-    overrideState: 1
-    value: 0.25
-  quality:
-    overrideState: 1
-    value: 2
---- !u!114 &114895797164154850
+--- !u!114 &-3763391971639015342
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1555,19 +1329,19 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 2
+    value: 1
   threshold:
     overrideState: 1
-    value: 1
+    value: 0.9
   softKnee:
-    overrideState: 0
+    overrideState: 1
     value: 0.5
   clamp:
     overrideState: 0
     value: 65472
   diffusion:
     overrideState: 0
-    value: 8.46
+    value: 7
   anamorphicRatio:
     overrideState: 0
     value: 0
@@ -1578,13 +1352,13 @@ MonoBehaviour:
     overrideState: 0
     value: 0
   dirtTexture:
-    overrideState: 1
-    value: {fileID: 2800000, guid: 7a051dbda2d7bc447bee412427cd311e, type: 3}
+    overrideState: 0
+    value: {fileID: 0}
     defaultState: 1
   dirtIntensity:
-    overrideState: 1
-    value: 25
---- !u!114 &114926529047624142
+    overrideState: 0
+    value: 0
+--- !u!114 &-1517780558201907457
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1601,26 +1375,26 @@ MonoBehaviour:
     overrideState: 1
     value: 1
   mode:
-    overrideState: 0
+    overrideState: 1
     value: 0
   color:
-    overrideState: 0
+    overrideState: 1
     value: {r: 0, g: 0, b: 0, a: 1}
   center:
-    overrideState: 0
+    overrideState: 1
     value: {x: 0.5, y: 0.5}
   intensity:
     overrideState: 1
-    value: 0.319
+    value: 1
   smoothness:
     overrideState: 1
-    value: 0.25
+    value: 0.2
   roundness:
     overrideState: 1
     value: 1
   rounded:
     overrideState: 1
-    value: 1
+    value: 0
   mask:
     overrideState: 0
     value: {fileID: 0}
@@ -1628,3 +1402,19 @@ MonoBehaviour:
   opacity:
     overrideState: 0
     value: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e6292b2c06870d4495f009f912b9600, type: 3}
+  m_Name: Levels Profile
+  m_EditorClassIdentifier: 
+  settings:
+  - {fileID: -3763391971639015342}
+  - {fileID: -8468076701359932373}
+  - {fileID: -1517780558201907457}
