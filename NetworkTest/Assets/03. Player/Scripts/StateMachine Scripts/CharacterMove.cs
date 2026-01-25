@@ -183,7 +183,7 @@ public class CharacterMove : MonoBehaviour
             {
                 Vector3 edgeFallMovement = transform.position - hitInfo.point;
                 edgeFallMovement.y = 0;
-                edgeSlipVelocity += (edgeFallMovement * Time.deltaTime * edgeFallMoveForce);
+                edgeSlipVelocity += edgeFallMovement * Time.deltaTime * edgeFallMoveForce;
             }
             else
             {

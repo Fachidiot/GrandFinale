@@ -4,18 +4,18 @@ using UnityEngine;
 
 
 /// <summary>
-/// ÇÏ³ªÀÇ ´ë»ç Á¤º¸¸¦ ´ã´Â Å¬·¡½º
+/// í•˜ë‚˜ì˜ ëŒ€ì‚¬ ì •ë³´ë¥¼ ë‹´ëŠ” í´ë˜ìŠ¤
 /// </summary>
 
 [System.Serializable]
 public class Dialogue
 {
-    public int id;                 // ´ë»çÀÇ °íÀ¯ ID
-    public string speaker;         // ¸»ÇÏ´Â Ä³¸¯ÅÍ ÀÌ¸§
-    [TextArea] public string text; // ´ë»ç ³»¿ë
-    public string choices;         // ¼±ÅÃÁö ÅØ½ºÆ®: "¼±ÅÃÁö1:3,¼±ÅÃÁö2:4"
-    public int nextId;             // ´ÙÀ½ ´ë»ç ID (¼±ÅÃÁö ¾øÀ» ¶§)
-    public string tag;             // ´ë»ç¿¡ Æ÷ÇÔµÈ ÅÂ±× (WAIT, FLAG_ µî)
-    public string type;            // System, Player µî
+    public int id;                 // ëŒ€ì‚¬ì˜ ê³ ìœ  ID
+    public string speaker;         // ë§í•˜ëŠ” ìºë¦­í„° ì´ë¦„
+    [TextArea] public string text; // ëŒ€ì‚¬ ë‚´ìš©
+    public string choices;         // ì„ íƒì§€ í…ìŠ¤íŠ¸: "ì„ íƒì§€1:3,ì„ íƒì§€2:4"
+    public int nextId;             // ë‹¤ìŒ ëŒ€ì‚¬ ID (ì„ íƒì§€ ì—†ì„ ë•Œ)
+    public string tag;             // ëŒ€ì‚¬ì— í¬í•¨ëœ íƒœê·¸ (WAIT, FLAG_ ë“±)
+    public string type;            // System, Player ë“±
 
 }

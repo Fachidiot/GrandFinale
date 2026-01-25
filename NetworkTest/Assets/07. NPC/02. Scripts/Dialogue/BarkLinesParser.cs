@@ -1,4 +1,4 @@
-#if UNITY_EDITOR // ÀÌ ½ºÅ©¸³Æ®´Â À¯´ÏÆ¼ ¿¡µğÅÍ¿¡¼­¸¸ ÄÄÆÄÀÏµÇ°í ÀÛµ¿ÇÕ´Ï´Ù.
+#if UNITY_EDITOR // ì´ ìŠ¤í¬ë¦½íŠ¸ëŠ” ìœ ë‹ˆí‹° ì—ë””í„°ì—ì„œë§Œ ì»´íŒŒì¼ë˜ê³  ì‘ë™í•©ë‹ˆë‹¤.
 
 using UnityEngine;
 using UnityEditor;
@@ -7,49 +7,49 @@ using System.Collections.Generic;
 
 public class BarkLinesParser
 {
-    // À¯´ÏÆ¼ »ó´Ü ¸Ş´º¿¡ "Tools/Import Bark Lines from CSV" Ç×¸ñÀ» Ãß°¡ÇÕ´Ï´Ù.
+    // ìœ ë‹ˆí‹° ìƒë‹¨ ë©”ë‰´ì— "Tools/Import Bark Lines from CSV" í•­ëª©ì„ ì¶”ê°€í•©ë‹ˆë‹¤.
     [MenuItem("Tools/Import Bark Lines from CSV")]
     public static void ImportBarks()
     {
-        // ÆÄÀÏ Å½»ö±â¸¦ ¿­¾î À¯Àú°¡ CSV ÆÄÀÏÀ» ¼±ÅÃÇÏµµ·Ï ÇÕ´Ï´Ù.
+        // íŒŒì¼ íƒìƒ‰ê¸°ë¥¼ ì—´ì–´ ìœ ì €ê°€ CSV íŒŒì¼ì„ ì„ íƒí•˜ë„ë¡ í•©ë‹ˆë‹¤.
         string path = EditorUtility.OpenFilePanel("Import Bark Lines CSV", "", "csv");
-        if (string.IsNullOrEmpty(path)) return; // ÆÄÀÏÀ» ¼±ÅÃÇÏÁö ¾ÊÀ¸¸é Áß´Ü
+        if (string.IsNullOrEmpty(path)) return; // íŒŒì¼ì„ ì„ íƒí•˜ì§€ ì•Šìœ¼ë©´ ì¤‘ë‹¨
 
-        // CSV ÆÄÀÏÀÇ ¸ğµç ÁÙÀ» ÀĞ¾î¿É´Ï´Ù.
+        // CSV íŒŒì¼ì˜ ëª¨ë“  ì¤„ì„ ì½ì–´ì˜µë‹ˆë‹¤.
         string[] allLines = File.ReadAllLines(path);
 
-        // ScriptableObject ÀÎ½ºÅÏ½º¸¦ ¸Ş¸ğ¸®¿¡ »ı¼ºÇÕ´Ï´Ù.
+        // ScriptableObject ì¸ìŠ¤í„´ìŠ¤ë¥¼ ë©”ëª¨ë¦¬ì— ìƒì„±í•©ë‹ˆë‹¤.
         BarkLinesSO barkLinesSO = ScriptableObject.CreateInstance<BarkLinesSO>();
 
         List<string> linesList = new List<string>();
 
-        // Ã¹ ¹øÂ° ÁÙ(Çì´õ)Àº °Ç³Ê¶Ù°í, °¢ ÁÙÀ» ¸®½ºÆ®¿¡ Ãß°¡ÇÕ´Ï´Ù.
+        // ì²« ë²ˆì§¸ ì¤„(í—¤ë”)ì€ ê±´ë„ˆë›°ê³ , ê° ì¤„ì„ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€í•©ë‹ˆë‹¤.
         for (int i = 1; i < allLines.Length; i++)
         {
-            string line = allLines[i].Trim(); // ¾ÕµÚ °ø¹é Á¦°Å
-            if (!string.IsNullOrEmpty(line)) // ºñ¾îÀÖ´Â ÁÙÀº ¹«½Ã
+            string line = allLines[i].Trim(); // ì•ë’¤ ê³µë°± ì œê±°
+            if (!string.IsNullOrEmpty(line)) // ë¹„ì–´ìˆëŠ” ì¤„ì€ ë¬´ì‹œ
             {
                 linesList.Add(line);
             }
         }
 
-        // ¿Ï¼ºµÈ ¸®½ºÆ®¸¦ ScriptableObjectÀÇ ¹è¿­¿¡ ÇÒ´çÇÕ´Ï´Ù.
+        // ì™„ì„±ëœ ë¦¬ìŠ¤íŠ¸ë¥¼ ScriptableObjectì˜ ë°°ì—´ì— í• ë‹¹í•©ë‹ˆë‹¤.
         barkLinesSO.lines = linesList.ToArray();
 
-        // ÀúÀåÇÒ °æ·Î¿Í ÆÄÀÏ ÀÌ¸§À» ¼³Á¤ÇÕ´Ï´Ù.
+        // ì €ì¥í•  ê²½ë¡œì™€ íŒŒì¼ ì´ë¦„ì„ ì„¤ì •í•©ë‹ˆë‹¤.
         string fileName = Path.GetFileNameWithoutExtension(path);
-        string assetPath = $"Assets/Resources/Barks/{fileName}.asset"; // ¿¡¼ÂÀ» ÀúÀåÇÒ Æú´õ
+        string assetPath = $"Assets/Resources/Barks/{fileName}.asset"; // ì—ì…‹ì„ ì €ì¥í•  í´ë”
 
-        // Æú´õ°¡ ¾øÀ¸¸é ÀÚµ¿À¸·Î »ı¼ºÇÕ´Ï´Ù.
+        // í´ë”ê°€ ì—†ìœ¼ë©´ ìë™ìœ¼ë¡œ ìƒì„±í•©ë‹ˆë‹¤.
         Directory.CreateDirectory(Path.GetDirectoryName(assetPath));
 
-        // ScriptableObject¸¦ ¿¡¼Â ÆÄÀÏ·Î ÀúÀåÇÕ´Ï´Ù.
+        // ScriptableObjectë¥¼ ì—ì…‹ íŒŒì¼ë¡œ ì €ì¥í•©ë‹ˆë‹¤.
         AssetDatabase.CreateAsset(barkLinesSO, assetPath);
         AssetDatabase.SaveAssets();
 
-        Debug.Log($"[BarkLinesParser] BarkLinesSO ¿¡¼Â »ı¼º ¿Ï·á: {assetPath}");
+        Debug.Log($"[BarkLinesParser] BarkLinesSO ì—ì…‹ ìƒì„± ì™„ë£Œ: {assetPath}");
 
-        // »ı¼ºµÈ ¿¡¼ÂÀ» ÇÁ·ÎÁ§Æ® Ã¢¿¡¼­ ¹Ù·Î º¸¿©ÁÖ°í ¼±ÅÃÇØÁİ´Ï´Ù.
+        // ìƒì„±ëœ ì—ì…‹ì„ í”„ë¡œì íŠ¸ ì°½ì—ì„œ ë°”ë¡œ ë³´ì—¬ì£¼ê³  ì„ íƒí•´ì¤ë‹ˆë‹¤.
         EditorUtility.FocusProjectWindow();
         Selection.activeObject = barkLinesSO;
     }

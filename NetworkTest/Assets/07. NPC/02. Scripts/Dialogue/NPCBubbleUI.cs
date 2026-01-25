@@ -26,11 +26,11 @@ public class NPCBubbleUI : MonoBehaviour
     }
 
     /// <summary>
-    /// �ܺ�(DialogueUI ��)���� ��ǳ���� ������ ���� �� ȣ���ϴ� �Լ��Դϴ�.
+    /// 외부(DialogueUI 등)에서 말풍선을 강제로 숨길 때 호출하는 함수입니다.
     /// </summary>
-    public void Hide() // �ڡڡ� �ٷ� �� �κ��Դϴ�! �ڡڡ�
+    public void Hide() // ★★★ 바로 이 부분입니다! ★★★
     {
-        // ���� �ڷ�ƾ�� ���� ���̾��ٸ� �����ϰ� ��� �г��� ��Ȱ��ȭ�մϴ�.
+        // 숨김 코루틴이 실행 중이었다면 중지하고 즉시 패널을 비활성화합니다.
         if (_hideCoroutine != null) StopCoroutine(_hideCoroutine);
         if (bubblePanel) bubblePanel.SetActive(false);
     }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ¿©·¯ ´ë»ç ¶óÀÎÀ» ´ã´Â ´ëÈ­ ÀÌº¥Æ® Å¬·¡½º (ScriptableObject)
+/// ì—¬ëŸ¬ ëŒ€ì‚¬ ë¼ì¸ì„ ë‹´ëŠ” ëŒ€í™” ì´ë²¤íŠ¸ í´ë˜ìŠ¤ (ScriptableObject)
 /// </summary>
 [CreateAssetMenu(fileName = "NewDialogueEvent", menuName = "Dialogue/DialogueEvent")]
 public class DialogueEvent : ScriptableObject
 {
-    public string eventName;              // ÀÌº¥Æ® ÀÌ¸§ (¿¹: intro_1)
-    public List<Dialogue> lines;          // ÀÌ ÀÌº¥Æ®¿¡ Æ÷ÇÔµÈ ¸ğµç ´ë»ç
+    public string eventName;              // ì´ë²¤íŠ¸ ì´ë¦„ (ì˜ˆ: intro_1)
+    public List<Dialogue> lines;          // ì´ ì´ë²¤íŠ¸ì— í¬í•¨ëœ ëª¨ë“  ëŒ€ì‚¬
 }
